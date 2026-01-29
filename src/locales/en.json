@@ -1,0 +1,36 @@
+{
+  "header": {
+    "greeting": "Good morning, Family 👋"
+  },
+  "nav": {
+    "home": "Home",
+    "extraescolars": "Activities",
+    "shop": "Shop",
+    "profile": "Profile"
+  },
+  "home": {
+    "extraescolars": "Activities",
+    "fees": "Fees",
+    "calendar": "Calendar",
+    "news_title": "Latest News",
+    "see_all": "See all",
+    "events_title": "Upcoming Events",
+    "member_status": "Membership Status",
+    "member_active": "Year 2024-2025 Active",
+    "about_title": "What does the AFA do?",
+    "about_text_1": "The AFA is the association formed by the majority of the school's families. The board of directors is responsible for coordinating various activities. Joining the board is voluntary. Therefore, any help from you, no matter how small, will be very welcome.",
+    "about_text_2": "The board organizes and manages extracurricular activities intended to complement the children's education, and collaborates in many other activities throughout the school year.",
+    "about_text_3": "It also participates in organizing popular festivals: Castanyada, Tió, Sant Jordi, End of Year...",
+    "about_contact": "For any information, you can find us at the AFA office on Tuesdays from 9:00 to 9:30 and Fridays from 16:30 to 17:00.",
+    "about_functions_title": "Its main functions are:",
+    "about_functions": [
+      "Raise awareness and guide parents regarding their responsibility for their children's education.",
+      "Channel initiatives and suggestions from parents.",
+      "Manage the acquisition and distribution of common materials and books.",
+      "Promote permanent family-school dialogue.",
+      "Organize and manage extracurricular or complementary activities.",
+      "Participate in social and cultural activities organized at the municipal level that may be of interest to schools.",
+      "Collaborate in the school's festivals and cultural acts."
+    ]
+  }
+}

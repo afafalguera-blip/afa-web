@@ -1,0 +1,48 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/Administrator/Desktop/Proyectos/AFA/afa-web[39m
+
+ [31mΓ¥»[39m src/tests/inscriptionFilters.test.ts [2m([22m[2m16 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 17[2mms[22m[39m
+     [32mΓ£ô[39m should flatten inscriptions with students array[32m 2[2mms[22m[39m
+     [32mΓ£ô[39m should handle legacy format (single student fields)[32m 0[2mms[22m[39m
+     [32mΓ£ô[39m should return empty array for empty input[32m 1[2mms[22m[39m
+     [32mΓ£ô[39m should set default status to active for new format[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should filter by course[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should return all when course filter is empty[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should filter by activity (array activities)[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should find activity in array[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should show all statuses when filter is ALL[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should filter baja status[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should filter active status (non-baja)[32m 1[2mms[22m[39m
+       [32mΓ£ô[39m should search by name (case insensitive)[32m 0[2mms[22m[39m
+[31m       [31m├ù[31m should search by surname[39m[32m 7[2mms[22m[39m
+       [32mΓ£ô[39m should search by email[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should apply multiple filters simultaneously[32m 0[2mms[22m[39m
+       [32mΓ£ô[39m should return empty when no match[32m 0[2mms[22m[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  src/tests/inscriptionFilters.test.ts > filterInscriptions > search filter > should search by surname
+AssertionError: expected [ { inscription_id: 1, ΓÇª(10) }, ΓÇª(2) ] to have a length of 2 but got 3
+
+- Expected
++ Received
+
+- 2
++ 3
+
+ Γ¥» src/tests/inscriptionFilters.test.ts:194:22
+    192|       const result = filterInscriptions(testData, filters);
+    193| 
+    194|       expect(result).toHaveLength(2); // Joan and Maria have same surnΓÇª
+       |                      ^
+    195|     });
+    196| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/1]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m15 passed[39m[22m[90m (16)[39m
+[2m   Start at [22m 23:50:06
+[2m   Duration [22m 970ms[2m (transform 65ms, setup 103ms, import 55ms, tests 17ms, environment 617ms)[22m
+

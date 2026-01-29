@@ -1,0 +1,36 @@
+{
+  "header": {
+    "greeting": "Bon dia, Família 👋"
+  },
+  "nav": {
+    "home": "Inici",
+    "extraescolars": "Extraescolars",
+    "shop": "Botiga",
+    "profile": "Perfil"
+  },
+  "home": {
+    "extraescolars": "Extraescolars",
+    "fees": "Quotes",
+    "calendar": "Calendari",
+    "news_title": "Últimes Notícies",
+    "see_all": "Veure-ho tot",
+    "events_title": "Propers Esdeveniments",
+    "member_status": "Estatus de Soci",
+    "member_active": "Curs 2024-2025 Actiu",
+    "about_title": "Què fa l'AFA?",
+    "about_text_1": "L’AFA és l’associació formada per la majoria de les famílies de l’escola. La junta directiva n’és la responsable i la que coordina les diverses activitats. Formar part de la junta és voluntari. Per tant, qualsevol ajuda vostra, per petita que sigui, serà molt ben acollida.",
+    "about_text_2": "La junta organitza i gestiona les activitats extraescolars amb les quals pretén complementar la formació dels nens-nenes de l’escola, i col·labora en mulltes altres activitats que van sorgint al llarg del curs.",
+    "about_text_3": "També participa en l’organització de les festes populars: Castanyada, Tió, Sant Jordi, Final de curs,…",
+    "about_contact": "Per qualsevol informació ens trobareu al despatx de l’AFA de l’escola els dimarts de les 9:00 a 9:30 i els divendres de 16:30 a 17:00.",
+    "about_functions_title": "Les seves funcions principals són:",
+    "about_functions": [
+      "Sensibilitzar i orientar els pares i mares sobre la seva responsabilitat pel que fa a l’educació dels seus fills i filles.",
+      "Canalitzar les iniciatives i suggeriments dels pares i mares.",
+      "Gestionar l’adquisició i distribució de materials i llibres comuns.",
+      "Afavorir el diàleg permanent família – escola.",
+      "Organitzar i gestionar les activitats extraescolars o complementàries.",
+      "Participar en les activitats socials i culturals organitzades a nivell municipal, que puguin ser d’interès per a les escoles.",
+      "Col·laborar en les festes i actes culturals de l’escola."
+    ]
+  }
+}
