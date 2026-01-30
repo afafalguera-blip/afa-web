@@ -48,8 +48,10 @@ export function Home() {
         </div>
       </div>
       
-      <section className="px-6 py-4">
-        <div className="grid grid-cols-3 gap-4">
+      {/* Navigation: Mobile Grid | Desktop Floating Pill */}
+      <section className="px-6 py-4 relative z-20 -mt-8 lg:-mt-12 mb-8">
+        {/* Mobile Grid */}
+        <div className="grid grid-cols-3 gap-4 lg:hidden">
           <Link to="/extraescolars" className="flex flex-col items-center gap-2 group">
             <div className="w-full aspect-square flex items-center justify-center bg-primary rounded-2xl text-white shadow-lg shadow-primary/20 group-active:scale-95 transition-transform">
               <span className="material-icons-round text-3xl">sports_soccer</span>
@@ -68,6 +70,36 @@ export function Home() {
             </div>
             <span className="text-xs font-semibold text-slate-900 dark:text-slate-200">{t('home.calendar')}</span>
           </button>
+        </div>
+
+        {/* Desktop Floating Pill Nav */}
+        <div className="hidden lg:flex justify-center">
+            <div className="bg-white dark:bg-slate-800 rounded-full shadow-xl shadow-slate-200/50 dark:shadow-black/50 p-2 flex items-center gap-2 border border-slate-100 dark:border-slate-700">
+                <Link to="/extraescolars" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
+                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                        <span className="material-icons-round">sports_soccer</span>
+                    </div>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.extraescolars')}</span>
+                </Link>
+
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+
+                <button className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
+                    <div className="w-10 h-10 bg-secondary/10 text-secondary rounded-full flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors">
+                        <span className="material-icons-round">payments</span>
+                    </div>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.fees')}</span>
+                </button>
+                
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+
+                <button className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
+                    <div className="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                        <span className="material-icons-round">calendar_today</span>
+                    </div>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.calendar')}</span>
+                </button>
+            </div>
         </div>
       </section>
 
