@@ -80,14 +80,7 @@ export function Extraescolars() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t('home.extraescolars')}</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Curs 2024 - 2025</p>
-          </div>
-          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-white dark:bg-slate-800 lg:hidden">
-            <img 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2zmUsA_lNi6PkTVW5FFKX6ezhKzSqf2ybugWV6W5LVoD9CP25F8bZ62uZecRlcuoYSUoMIgpBy4I6aTTrjb5zaUV5YV9xdGGa_Mqn8TXOutmWMeL5chJcGU9qUPOfYgIDDIvVlMQaEk1D8tMKQ4B_Jd-t49Daj54BlpiUKQyhDCSjNWgp3zXVEPgI115dZGpCyoD430KvcPWGb_FxE8XBf4PezoNOVLsxAnaaZag2SfgxUWZX_hRGrgYH9ASRHnh0i-dtI4dzxgM" 
-              alt="Escola Logo" 
-              className="w-full h-full object-cover p-1"
-            />
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Curs 2025 - 2026</p>
           </div>
         </div>
 

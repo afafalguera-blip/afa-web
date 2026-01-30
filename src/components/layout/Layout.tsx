@@ -1,15 +1,17 @@
 import { Outlet } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 import { DesktopNav } from './DesktopNav';
+import { MobileTopNav } from './MobileTopNav';
 
 export function Layout() {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
         
       <DesktopNav />
+      <MobileTopNav />
 
-      {/* Status bar spacer - Mobile only */}
-      <div className="h-12 w-full lg:hidden"></div>
+      {/* Status bar spacer - Mobile only (adjusted for new TopNav) */}
+      <div className="h-20 w-full lg:hidden"></div>
       
       <main className="pb-24 lg:pb-12 max-w-7xl mx-auto w-full">
         <Outlet />
