@@ -1,6 +1,8 @@
 import { UserPlus, UserMinus, Users, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function StatsCards({ inscriptions }: any) {
+  const { t } = useTranslation();
   // Logic from admin.html to calculate stats
   let totalActive = 0;
   let totalBaja = 0;
@@ -21,10 +23,10 @@ export function StatsCards({ inscriptions }: any) {
   });
 
   const cards = [
-    { title: 'Inscritos (altas)', value: totalActive, icon: UserPlus, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { title: 'Bajas', value: totalBaja, icon: UserMinus, color: 'text-amber-600', bg: 'bg-amber-100' },
-    { title: 'Socis AFA', value: `${afaMembers}/${totalActive > afaMembers ? totalActive - afaMembers : 0}`, icon: Users, color: 'text-green-600', bg: 'bg-green-100' },
-    { title: 'Popular', value: '...', icon: Star, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { title: t('admin.dashboard.stats.active'), value: totalActive, icon: UserPlus, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { title: t('admin.dashboard.stats.bajas'), value: totalBaja, icon: UserMinus, color: 'text-amber-600', bg: 'bg-amber-100' },
+    { title: t('admin.dashboard.stats.afa_members'), value: `${afaMembers}/${totalActive > afaMembers ? totalActive - afaMembers : 0}`, icon: Users, color: 'text-green-600', bg: 'bg-green-100' },
+    { title: t('admin.dashboard.stats.popular'), value: '...', icon: Star, color: 'text-purple-600', bg: 'bg-purple-100' },
   ];
 
   return (

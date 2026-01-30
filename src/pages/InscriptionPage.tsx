@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, CheckCircle2, AlertCircle, Rocket, Info } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, Rocket, Info, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -28,6 +28,7 @@ interface AdditionalInfo {
   healthInfo: string;
   imageRights: string; // "si" | "no"
   canLeaveAlone: string; // "true" | "false"
+  authorizedPickup: string;
   termsAccepted: boolean;
 }
 
@@ -51,22 +52,22 @@ export default function InscriptionPage() {
     infantil: [
       { value: "Teatre Musical en Anglès (Dimarts)", label: `${t('inscription.activity_names.musical_theater_eng')} - ${t('inscription.days.tue')} 16:30-18:00` },
       { value: "Marxa-Marxa en Anglès (Dijous)", label: `${t('inscription.activity_names.marxa_marxa_eng')} - ${t('inscription.days.thu')} 16:30-18:00` },
-      { value: "Iniciació a Timbals (Divendres)", label: `${t('inscription.activity_names.drums_init')} - ${t('inscription.days.fri')} 17:30-19:00` },
     ],
+
     primaria1: [
       { value: "Futbol (Dimarts)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.tue')} 16:30-18:00` },
       { value: "Anglès (Dimecres)", label: `${t('inscription.activity_names.english')} - ${t('inscription.days.wed')} 16:30-18:00` },
       { value: "Patinatge (Dimecres)", label: `${t('inscription.activity_names.skating')} - ${t('inscription.days.wed')} 16:30-18:00` },
       { value: "Futbol (Dijous)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.thu')} 16:30-18:00` },
-      { value: "Timbals (Divendres)", label: `${t('inscription.activity_names.drums')} - ${t('inscription.days.fri')} 17:30-19:00` },
     ],
+
     primaria2: [
       { value: "Anglès (Dimarts)", label: `${t('inscription.activity_names.english')} - ${t('inscription.days.tue')} 16:30-18:00` },
       { value: "Futbol (Dimarts)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.tue')} 16:30-18:00` },
       { value: "Patinatge (Dimecres)", label: `${t('inscription.activity_names.skating')} - ${t('inscription.days.wed')} 16:30-18:00` },
       { value: "Futbol (Dijous)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.thu')} 16:30-18:00` },
-      { value: "Timbals (Divendres)", label: `${t('inscription.activity_names.drums')} - ${t('inscription.days.fri')} 17:30-19:00` },
     ]
+
   }), [t]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -82,7 +83,7 @@ export default function InscriptionPage() {
   });
 
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo>({
-    healthInfo: '', imageRights: '', canLeaveAlone: '', termsAccepted: false
+    healthInfo: '', imageRights: 'si', canLeaveAlone: 'false', authorizedPickup: '', termsAccepted: false
   });
 
   // Handlers
@@ -162,6 +163,7 @@ export default function InscriptionPage() {
         health_info: additionalInfo.healthInfo || null,
         image_auth_consent: additionalInfo.imageRights,
         can_leave_alone: additionalInfo.canLeaveAlone === 'true',
+        authorized_pickup: additionalInfo.authorizedPickup || null,
         conditions_accepted: true,
         form_language: i18n.language,
         status: 'alta' 
@@ -238,6 +240,78 @@ export default function InscriptionPage() {
            </p>
         </div>
       </div>
+
+      {/* --- Pricing & Payment Section --- */}
+      <section className="mb-10 space-y-6">
+        <h2 className="text-xl font-bold bg-slate-100 px-4 py-2 rounded-lg border-l-4 border-blue-500 text-slate-800">
+          {t('inscription.pricing.title')}
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <h4 className="font-bold text-slate-900 mb-1">{t('inscription.pricing.general_title')}</h4>
+            <p className="text-xs text-slate-500 mb-3">{t('inscription.pricing.hours_general')}</p>
+            <div className="space-y-1">
+              <p><span className="font-bold text-blue-600">20€</span> <span className="text-sm text-slate-600">{t('inscription.pricing.socis')}</span></p>
+              <p><span className="font-bold text-slate-400">25€</span> <span className="text-sm text-slate-600">{t('inscription.pricing.no_socis')}</span></p>
+            </div>
+          </div>
+
+          <div className="bg-indigo-50 border border-indigo-100 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+
+            <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold">INFO</div>
+            <h4 className="font-bold text-indigo-900 mb-1">{t('inscription.pricing.english_title')}</h4>
+            <p className="text-xs text-indigo-500 mb-3">{t('inscription.pricing.hours_general')}</p>
+            <div className="space-y-1">
+              <p><span className="font-bold text-indigo-600">39€</span> <span className="text-sm text-indigo-700">{t('inscription.pricing.socis')}</span></p>
+              <p><span className="font-bold text-indigo-400">44€</span> <span className="text-sm text-indigo-700">{t('inscription.pricing.no_socis')}</span></p>
+            </div>
+            <div className="mt-3 text-[10px] bg-indigo-100/50 p-2 rounded border border-indigo-200 text-indigo-700">
+               {t('inscription.pricing.english_material')}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-600">
+          <p><strong>{t('inscription.pricing.discount_title')}</strong> {t('inscription.pricing.discount_body')}</p>
+        </div>
+
+        <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex gap-4 items-start shadow-sm">
+          <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-bold text-red-800 mb-1">{t('inscription.pricing.english_warning_title')}</p>
+            <p className="text-red-700 leading-relaxed italic">{t('inscription.pricing.english_warning_body')}</p>
+          </div>
+        </div>
+
+        {/* Payment Info Box */}
+        <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl shadow-sm">
+           <h4 className="font-bold text-emerald-900 mb-4 flex items-center gap-2">
+             <CreditCard className="w-5 h-5 text-emerald-600" />
+             {t('inscription.pricing.payment_method_title')}
+           </h4>
+           <p className="text-sm text-emerald-800 mb-4">{t('inscription.pricing.payment_method_body')}</p>
+           
+           <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-emerald-200/50">
+             <code className="text-sm font-mono text-slate-700 bg-slate-50 px-3 py-1.5 rounded-lg flex-grow block w-full text-center sm:text-left">
+               ES22 0081 1604 7400 0103 8208
+             </code>
+             <button 
+               onClick={(e) => {
+                 e.preventDefault();
+                 navigator.clipboard.writeText('ES22 0081 1604 7400 0103 8208');
+                 // Could add a toast here
+               }}
+               className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-colors shadow-sm shrink-0 w-full sm:w-auto"
+             >
+                {t('inscription.pricing.copy_iban')}
+             </button>
+           </div>
+           <p className="text-[10px] text-emerald-600 font-bold mt-3 text-center sm:text-left uppercase tracking-tight">
+             {t('inscription.pricing.iban_hint')}
+           </p>
+        </div>
+      </section>
 
       {error && (
         <div className="bg-red-50 text-red-800 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg flex items-center gap-2">
@@ -445,6 +519,18 @@ export default function InscriptionPage() {
                         </label>
                     </div>
                 </div>
+
+                {additionalInfo.canLeaveAlone === 'false' && (
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.authorized_pickup')}</label>
+                        <textarea 
+                            className="flex min-h-[80px] w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" 
+                            placeholder={t('inscription.form.authorized_pickup_placeholder')}
+                            value={additionalInfo.authorizedPickup} 
+                            onChange={e => setAdditionalInfo({...additionalInfo, authorizedPickup: e.target.value})}
+                        />
+                    </div>
+                )}
 
                 <div className="pt-4 border-t">
                     <div className="flex items-center space-x-2">

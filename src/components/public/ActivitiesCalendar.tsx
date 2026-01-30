@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import type { Activity, ScheduleSession } from '../../services/ActivityService';
 
 interface ActivitiesCalendarProps {
@@ -19,7 +18,6 @@ const DAYS = [
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 8); // 8:00 to 21:00
 
 export function ActivitiesCalendar({ activities, onActivityClick }: ActivitiesCalendarProps) {
-  const { t } = useTranslation();
 
   const sessions = useMemo(() => {
     const allSessions: { activity: Activity; session: ScheduleSession; groupName: string }[] = [];

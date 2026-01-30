@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useTranslation } from 'react-i18next';
 import { Search, Plus, CheckCircle, XCircle, Download, Edit, Trash2 } from 'lucide-react';
 import { EditPaymentModal } from '../../../components/admin/EditPaymentModal';
 import { ExportService } from '../../../services/ExportService';
@@ -21,6 +22,7 @@ interface Payment {
 }
 
 export function PaymentsPage() {
+  const { t, i18n } = useTranslation();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterText, setFilterText] = useState('');
@@ -66,7 +68,7 @@ export function PaymentsPage() {
       fetchPayments(); // Refresh list
     } catch (error) {
       console.error('Error updating payment:', error);
-      alert('Error al actualitzar l\'estat del pagament');
+      alert(t('admin.payments.update_error'));
     }
   };
 
@@ -81,14 +83,14 @@ export function PaymentsPage() {
   };
   
   const handleDelete = async (id: string) => {
-      if (!confirm('Estàs segur que vols eliminar aquest pagament?')) return;
+      if (!confirm(t('admin.payments.delete_confirm'))) return;
       try {
           const { error } = await supabase.from('payments').delete().eq('id', id);
           if (error) throw error;
           setPayments(prev => prev.filter(p => p.id !== id));
-      } catch (err) {
+        } catch (err) {
           console.error(err);
-          alert('Error al eliminar');
+          alert(t('admin.payments.delete_error'));
       }
   };
 
@@ -152,14 +154,14 @@ export function PaymentsPage() {
     return true;
   });
 
-  if (loading) return <div className="p-8 text-center">Carregant pagaments...</div>;
+  if (loading) return <div className="p-8 text-center">{t('admin.payments.loading')}</div>;
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pagaments</h1>
-          <p className="text-slate-500">Gestió de quotes i rebuts</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('admin.payments.title')}</h1>
+          <p className="text-slate-500">{t('admin.payments.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
            <button 
@@ -172,7 +174,7 @@ export function PaymentsPage() {
                 onClick={handleCreate}
                 className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
             >
-             <Plus className="w-4 h-4" /> Registrar Pagament
+             <Plus className="w-4 h-4" /> {t('admin.payments.register_button')}
            </button>
         </div>
       </div>
@@ -180,16 +182,16 @@ export function PaymentsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="text-sm font-medium text-slate-500">Total Previst</div>
+          <div className="text-sm font-medium text-slate-500">{t('admin.payments.stats.total')}</div>
           <div className="text-3xl font-bold text-slate-900 mt-2">{totalAmount.toFixed(2)}€</div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="text-sm font-medium text-slate-500">Cobrat</div>
+          <div className="text-sm font-medium text-slate-500">{t('admin.payments.stats.paid')}</div>
           <div className="text-3xl font-bold text-green-600 mt-2">{paidAmount.toFixed(2)}€</div>
-          <div className="text-xs text-slate-400 mt-1">{((paidAmount/totalAmount || 0)*100).toFixed(0)}% del total</div>
+          <div className="text-xs text-slate-400 mt-1">{t('admin.payments.stats.percentage_hint', { percentage: ((paidAmount/totalAmount || 0)*100).toFixed(0) })}</div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="text-sm font-medium text-slate-500">Pendent</div>
+          <div className="text-sm font-medium text-slate-500">{t('admin.payments.stats.pending')}</div>
           <div className="text-3xl font-bold text-amber-600 mt-2">{pendingAmount.toFixed(2)}€</div>
         </div>
       </div>
@@ -200,7 +202,7 @@ export function PaymentsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
           <input 
             type="text" 
-            placeholder="Cercar estudiant..." 
+            placeholder={t('admin.payments.search_placeholder')} 
             className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none"
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
@@ -208,25 +210,27 @@ export function PaymentsPage() {
         </div>
 
         <select 
-          className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white"
+          className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
           value={monthFilter}
           onChange={e => setMonthFilter(e.target.value)}
         >
-          <option value="all">Tots els mesos</option>
+          <option value="all">{t('admin.payments.all_months')}</option>
           {[...Array(12)].map((_, i) => (
-            <option key={i} value={i + 1}>{new Date(0, i).toLocaleString('ca-ES', { month: 'long' })}</option>
+            <option key={i} value={i + 1}>
+              {new Date(0, i).toLocaleString(i18n.language === 'es' ? 'es-ES' : 'ca-ES', { month: 'long' })}
+            </option>
           ))}
         </select>
         
         <select 
-          className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white"
+          className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
         >
-          <option value="all">Tots els estats</option>
-          <option value="paid">Pagats</option>
-          <option value="pending">Pendents</option>
-          <option value="overdue">Vençuts</option>
+          <option value="all">{t('admin.payments.status_all')}</option>
+          <option value="paid">{t('admin.payments.status.paid')}</option>
+          <option value="pending">{t('admin.payments.status.pending')}</option>
+          <option value="overdue">{t('admin.payments.status.overdue')}</option>
         </select>
       </div>
 
@@ -235,12 +239,12 @@ export function PaymentsPage() {
         <table className="w-full text-left">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Estudiant</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Concepte</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Import</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Venciment</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Estat</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">Accions</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.student')}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.concept')}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.amount')}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.due_date')}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.status')}</th>
+              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -271,7 +275,7 @@ export function PaymentsPage() {
                     st === 'overdue' ? 'bg-red-50 text-red-700' :
                     'bg-amber-50 text-amber-700'
                   }`}>
-                    {st === 'paid' ? 'Pagat' : st === 'overdue' ? 'Vençut' : 'Pendent'}
+                    {st === 'paid' ? t('admin.payments.status.paid') : st === 'overdue' ? t('admin.payments.status.overdue') : t('admin.payments.status.pending')}
                   </span>
                 </td>
                 <td className="px-6 py-4">
@@ -305,7 +309,7 @@ export function PaymentsPage() {
         </table>
         {filteredPayments.length === 0 && (
           <div className="p-12 text-center text-slate-500">
-            No s'han trobat pagaments.
+            {t('admin.payments.table.no_results')}
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { Euro, ShoppingBag, Clock, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { FinancialStats, ShopStats } from '../../../services/StatsService';
 
 interface Props {
@@ -7,38 +8,39 @@ interface Props {
 }
 
 export function FinancialStatsCards({ financial, shop }: Props) {
+  const { t } = useTranslation();
   const cards = [
     { 
-      title: 'Ingressos', 
+      title: t('admin.dashboard.stats.financial.income'), 
       value: `${financial.paidAmount.toFixed(2)}€`, 
       icon: Euro, 
       color: 'text-green-600', 
       bg: 'bg-green-100',
-      subtitle: `de ${financial.totalAmount.toFixed(2)}€ previstos`
+      subtitle: t('admin.dashboard.stats.financial.income_subtitle', { total: financial.totalAmount.toFixed(2) })
     },
     { 
-      title: 'Pendent de Cobrament', 
+      title: t('admin.dashboard.stats.financial.pending'), 
       value: `${financial.pendingAmount.toFixed(2)}€`, 
       icon: Clock, 
       color: 'text-amber-600', 
       bg: 'bg-amber-100',
-      subtitle: 'Quotes pendents'
+      subtitle: t('admin.dashboard.stats.financial.pending_subtitle')
     },
     { 
-      title: 'Botiga: Comandes', 
+      title: t('admin.dashboard.stats.financial.shop_orders'), 
       value: shop.totalOrders, 
       icon: ShoppingBag, 
       color: 'text-blue-600', 
       bg: 'bg-blue-100',
-      subtitle: `${shop.pendingOrders} pendents`
+      subtitle: t('admin.dashboard.stats.financial.shop_orders_subtitle', { pending: shop.pendingOrders })
     },
     { 
-      title: 'Botiga: Facturació', 
+      title: t('admin.dashboard.stats.financial.shop_revenue'), 
       value: `${shop.revenue.toFixed(2)}€`, 
       icon: TrendingUp, 
       color: 'text-purple-600', 
       bg: 'bg-purple-100',
-      subtitle: 'Total vendes'
+      subtitle: t('admin.dashboard.stats.financial.shop_revenue_subtitle')
     },
   ];
 

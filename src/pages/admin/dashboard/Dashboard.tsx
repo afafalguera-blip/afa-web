@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { Loader2, FileSpreadsheet, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Hooks
 import { useInscriptions } from '../../../hooks/useInscriptions';
@@ -25,6 +26,7 @@ import { InscriptionEditModal } from './InscriptionEditModal';
 import type { InscriptionFlat } from '../../../types/inscription';
 
 export function Dashboard() {
+  const { t } = useTranslation();
   // Inscription logic extracted to custom hook
   const {
     inscriptions,
@@ -66,15 +68,15 @@ export function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Inscripcions</h2>
-          <p className="text-slate-500">Gestió de les inscripcions a extraescolars</p>
+          <h2 className="text-2xl font-bold text-slate-900">{t('admin.dashboard.title')}</h2>
+          <p className="text-slate-500">{t('admin.dashboard.subtitle')}</p>
         </div>
 
         <div className="flex gap-2">
           <button
             onClick={handleExportExcel}
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2 text-sm font-medium"
-            title="Exportar a Excel"
+            title={t('admin.dashboard.export_excel')}
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span className="hidden sm:inline">Excel</span>
@@ -83,7 +85,7 @@ export function Dashboard() {
           <button
             onClick={handleExportPDF}
             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm font-medium"
-            title="Exportar a PDF"
+            title={t('admin.dashboard.export_pdf')}
           >
             <FileText className="w-4 h-4" />
             <span className="hidden sm:inline">PDF</span>
@@ -93,7 +95,7 @@ export function Dashboard() {
             onClick={handleReload}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 text-sm font-medium"
           >
-            {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Actualitzar'}
+            {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : t('admin.dashboard.update')}
           </button>
         </div>
       </div>

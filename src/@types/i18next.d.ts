@@ -1,3 +1,4 @@
+// tslint:disable
 import 'i18next';
 import translation from '../../public/locales/ca/translation.json';
 
