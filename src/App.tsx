@@ -14,6 +14,9 @@ import InscriptionPage from './pages/InscriptionPage';
 import ActivitiesManager from './pages/admin/ActivitiesManager';
 import FeesPage from './pages/FeesPage';
 import GeneralCalendarPage from './pages/GeneralCalendarPage';
+import NewsManager from './pages/admin/NewsManager';
+import ProjectsManager from './pages/admin/ProjectsManager';
+import EventsManager from './pages/admin/EventsManager';
 
 import { ShopLanding } from './pages/shop/ShopLanding';
 
@@ -56,6 +59,9 @@ function App() {
              <Route path="shop/inventory" element={<InventoryPage />} />
              <Route path="shop/orders" element={<OrdersPage />} />
              <Route path="activities" element={<ActivitiesManager />} />
+             <Route path="news" element={<NewsManager />} />
+             <Route path="projects" element={<ProjectsManager />} />
+             <Route path="calendar" element={<EventsManager />} />
           </Route>
         </Routes>
       </BrowserRouter>

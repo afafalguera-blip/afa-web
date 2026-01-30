@@ -18,8 +18,8 @@ export function DesktopNav() {
 
   return (
     <nav className="hidden lg:flex items-center justify-between px-8 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 sticky top-0 z-50">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700 overflow-hidden bg-white">
+      <NavLink to="/" className="flex items-center gap-4 group">
+        <div className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700 overflow-hidden bg-white transition-transform group-hover:scale-110 shadow-sm">
              <img 
             alt="AFA Escola Logo" 
             className="w-full h-full object-cover p-0.5" 
@@ -27,7 +27,7 @@ export function DesktopNav() {
           />
         </div>
         <span className="font-bold text-lg text-slate-800 dark:text-white">AFA Escola Falguera</span>
-      </div>
+      </NavLink>
 
       <div className="flex items-center gap-8">
         <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
