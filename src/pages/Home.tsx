@@ -42,33 +42,33 @@ export function Home() {
           className="w-full h-full object-cover bg-slate-200"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4 lg:p-8">
-            <h1 className="text-xl lg:text-4xl font-bold text-white drop-shadow-md leading-tight">
+            <h1 className="hidden lg:block text-4xl font-bold text-white drop-shadow-md leading-tight">
                 {t('home.welcome_title' as any) || "Benvinguts a l'AFA Falguera"}
             </h1>
         </div>
       </div>
       
       {/* Navigation: Mobile Grid | Desktop Floating Pill */}
-      <section className="px-6 py-4 relative z-20 mb-8">
+      <section className="px-6 py-4 relative z-20 mb-6">
         {/* Mobile Grid */}
-        <div className="grid grid-cols-3 gap-4 lg:hidden">
-          <Link to="/extraescolars" className="flex flex-col items-center gap-2 group">
-            <div className="w-full aspect-square flex items-center justify-center bg-primary rounded-2xl text-white shadow-lg shadow-primary/20 group-active:scale-95 transition-transform">
-              <span className="material-icons-round text-3xl">sports_soccer</span>
+        <div className="grid grid-cols-3 gap-6 lg:hidden">
+          <Link to="/extraescolars" className="flex flex-col items-center gap-1.5 group">
+            <div className="w-14 h-14 flex items-center justify-center bg-primary rounded-2xl text-white shadow-lg shadow-primary/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-2xl">sports_soccer</span>
             </div>
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-200">{t('home.extraescolars')}</span>
+            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.extraescolars')}</span>
           </Link>
-          <button className="flex flex-col items-center gap-2 group">
-            <div className="w-full aspect-square flex items-center justify-center bg-secondary rounded-2xl text-white shadow-lg shadow-secondary/20 group-active:scale-95 transition-transform">
-              <span className="material-icons-round text-3xl">payments</span>
+          <button className="flex flex-col items-center gap-1.5 group">
+            <div className="w-14 h-14 flex items-center justify-center bg-secondary rounded-2xl text-white shadow-lg shadow-secondary/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-2xl">payments</span>
             </div>
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-200">{t('home.fees')}</span>
+            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.fees')}</span>
           </button>
-          <button className="flex flex-col items-center gap-2 group">
-            <div className="w-full aspect-square flex items-center justify-center bg-amber-500 rounded-2xl text-white shadow-lg shadow-amber-500/20 group-active:scale-95 transition-transform">
-              <span className="material-icons-round text-3xl">calendar_today</span>
+          <button className="flex flex-col items-center gap-1.5 group">
+            <div className="w-14 h-14 flex items-center justify-center bg-amber-500 rounded-2xl text-white shadow-lg shadow-amber-500/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-2xl">calendar_today</span>
             </div>
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-200">{t('home.calendar')}</span>
+            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.calendar')}</span>
           </button>
         </div>
 
