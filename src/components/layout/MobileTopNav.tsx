@@ -1,5 +1,6 @@
 import { Bell } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 export function MobileTopNav() {
   const { i18n } = useTranslation();
@@ -11,7 +12,7 @@ export function MobileTopNav() {
   return (
     <div className="fixed top-0 left-0 right-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 z-50 flex items-center justify-between px-4 lg:hidden">
       {/* Left: Branding & Greeting */}
-      <a href="/" className="flex items-center gap-3 active:scale-95 transition-transform">
+      <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
         <div className="w-10 h-10 rounded-full border border-slate-100 dark:border-slate-700 overflow-hidden bg-white shadow-sm shrink-0">
           <img 
             alt="AFA Logo" 
@@ -23,7 +24,7 @@ export function MobileTopNav() {
             <span className="text-[10px] text-slate-500 font-medium leading-none mb-0.5">Bon dia Família 👋</span>
             <span className="font-bold text-sm text-primary dark:text-white leading-none">AFA Escola Falguera</span>
         </div>
-      </a>
+      </Link>
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
