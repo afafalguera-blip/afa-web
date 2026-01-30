@@ -1,22 +1,8 @@
 import { useTranslation } from 'react-i18next';
+import type { Activity } from '../../services/ActivityService';
 
 interface ActivityDetailModalProps {
-  activity: {
-    id: number;
-    category: string;
-    title: string;
-    price: string | number;
-    priceInfo?: string;
-    description?: string;
-    grades: string;
-    place?: string;
-    spotsLeft?: number;
-    image: string;
-    schedule?: { group: string; days: string; time: string }[];
-    importantNote?: string;
-    categoryIcon?: string;
-    isStemApproved?: boolean;
-  };
+  activity: Activity;
   isOpen: boolean;
   onClose: () => void;
   onSignUp: () => void;
@@ -55,7 +41,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
         <div className="relative h-[40vh] min-h-[300px] w-full -mt-16">
           <div 
             className="h-full w-full bg-cover bg-center" 
-            style={{ backgroundImage: `url("${activity.image}")` }}
+            style={{ backgroundImage: `url("${activity.image_url}")` }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background-light dark:to-background-dark"></div>
           </div>
@@ -67,11 +53,11 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
           <div className="flex flex-wrap gap-2 mb-4">
             <div className="flex h-8 items-center justify-center gap-x-2 rounded-full bg-primary/20 dark:bg-primary/30 px-4">
               <span className="material-symbols-outlined text-primary text-[18px]">
-                {activity.categoryIcon || 'school'}
+                {activity.category_icon || 'school'}
               </span>
               <p className="text-primary text-xs font-bold uppercase tracking-wider">{activity.category}</p>
             </div>
-            {activity.isStemApproved && (
+            {activity.is_stem_approved && (
               <div className="flex h-8 items-center justify-center gap-x-2 rounded-full bg-white/50 dark:bg-white/10 px-4 backdrop-blur-sm border border-black/5 dark:border-white/5">
                 <span className="material-symbols-outlined text-[#667085] text-[18px]">military_tech</span>
                 <p className="text-[#667085] dark:text-gray-300 text-xs font-medium">STEM Approved</p>
@@ -85,8 +71,19 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
               {activity.title}
             </h1>
             <div className="text-right">
-              <p className="text-primary text-2xl font-bold">{activity.price}€</p>
-              <p className="text-[#667085] dark:text-gray-400 text-xs">{activity.priceInfo || t('inscription.activity_modal.per_month')}</p>
+              <div className="flex flex-col items-end">
+                <p className="text-primary text-2xl font-bold">
+                  {activity.price_member || activity.price}€
+                  <span className="text-xs font-medium text-[#667085] dark:text-gray-400 ml-1">({t('inscription.pricing.price_member')})</span>
+                </p>
+                {activity.price_non_member && (
+                  <p className="text-[#667085] dark:text-gray-400 text-sm font-bold -mt-1">
+                    {activity.price_non_member}€
+                    <span className="text-[10px] font-medium text-[#667085]/70 ml-1">({t('inscription.pricing.price_non_member')})</span>
+                  </p>
+                )}
+              </div>
+              <p className="text-[#667085] dark:text-gray-400 text-[10px] mt-1">{activity.price_info || t('inscription.activity_modal.per_month')}</p>
             </div>
           </div>
 
@@ -105,7 +102,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">groups</span>
               <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.spots')}</span>
-              <span className="text-sm font-semibold dark:text-gray-200">{activity.spotsLeft || t('inscription.activity_modal.spots_available')}</span>
+              <span className="text-sm font-semibold dark:text-gray-200">{activity.spots || t('inscription.activity_modal.spots_available')}</span>
             </div>
           </div>
 
@@ -118,47 +115,55 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
           </div>
 
           {/* Schedule Selection */}
-          {activity.schedule && activity.schedule.length > 0 && (
+          {activity.schedule_details && activity.schedule_details.length > 0 && (
             <div className="mb-10">
               <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-4">{t('inscription.activity_modal.schedule_title')}</h3>
               <div className="space-y-3">
-                {activity.schedule.map((slot, idx) => (
-                  <label 
-                    key={idx}
-                    className={`relative flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      idx === 0 
-                      ? 'border-primary bg-primary/5 dark:bg-primary/10' 
-                      : 'border-transparent bg-white dark:bg-gray-800/50 shadow-sm hover:border-black/10'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                        idx === 0 ? 'bg-primary text-white' : 'bg-[#f2f4f7] dark:bg-gray-700 text-[#667085]'
-                      }`}>
-                        <span className="material-symbols-outlined text-[20px]">calendar_today</span>
+                {activity.schedule_details.map((group, groupIdx) => (
+                  <div key={groupIdx} className="space-y-2">
+                    {group.sessions.map((session, sessionIdx) => (
+                      <div 
+                        key={`${groupIdx}-${sessionIdx}`}
+                        className={`relative flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                          groupIdx === 0 && sessionIdx === 0
+                          ? 'border-primary bg-primary/5 dark:bg-primary/10' 
+                          : 'border-transparent bg-white dark:bg-gray-800/50 shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                            groupIdx === 0 && sessionIdx === 0 ? 'bg-primary text-white' : 'bg-[#f2f4f7] dark:bg-gray-700 text-[#667085]'
+                          }`}>
+                            <span className="material-symbols-outlined text-[20px]">calendar_today</span>
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm dark:text-white">
+                              {group.group}: {
+                                session.day === 1 ? t('admin.editor.days.mon') :
+                                session.day === 2 ? t('admin.editor.days.tue') :
+                                session.day === 3 ? t('admin.editor.days.wed') :
+                                session.day === 4 ? t('admin.editor.days.thu') :
+                                session.day === 5 ? t('admin.editor.days.fri') :
+                                t('admin.editor.days.sat')
+                              }
+                            </p>
+                            <p className="text-xs text-[#667085] dark:text-gray-400">{session.startTime} - {session.endTime}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-sm dark:text-white">{slot.group}: {slot.days}</p>
-                        <p className="text-xs text-[#667085] dark:text-gray-400">{slot.time}</p>
-                      </div>
-                    </div>
-                    {idx === 0 ? (
-                      <span className="material-symbols-outlined text-primary">check_circle</span>
-                    ) : (
-                      <div className="h-6 w-6 rounded-full border border-gray-300 dark:border-gray-600"></div>
-                    )}
-                  </label>
+                    ))}
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
           {/* Important Notice */}
-          {activity.importantNote && (
+          {activity.important_note && (
             <div className="flex gap-3 p-4 rounded-xl bg-accent-terracotta/10 border border-accent-terracotta/20 mb-8">
               <span className="material-symbols-outlined text-accent-terracotta">info</span>
               <p className="text-xs text-[#8c5e4d] dark:text-accent-terracotta leading-snug">
-                <span className="font-bold">{t('inscription.activity_modal.note_label')}</span> {activity.importantNote}
+                <span className="font-bold">{t('inscription.activity_modal.note_label')}</span> {activity.important_note}
               </p>
             </div>
           )}

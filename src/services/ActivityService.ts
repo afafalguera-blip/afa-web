@@ -18,6 +18,8 @@ export interface Activity {
   category: string;
   description: string;
   price: number;
+  price_member?: number;
+  price_non_member?: number;
   price_info: string;
   grades: string;
   schedule_summary: string;

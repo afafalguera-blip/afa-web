@@ -17,6 +17,8 @@ const DEFAULT_ACTIVITY: Partial<Activity> = {
   category: "educational",
   description: "",
   price: 0,
+  price_member: 0,
+  price_non_member: 0,
   price_info: "/mes",
   grades: "",
   schedule_summary: "",
@@ -193,14 +195,23 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
             </div>
 
             {/* Pricing & Logistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.price')}</label>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.price_member' as any)}</label>
                   <input 
                     type="number"
                     className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    value={formData.price} 
-                    onChange={e => handleChange('price', parseFloat(e.target.value))}
+                    value={formData.price_member} 
+                    onChange={e => handleChange('price_member', parseFloat(e.target.value))}
+                  />
+               </div>
+               <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.price_non_member' as any)}</label>
+                  <input 
+                    type="number"
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    value={formData.price_non_member} 
+                    onChange={e => handleChange('price_non_member', parseFloat(e.target.value))}
                   />
                </div>
                <div className="space-y-2">

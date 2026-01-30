@@ -89,6 +89,10 @@
       "hours_timbals": "5:30 PM to 7:00 PM (Friday)",
       "socis": "/month members",
       "no_socis": "/month non-members",
+      "price_member": "Members",
+      "price_non_member": "Non-members",
+      "offer_banner_title": "Special Multi-Activity Offer",
+      "offer_banner_body": "If you take two identical extracurricular activities in the same week, enjoy a reduced price: 36€/month (members) and 40€/month (non-members).",
       "discount_title": "Discount:",
       "discount_body": "If taking two identical activities per week: 36€/month (members) and 40€/month (non-members).",
       "english_material": "+ 60€ material (October)",
@@ -180,5 +184,64 @@
       "skating": "Skating",
       "drums": "Drums"
     }
+  },
+  "admin": {
+    "editor": {
+      "edit_title": "Edit Activity",
+      "new_title": "New Activity",
+      "title": "Title",
+      "category": "Category",
+      "description": "Description",
+      "price_member": "Member Price (€)",
+      "price_non_member": "Non-Member Price (€)",
+      "price_unit": "Price Unit",
+      "spots": "Spots",
+      "image": "Cover Image",
+      "upload_image": "Upload Image",
+      "image_hint": "Recommended: 1000x600px, Max 2MB.",
+      "schedule_title": "Schedules and Sessions",
+      "schedule_subtitle": "Define groups and weekly sessions for the calendar.",
+      "add_group": "Add Group",
+      "group_placeholder": "Group Name (e.g. Group A, 1st-3rd...)",
+      "add_session": "Add Session",
+      "no_schedule": "No schedules defined. Click \"Add Group\" to start.",
+      "grades": "Grades",
+      "place": "Place",
+      "color": "Color (Tailwind)",
+      "icon": "Icon (Material Symbols)",
+      "stem": "STEM Approved",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "categories": {
+        "educational": "Educational",
+        "artistic": "Artistic",
+        "languages": "Languages",
+        "music": "Music",
+        "sports": "Sports"
+      },
+      "days": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday"
+      }
+    }
+  },
+  "common": {
+    "list": "List",
+    "search": "Search...",
+    "all": "All",
+    "error_delete": "Error deleting",
+    "error_save": "Error saving",
+    "error_generic": "An error occurred",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "refresh": "Refresh"
   }
 }

@@ -1,35 +1,50 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
-import { ActivityDetailModal } from '../components/public/ActivityDetailModal';
+import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { FeaturedProjects } from '../components/public/FeaturedProjects';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
-const YOGA_ACTIVITY = {
-  id: 101,
-  category: "Benestar",
-  title: "Ioga per a nens i nenes",
-  price: 25,
-  priceInfo: "/mes",
-  time: "Dilluns, 17:00h - 18:00h",
-  grades: "Primària",
-  image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzncWqQPQqWMaxjgzjUyUMqPOOz9GOhIwLZOpjvi6TRVug2sBCCxPZ0oH63RyeIt4qd5V_yrLeTgKgCpZa4T55rgzX8HswI3Kit4hyl_FTd9d7Yq2yKBG0pzerq9fqtUY0PPoKtBaZ4ECzaBJH49PbguWYI2FVisZ9tvPorpMErXKj2yjY9WLrTMXOwGn-0OcwspJk87imxFdNnuBntEN-wsUvzEyKOiJxb-JEXVUobsZNmpoXeCIFY9COnIKt202N4ZvuXNgMSUc",
-  color: "bg-teal-500",
-  description: "Millora la concentració, relaxació i flexibilitat dels més petits a través del ioga lúdic. Una activitat ideal per tancar el dia amb calma i equilibri.",
-  place: "Gimnàs 2",
-  spotsLeft: 10,
-  schedule: [
-    { group: "Grup Únic", days: "Dilluns", time: "17:00 — 18:00" }
-  ],
-  categoryIcon: "self_improvement"
-};
+interface NewsArticle {
+  id: string;
+  title: string;
+  excerpt: string;
+  image_url: string | null;
+  published: boolean;
+  created_at: string;
+}
+
 
 export function Home() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [aboutExpanded, setAboutExpanded] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [news, setNews] = useState<NewsArticle[]>([]);
+  const [loadingNews, setLoadingNews] = useState(true);
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const fetchNews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+      setNews(data || []);
+    } catch (error) {
+      console.error('Error fetching news:', error);
+    } finally {
+      setLoadingNews(false);
+    }
+  };
 
   return (
     <>
@@ -111,27 +126,50 @@ export function Home() {
         
         {/* Mobile: Horizontal Scroll | Desktop: Grid */}
         <div className="flex overflow-x-auto px-6 gap-4 hide-scrollbar snap-x pb-4 lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0">
-          <div 
-            onClick={() => {
-              setSelectedActivity(YOGA_ACTIVITY);
-              setIsModalOpen(true);
-            }}
-            className="min-w-[85%] snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow cursor-pointer"
-          >
-            <div className="h-40 bg-slate-200 relative">
-              <img 
-                alt="Yoga kids" 
-                className="w-full h-full object-cover" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzncWqQPQqWMaxjgzjUyUMqPOOz9GOhIwLZOpjvi6TRVug2sBCCxPZ0oH63RyeIt4qd5V_yrLeTgKgCpZa4T55rgzX8HswI3Kit4hyl_FTd9d7Yq2yKBG0pzerq9fqtUY0PPoKtBaZ4ECzaBJH49PbguWYI2FVisZ9tvPorpMErXKj2yjY9WLrTMXOwGn-0OcwspJk87imxFdNnuBntEN-wsUvzEyKOiJxb-JEXVUobsZNmpoXeCIFY9COnIKt202N4ZvuXNgMSUc"
-              />
-              <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Activitat</div>
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-lg leading-tight mb-2 text-slate-900 dark:text-white">Comença el curs de Ioga per a nens i nenes</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Ja estan obertes les inscripcions per a la nova activitat de benestar emocional...</p>
-            </div>
-          </div>
-          {/* ... existing cards ... */}
+          {loadingNews ? (
+             Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="min-w-[85%] lg:min-w-0 bg-slate-100 dark:bg-slate-800 rounded-3xl h-64 animate-pulse"></div>
+             ))
+          ) : news.length === 0 ? (
+             <div className="col-span-3 py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+                {t('common.no_news' as any) || "No hi ha notícies actualment"}
+             </div>
+          ) : (
+            news.map((item) => (
+              <div 
+                key={item.id}
+                className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative"
+              >
+                {isAdmin && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/admin/news');
+                    }}
+                    className="absolute top-3 right-3 z-20 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 scale-0 group-hover:scale-100 transition-transform flex items-center gap-1 text-xs px-3"
+                  >
+                    <Edit size={14} />
+                    {t('common.edit')}
+                  </button>
+                )}
+                
+                <div className="h-40 bg-slate-200 relative overflow-hidden">
+                  <img 
+                    alt={item.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                    src={item.image_url || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}
+                  />
+                  <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                    Notícia
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-lg leading-tight mb-2 text-slate-900 dark:text-white line-clamp-2">{item.title}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{item.excerpt}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -212,12 +250,6 @@ export function Home() {
         </div>
       </section>
 
-      <ActivityDetailModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        activity={selectedActivity || YOGA_ACTIVITY}
-        onSignUp={() => navigate('/extraescolars/inscripcio')}
-      />
     </>
   );
 }
