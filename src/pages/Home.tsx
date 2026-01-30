@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Header } from '../components/layout/Header';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { ActivityDetailModal } from '../components/public/ActivityDetailModal';
@@ -34,7 +33,6 @@ export function Home() {
 
   return (
     <>
-      <Header />
 
       {/* Hero Section - Desktop Only */}
       <div className="hidden lg:block w-full h-[300px] mb-8 relative rounded-3xl overflow-hidden mt-6 shadow-xl">
