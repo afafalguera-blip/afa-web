@@ -12,6 +12,8 @@ import { PaymentsPage } from './pages/admin/payments/PaymentsPage';
 import { FinanceDashboard } from './pages/admin/finances/FinanceDashboard';
 import InscriptionPage from './pages/InscriptionPage';
 import ActivitiesManager from './pages/admin/ActivitiesManager';
+import FeesPage from './pages/FeesPage';
+import GeneralCalendarPage from './pages/GeneralCalendarPage';
 
 import { ShopLanding } from './pages/shop/ShopLanding';
 
@@ -39,6 +41,8 @@ function App() {
             <Route path="extraescolars" element={<Extraescolars />} />
             <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
             <Route path="botiga" element={<ShopLanding />} />
+            <Route path="quotes" element={<FeesPage />} />
+            <Route path="calendari" element={<GeneralCalendarPage />} />
             {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
           </Route>
           
