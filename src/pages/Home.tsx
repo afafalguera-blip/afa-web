@@ -34,20 +34,22 @@ export function Home() {
   return (
     <>
 
-      {/* Hero Section - Desktop Only */}
-      <div className="hidden lg:block w-full h-[300px] mb-8 relative rounded-3xl overflow-hidden mt-6 shadow-xl">
+      {/* Hero Section - Responsive */}
+      <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none">
         <img 
           src="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/sign/Imagenes/hero_escuela.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84NjM3Yjc4My1lYzY4LTRjMjMtYmMyNS04MTA2ODk5ZjhjMGIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZW5lcy9oZXJvX2VzY3VlbGEucG5nIiwiaWF0IjoxNzY5NTU0NjAxLCJleHAiOjMzMzA1NTU0NjAxfQ.fZrP8adLhMw8UjClDHTCdao7eDbB-2-8tgQBTlhpOwQ"
           alt="Escola Hero"
           className="w-full h-full object-cover bg-slate-200"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
-            <h1 className="text-4xl font-bold text-white drop-shadow-md">Benvinguts a l'AFA de l'Escola Falguera</h1>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4 lg:p-8">
+            <h1 className="text-xl lg:text-4xl font-bold text-white drop-shadow-md leading-tight">
+                {t('home.welcome_title' as any) || "Benvinguts a l'AFA Falguera"}
+            </h1>
         </div>
       </div>
       
       {/* Navigation: Mobile Grid | Desktop Floating Pill */}
-      <section className="px-6 py-4 relative z-20 -mt-8 lg:-mt-12 mb-8">
+      <section className="px-6 py-4 relative z-20 mb-8">
         {/* Mobile Grid */}
         <div className="grid grid-cols-3 gap-4 lg:hidden">
           <Link to="/extraescolars" className="flex flex-col items-center gap-2 group">

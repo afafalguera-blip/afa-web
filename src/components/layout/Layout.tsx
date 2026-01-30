@@ -11,7 +11,7 @@ export function Layout() {
       <MobileTopNav />
 
       {/* Status bar spacer - Mobile only (adjusted for new TopNav) */}
-      <div className="h-20 w-full lg:hidden"></div>
+      <div className="h-16 w-full lg:hidden"></div>
       
       <main className="pb-24 lg:pb-12 max-w-7xl mx-auto w-full">
         <Outlet />
