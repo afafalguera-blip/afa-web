@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,10 +12,14 @@ export function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  if (user) {
-      navigate('/botiga'); // Change to Dashboard if admin?
-      return null;
-  }
+  useEffect(() => {
+    if (user) {
+        const timer = setTimeout(() => {
+            navigate('/botiga');
+        }, 1500);
+        return () => clearTimeout(timer);
+    }
+  }, [user, navigate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +40,7 @@ export function LoginPage() {
                 password,
             });
             if (error) throw error;
-            navigate('/botiga'); 
+            // Navigation will be handled by useEffect
         }
     } catch (error: any) {
         setErrorMsg(error.message || 'Error autenticant');
@@ -58,6 +62,18 @@ export function LoginPage() {
           setErrorMsg(error.message);
       }
   };
+
+  if (user) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <h2 className="text-xl font-bold text-slate-700">Ja has iniciat sessió!</h2>
+                <p className="text-slate-500">Et redirigim a la botiga...</p>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">

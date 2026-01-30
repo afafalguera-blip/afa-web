@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, ShoppingBag } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingBag, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +44,7 @@ export function DesktopNav() {
               }
             >
               <Icon className="w-4 h-4" />
-              <span className="text-sm">{t(labelKey)}</span>
+              <span className="text-sm">{t(labelKey as any)}</span>
             </NavLink>
           ))}
         </div>
@@ -52,10 +52,23 @@ export function DesktopNav() {
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
 
         <div className="flex items-center gap-2">
-            <button onClick={() => changeLanguage('ca')} className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'ca' ? 'text-primary' : 'text-slate-400'}`}>CA</button>
-            <button onClick={() => changeLanguage('es')} className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'es' ? 'text-primary' : 'text-slate-400'}`}>ES</button>
-            <button onClick={() => changeLanguage('en')} className={`text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'en' ? 'text-primary' : 'text-slate-400'}`}>EN</button>
+            <button onClick={() => changeLanguage('ca')} translate="no" className={`notranslate text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'ca' ? 'text-primary' : 'text-slate-400'}`}>CA</button>
+            <button onClick={() => changeLanguage('es')} translate="no" className={`notranslate text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'es' ? 'text-primary' : 'text-slate-400'}`}>ES</button>
+            <button onClick={() => changeLanguage('en')} translate="no" className={`notranslate text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'en' ? 'text-primary' : 'text-slate-400'}`}>EN</button>
         </div>
+
+        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
+
+        <button 
+            onClick={async () => {
+                await import('../../lib/supabase').then(m => m.supabase.auth.signOut());
+                window.location.href = '/';
+            }} 
+            className="text-slate-500 hover:text-red-600 transition-colors"
+            title="Tancar Sessió"
+        >
+            <LogOut className="w-5 h-5" />
+        </button>
       </div>
     </nav>
   );

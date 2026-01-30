@@ -1,42 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, Rocket, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
-// --- Constants (Same as before) ---
-const ALL_ACTIVITIES = {
-  infantil: [
-    { value: "Teatre Musical en Anglès (Dimarts)", label: "Teatre Musical en Anglès - Dimarts 16:30-18:00" },
-    { value: "Marxa-Marxa en Anglès (Dijous)", label: "Marxa-Marxa en Anglès - Dijous 16:30-18:00" },
-    { value: "Iniciació a Timbals (Divendres)", label: "Iniciació a Timbals - Divendres 17:30-19:00" },
-  ],
-  primaria1: [
-    { value: "Futbol (Dimarts)", label: "Futbol - Dimarts 16:30-18:00" },
-    { value: "Anglès (Dimecres)", label: "Anglès - Dimecres 16:30-18:00" },
-    { value: "Patinatge (Dimecres)", label: "Patinatge - Dimecres 16:30-18:00" },
-    { value: "Futbol (Dijous)", label: "Futbol - Dijous 16:30-18:00" },
-    { value: "Timbals (Divendres)", label: "Timbals - Divendres 17:30-19:00" },
-  ],
-  primaria2: [
-    { value: "Anglès (Dimarts)", label: "Anglès - Dimarts 16:30-18:00" },
-    { value: "Futbol (Dimarts)", label: "Futbol - Dimarts 16:30-18:00" },
-    { value: "Patinatge (Dimecres)", label: "Patinatge - Dimecres 16:30-18:00" },
-    { value: "Futbol (Dijous)", label: "Futbol - Dijous 16:30-18:00" },
-    { value: "Timbals (Divendres)", label: "Timbals - Divendres 17:30-19:00" },
-  ]
-};
 
-const COURSES = [
-  { value: 'I3', label: 'I3', type: 'infantil' },
-  { value: 'I4', label: 'I4', type: 'infantil' },
-  { value: 'I5', label: 'I5', type: 'infantil' },
-  { value: '1PRI', label: '1r Primària', type: 'primaria1' },
-  { value: '2PRI', label: '2n Primària', type: 'primaria1' },
-  { value: '3PRI', label: '3r Primària', type: 'primaria1' },
-  { value: '4PRI', label: '4t Primària', type: 'primaria2' },
-  { value: '5PRI', label: '5è Primària', type: 'primaria2' },
-  { value: '6PRI', label: '6è Primària', type: 'primaria2' },
-];
 
 interface Student {
   name: string;
@@ -63,7 +32,42 @@ interface AdditionalInfo {
 }
 
 export default function InscriptionPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  const COURSES = useMemo(() => [
+    { value: 'I3', label: t('inscription.courses.i3'), type: 'infantil' },
+    { value: 'I4', label: t('inscription.courses.i4'), type: 'infantil' },
+    { value: 'I5', label: t('inscription.courses.i5'), type: 'infantil' },
+    { value: '1PRI', label: t('inscription.courses.1pri'), type: 'primaria1' },
+    { value: '2PRI', label: t('inscription.courses.2pri'), type: 'primaria1' },
+    { value: '3PRI', label: t('inscription.courses.3pri'), type: 'primaria1' },
+    { value: '4PRI', label: t('inscription.courses.4pri'), type: 'primaria2' },
+    { value: '5PRI', label: t('inscription.courses.5pri'), type: 'primaria2' },
+    { value: '6PRI', label: t('inscription.courses.6pri'), type: 'primaria2' },
+  ], [t]);
+
+  const ALL_ACTIVITIES = useMemo(() => ({
+    infantil: [
+      { value: "Teatre Musical en Anglès (Dimarts)", label: `${t('inscription.activity_names.musical_theater_eng')} - ${t('inscription.days.tue')} 16:30-18:00` },
+      { value: "Marxa-Marxa en Anglès (Dijous)", label: `${t('inscription.activity_names.marxa_marxa_eng')} - ${t('inscription.days.thu')} 16:30-18:00` },
+      { value: "Iniciació a Timbals (Divendres)", label: `${t('inscription.activity_names.drums_init')} - ${t('inscription.days.fri')} 17:30-19:00` },
+    ],
+    primaria1: [
+      { value: "Futbol (Dimarts)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.tue')} 16:30-18:00` },
+      { value: "Anglès (Dimecres)", label: `${t('inscription.activity_names.english')} - ${t('inscription.days.wed')} 16:30-18:00` },
+      { value: "Patinatge (Dimecres)", label: `${t('inscription.activity_names.skating')} - ${t('inscription.days.wed')} 16:30-18:00` },
+      { value: "Futbol (Dijous)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.thu')} 16:30-18:00` },
+      { value: "Timbals (Divendres)", label: `${t('inscription.activity_names.drums')} - ${t('inscription.days.fri')} 17:30-19:00` },
+    ],
+    primaria2: [
+      { value: "Anglès (Dimarts)", label: `${t('inscription.activity_names.english')} - ${t('inscription.days.tue')} 16:30-18:00` },
+      { value: "Futbol (Dimarts)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.tue')} 16:30-18:00` },
+      { value: "Patinatge (Dimecres)", label: `${t('inscription.activity_names.skating')} - ${t('inscription.days.wed')} 16:30-18:00` },
+      { value: "Futbol (Dijous)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.thu')} 16:30-18:00` },
+      { value: "Timbals (Divendres)", label: `${t('inscription.activity_names.drums')} - ${t('inscription.days.fri')} 17:30-19:00` },
+    ]
+  }), [t]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,13 +133,13 @@ export default function InscriptionPage() {
     setError(null);
 
     if (!additionalInfo.termsAccepted) {
-        setError("Has d'acceptar les condicions per continuar.");
+        setError(t('inscription.form.error_terms'));
         setLoading(false);
         return;
     }
 
     if (students.some(s => s.activities.length === 0)) {
-        setError("Tots els alumnes han de tenir almenys una activitat seleccionada.");
+        setError(t('inscription.form.error_activities'));
         setLoading(false);
         return;
     }
@@ -159,7 +163,7 @@ export default function InscriptionPage() {
         image_auth_consent: additionalInfo.imageRights,
         can_leave_alone: additionalInfo.canLeaveAlone === 'true',
         conditions_accepted: true,
-        form_language: 'ca',
+        form_language: i18n.language,
         status: 'alta' 
       };
 
@@ -174,7 +178,7 @@ export default function InscriptionPage() {
 
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Hi ha hagut un error en enviar el formulari.");
+      setError(err.message || t('inscription.form.error_generic'));
     } finally {
       setLoading(false);
     }
@@ -187,15 +191,15 @@ export default function InscriptionPage() {
             <div className="rounded-full bg-green-100 p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-green-800 mb-2">Inscripció Rebuda!</h2>
+            <h2 className="text-2xl font-bold text-green-800 mb-2">{t('inscription.form.success_title')}</h2>
             <p className="text-green-700 mb-6">
-                Hem registrat correctament la preinscripció.
+                {t('inscription.form.success_message')}
             </p>
             <button 
                 onClick={() => navigate('/')} 
                 className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md transition-colors"
             >
-                Tornar a l'inici
+                {t('inscription.form.back_home')}
             </button>
         </div>
       </div>
@@ -204,16 +208,35 @@ export default function InscriptionPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-blue-900">Preinscripció Extraescolars 2025-26</h1>
-        <p className="text-gray-600 mt-2">AFA Escola Falguera</p>
+      <div className="text-center mb-12">
+        <motion.div 
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="inline-flex items-center justify-center p-3 rounded-full bg-blue-100/50 text-blue-600 mb-6 ring-4 ring-blue-50"
+        >
+             <Rocket className="w-8 h-8" />
+        </motion.div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+            {t('inscription.title_prefix')} <br className="hidden md:block" />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                {t('inscription.title_highlight')}
+            </span>
+        </h1>
+        <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            {t('inscription.subtitle_prefix')} <span className="text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded">{t('inscription.subtitle_highlight')}</span> {t('inscription.subtitle_suffix')}
+        </p>
       </div>
 
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg">
-        <h3 className="font-semibold text-blue-800">Informació Important</h3>
-        <p className="text-sm text-blue-700">
-          Les activitats només es faran si hi ha prou alumnes. Si hi ha excés d'alumnes, es respectarà l'ordre d'inscripció.
-        </p>
+      <div className="bg-white border border-slate-200 p-6 mb-10 rounded-2xl flex gap-5 items-start shadow-sm ring-1 ring-slate-100">
+        <div className="bg-blue-100 p-2 rounded-lg shrink-0">
+            <Info className="w-6 h-6 text-blue-600" />
+        </div>
+        <div>
+           <h3 className="font-bold text-slate-900 text-lg mb-1">{t('inscription.info_box.title')}</h3>
+           <p className="text-slate-600 leading-relaxed">
+             {t('inscription.info_box.text')}
+           </p>
+        </div>
       </div>
 
       {error && (
@@ -227,47 +250,47 @@ export default function InscriptionPage() {
         
         {/* --- Students Section --- */}
         <section className="space-y-6">
-          <h2 className="text-xl font-semibold border-b pb-2">Dades dels Alumnes</h2>
+          <h2 className="text-xl font-semibold border-b pb-2">{t('inscription.form.student_section')}</h2>
           
           {students.map((student, index) => {
             const activities = student.course ? getAvailableActivities(student.course) : [];
             return (
               <div key={index} className="bg-white border rounded-lg shadow-sm overflow-hidden">
                 <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                     <h3 className="font-medium text-gray-700">Alumne/a {index + 1}</h3>
-                     {index > 0 && <button type="button" className="text-red-500 hover:text-red-700 text-sm font-medium" onClick={() => removeStudent(index)}>Eliminar</button>}
+                     <h3 className="font-medium text-gray-700">{t('inscription.form.student_label')} {index + 1}</h3>
+                     {index > 0 && <button type="button" className="text-red-500 hover:text-red-700 text-sm font-medium" onClick={() => removeStudent(index)}>{t('inscription.form.remove_student')}</button>}
                 </div>
                 <div className="p-6 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Nom <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.name')} <span className="text-red-500">*</span></label>
                         <input 
                             className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
                             value={student.name} 
                             onChange={(e) => updateStudent(index, 'name', e.target.value)} 
                             required 
-                            placeholder="Nom de l'alumne"
+                            placeholder={t('inscription.form.name')}
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Cognoms <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.surname')} <span className="text-red-500">*</span></label>
                         <input 
                             className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={student.surname} 
                             onChange={(e) => updateStudent(index, 'surname', e.target.value)} 
                             required 
-                            placeholder="Cognoms"
+                            placeholder={t('inscription.form.surname')}
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Curs <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.course')} <span className="text-red-500">*</span></label>
                         <select 
                             className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={student.course} 
                             onChange={(e) => updateStudent(index, 'course', e.target.value)}
                             required
                         >
-                            <option value="" disabled>Selecciona el curs</option>
+                            <option value="" disabled>{t('inscription.form.select_course')}</option>
                             {COURSES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                         </select>
                     </div>
@@ -277,10 +300,10 @@ export default function InscriptionPage() {
                   {student.course && (
                     <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
                         <h4 className="text-sm font-semibold text-blue-900 mb-3 uppercase tracking-wide">
-                            Activitats disponibles per a {COURSES.find(c => c.value === student.course)?.label}
+                            {t('inscription.form.available_activities')} {COURSES.find(c => c.value === student.course)?.label}
                         </h4>
                         {activities.length === 0 ? (
-                            <p className="text-sm text-gray-500">No hi ha activitats disponibles per a aquest curs.</p>
+                            <p className="text-sm text-gray-500">{t('inscription.form.no_activities')}</p>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {activities.map((act: { value: string; label: string }) => (
@@ -312,7 +335,7 @@ export default function InscriptionPage() {
                                 ))}
                             </div>
                         )}
-                        {student.activities.length === 0 && <p className="text-xs text-red-500 mt-2">* Has de seleccionar almenys una activitat.</p>}
+                        {student.activities.length === 0 && <p className="text-xs text-red-500 mt-2">{t('inscription.form.must_select_activity')}</p>}
                     </div>
                   )}
                 </div>
@@ -326,50 +349,50 @@ export default function InscriptionPage() {
                 onClick={addStudent} 
                 className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
             >
-                + Afegir un altre alumne/a
+                {t('inscription.form.add_student')}
             </button>
           )}
         </section>
 
         {/* --- Parent Section --- */}
         <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b pb-2">Dades del Pare/Mare/Tutor</h2>
+            <h2 className="text-xl font-semibold border-b pb-2">{t('inscription.form.parent_section')}</h2>
             <div className="bg-white border rounded-lg shadow-sm p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Nom i Cognoms <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.name')} <span className="text-red-500">*</span></label>
                         <input className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.name} onChange={e => setParentInfo({...parentInfo, name: e.target.value})} required />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">DNI/NIE <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.dni')} <span className="text-red-500">*</span></label>
                         <input className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.dni} onChange={e => setParentInfo({...parentInfo, dni: e.target.value})} required />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Telèfon 1 <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.phone_1')} <span className="text-red-500">*</span></label>
                         <input type="tel" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.phone1} onChange={e => setParentInfo({...parentInfo, phone1: e.target.value})} required />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Telèfon 2 (Opcional)</label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.phone_2')}</label>
                         <input type="tel" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.phone2} onChange={e => setParentInfo({...parentInfo, phone2: e.target.value})} />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Email 1 <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.email_1')} <span className="text-red-500">*</span></label>
                         <input type="email" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.email1} onChange={e => setParentInfo({...parentInfo, email1: e.target.value})} required />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">Email 2 (Opcional)</label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.email_2')}</label>
                         <input type="email" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.email2} onChange={e => setParentInfo({...parentInfo, email2: e.target.value})} />
                     </div>
                     <div className="md:col-span-2 space-y-3">
-                        <label className="block text-sm font-medium text-gray-700">Sou socis de l'AFA? <span className="text-red-500">*</span></label>
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.is_member')} <span className="text-red-500">*</span></label>
                         <div className="flex space-x-6">
                             <label className="flex items-center space-x-2 cursor-pointer">
                                 <input type="radio" name="afa_member" value="true" checked={parentInfo.isAfaMember === 'true'} onChange={() => setParentInfo({...parentInfo, isAfaMember: 'true'})} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                                <span>Sí</span>
+                                <span>{t('inscription.form.yes')}</span>
                             </label>
                             <label className="flex items-center space-x-2 cursor-pointer">
                                 <input type="radio" name="afa_member" value="false" checked={parentInfo.isAfaMember === 'false'} onChange={() => setParentInfo({...parentInfo, isAfaMember: 'false'})} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                                <span>No</span>
+                                <span>{t('inscription.form.no')}</span>
                             </label>
                         </div>
                     </div>
@@ -379,46 +402,46 @@ export default function InscriptionPage() {
 
         {/* --- Additional Info Section --- */}
         <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b pb-2">Informació Addicional</h2>
+            <h2 className="text-xl font-semibold border-b pb-2">{t('inscription.form.additional_section')}</h2>
             <div className="bg-white border rounded-lg shadow-sm p-6 space-y-6">
                 <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Malalties, al·lèrgies o medicació</label>
+                    <label className="block text-sm font-medium text-gray-700">{t('inscription.form.health_info')}</label>
                     <input 
                         className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                         value={additionalInfo.healthInfo} 
                         onChange={e => setAdditionalInfo({...additionalInfo, healthInfo: e.target.value})} 
-                        placeholder="Deixar en blanc si no n'hi ha" 
+                        placeholder={t('inscription.form.health_placeholder')} 
                     />
                 </div>
                 
                 <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">Autorització de drets d'imatge <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700">{t('inscription.form.image_rights')} <span className="text-red-500">*</span></label>
                     <p className="text-xs text-gray-500">
-                         Autoritzo l'ús d'imatges en fotografies i/o vídeos realitzats per l'AFA per a la web i xarxes socials.
+                         {t('inscription.form.image_text')}
                     </p>
                     <div className="flex flex-col space-y-2">
                         <label className="flex items-center space-x-2 cursor-pointer">
                             <input type="radio" name="img_rights" value="si" checked={additionalInfo.imageRights === 'si'} onChange={() => setAdditionalInfo({...additionalInfo, imageRights: 'si'})} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                            <span>Sí, autoritzo el tractament de la imatge.</span>
+                            <span>{t('inscription.form.image_yes')}</span>
                         </label>
                         <label className="flex items-center space-x-2 cursor-pointer">
                             <input type="radio" name="img_rights" value="no" checked={additionalInfo.imageRights === 'no'} onChange={() => setAdditionalInfo({...additionalInfo, imageRights: 'no'})} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                            <span>No, no autoritzo el tractament de la imatge.</span>
+                            <span>{t('inscription.form.image_no')}</span>
                         </label>
                     </div>
                 </div>
 
                 <div className="space-y-3">
-                     <label className="block text-sm font-medium text-gray-700">Autorització de sortida sola/sol <span className="text-red-500">*</span></label>
-                     <p className="text-xs text-gray-500">L'alumne/a pot marxar sol/a en finalitzar l'activitat?</p>
+                     <label className="block text-sm font-medium text-gray-700">{t('inscription.form.leave_alone')} <span className="text-red-500">*</span></label>
+                     <p className="text-xs text-gray-500">{t('inscription.form.leave_alone_text')}</p>
                      <div className="flex space-x-6">
                          <label className="flex items-center space-x-2 cursor-pointer">
                             <input type="radio" name="leave_alone" value="true" checked={additionalInfo.canLeaveAlone === 'true'} onChange={() => setAdditionalInfo({...additionalInfo, canLeaveAlone: 'true'})} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                            <span>Sí</span>
+                            <span>{t('inscription.form.yes')}</span>
                         </label>
                         <label className="flex items-center space-x-2 cursor-pointer">
                             <input type="radio" name="leave_alone" value="false" checked={additionalInfo.canLeaveAlone === 'false'} onChange={() => setAdditionalInfo({...additionalInfo, canLeaveAlone: 'false'})} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                            <span>No</span>
+                            <span>{t('inscription.form.no')}</span>
                         </label>
                     </div>
                 </div>
@@ -433,7 +456,7 @@ export default function InscriptionPage() {
                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
                         <label htmlFor="terms" className="text-sm text-gray-700 cursor-pointer select-none">
-                            He llegit i accepto les <a href="#" className="text-blue-600 underline hover:text-blue-800">condicions de les extraescolars i acollida</a>. <span className="text-red-500">*</span>
+                            {t('inscription.form.terms_accept')} <a href="#" className="text-blue-600 underline hover:text-blue-800">{t('inscription.form.terms_link')}</a>. <span className="text-red-500">*</span>
                         </label>
                     </div>
                 </div>
@@ -446,10 +469,10 @@ export default function InscriptionPage() {
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
                 disabled={loading}
             >
-                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Enviar Preinscripció'}
+                {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : t('inscription.form.submit_btn')}
             </button>
             <p className="text-center text-xs text-gray-500 mt-4">
-                En enviar el formulari, acceptes la política de privacitat del centre.
+                {t('inscription.form.privacy_note')}
             </p>
         </div>
 

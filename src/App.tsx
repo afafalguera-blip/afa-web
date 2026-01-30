@@ -11,6 +11,7 @@ import InscriptionsPage from './pages/admin/inscriptions/InscriptionsPage';
 import { PaymentsPage } from './pages/admin/payments/PaymentsPage';
 import { FinanceDashboard } from './pages/admin/finances/FinanceDashboard';
 import InscriptionPage from './pages/InscriptionPage';
+import ActivitiesManager from './pages/admin/ActivitiesManager';
 
 import { ShopLanding } from './pages/shop/ShopLanding';
 
@@ -50,6 +51,7 @@ function App() {
              <Route path="finances" element={<FinanceDashboard />} />
              <Route path="shop/inventory" element={<InventoryPage />} />
              <Route path="shop/orders" element={<OrdersPage />} />
+             <Route path="activities" element={<ActivitiesManager />} />
           </Route>
         </Routes>
       </BrowserRouter>

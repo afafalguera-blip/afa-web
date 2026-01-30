@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 
 interface ActivityDetailModalProps {
   activity: {
@@ -22,6 +23,8 @@ interface ActivityDetailModalProps {
 }
 
 export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: ActivityDetailModalProps) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
@@ -83,7 +86,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
             </h1>
             <div className="text-right">
               <p className="text-primary text-2xl font-bold">{activity.price}€</p>
-              <p className="text-[#667085] dark:text-gray-400 text-xs">{activity.priceInfo || 'per mes'}</p>
+              <p className="text-[#667085] dark:text-gray-400 text-xs">{activity.priceInfo || t('inscription.activity_modal.per_month')}</p>
             </div>
           </div>
 
@@ -91,33 +94,33 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
           <div className="grid grid-cols-3 gap-3 mb-8">
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">child_care</span>
-              <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">Cursos</span>
+              <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.grades')}</span>
               <span className="text-sm font-semibold dark:text-gray-200">{activity.grades}</span>
             </div>
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">location_on</span>
-              <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">Lloc</span>
+              <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.location')}</span>
               <span className="text-sm font-semibold dark:text-gray-200 line-clamp-1">{activity.place || 'Escola'}</span>
             </div>
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">groups</span>
-              <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">Places</span>
-              <span className="text-sm font-semibold dark:text-gray-200">{activity.spotsLeft || 'Disponibles'}</span>
+              <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.spots')}</span>
+              <span className="text-sm font-semibold dark:text-gray-200">{activity.spotsLeft || t('inscription.activity_modal.spots_available')}</span>
             </div>
           </div>
 
           {/* Description */}
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-3">Sobre l'activitat</h3>
+            <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-3">{t('inscription.activity_modal.about')}</h3>
             <p className="text-[#4b5563] dark:text-gray-300 text-base leading-relaxed font-light">
-              {activity.description || "Uneix-te a la nostra activitat on els alumnes aprenen i es diverteixen en un entorn col·laboratiu. No es requereix experiència prèvia!"}
+              {activity.description || t('inscription.activity_modal.default_description')}
             </p>
           </div>
 
           {/* Schedule Selection */}
           {activity.schedule && activity.schedule.length > 0 && (
             <div className="mb-10">
-              <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-4">Horaris Disponibles</h3>
+              <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-4">{t('inscription.activity_modal.schedule_title')}</h3>
               <div className="space-y-3">
                 {activity.schedule.map((slot, idx) => (
                   <label 
@@ -155,7 +158,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
             <div className="flex gap-3 p-4 rounded-xl bg-accent-terracotta/10 border border-accent-terracotta/20 mb-8">
               <span className="material-symbols-outlined text-accent-terracotta">info</span>
               <p className="text-xs text-[#8c5e4d] dark:text-accent-terracotta leading-snug">
-                <span className="font-bold">Nota:</span> {activity.importantNote}
+                <span className="font-bold">{t('inscription.activity_modal.note_label')}</span> {activity.importantNote}
               </p>
             </div>
           )}
@@ -168,7 +171,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
               onClick={onSignUp}
               className="flex h-14 w-full items-center justify-center rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/30 active:scale-95 transition-transform"
             >
-              Inscriure's Ara
+              {t('inscription.activity_modal.signup_btn')}
             </button>
           </div>
         </div>

@@ -1,0 +1,162 @@
+{
+  "header": {
+    "greeting": "Bon dia, Família 👋"
+  },
+  "nav": {
+    "home": "Inici",
+    "extraescolars": "Extraescolars",
+    "shop": "Botiga",
+    "profile": "Perfil"
+  },
+  "home": {
+    "extraescolars": "Extraescolars",
+    "fees": "Quotes",
+    "calendar": "Calendari",
+    "news_title": "Últimes Notícies",
+    "see_all": "Veure-ho tot",
+    "events_title": "Propers Esdeveniments",
+    "member_status": "Estatus de Soci",
+    "member_active": "Curs 2024-2025 Actiu",
+    "about_title": "Què fa l'AFA?",
+    "about_text_1": "L’AFA és l’associació formada per la majoria de les famílies de l’escola. La junta directiva n’és la responsable i la que coordina les diverses activitats. Formar part de la junta és voluntari. Per tant, qualsevol ajuda vostra, per petita que sigui, serà molt ben acollida.",
+    "about_text_2": "La junta organitza i gestiona les activitats extraescolars amb les quals pretén complementar la formació dels nens-nenes de l’escola, i col·labora en mulltes altres activitats que van sorgint al llarg del curs.",
+    "about_text_3": "També participa en l’organització de les festes populars: Castanyada, Tió, Sant Jordi, Final de curs,…",
+    "about_contact": "Per qualsevol informació ens trobareu al despatx de l’AFA de l’escola els dimarts de les 9:00 a 9:30 i els divendres de 16:30 a 17:00.",
+    "about_functions_title": "Les seves funcions principals són:",
+    "about_functions": [
+      "Sensibilitzar i orientar els pares i mares sobre la seva responsabilitat pel que fa a l’educació dels seus fills i filles.",
+      "Canalitzar les iniciatives i suggeriments dels pares i mares.",
+      "Gestionar l’adquisició i distribució de materials i llibres comuns.",
+      "Afavorir el diàleg permanent família – escola.",
+      "Organitzar i gestionar les activitats extraescolars o complementàries.",
+      "Participar en les activitats socials i culturals organitzades a nivell municipal, que puguin ser d’interès per a les escoles.",
+      "Col·laborar en les festes i actes culturals de l’escola."
+    ]
+  },
+  "featured_projects": {
+    "title": "La teva quota transforma l'escola",
+    "subtitle_prefix": "No només gestionem, creem",
+    "subtitle_highlight": "ambients motivadors",
+    "subtitle_suffix": "Mira el que estem aconseguint gràcies a famílies com la teva.",
+    "investment_label": "Inversió AFA",
+    "status": {
+      "completed": "Aconseguit!",
+      "in_progress": "En Marxa",
+      "voting": "En Votació"
+    },
+    "projects": {
+      "1": {
+        "title": "Smart Classroom & Espais Vius",
+        "description": "Transformem les aules tradicionals en ambients motivadors que fomenten la creativitat i el treball col·laboratiu.",
+        "impact": "+450 alumnes beneficiats",
+        "participants": "Comissió d'Espais i Ex-alumnes"
+      },
+      "2": {
+        "title": "Renaturalització del Pati Infantil",
+        "description": "Més verd, menys ciment. Un projecte per \"donar vida\" a l'esbarjo amb zones d'ombra, hort escolar i estructures de joc inclusives.",
+        "impact": "Millora convivència i temperatura",
+        "participants": "Famílies voluntàries cap de setmana"
+      },
+      "3": {
+        "title": "Digitalització i Biblioteca Oberta",
+        "description": "Volem una biblioteca que sigui el cor cultural del centre. Vota per aprovar la compra de nou mobiliari i e-readers.",
+        "impact": "Foment lector i estudi",
+        "participants": "Assemblea de Socis"
+      }
+    }
+  },
+  "inscription": {
+    "title_prefix": "Més que Extraescolars:",
+    "title_highlight": "Experiències per Créixer",
+    "subtitle_prefix": "Inscripció Curs 2025-26.",
+    "subtitle_highlight": "Tot en un sol lloc.",
+    "subtitle_suffix": "Simplifiquem la gestió perquè tu gaudeixis de veure'ls aprendre i divertir-se.",
+    "info_box": {
+      "title": "Com funciona el procés?",
+      "text": "Hem dissenyat aquest formulari únic per facilitar-te la vida. Pots inscriure a tots els teus fills de cop. Si alguna activitat té excés de demanda, garantim un procés just respectant l'ordre d'entrada."
+    },
+    "important_info": {
+      "title": "Informació Important",
+      "text": "Les activitats només es faran si hi ha prou alumnes. Si hi ha excés d'alumnes, es respectarà l'ordre d'inscripció."
+    },
+    "form": {
+      "student_section": "Dades dels Alumnes",
+      "student_label": "Alumne/a",
+      "remove_student": "Eliminar",
+      "add_student": "+ Afegir un altre alumne/a",
+      "name": "Nom",
+      "surname": "Cognoms",
+      "course": "Curs",
+      "select_course": "Selecciona el curs",
+      "available_activities": "Activitats disponibles per a",
+      "no_activities": "No hi ha activitats disponibles per a aquest curs.",
+      "must_select_activity": "* Has de seleccionar almenys una activitat.",
+      "parent_section": "Dades del Pare/Mare/Tutor",
+      "dni": "DNI/NIE",
+      "phone_1": "Telèfon 1",
+      "phone_2": "Telèfon 2 (Opcional)",
+      "email_1": "Email 1",
+      "email_2": "Email 2 (Opcional)",
+      "is_member": "Sou socis de l'AFA?",
+      "yes": "Sí",
+      "no": "No",
+      "additional_section": "Informació Addicional",
+      "health_info": "Malalties, al·lèrgies o medicació",
+      "health_placeholder": "Deixar en blanc si no n'hi ha",
+      "image_rights": "Autorització de drets d'imatge",
+      "image_text": "Autoritzo l'ús d'imatges en fotografies i/o vídeos realitzats per l'AFA per a la web i xarxes socials.",
+      "image_yes": "Sí, autoritzo el tractament de la imatge.",
+      "image_no": "No, no autoritzo el tractament de la imatge.",
+      "leave_alone": "Autorització de sortida sola/sol",
+      "leave_alone_text": "L'alumne/a pot marxar sol/a en finalitzar l'activitat?",
+      "terms_accept": "He llegit i accepto les",
+      "terms_link": "condicions de les extraescolars i acollida",
+      "submit_btn": "Enviar Preinscripció",
+      "privacy_note": "En enviar el formulari, acceptes la política de privacitat del centre.",
+      "success_title": "Inscripció Rebuda!",
+      "success_message": "Hem registrat correctament la preinscripció.",
+      "back_home": "Tornar a l'inici",
+      "error_terms": "Has d'acceptar les condicions per continuar.",
+      "error_activities": "Tots els alumnes han de tenir almenys una activitat seleccionada.",
+      "error_generic": "Hi ha hagut un error en enviar el formulari."
+    },
+    "activity_modal": {
+      "grades": "Cursos",
+      "location": "Lloc",
+      "spots": "Places",
+      "spots_available": "Disponibles",
+      "about": "Sobre l'activitat",
+      "default_description": "Uneix-te a la nostra activitat on els alumnes aprenen i es diverteixen en un entorn col·laboratiu. No es requereix experiència prèvia!",
+      "schedule_title": "Horaris Disponibles",
+      "note_label": "Nota:",
+      "signup_btn": "Inscriure's Ara",
+      "per_month": "per mes"
+    },
+    "days": {
+      "tue": "Dimarts",
+      "wed": "Dimecres",
+      "thu": "Dijous",
+      "fri": "Divendres"
+    },
+    "courses": {
+      "i3": "I3",
+      "i4": "I4",
+      "i5": "I5",
+      "1pri": "1r Primària",
+      "2pri": "2n Primària",
+      "3pri": "3r Primària",
+      "4pri": "4t Primària",
+      "5pri": "5è Primària",
+      "6pri": "6è Primària"
+    },
+    "activity_names": {
+      "musical_theater_eng": "Teatre Musical en Anglès",
+      "marxa_marxa_eng": "Marxa-Marxa en Anglès",
+      "drums_init": "Iniciació a Timbals",
+      "football": "Futbol",
+      "english": "Anglès",
+      "skating": "Patinatge",
+      "drums": "Timbals"
+    }
+  }
+}

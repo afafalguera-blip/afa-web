@@ -1,0 +1,162 @@
+{
+  "header": {
+    "greeting": "Buenos días, Familia 👋"
+  },
+  "nav": {
+    "home": "Inicio",
+    "extraescolars": "Extraescolares",
+    "shop": "Tienda",
+    "profile": "Perfil"
+  },
+  "home": {
+    "extraescolars": "Extraescolares",
+    "fees": "Cuotas",
+    "calendar": "Calendario",
+    "news_title": "Últimas Noticias",
+    "see_all": "Ver todo",
+    "events_title": "Próximos Eventos",
+    "member_status": "Estatus de Socio",
+    "member_active": "Curso 2024-2025 Activo",
+    "about_title": "¿Qué hace el AFA?",
+    "about_text_1": "El AFA es la asociación formada por la mayoría de las familias de la escuela. La junta directiva es la responsable y la que coordina las diversas actividades. Formar parte de la junta es voluntario. Por tanto, cualquier ayuda vuestra, por pequeña que sea, será muy bien acogida.",
+    "about_text_2": "La junta organiza y gestiona las actividades extraescolares con las cuales pretende complementar la formación de los niños y niñas de la escuela, y colabora en muchas otras actividades que van surgiendo a lo largo del curso.",
+    "about_text_3": "También participa en la organización de las fiestas populares: Castañada, Tió, Sant Jordi, Final de curso...",
+    "about_contact": "Para cualquier información nos encontraréis en el despacho del AFA de la escuela los martes de las 9:00 a 9:30 y los viernes de 16:30 a 17:00.",
+    "about_functions_title": "Sus funciones principales son:",
+    "about_functions": [
+      "Sensibilizar y orientar a los padres y madres sobre su responsabilidad en relación con la educación de sus hijos e hijas.",
+      "Canalizar las iniciativas y sugerencias de los padres y madres.",
+      "Gestionar la adquisición y distribución de materiales y libros comunes.",
+      "Favorecer el diálogo permanente familia – escuela.",
+      "Organizar y gestionar las actividades extraescolares o complementarias.",
+      "Participar en las actividades sociales y culturales organizadas a nivel municipal, que puedan ser de interés para las escuelas.",
+      "Colaborar en las fiestas y actos culturales de la escuela."
+    ]
+  },
+  "featured_projects": {
+    "title": "Tu cuota transforma el colegio",
+    "subtitle_prefix": "No solo gestionamos, creamos",
+    "subtitle_highlight": "ambientes motivadores",
+    "subtitle_suffix": "Mira lo que estamos consiguiendo gracias a familias como la tuya.",
+    "investment_label": "Inversión AFA",
+    "status": {
+      "completed": "¡Logrado!",
+      "in_progress": "En Marcha",
+      "voting": "En Votación"
+    },
+    "projects": {
+      "1": {
+        "title": "Smart Classroom & Espacios Vivos",
+        "description": "Transformamos las aulas tradicionales en ambientes motivadores que fomentan la creatividad y el trabajo colaborativo.",
+        "impact": "+450 alumnos beneficiados",
+        "participants": "Comisión de Espacios y Ex-alumnos"
+      },
+      "2": {
+        "title": "Renaturalización del Patio Infantil",
+        "description": "Más verde, menos cemento. Un proyecto para \"dar vidilla\" al recreo con zonas de sombra, huerto escolar y estructuras de juego inclusivas.",
+        "impact": "Mejora convivencia y temperatura",
+        "participants": "Familias voluntarias fin de semana"
+      },
+      "3": {
+        "title": "Digitalización y Biblioteca Abierta",
+        "description": "Queremos una biblioteca que sea el corazón cultural del centro. Vota para aprobar la compra de nuevo mobiliario y e-readers.",
+        "impact": "Fomento lector y estudio",
+        "participants": "Asamblea de Socios"
+      }
+    }
+  },
+  "inscription": {
+    "title_prefix": "Más que Extraescolares:",
+    "title_highlight": "Experiencias para Crecer",
+    "subtitle_prefix": "Inscripción Curso 2025-26.",
+    "subtitle_highlight": "Todo en un solo lugar.",
+    "subtitle_suffix": "Simplificamos la gestión para que tú disfrutes de verlos aprender y divertirse.",
+    "info_box": {
+      "title": "¿Cómo funciona el proceso?",
+      "text": "Hemos diseñado este formulario único para facilitarte la vida. Puedes inscribir a todos tus hijos de una vez. Si alguna actividad tiene exceso de demanda, garantizamos un proceso justo respetando el orden de entrada."
+    },
+    "important_info": {
+      "title": "Información Importante",
+      "text": "Las actividades solo se realizarán si hay suficientes alumnos. Si hay exceso de alumnos, se respetará el orden de inscripción."
+    },
+    "form": {
+      "student_section": "Datos de los Alumnos",
+      "student_label": "Alumno/a",
+      "remove_student": "Eliminar",
+      "add_student": "+ Añadir otro alumno/a",
+      "name": "Nombre",
+      "surname": "Apellidos",
+      "course": "Curso",
+      "select_course": "Selecciona el curso",
+      "available_activities": "Actividades disponibles para",
+      "no_activities": "No hay actividades disponibles para este curso.",
+      "must_select_activity": "* Debes seleccionar al menos una actividad.",
+      "parent_section": "Datos del Padre/Madre/Tutor",
+      "dni": "DNI/NIE",
+      "phone_1": "Teléfono 1",
+      "phone_2": "Teléfono 2 (Opcional)",
+      "email_1": "Email 1",
+      "email_2": "Email 2 (Opcional)",
+      "is_member": "¿Sois socios del AFA?",
+      "yes": "Sí",
+      "no": "No",
+      "additional_section": "Información Adicional",
+      "health_info": "Enfermedades, alergias o medicación",
+      "health_placeholder": "Dejar en blanco si no hay",
+      "image_rights": "Autorización de derechos de imagen",
+      "image_text": "Autorizo el uso de imágenes en fotografías y/o vídeos realizados por el AFA para la web y redes sociales.",
+      "image_yes": "Sí, autorizo el tratamiento de la imagen.",
+      "image_no": "No, no autorizo el tratamiento de la imagen.",
+      "leave_alone": "Autorización de salida solo/a",
+      "leave_alone_text": "¿El alumno/a puede irse solo/a al finalizar la actividad?",
+      "terms_accept": "He leído y acepto las",
+      "terms_link": "condiciones de las extraescolares y acogida",
+      "submit_btn": "Enviar Preinscripción",
+      "privacy_note": "Al enviar el formulario, aceptas la política de privacidad del centro.",
+      "success_title": "¡Inscripción Recibida!",
+      "success_message": "Hemos registrado correctamente la preinscripción.",
+      "back_home": "Volver al inicio",
+      "error_terms": "Debes aceptar las condiciones para continuar.",
+      "error_activities": "Todos los alumnos deben tener al menos una actividad seleccionada.",
+      "error_generic": "Ha habido un error al enviar el formulario."
+    },
+    "activity_modal": {
+      "grades": "Cursos",
+      "location": "Lugar",
+      "spots": "Plazas",
+      "spots_available": "Disponibles",
+      "about": "Sobre la actividad",
+      "default_description": "Únete a nuestra actividad donde los alumnos aprenden y se divierten en un entorno colaborativo. ¡No se requiere experiencia previa!",
+      "schedule_title": "Horarios Disponibles",
+      "note_label": "Nota:",
+      "signup_btn": "Inscribirse Ahora",
+      "per_month": "por mes"
+    },
+    "days": {
+      "tue": "Martes",
+      "wed": "Miércoles",
+      "thu": "Jueves",
+      "fri": "Viernes"
+    },
+    "courses": {
+      "i3": "I3",
+      "i4": "I4",
+      "i5": "I5",
+      "1pri": "1º Primaria",
+      "2pri": "2º Primaria",
+      "3pri": "3º Primaria",
+      "4pri": "4º Primaria",
+      "5pri": "5º Primaria",
+      "6pri": "6º Primaria"
+    },
+    "activity_names": {
+      "musical_theater_eng": "Teatro Musical en Inglés",
+      "marxa_marxa_eng": "Marxa-Marxa en Inglés",
+      "drums_init": "Iniciación a Timbales",
+      "football": "Fútbol",
+      "english": "Inglés",
+      "skating": "Patinaje",
+      "drums": "Timbales"
+    }
+  }
+}

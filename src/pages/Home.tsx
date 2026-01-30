@@ -4,6 +4,7 @@ import { Header } from '../components/layout/Header';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { ActivityDetailModal } from '../components/public/ActivityDetailModal';
+import { FeaturedProjects } from '../components/public/FeaturedProjects';
 
 const YOGA_ACTIVITY = {
   id: 101,
@@ -101,6 +102,9 @@ export function Home() {
           {/* ... existing cards ... */}
         </div>
       </section>
+
+      {/* Featured Projects Section */}
+      <FeaturedProjects />
 
       {/* New About Section */}
       <section className="px-6 mt-4">

@@ -1,0 +1,162 @@
+{
+  "header": {
+    "greeting": "Good morning, Family 👋"
+  },
+  "nav": {
+    "home": "Home",
+    "extraescolars": "Activities",
+    "shop": "Shop",
+    "profile": "Profile"
+  },
+  "home": {
+    "extraescolars": "Activities",
+    "fees": "Fees",
+    "calendar": "Calendar",
+    "news_title": "Latest News",
+    "see_all": "See all",
+    "events_title": "Upcoming Events",
+    "member_status": "Membership Status",
+    "member_active": "Year 2024-2025 Active",
+    "about_title": "What does the AFA do?",
+    "about_text_1": "The AFA is the association formed by the majority of the school's families. The board of directors is responsible for coordinating various activities. Joining the board is voluntary. Therefore, any help from you, no matter how small, will be very welcome.",
+    "about_text_2": "The board organizes and manages extracurricular activities intended to complement the children's education, and collaborates in many other activities throughout the school year.",
+    "about_text_3": "It also participates in organizing popular festivals: Castanyada, Tió, Sant Jordi, End of Year...",
+    "about_contact": "For any information, you can find us at the AFA office on Tuesdays from 9:00 to 9:30 and Fridays from 16:30 to 17:00.",
+    "about_functions_title": "Its main functions are:",
+    "about_functions": [
+      "Raise awareness and guide parents regarding their responsibility for their children's education.",
+      "Channel initiatives and suggestions from parents.",
+      "Manage the acquisition and distribution of common materials and books.",
+      "Promote permanent family-school dialogue.",
+      "Organize and manage extracurricular or complementary activities.",
+      "Participate in social and cultural activities organized at the municipal level that may be of interest to schools.",
+      "Collaborate in the school's festivals and cultural acts."
+    ]
+  },
+  "featured_projects": {
+    "title": "Your fee transforms the school",
+    "subtitle_prefix": "We don’t just manage, we create",
+    "subtitle_highlight": "motivating environments",
+    "subtitle_suffix": "See what we are achieving thanks to families like yours.",
+    "investment_label": "AFA Investment",
+    "status": {
+      "completed": "Achieved!",
+      "in_progress": "In Progress",
+      "voting": "Voting"
+    },
+    "projects": {
+      "1": {
+        "title": "Smart Classroom & Living Spaces",
+        "description": "We transform traditional classrooms into motivating environments that foster creativity and collaborative work.",
+        "impact": "+450 students benefited",
+        "participants": "Space Commission & Alumni"
+      },
+      "2": {
+        "title": "Playground Renaturalization",
+        "description": "More green, less concrete. A project to bring life to recess with shaded areas, a school garden, and inclusive play structures.",
+        "impact": "Improves coexistence & temperature",
+        "participants": "Volunteer families (weekends)"
+      },
+      "3": {
+        "title": "Digitalization & Open Library",
+        "description": "We want a library that is the cultural heart of the center. Vote to approve the purchase of new furniture and e-readers.",
+        "impact": "Promotes reading & study",
+        "participants": "Member Assembly"
+      }
+    }
+  },
+  "inscription": {
+    "title_prefix": "More than Activities:",
+    "title_highlight": "Experiences for Growth",
+    "subtitle_prefix": "Registration Year 2025-26.",
+    "subtitle_highlight": "Everything in one place.",
+    "subtitle_suffix": "We simplify management so you can enjoy watching them learn and have fun.",
+    "info_box": {
+      "title": "How does the process work?",
+      "text": "We have designed this unique form to make your life easier. You can register all your children at once. If any activity has excess demand, we guarantee a fair process respecting the order of entry."
+    },
+    "important_info": {
+      "title": "Important Information",
+      "text": "Activities will only take place if there are enough students. If there is an excess of students, registration order will be respected."
+    },
+    "form": {
+      "student_section": "Student Details",
+      "student_label": "Student",
+      "remove_student": "Remove",
+      "add_student": "+ Add another student",
+      "name": "First Name",
+      "surname": "Last Name",
+      "course": "Grade/Year",
+      "select_course": "Select grade",
+      "available_activities": "Activities available for",
+      "no_activities": "No activities available for this grade.",
+      "must_select_activity": "* You must select at least one activity.",
+      "parent_section": "Parent/Guardian Details",
+      "dni": "ID/Passport",
+      "phone_1": "Phone 1",
+      "phone_2": "Phone 2 (Optional)",
+      "email_1": "Email 1",
+      "email_2": "Email 2 (Optional)",
+      "is_member": "Are you AFA members?",
+      "yes": "Yes",
+      "no": "No",
+      "additional_section": "Additional Information",
+      "health_info": "Medical conditions, allergies or medication",
+      "health_placeholder": "Leave blank if none",
+      "image_rights": "Image rights authorization",
+      "image_text": "I authorize the use of images in photographs and/or videos taken by the AFA for the website and social media.",
+      "image_yes": "Yes, I authorize image processing.",
+      "image_no": "No, I do not authorize image processing.",
+      "leave_alone": "Authorization to leave alone",
+      "leave_alone_text": "Can the student leave alone after the activity?",
+      "terms_accept": "I have read and accept the",
+      "terms_link": "terms and conditions of extracurriculars",
+      "submit_btn": "Submit Registration",
+      "privacy_note": "By submitting the form, you accept the center's privacy policy.",
+      "success_title": "Registration Received!",
+      "success_message": "We have successfully registered the pre-registration.",
+      "back_home": "Back to Home",
+      "error_terms": "You must accept the conditions to continue.",
+      "error_activities": "All students must have at least one activity selected.",
+      "error_generic": "There was an error submitting the form."
+    },
+    "activity_modal": {
+      "grades": "Grades",
+      "location": "Location",
+      "spots": "Spots",
+      "spots_available": "Available",
+      "about": "About the activity",
+      "default_description": "Join our activity where students learn and have fun in a collaborative environment. No previous experience required!",
+      "schedule_title": "Available Schedules",
+      "note_label": "Note:",
+      "signup_btn": "Sign Up Now",
+      "per_month": "per month"
+    },
+    "days": {
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday"
+    },
+    "courses": {
+      "i3": "I3",
+      "i4": "I4",
+      "i5": "I5",
+      "1pri": "1st Grade",
+      "2pri": "2nd Grade",
+      "3pri": "3rd Grade",
+      "4pri": "4th Grade",
+      "5pri": "5th Grade",
+      "6pri": "6th Grade"
+    },
+    "activity_names": {
+      "musical_theater_eng": "Musical Theatre in English",
+      "marxa_marxa_eng": "Marxa-Marxa in English",
+      "drums_init": "Drums Initiation",
+      "football": "Football",
+      "english": "English",
+      "skating": "Skating",
+      "drums": "Drums"
+    }
+  }
+}
