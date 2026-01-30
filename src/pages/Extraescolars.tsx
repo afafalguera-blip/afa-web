@@ -48,44 +48,65 @@ export function Extraescolars() {
     // Filter by Search
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        result = result.filter(a => 
-            a.title.toLowerCase().includes(q) || 
-            a.description.toLowerCase().includes(q)
-        );
-    }
+  }
 
-    setFilteredActivities(result);
-  }, [activeFilter, searchQuery, activities]);
+  const categories = ['all', ...Array.from(new Set(activities.map(a => a.category)))];
 
-  const handleOpenDetail = (activity: any) => {
-    // Map backend model to frontend model for Modal if needed
-    // Actually the modal props align mostly, we just need to ensure consistency
-    const modalProps = {
-        ...activity,
-        // Ensure legacy fields mapping if necessary
-        schedule: activity.schedule_details,
-        spotsLeft: activity.spots,
-        importantNote: activity.important_note,
-        categoryIcon: activity.category_icon || 'school',
-        isStemApproved: activity.is_stem_approved,
-        priceInfo: activity.price_info || '/mes'
-    };
-    setSelectedActivity(modalProps);
-    setIsModalOpen(true);
-  };
+  const filteredActivities = activities.filter(activity => {
+    const matchesSearch = activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         activity.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <header className="px-6 py-4 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t('home.extraescolars')}</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Curs 2025 - 2026</p>
-          </div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 px-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            {t('home.extraescolars')}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
+            Curs 2025 - 2026
+          </p>
         </div>
 
-        {/* Hero CTA */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-xl mb-2">
+        {/* View Toggle */}
+        <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl shadow-inner inline-flex self-start">
+            <button 
+                onClick={() => setViewMode('list')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${
+                    viewMode === 'list' 
+                    ? 'bg-white dark:bg-slate-700 text-primary shadow-md' 
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+            >
+                <LayoutGrid className="w-4 h-4" /> {t('common.list' as any)}
+            </button>
+            <button 
+                onClick={() => setViewMode('calendar')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${
+                    viewMode === 'calendar' 
+                    ? 'bg-white dark:bg-slate-700 text-primary shadow-md' 
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+            >
+                <CalendarIcon className="w-4 h-4" /> {t('home.calendar')}
+            </button>
+        </div>
+      </div>
+
+      {/* Hero CTA */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-xl mb-2">
             <h2 className="text-2xl font-bold mb-2">Inscripcions Obertes!</h2>
             <p className="text-blue-100 mb-4 text-sm">
                 Ja pots fer la preincripció per les activitats extraescolars del curs 2024-2025.

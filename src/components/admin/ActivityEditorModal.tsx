@@ -58,23 +58,47 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
   };
 
   // Schedule Details Handler
-  const addScheduleDetail = () => {
+  const addScheduleGroup = () => {
     const current = formData.schedule_details || [];
     setFormData(prev => ({
         ...prev,
-        schedule_details: [...current, { group: "Grup A", days: "Dilluns", time: "17:00 - 18:00" }]
+        schedule_details: [...current, { group: "Nou Grup", sessions: [] }]
     }));
   };
 
-  const updateScheduleDetail = (index: number, field: string, val: string) => {
+  const updateGroupName = (index: number, name: string) => {
     const current = [...(formData.schedule_details || [])];
-    current[index] = { ...current[index], [field]: val };
+    current[index] = { ...current[index], group: name };
     setFormData(prev => ({ ...prev, schedule_details: current }));
   };
 
-  const removeScheduleDetail = (index: number) => {
+  const removeScheduleGroup = (index: number) => {
     const current = [...(formData.schedule_details || [])];
     current.splice(index, 1);
+    setFormData(prev => ({ ...prev, schedule_details: current }));
+  };
+
+  const addSession = (groupIndex: number) => {
+    const current = [...(formData.schedule_details || [])];
+    current[groupIndex].sessions = [
+        ...current[groupIndex].sessions, 
+        { day: 1, startTime: "17:00", endTime: "18:30" }
+    ];
+    setFormData(prev => ({ ...prev, schedule_details: current }));
+  };
+
+  const updateSession = (groupIndex: number, sessionIndex: number, field: string, value: any) => {
+    const current = [...(formData.schedule_details || [])];
+    current[groupIndex].sessions[sessionIndex] = { 
+        ...current[groupIndex].sessions[sessionIndex], 
+        [field]: field === 'day' ? parseInt(value) : value 
+    };
+    setFormData(prev => ({ ...prev, schedule_details: current }));
+  };
+
+  const removeSession = (groupIndex: number, sessionIndex: number) => {
+    const current = [...(formData.schedule_details || [])];
+    current[groupIndex].sessions.splice(sessionIndex, 1);
     setFormData(prev => ({ ...prev, schedule_details: current }));
   };
 
@@ -217,23 +241,80 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
               </div>
             </div>
 
-            {/* Schedule Details (JSON Editor UI) */}
-            <div className="space-y-3 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center">
-                    <label className="font-semibold text-slate-700 dark:text-slate-300">Horaris Detallats</label>
-                    <button type="button" onClick={addScheduleDetail} className="text-xs flex items-center gap-1 text-blue-600 font-bold hover:underline">
-                        <Plus className="w-3 h-3" /> Afegir Grup
+            {/* Schedule Details (Structured Session Editor) */}
+            <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+                <div className="flex justify-between items-center mb-2">
+                    <div>
+                        <h3 className="font-bold text-slate-900 dark:text-white">Horaris i Sessions</h3>
+                        <p className="text-xs text-slate-500">Defineix els grups i les sessions setmanals per al calendari.</p>
+                    </div>
+                    <button type="button" onClick={addScheduleGroup} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-bold">
+                        <Plus className="w-4 h-4" /> Afegir Grup
                     </button>
                 </div>
-                {formData.schedule_details?.map((item: any, idx: number) => (
-                    <div key={idx} className="flex gap-2 items-center">
-                        <input className="w-1/3 p-2 text-sm border rounded" value={item.group} onChange={e => updateScheduleDetail(idx, 'group', e.target.value)} placeholder="Nom Grup" />
-                        <input className="w-1/3 p-2 text-sm border rounded" value={item.days} onChange={e => updateScheduleDetail(idx, 'days', e.target.value)} placeholder="Dies" />
-                        <input className="w-1/3 p-2 text-sm border rounded" value={item.time} onChange={e => updateScheduleDetail(idx, 'time', e.target.value)} placeholder="Hores" />
-                        <button type="button" onClick={() => removeScheduleDetail(idx)} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                ))}
-                {formData.schedule_details?.length === 0 && <p className="text-xs text-slate-500 italic">Cap horari definit.</p>}
+
+                <div className="space-y-6">
+                    {formData.schedule_details?.map((group: any, gIdx: number) => (
+                        <div key={gIdx} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4">
+                            <div className="flex items-center gap-4">
+                                <input 
+                                    className="flex-1 px-3 py-1.5 font-bold text-slate-800 dark:text-white border-b-2 border-transparent focus:border-blue-500 bg-transparent outline-none"
+                                    value={group.group} 
+                                    onChange={e => updateGroupName(gIdx, e.target.value)} 
+                                    placeholder="Nom del Grup (ex: Grup A, 1r-3r...)" 
+                                />
+                                <button type="button" onClick={() => removeScheduleGroup(gIdx)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-2">
+                                {group.sessions?.map((session: any, sIdx: number) => (
+                                    <div key={sIdx} className="flex flex-wrap md:flex-nowrap gap-2 items-center bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                                        <select 
+                                            className="flex-1 min-w-[120px] p-1.5 text-sm border rounded bg-white dark:bg-slate-900 dark:text-white"
+                                            value={session.day}
+                                            onChange={e => updateSession(gIdx, sIdx, 'day', e.target.value)}
+                                        >
+                                            <option value={1}>Dilluns</option>
+                                            <option value={2}>Dimarts</option>
+                                            <option value={3}>Dimecres</option>
+                                            <option value={4}>Dijous</option>
+                                            <option value={5}>Divendres</option>
+                                            <option value={6}>Dissabte</option>
+                                        </select>
+                                        <div className="flex items-center gap-2">
+                                            <input 
+                                                type="time" 
+                                                className="p-1.5 text-sm border rounded bg-white dark:bg-slate-900 dark:text-white"
+                                                value={session.startTime}
+                                                onChange={e => updateSession(gIdx, sIdx, 'startTime', e.target.value)}
+                                            />
+                                            <span className="text-slate-400">a</span>
+                                            <input 
+                                                type="time" 
+                                                className="p-1.5 text-sm border rounded bg-white dark:bg-slate-900 dark:text-white"
+                                                value={session.endTime}
+                                                onChange={e => updateSession(gIdx, sIdx, 'endTime', e.target.value)}
+                                            />
+                                        </div>
+                                        <button type="button" onClick={() => removeSession(gIdx, sIdx)} className="p-1 text-slate-400 hover:text-red-500 transition-colors">
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button type="button" onClick={() => addSession(gIdx)} className="w-full py-2 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-2 mt-2">
+                                    <Plus className="w-3 h-3" /> Afegir Sessió
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    {(!formData.schedule_details || formData.schedule_details.length === 0) && (
+                        <div className="text-center py-8 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                            <p className="text-sm text-slate-500 italic">No hi ha horaris definits. Fes clic a "Afegir Grup" per començar.</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
              {/* Extra Fields */}

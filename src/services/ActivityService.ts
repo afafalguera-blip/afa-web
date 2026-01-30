@@ -1,5 +1,16 @@
 import { supabase } from '../lib/supabase';
 
+export interface ScheduleSession {
+  day: number; // 1 (Mon) - 5 (Fri)
+  startTime: string; // "HH:mm"
+  endTime: string; // "HH:mm"
+}
+
+export interface ScheduleDetail {
+  group: string;
+  sessions: ScheduleSession[];
+}
+
 export interface Activity {
   id: number;
   created_at?: string;
@@ -10,7 +21,7 @@ export interface Activity {
   price_info: string;
   grades: string;
   schedule_summary: string;
-  schedule_details: any[]; // JSONB
+  schedule_details: ScheduleDetail[]; // Structured JSON
   place: string;
   spots: number;
   image_url: string;
