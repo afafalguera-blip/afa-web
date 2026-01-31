@@ -32,7 +32,10 @@
       "Organize and manage extracurricular or complementary activities.",
       "Participate in social and cultural activities organized at the municipal level that may be of interest to schools.",
       "Collaborate in the school's festivals and cultural acts."
-    ]
+    ],
+    "news_archive": {
+      "subtitle": "Keep up to date with everything happening in our school and AFA projects."
+    }
   },
   "featured_projects": {
     "title": "Your fee transforms the school",
@@ -242,6 +245,9 @@
     "saving": "Saving...",
     "edit": "Edit",
     "delete": "Delete",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "read_more_external": "Read original news",
+    "read_more": "Read more",
+    "loading": "Loading..."
   }
 }

@@ -9,8 +9,11 @@ import {
   Eye, 
   EyeOff,
   Calendar,
-  RefreshCw
+  RefreshCw,
+  Wand2
 } from 'lucide-react';
+import { ImageUpload } from '../../components/admin/ImageUpload';
+import { TranslationService } from '../../services/TranslationService';
 
 interface NewsArticle {
   id: string;
@@ -22,6 +25,10 @@ interface NewsArticle {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  event_date?: string | null;
+  news_url?: string | null;
+  sources?: string | null;
+  translations?: Record<string, { title: string; excerpt: string; content: string }>;
 }
 
 interface NewsFormData {
@@ -29,6 +36,10 @@ interface NewsFormData {
   content: string;
   excerpt: string;
   image_url: string;
+  news_url: string;
+  sources: string;
+  event_date: string;
+  translations: Record<string, { title: string; excerpt: string; content: string }>;
 }
 
 export default function NewsManager() {
@@ -42,8 +53,18 @@ export default function NewsManager() {
     title: '',
     content: '',
     excerpt: '',
-    image_url: ''
+    image_url: '',
+    news_url: '',
+    sources: '',
+    event_date: '',
+    translations: {
+      ca: { title: '', excerpt: '', content: '' },
+      es: { title: '', excerpt: '', content: '' },
+      en: { title: '', excerpt: '', content: '' }
+    }
   });
+  const [activeLang, setActiveLang] = useState<'ca' | 'es' | 'en'>('es');
+  const [isTranslating, setIsTranslating] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -69,7 +90,21 @@ export default function NewsManager() {
 
   const handleCreate = () => {
     setEditingArticle(null);
-    setFormData({ title: '', content: '', excerpt: '', image_url: '' });
+    setFormData({ 
+      title: '', 
+      content: '', 
+      excerpt: '', 
+      image_url: '',
+      news_url: '',
+      sources: '',
+      event_date: '',
+      translations: {
+        ca: { title: '', excerpt: '', content: '' },
+        es: { title: '', excerpt: '', content: '' },
+        en: { title: '', excerpt: '', content: '' }
+      }
+    });
+    setActiveLang('es');
     setIsModalOpen(true);
   };
 
@@ -79,8 +114,18 @@ export default function NewsManager() {
       title: article.title,
       content: article.content || '',
       excerpt: article.excerpt || '',
-      image_url: article.image_url || ''
+      image_url: article.image_url || '',
+      news_url: article.news_url || '',
+      sources: article.sources || '',
+      event_date: article.event_date ? new Date(article.event_date).toISOString().slice(0, 16) : '',
+      translations: {
+        ca: { title: '', excerpt: '', content: '' },
+        es: { title: article.title, excerpt: article.excerpt || '', content: article.content || '' },
+        en: { title: '', excerpt: '', content: '' },
+        ...(article.translations || {})
+      }
     });
+    setActiveLang('es');
     setIsModalOpen(true);
   };
 
@@ -120,23 +165,80 @@ export default function NewsManager() {
     }
   };
 
+  const handleAutoTranslate = async () => {
+    // Determine source language content
+    const sourceContent = formData.translations[activeLang];
+    
+    if (!sourceContent.title) {
+      alert(t('admin.news.fill_source_first'));
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const targetLangs = (['ca', 'es', 'en'] as const).filter(l => l !== activeLang);
+      
+      const updatedTranslations = { ...formData.translations };
+      
+      for (const lang of targetLangs) {
+        const translated = await TranslationService.translateNews(
+          sourceContent,
+          lang,
+          activeLang
+        );
+        updatedTranslations[lang] = translated;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        translations: updatedTranslations
+      }));
+    } catch (error) {
+      console.error('Translation error:', error);
+      alert(t('common.error_translation'));
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const updateTranslationField = (lang: string, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [lang]: {
+          ...prev.translations[lang],
+          [field]: value
+        }
+      },
+      // Update primary fields if activeLang is 'es' (default)
+      ...(lang === 'es' ? { [field]: value } : {})
+    }));
+  };
+
   const handleSave = async () => {
-    if (!formData.title.trim()) {
+    if (!formData.translations.es.title.trim() && !formData.title.trim()) {
       alert(t('admin.news.title_required'));
       return;
     }
 
     setSaving(true);
     try {
+      const payload = {
+        title: formData.translations.es.title || formData.title,
+        content: formData.translations.es.content || formData.content,
+        excerpt: formData.translations.es.excerpt || formData.excerpt,
+        image_url: formData.image_url || null,
+        news_url: formData.news_url || null,
+        sources: formData.sources || null,
+        event_date: formData.event_date ? new Date(formData.event_date).toISOString() : null,
+        translations: formData.translations
+      };
+
       if (editingArticle) {
         const { error } = await supabase
           .from('news')
-          .update({
-            title: formData.title,
-            content: formData.content,
-            excerpt: formData.excerpt,
-            image_url: formData.image_url || null
-          })
+          .update(payload)
           .eq('id', editingArticle.id);
 
         if (error) throw error;
@@ -144,10 +246,7 @@ export default function NewsManager() {
         const { error } = await supabase
           .from('news')
           .insert([{
-            title: formData.title,
-            content: formData.content,
-            excerpt: formData.excerpt,
-            image_url: formData.image_url || null,
+            ...payload,
             published: false
           }]);
 
@@ -295,53 +394,121 @@ export default function NewsManager() {
                 {editingArticle ? t('admin.news.edit_article') : t('admin.news.new_article')}
               </h2>
             </div>
-            <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-180px)]">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {t('admin.news.field_title')} *
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder={t('admin.news.title_placeholder')}
-                />
+            <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              {/* Language Tabs */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex gap-2">
+                  {(['ca', 'es', 'en'] as const).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setActiveLang(lang)}
+                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                        activeLang === lang
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {lang.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleAutoTranslate}
+                  disabled={isTranslating}
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-bold hover:bg-amber-600 transition-all disabled:opacity-50"
+                  title="Traducir automáticamente al resto de idiomas"
+                >
+                  <Wand2 className={`w-4 h-4 ${isTranslating ? 'animate-pulse' : ''}`} />
+                  {isTranslating ? 'Traduciendo...' : 'Auto-traducir'}
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {t('admin.news.field_excerpt')}
-                </label>
-                <input
-                  type="text"
-                  value={formData.excerpt}
-                  onChange={e => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder={t('admin.news.excerpt_placeholder')}
-                />
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {t('admin.news.field_title')} ({activeLang.toUpperCase()}) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.translations[activeLang]?.title || ''}
+                    onChange={e => updateTranslationField(activeLang, 'title', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder={t('admin.news.title_placeholder')}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {t('admin.news.field_excerpt')} ({activeLang.toUpperCase()})
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.translations[activeLang]?.excerpt || ''}
+                    onChange={e => updateTranslationField(activeLang, 'excerpt', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder={t('admin.news.excerpt_placeholder')}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {t('admin.news.field_content')} ({activeLang.toUpperCase()})
+                  </label>
+                  <textarea
+                    value={formData.translations[activeLang]?.content || ''}
+                    onChange={e => updateTranslationField(activeLang, 'content', e.target.value)}
+                    rows={8}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    placeholder={t('admin.news.content_placeholder')}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {t('admin.news.field_content')}
-                </label>
-                <textarea
-                  value={formData.content}
-                  onChange={e => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  rows={8}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                  placeholder={t('admin.news.content_placeholder')}
-                />
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   {t('admin.news.field_image_url')}
                 </label>
-                <input
-                  type="url"
+                <ImageUpload
                   value={formData.image_url}
-                  onChange={e => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                  onUpload={(url) => setFormData(prev => ({ ...prev, image_url: url || '' }))}
+                  folder="news"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {t('admin.news.field_event_date')}
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.event_date}
+                    onChange={e => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {t('admin.news.field_news_url')}
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.news_url}
+                    onChange={e => setFormData(prev => ({ ...prev, news_url: e.target.value }))}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {t('admin.news.field_sources')}
+                </label>
+                <input
+                  type="text"
+                  value={formData.sources}
+                  onChange={e => setFormData(prev => ({ ...prev, sources: e.target.value }))}
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="https://..."
+                  placeholder="Ej: Diario Local, AFA News..."
                 />
               </div>
             </div>

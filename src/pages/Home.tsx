@@ -3,30 +3,73 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { FeaturedProjects } from '../components/public/FeaturedProjects';
+import { NewsDetailModal } from '../components/public/NewsDetailModal';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
 interface NewsArticle {
   id: string;
   title: string;
+  content: string;
   excerpt: string;
   image_url: string | null;
   published: boolean;
+  published_at: string | null;
   created_at: string;
+  news_url?: string | null;
+  sources?: string | null;
+  event_date?: string | null;
+  translations?: Record<string, { title: string; excerpt: string; content: string }>;
+}
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  location: string | null;
+  all_day: boolean;
+  color: string | null;
+  event_type: string | null;
 }
 
 
 export function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [news, setNews] = useState<NewsArticle[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   useEffect(() => {
     fetchNews();
+    fetchEvents();
   }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .gte('event_date', new Date().toISOString().split('T')[0])
+        .order('event_date', { ascending: true })
+        .limit(8);
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
 
   const fetchNews = async () => {
     try {
@@ -35,7 +78,7 @@ export function Home() {
         .select('*')
         .eq('published', true)
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(3);
 
       if (error) throw error;
       setNews(data || []);
@@ -44,6 +87,11 @@ export function Home() {
     } finally {
       setLoadingNews(false);
     }
+  };
+
+  const handleOpenDetail = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    setIsDetailModalOpen(true);
   };
 
   return (
@@ -121,7 +169,7 @@ export function Home() {
       <section className="mt-4 lg:mt-8">
         <div className="px-6 flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('home.news_title')}</h2>
-          <button className="text-sm font-semibold text-primary">{t('home.see_all')}</button>
+          <Link to="/noticies" className="text-sm font-semibold text-primary">{t('home.see_all')}</Link>
         </div>
         
         {/* Mobile: Horizontal Scroll | Desktop: Grid */}
@@ -138,7 +186,8 @@ export function Home() {
             news.map((item) => (
               <div 
                 key={item.id}
-                className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative"
+                onClick={() => handleOpenDetail(item)}
+                className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative cursor-pointer"
               >
                 {isAdmin && (
                   <button
@@ -162,10 +211,39 @@ export function Home() {
                   <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                     Notícia
                   </div>
+                  {item.event_date && (
+                    <div className="absolute top-3 right-3 bg-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-lg flex items-center gap-1.5 animate-pulse">
+                      <span className="material-icons-round text-xs">event</span>
+                      {new Date(item.event_date).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-lg leading-tight mb-2 text-slate-900 dark:text-white line-clamp-2">{item.title}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{item.excerpt}</p>
+                  <h3 className="font-bold text-lg leading-tight mb-2 text-slate-900 dark:text-white line-clamp-2">
+                    {item.translations?.[i18n.language]?.title || item.title}
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+                    {item.translations?.[i18n.language]?.excerpt || item.excerpt}
+                  </p>
+                  {(item.sources || item.news_url) && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[150px]">
+                        {item.sources || 'Font externa'}
+                      </span>
+                      {item.news_url && (
+                        <a 
+                          href={item.news_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Llegir més
+                          <span className="material-icons-round text-xs">open_in_new</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))
@@ -173,11 +251,82 @@ export function Home() {
         </div>
       </section>
 
-      {/* Featured Projects Section */}
+      <section className="px-6 mt-8 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('home.events_title')}</h2>
+          <Link to="/calendari" className="text-sm font-semibold text-primary">{t('home.see_all')}</Link>
+        </div>
+        
+        <div className="space-y-4">
+          {loadingEvents ? (
+            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl animate-pulse">
+              <div className="w-14 h-14 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
+                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
+              </div>
+            </div>
+          ) : events.length === 0 ? (
+            <div className="text-center py-8 text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 uppercase text-[10px] tracking-widest font-bold">
+              {t('common.no_events' as any) || "No hi ha propers esdeveniments"}
+            </div>
+          ) : (
+            events.map((event) => {
+              const date = new Date(event.event_date);
+              const day = date.getDate();
+              const month = date.toLocaleDateString(i18n.language, { month: 'short' });
+              
+              return (
+                <div key={event.id} className="flex items-center gap-4 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow group">
+                  <div 
+                    className="w-14 h-14 flex flex-col items-center justify-center rounded-xl text-secondary dark:text-primary transition-colors"
+                    style={{ backgroundColor: event.color ? `${event.color}15` : 'rgba(var(--color-primary), 0.1)' }}
+                  >
+                    <span className="text-[10px] font-bold uppercase">{month}</span>
+                    <span className="text-xl font-bold">{day}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm text-slate-900 dark:text-white line-clamp-1">{event.title}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {event.start_time ? event.start_time.slice(0, 5) : ''}
+                      {event.start_time && event.location ? ' · ' : ''}
+                      {event.location}
+                    </p>
+                  </div>
+                  <button className="p-2 text-slate-300 hover:text-slate-500 transition group-hover:bg-slate-100 dark:group-hover:bg-slate-700 rounded-full">
+                    <span className="material-icons-round text-lg">chevron_right</span>
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      <NewsDetailModal 
+        article={selectedArticle}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+      />
+
       <FeaturedProjects />
 
-      {/* New About Section */}
       <section className="px-6 mt-4">
+        <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 p-5 rounded-3xl flex items-center justify-between">
+          <div className="flex gap-4 items-center">
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white">
+              <span className="material-icons-round">verified_user</span>
+            </div>
+            <div>
+              <h4 className="font-bold text-secondary dark:text-primary">{t('home.member_status')}</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400">{t('home.member_active')}</p>
+            </div>
+          </div>
+          <span className="material-icons-round text-slate-400">chevron_right</span>
+        </div>
+      </section>
+
+      <section className="px-6 mt-4 mb-12">
          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden">
             <button 
                 onClick={() => setAboutExpanded(!aboutExpanded)}
@@ -214,42 +363,6 @@ export function Home() {
             )}
          </div>
       </section>
-
-      <section className="px-6 mt-4">
-        <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 p-5 rounded-3xl flex items-center justify-between">
-          <div className="flex gap-4 items-center">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white">
-              <span className="material-icons-round">verified_user</span>
-            </div>
-            <div>
-              <h4 className="font-bold text-secondary dark:text-primary">{t('home.member_status')}</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400">{t('home.member_active')}</p>
-            </div>
-          </div>
-          <span className="material-icons-round text-slate-400">chevron_right</span>
-        </div>
-      </section>
-
-      <section className="px-6 mt-8 mb-4">
-        <h2 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">{t('home.events_title')}</h2>
-        {/* Events list using translations if we had keys, but title is static here for now */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-4 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
-            <div className="w-14 h-14 bg-accent dark:bg-slate-700 flex flex-col items-center justify-center rounded-xl text-secondary dark:text-primary">
-              <span className="text-xs font-bold uppercase">Oct</span>
-              <span className="text-xl font-bold">24</span>
-            </div>
-            <div className="flex-1">
-              <h4 className="font-semibold text-sm text-slate-900 dark:text-white">Reunió de delegats</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">17:30h · Biblioteca</p>
-            </div>
-            <button className="p-2 text-slate-300 hover:text-slate-500 transition">
-              <span className="material-icons-round">more_vert</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
     </>
   );
 }

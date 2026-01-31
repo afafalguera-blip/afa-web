@@ -8,8 +8,11 @@ import {
   Trash2, 
   Archive,
   RefreshCw,
-  FolderHeart
+  FolderHeart,
+  Wand2
 } from 'lucide-react';
+import { ImageUpload } from '../../components/admin/ImageUpload';
+import { TranslationService } from '../../services/TranslationService';
 
 interface Project {
   id: string;
@@ -20,12 +23,14 @@ interface Project {
   display_order: number;
   created_at: string;
   updated_at: string;
+  translations?: Record<string, { title: string; description: string }>;
 }
 
 interface ProjectFormData {
   title: string;
   description: string;
   image_url: string;
+  translations: Record<string, { title: string; description: string }>;
 }
 
 export default function ProjectsManager() {
@@ -39,8 +44,15 @@ export default function ProjectsManager() {
   const [formData, setFormData] = useState<ProjectFormData>({
     title: '',
     description: '',
-    image_url: ''
+    image_url: '',
+    translations: {
+      ca: { title: '', description: '' },
+      es: { title: '', description: '' },
+      en: { title: '', description: '' }
+    }
   });
+  const [activeLang, setActiveLang] = useState<'ca' | 'es' | 'en'>('es');
+  const [isTranslating, setIsTranslating] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -66,7 +78,17 @@ export default function ProjectsManager() {
 
   const handleCreate = () => {
     setEditingProject(null);
-    setFormData({ title: '', description: '', image_url: '' });
+    setFormData({ 
+      title: '', 
+      description: '', 
+      image_url: '',
+      translations: {
+        ca: { title: '', description: '' },
+        es: { title: '', description: '' },
+        en: { title: '', description: '' }
+      }
+    });
+    setActiveLang('es');
     setIsModalOpen(true);
   };
 
@@ -75,8 +97,15 @@ export default function ProjectsManager() {
     setFormData({
       title: project.title,
       description: project.description || '',
-      image_url: project.image_url || ''
+      image_url: project.image_url || '',
+      translations: {
+        ca: { title: '', description: '' },
+        es: { title: project.title, description: project.description || '' },
+        en: { title: '', description: '' },
+        ...(project.translations || {})
+      }
     });
+    setActiveLang('es');
     setIsModalOpen(true);
   };
 
@@ -113,22 +142,76 @@ export default function ProjectsManager() {
     }
   };
 
+  const handleAutoTranslate = async () => {
+    const sourceContent = formData.translations[activeLang];
+    
+    if (!sourceContent.title) {
+      alert(t('admin.news.fill_source_first')); // Reusing news translation key for consistency
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const targetLangs = (['ca', 'es', 'en'] as const).filter(l => l !== activeLang);
+      const updatedTranslations = { ...formData.translations };
+      
+      for (const lang of targetLangs) {
+        const translated = await TranslationService.translateContent(
+          sourceContent,
+          lang,
+          activeLang
+        );
+        updatedTranslations[lang] = {
+          title: translated.title || '',
+          description: translated.description || ''
+        };
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        translations: updatedTranslations
+      }));
+    } catch (error) {
+      console.error('Translation error:', error);
+      alert(t('common.error_translation'));
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const updateTranslationField = (lang: string, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [lang]: {
+          ...prev.translations[lang],
+          [field]: value
+        }
+      },
+      ...(lang === 'es' ? { [field]: value } : {})
+    }));
+  };
+
   const handleSave = async () => {
-    if (!formData.title.trim()) {
+    if (!formData.translations.es.title.trim() && !formData.title.trim()) {
       alert(t('admin.projects.title_required'));
       return;
     }
 
     setSaving(true);
     try {
+      const payload = {
+        title: formData.translations.es.title || formData.title,
+        description: formData.translations.es.description || formData.description,
+        image_url: formData.image_url || null,
+        translations: formData.translations
+      };
+
       if (editingProject) {
         const { error } = await supabase
           .from('projects')
-          .update({
-            title: formData.title,
-            description: formData.description,
-            image_url: formData.image_url || null
-          })
+          .update(payload)
           .eq('id', editingProject.id);
 
         if (error) throw error;
@@ -137,9 +220,7 @@ export default function ProjectsManager() {
         const { error } = await supabase
           .from('projects')
           .insert([{
-            title: formData.title,
-            description: formData.description,
-            image_url: formData.image_url || null,
+            ...payload,
             status: 'active',
             display_order: maxOrder + 1
           }]);
@@ -231,15 +312,13 @@ export default function ProjectsManager() {
                 project.status === 'archived' ? 'border-slate-300 opacity-70' : 'border-slate-200'
               }`}
             >
-              {project.image_url && (
-                <div className="aspect-video bg-slate-100">
-                  <img 
-                    src={project.image_url} 
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+              <div className="aspect-video bg-slate-100 relative">
+                <img 
+                  src={project.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop'} 
+                  alt={project.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="p-5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3 className="font-semibold text-slate-900">{project.title}</h3>
@@ -288,47 +367,76 @@ export default function ProjectsManager() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
             <div className="p-6 border-b border-slate-200">
               <h2 className="text-xl font-bold text-slate-900">
                 {editingProject ? t('admin.projects.edit_project') : t('admin.projects.new_project')}
               </h2>
             </div>
-            <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-180px)]">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {t('admin.projects.field_title')} *
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder={t('admin.projects.title_placeholder')}
-                />
+            <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              {/* Language Tabs */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex gap-2">
+                  {(['ca', 'es', 'en'] as const).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setActiveLang(lang)}
+                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                        activeLang === lang
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {lang.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleAutoTranslate}
+                  disabled={isTranslating}
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-bold hover:bg-amber-600 transition-all disabled:opacity-50"
+                  title="Traducir automáticamente al resto de idiomas"
+                >
+                  <Wand2 className={`w-4 h-4 ${isTranslating ? 'animate-pulse' : ''}`} />
+                  {isTranslating ? 'Traduciendo...' : 'Auto-traducir'}
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {t('admin.projects.field_description')}
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  rows={5}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                  placeholder={t('admin.projects.description_placeholder')}
-                />
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {t('admin.projects.field_title')} ({activeLang.toUpperCase()}) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.translations[activeLang]?.title || ''}
+                    onChange={e => updateTranslationField(activeLang, 'title', e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder={t('admin.projects.title_placeholder')}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {t('admin.projects.field_description')} ({activeLang.toUpperCase()})
+                  </label>
+                  <textarea
+                    value={formData.translations[activeLang]?.description || ''}
+                    onChange={e => updateTranslationField(activeLang, 'description', e.target.value)}
+                    rows={5}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    placeholder={t('admin.projects.description_placeholder')}
+                  />
+                </div>
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   {t('admin.projects.field_image_url')}
                 </label>
-                <input
-                  type="url"
+                <ImageUpload
                   value={formData.image_url}
-                  onChange={e => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="https://..."
+                  onUpload={(url) => setFormData(prev => ({ ...prev, image_url: url || '' }))}
+                  folder="projects"
                 />
               </div>
             </div>

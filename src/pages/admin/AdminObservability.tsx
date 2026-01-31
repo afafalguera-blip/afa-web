@@ -28,7 +28,7 @@ export default function AdminObservability() {
     async function fetchLogs() {
       const { data, error } = await supabase
         .from('audit_logs')
-        .select('*, profiles:changed_by(full_name)')
+        .select('*, profiles!changed_by(full_name)')
         .order('created_at', { ascending: false })
         .limit(50);
 

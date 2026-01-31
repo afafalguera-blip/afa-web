@@ -12,7 +12,6 @@ interface ProductModalProps {
 
 export function ProductModal({ product, onClose }: ProductModalProps) {
   const { user, profile } = useAuth();
-  const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [customerName, setCustomerName] = useState('');
   
@@ -34,10 +33,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const isOutOfStock = selectedVariant ? selectedVariant.stock <= 0 : false;
 
   const handleReserve = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
     if (!selectedVariant) return;
     if (!customerName.trim()) {
       setErrorMsg('Cal introduir el nom i cognoms per reservar.');
@@ -48,31 +43,17 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     setErrorMsg('');
 
     try {
-      // 1. Create Order
-      const { data: orderData, error: orderError } = await supabase
-        .from('shop_orders')
-        .insert({
-          user_id: user.id,
-          status: 'pending',
-          total_amount: selectedVariant.price_member, // Assuming member price for now
-          customer_name: customerName,
-        })
-        .select()
-        .single();
+      // Create Order and Items via RPC (handles guest/atomic insert)
+      const { error: rpcError } = await supabase.rpc('create_shop_order_v1', {
+        p_customer_name: customerName,
+        p_total_amount: selectedVariant.price_member,
+        p_variant_id: selectedVariant.id,
+        p_quantity: 1,
+        p_price_at_time: selectedVariant.price_member,
+        p_user_id: user?.id || null
+      });
 
-      if (orderError) throw orderError;
-
-      // 2. Create Order Item
-      const { error: itemError } = await supabase
-        .from('shop_order_items')
-        .insert({
-          order_id: orderData.id,
-          variant_id: selectedVariant.id,
-          quantity: 1,
-          price_at_time: selectedVariant.price_member
-        });
-
-      if (itemError) throw itemError;
+      if (rpcError) throw rpcError;
       
       setSuccess(true);
       setTimeout(() => {
@@ -189,27 +170,18 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               )}
 
               <div className="mt-auto">
-                 {user ? (
-                     <button 
-                        onClick={handleReserve}
-                        disabled={!selectedSize || isOutOfStock || loading}
-                        className={`
-                            w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95
-                            ${!selectedSize || isOutOfStock 
-                                ? 'bg-slate-300 dark:bg-slate-700 cursor-not-allowed' 
-                                : 'bg-slate-900 dark:bg-white dark:text-slate-900 hover:shadow-xl'}
-                        `}
-                     >
-                        {loading ? 'Processant...' : 'Reservar Ara'}
-                     </button>
-                 ) : (
-                     <button 
-                        onClick={() => navigate('/login')}
-                        className="w-full py-4 bg-primary text-white rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all"
-                     >
-                        Inicia Sessió per Reservar
-                     </button>
-                 )}
+                 <button 
+                    onClick={handleReserve}
+                    disabled={!selectedSize || isOutOfStock || loading}
+                    className={`
+                        w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95
+                        ${!selectedSize || isOutOfStock 
+                            ? 'bg-slate-300 dark:bg-slate-700 cursor-not-allowed' 
+                            : 'bg-slate-900 dark:bg-white dark:text-slate-900 hover:shadow-xl'}
+                    `}
+                 >
+                    {loading ? 'Processant...' : 'Reservar Ara'}
+                 </button>
                  <p className="text-center text-xs text-slate-400 mt-3">Pagament a la recollida</p>
               </div>
            </div>

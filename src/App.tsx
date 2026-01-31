@@ -19,6 +19,8 @@ import ProjectsManager from './pages/admin/ProjectsManager';
 import EventsManager from './pages/admin/EventsManager';
 import AdminObservability from './pages/admin/AdminObservability';
 
+import { NewsPage } from './pages/NewsPage';
+
 import { ShopLanding } from './pages/shop/ShopLanding';
 
 // Placeholder components
@@ -43,6 +45,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="extraescolars" element={<Extraescolars />} />
+            <Route path="noticies" element={<NewsPage />} />
             <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
             <Route path="botiga" element={<ShopLanding />} />
             <Route path="quotes" element={<FeesPage />} />

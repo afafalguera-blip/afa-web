@@ -51,7 +51,7 @@ const StatusBadge = ({ status }: { status: Project['status'] }) => {
 };
 
 export const FeaturedProjects = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -71,57 +71,31 @@ export const FeaturedProjects = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        setProjects(data.map(p => ({
-          id: p.id,
-          title: p.title,
-          description: p.description,
-          imageAfter: p.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop',
-          status: p.status,
-          budget: 0, // Not in schema yet, but keeping for UI
-          impact: '',
-          participants: ''
-        })));
+        setProjects(data.map(p => {
+          const lang = i18n.language;
+          const translation = p.translations?.[lang];
+          
+          return {
+            id: p.id,
+            title: translation?.title || p.title,
+            description: translation?.description || p.description,
+            imageAfter: p.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop',
+            status: p.status,
+            budget: 0, 
+            impact: '',
+            participants: ''
+          };
+        }));
       } else {
-        // Fallback to static if no projects in DB
-        setProjects([
-          {
-            id: '1',
-            title: t('featured_projects.projects.1.title'),
-            description: t('featured_projects.projects.1.description'),
-            imageAfter: 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop',
-            budget: 12500,
-            status: 'in_progress',
-            impact: t('featured_projects.projects.1.impact'),
-            participants: t('featured_projects.projects.1.participants')
-          },
-          {
-            id: '2',
-            title: t('featured_projects.projects.2.title'),
-            description: t('featured_projects.projects.2.description'),
-            imageAfter: 'https://images.unsplash.com/photo-1596496050844-4610e341904a?q=80&w=2073&auto=format&fit=crop',
-            budget: 8200,
-            status: 'completed',
-            impact: t('featured_projects.projects.2.impact'),
-            participants: t('featured_projects.projects.2.participants')
-          },
-          {
-            id: '3',
-            title: t('featured_projects.projects.3.title'),
-            description: t('featured_projects.projects.3.description'),
-            imageAfter: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=2070&auto=format&fit=crop',
-            budget: 4500,
-            status: 'voting',
-            impact: t('featured_projects.projects.3.impact'),
-            participants: t('featured_projects.projects.3.participants')
-          }
-        ]);
+        setProjects([]);
       }
     } catch (error) {
       console.error('Error fetching projects:', error);
-    } finally {
-      // Done fetching
+      setProjects([]);
     }
   };
+
+  if (projects.length === 0) return null;
 
   return (
     <section className="py-16 bg-slate-50 dark:bg-slate-900/50">

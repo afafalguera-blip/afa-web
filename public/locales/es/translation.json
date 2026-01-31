@@ -32,7 +32,10 @@
       "Organizar y gestionar las actividades extraescolares o complementarias.",
       "Participar en las actividades sociales y culturales organizadas a nivel municipal, que puedan ser de interés para las escuelas.",
       "Colaborar en las fiestas y actos culturales de la escuela."
-    ]
+    ],
+    "news_archive": {
+      "subtitle": "Mantente al día de todo lo que sucede en nuestra escuela y de los proyectos de la AFA."
+    }
   },
   "featured_projects": {
     "title": "Tu cuota transforma el colegio",
@@ -335,6 +338,9 @@
       "image": "Imagen Portada",
       "upload_image": "Subir Imagen",
       "image_hint": "Recomendado: 1000x600px, Max 2MB.",
+      "change_image": "Cambiar Imagen",
+      "error_invalid_file": "El archivo seleccionado no es una imagen válida.",
+      "image_too_large": "La imagen es demasiado grande. Máximo 2MB.",
       "schedule_title": "Horarios y Sesiones",
       "schedule_subtitle": "Define los grupos y las sesiones semanales para el calendario.",
       "add_group": "Añadir Grupo",
@@ -385,7 +391,11 @@
       "excerpt_placeholder": "Breve resumen para la vista previa...",
       "field_content": "Contenido",
       "content_placeholder": "Escribe el contenido de la noticia...",
-      "field_image_url": "URL de la imagen"
+      "field_image_url": "URL de la imagen",
+      "field_event_date": "Fecha del evento",
+      "field_news_url": "Enlace externo",
+      "field_sources": "Fuentes/Citas",
+      "fill_source_first": "Por favor, completa el título en el idioma actual antes de traducir"
     },
     "projects": {
       "title": "Gestión de Proyectos",
@@ -434,6 +444,7 @@
     "all": "Todas",
     "error_delete": "Error al eliminar",
     "error_save": "Error al guardar",
+    "error_translation": "Ha ocurrido un error en la traducción automática",
     "error_generic": "Se ha producido un error",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
@@ -441,6 +452,9 @@
     "saving": "Guardando...",
     "edit": "Editar",
     "delete": "Eliminar",
-    "refresh": "Actualizar"
+    "refresh": "Actualizar",
+    "read_more_external": "Leer noticia original",
+    "read_more": "Leer más",
+    "loading": "Cargando..."
   }
 }

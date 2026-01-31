@@ -5,6 +5,7 @@ function transformOrder(order: any) {
     // Map new columns or legacy status to new fields if missing
     return {
         ...order,
+        customer_name: order.customer_name || 'Usuari Registrat',
         payment_status: order.payment_status || (order.status === 'completed' ? 'paid' : 'pending'),
         delivery_status: order.delivery_status || (order.status === 'completed' ? 'delivered' : 'pending')
     };
@@ -68,5 +69,52 @@ export const ShopService = {
   
       if (error) throw error;
       return data;
+  },
+
+  async getProductsWithVariants() {
+    const { data, error } = await supabase
+      .from('shop_products')
+      .select('*, variants:shop_variants(*)')
+      .order('name');
+    if (error) throw error;
+    return data;
+  },
+
+  async addOrderItem(orderId: string, variantId: string, quantity: number, price: number) {
+    const { data, error } = await supabase
+      .from('shop_order_items')
+      .insert({
+        order_id: orderId,
+        variant_id: variantId,
+        quantity,
+        price_at_time: price
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateOrderItem(itemId: string, variantId: string, quantity: number, price: number) {
+    const { data, error } = await supabase
+      .from('shop_order_items')
+      .update({
+        variant_id: variantId,
+        quantity,
+        price_at_time: price
+      })
+      .eq('id', itemId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteOrderItem(itemId: string) {
+    const { error } = await supabase
+      .from('shop_order_items')
+      .delete()
+      .eq('id', itemId);
+    if (error) throw error;
   }
 };

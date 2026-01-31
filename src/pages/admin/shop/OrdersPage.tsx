@@ -3,11 +3,14 @@ import { ShopService } from '../../../services/ShopService';
 import { CheckCircle, XCircle, Euro, Truck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
+import { OrderEditModal } from '../../../components/shop/OrderEditModal';
+import { Settings } from 'lucide-react';
 
 interface Order {
   id: string;
   created_at: string;
   total_amount: number;
+  customer_name: string;
   payment_status: 'paid' | 'pending';
   delivery_status: 'pending' | 'delivered' | 'not_picked_up';
   items?: any[];
@@ -16,6 +19,7 @@ interface Order {
 export function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -70,7 +74,11 @@ export function OrdersPage() {
                                 {format(new Date(order.created_at), "d MMMM yyyy HH:mm", { locale: ca })}
                              </span>
                           </div>
-                          <p className="font-bold text-2xl text-slate-900 mb-2">{order.total_amount.toFixed(2)}€</p>
+                          <div className="flex items-center gap-3 mb-2">
+                             <p className="font-bold text-2xl text-slate-900 dark:text-white uppercase tracking-tighter">{order.total_amount.toFixed(2)}€</p>
+                             <div className="h-6 w-px bg-slate-200 dark:bg-white/10 mx-1"></div>
+                             <p className="font-bold text-slate-700 dark:text-slate-300">{order.customer_name}</p>
+                          </div>
                           
                           <div className="space-y-1">
                               {order.items?.map((item: any) => (
@@ -146,6 +154,14 @@ export function OrdersPage() {
                               )}
                           </div>
 
+                          <button 
+                            onClick={() => setSelectedOrder(order)}
+                            className="flex flex-col items-center justify-center p-3 bg-white dark:bg-card-dark rounded-lg border border-slate-200 dark:border-white/10 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-slate-400 hover:text-primary min-w-[100px]"
+                          >
+                              <Settings className="w-5 h-5 mb-1" />
+                              <span className="text-[10px] font-bold uppercase tracking-widest">Gestionar</span>
+                          </button>
+
                       </div>
                   </div>
               ))}
@@ -156,6 +172,14 @@ export function OrdersPage() {
                   </div>
               )}
           </div>
+      )}
+
+      {selectedOrder && (
+        <OrderEditModal 
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          onUpdate={fetchOrders}
+        />
       )}
     </div>
   );

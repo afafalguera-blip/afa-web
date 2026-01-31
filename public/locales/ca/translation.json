@@ -32,7 +32,10 @@
       "Organitzar i gestionar les activitats extraescolars o complementàries.",
       "Participar en les activitats socials i culturals organitzades a nivell municipal, que puguin ser d’interès per a les escoles.",
       "Col·laborar en les festes i actes culturals de l’escola."
-    ]
+    ],
+    "news_archive": {
+      "subtitle": "Mantén-te al dia de tot el que passa a la nostra escola i dels projectes de l'AFA."
+    }
   },
   "featured_projects": {
     "title": "La teva quota transforma l'escola",
@@ -335,6 +338,9 @@
       "image": "Imatge Portada",
       "upload_image": "Pujar Imatge",
       "image_hint": "Recomanat: 1000x600px, Max 2MB.",
+      "change_image": "Canviar Imatge",
+      "error_invalid_file": "El fitxer seleccionat no és una imatge vàlida.",
+      "image_too_large": "La imatge és massa gran. Màxim 2MB.",
       "schedule_title": "Horaris i Sessions",
       "schedule_subtitle": "Defineix els grups i les sessions setmanals per al calendari.",
       "add_group": "Afegir Grup",
@@ -385,7 +391,11 @@
       "excerpt_placeholder": "Breu resum per a la vista prèvia...",
       "field_content": "Contingut",
       "content_placeholder": "Escriu el contingut de la notícia...",
-      "field_image_url": "URL de la imatge"
+      "field_image_url": "URL de la imatge",
+      "field_event_date": "Data de l'esdeveniment",
+      "field_news_url": "Enllaç extern",
+      "field_sources": "Fonts/Cites",
+      "fill_source_first": "Si us plau, completa el títol en l'idioma actual abans de traduir"
     },
     "projects": {
       "title": "Gestió de Projectes",
@@ -434,6 +444,7 @@
     "all": "Totes",
     "error_delete": "Error en eliminar",
     "error_save": "Error en desar",
+    "error_translation": "S'ha produït un error en la traducció automàtica",
     "error_generic": "S'ha produït un error",
     "confirm": "Confirmar",
     "cancel": "Cancel·lar",
@@ -441,6 +452,9 @@
     "saving": "Desant...",
     "edit": "Editar",
     "delete": "Eliminar",
-    "refresh": "Actualitzar"
+    "refresh": "Actualitzar",
+    "read_more_external": "Llegir notícia original",
+    "read_more": "Llegir més",
+    "loading": "Carregant..."
   }
 }
