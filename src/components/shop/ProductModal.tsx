@@ -3,7 +3,6 @@ import { X, Check } from 'lucide-react';
 import type { ShopProduct } from '../../types/shop';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 interface ProductModalProps {
   product: ShopProduct;

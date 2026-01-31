@@ -186,7 +186,13 @@ export default function NewsManager() {
           lang,
           activeLang
         );
-        updatedTranslations[lang] = translated;
+        if (translated) {
+          updatedTranslations[lang] = {
+            title: translated.title || '',
+            excerpt: translated.excerpt || '',
+            content: translated.content || ''
+          };
+        }
       }
 
       setFormData(prev => ({

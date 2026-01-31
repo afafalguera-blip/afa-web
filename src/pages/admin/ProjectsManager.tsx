@@ -161,10 +161,12 @@ export default function ProjectsManager() {
           lang,
           activeLang
         );
-        updatedTranslations[lang] = {
-          title: translated.title || '',
-          description: translated.description || ''
-        };
+        if (translated) {
+          updatedTranslations[lang] = {
+            title: translated.title || '',
+            description: translated.description || ''
+          };
+        }
       }
 
       setFormData(prev => ({
