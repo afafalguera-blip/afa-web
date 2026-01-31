@@ -1,6 +1,6 @@
-import { Bell } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { NotificationBell } from '../common/NotificationBell';
 
 export function MobileTopNav() {
   const { i18n } = useTranslation();
@@ -47,10 +47,7 @@ export function MobileTopNav() {
         </div>
 
         {/* Bell */}
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-2 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white dark:border-slate-800"></span>
-        </button>
+        <NotificationBell />
       </div>
     </div>
   );

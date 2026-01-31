@@ -1,6 +1,7 @@
 import { Home, LayoutGrid, ShoppingBag, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { NotificationBell } from '../common/NotificationBell';
 
 const NAV_ITEMS = [
   { icon: Home, labelKey: 'nav.home', path: '/' },
@@ -56,6 +57,10 @@ export function DesktopNav() {
             <button onClick={() => changeLanguage('es')} translate="no" className={`notranslate text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'es' ? 'text-primary' : 'text-slate-400'}`}>ES</button>
             <button onClick={() => changeLanguage('en')} translate="no" className={`notranslate text-xs font-bold px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 ${i18n.language === 'en' ? 'text-primary' : 'text-slate-400'}`}>EN</button>
         </div>
+
+        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
+
+        <NotificationBell />
 
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
 

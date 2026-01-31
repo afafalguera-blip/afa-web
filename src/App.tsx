@@ -17,6 +17,7 @@ import GeneralCalendarPage from './pages/GeneralCalendarPage';
 import NewsManager from './pages/admin/NewsManager';
 import ProjectsManager from './pages/admin/ProjectsManager';
 import EventsManager from './pages/admin/EventsManager';
+import NotificationManager from './pages/admin/NotificationManager';
 import AdminObservability from './pages/admin/AdminObservability';
 
 import { NewsPage } from './pages/NewsPage';
@@ -66,6 +67,7 @@ function App() {
              <Route path="news" element={<NewsManager />} />
              <Route path="projects" element={<ProjectsManager />} />
              <Route path="calendar" element={<EventsManager />} />
+             <Route path="notifications" element={<NotificationManager />} />
              <Route path="observability" element={<AdminObservability />} />
           </Route>
         </Routes>

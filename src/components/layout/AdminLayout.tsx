@@ -14,7 +14,8 @@ import {
   Newspaper, 
   FolderHeart,
   CalendarRange,
-  History
+  History,
+  Bell
 } from 'lucide-react';
 
 export function AdminLayout() {
@@ -233,6 +234,19 @@ export function AdminLayout() {
             >
               <CalendarRange className="w-5 h-5" />
               {t('admin.sidebar.calendar')}
+            </NavLink>
+            <NavLink 
+              to="/admin/notifications"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive 
+                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <Bell className="w-5 h-5" />
+              Notificaciones
             </NavLink>
             <NavLink 
               to="/admin/observability"
