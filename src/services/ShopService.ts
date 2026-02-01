@@ -14,8 +14,19 @@ function transformOrder(order: any) {
 
 export const ShopService = {
   async updateProduct(id: string, updates: Partial<ShopProduct>) {
-    // Sanitize updates: remove relational and read-only fields that PostgREST would reject
-    const { variants, id: _id, created_at, ...cleanUpdates } = updates as any;
+    // Define explicit allowed columns to prevent PostgREST from failing on relational/extra fields
+    const allowedColumns = [
+      'name', 'name_es', 'name_ca', 'name_en',
+      'description', 'description_es', 'description_ca', 'description_en',
+      'category', 'image_url'
+    ];
+
+    const cleanUpdates: any = {};
+    Object.keys(updates).forEach(key => {
+      if (allowedColumns.includes(key)) {
+        cleanUpdates[key] = (updates as any)[key];
+      }
+    });
 
     const { data, error } = await supabase
       .from('shop_products')
