@@ -44,7 +44,7 @@ export function ShopLanding() {
     <div className="px-6 py-4 pb-24 lg:pb-12">
       <header className="mb-6">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('nav.shop')}</h1>
-        <p className="text-slate-500 text-sm">Reserva la roba escolar i recull-la a l'AFA.</p>
+        <p className="text-slate-500 text-sm">{t('shop_page.subtitle')}</p>
       </header>
 
       {/* Filters & Search */}
@@ -53,7 +53,7 @@ export function ShopLanding() {
              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
              <input 
                type="text" 
-               placeholder="Cerca productes..." 
+               placeholder={t('shop_page.search_placeholder')} 
                className="w-full pl-12 pr-4 py-3 bg-white dark:bg-card-dark border-none rounded-2xl shadow-sm ring-1 ring-slate-200 dark:ring-white/10 focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-400 dark:text-white"
              />
         </div>
@@ -63,19 +63,19 @@ export function ShopLanding() {
              onClick={() => setCategory('all')}
              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${category === 'all' ? 'bg-primary text-white' : 'bg-white dark:bg-card-dark border border-slate-200 dark:border-white/10'}`}
            >
-             Tots
+             {t('shop_page.filter_all')}
            </button>
            <button 
              onClick={() => setCategory('uniforme')}
              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${category === 'uniforme' ? 'bg-primary text-white' : 'bg-white dark:bg-card-dark border border-slate-200 dark:border-white/10'}`}
            >
-             Uniforme
+             {t('shop_page.filter_uniform')}
            </button>
            <button 
              onClick={() => setCategory('accessoris')}
              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${category === 'accessoris' ? 'bg-primary text-white' : 'bg-white dark:bg-card-dark border border-slate-200 dark:border-white/10'}`}
            >
-             Accessoris
+             {t('shop_page.filter_accessories')}
            </button>
         </div>
       </div>
@@ -107,11 +107,11 @@ export function ShopLanding() {
                     {product.variants && product.variants.length > 0 && (
                         <p className="text-primary font-bold">
                             {Math.min(...product.variants.map(v => Number(v.price_member)))}€
-                            <span className="text-xs text-slate-400 font-normal ml-1">Soci</span>
+                            <span className="text-xs text-slate-400 font-normal ml-1">{t('shop_page.member_price')}</span>
                         </p>
                     )}
                      <button className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg pointer-events-none">
-                        Veure Opcions
+                        {t('shop_page.view_options')}
                     </button>
                 </div>
             </div>

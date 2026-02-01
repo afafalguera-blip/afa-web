@@ -60,7 +60,7 @@ export function Extraescolars() {
             {t('home.extraescolars')}
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
-            Curs 2025 - 2026
+            {t('home.course_current')}
           </p>
         </div>
 
@@ -203,7 +203,7 @@ export function Extraescolars() {
                           </div>
                         </div>
                         <button className="w-full py-3.5 bg-primary hover:bg-opacity-90 text-white font-semibold rounded-2xl shadow-lg shadow-primary/20 transition-all">
-                          Veure Detalls
+                          {t('home.view_details')}
                         </button>
                       </div>
                     </div>

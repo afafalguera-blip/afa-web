@@ -13,6 +13,8 @@
     "extraescolars": "Extraescolars",
     "fees": "Quotes",
     "calendar": "Calendari",
+    "course_current": "Curs 2025 - 2026",
+    "view_details": "Veure Detalls",
     "news_title": "Últimes Notícies",
     "see_all": "Veure-ho tot",
     "events_title": "Propers Esdeveniments",
@@ -36,6 +38,39 @@
     "news_archive": {
       "subtitle": "Mantén-te al dia de tot el que passa a la nostra escola i dels projectes de l'AFA."
     }
+  },
+  "fees_page": {
+    "title": "Quota de l'AFA",
+    "subtitle": "La teva col·laboració ens permet seguir millorant l'experiència educativa de tots els infants de l'escola.",
+    "purpose_title": "Per a què serveix?",
+    "purpose_text": "L'AFA és una associació sense ànim de lucre formada per pares i mares. La quota anual és la nostra principal font de finançament per realitzar projectes i activitats.",
+    "purpose_list": [
+      "Compra de material pedagògic i lúdic per a l'escola.",
+      "Organització de festes tradicionals (Castanyada, Carnestoltes, Fi de curs).",
+      "Subvenció de xerrades i tallers per a famílies.",
+      "Gestió de les activitats extraescolars i l'acollida."
+    ],
+    "annual_quota": "Quota Anual per Família",
+    "single_payment": "Un únic pagament per curs escolar que beneficia a tots els teus fills/es.",
+    "payment_ref_label": "Referència de pagament",
+    "payment_ref_value": "CURS 2025-2026",
+    "transfer_info_title": "Informació per a la Transferència",
+    "iban_label": "IBAN de l'AFA",
+    "copy_iban": "Copiar IBAN",
+    "important_label": "Molt Important!",
+    "important_text": "En el concepte de la transferència, si us plau: FEU CONSTAR EL NOM DEL VOSTRE FILL O FILLA I EL CURS.",
+    "entity_label": "Entitat",
+    "holder_label": "Titular",
+    "footer_note": "Un cop realitzada la transferència, recordeu guardar el comprovant per si fos necessari."
+  },
+  "shop_page": {
+    "subtitle": "Reserva la roba escolar i recull-la a l'AFA.",
+    "search_placeholder": "Cerca productes...",
+    "filter_all": "Tots",
+    "filter_uniform": "Uniforme",
+    "filter_accessories": "Accessoris",
+    "view_options": "Veure Opcions",
+    "member_price": "Soci"
   },
   "featured_projects": {
     "title": "El teu suport transforma l'escola",

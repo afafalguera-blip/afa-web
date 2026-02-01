@@ -311,20 +311,7 @@ export function Home() {
 
       <FeaturedProjects />
 
-      <section className="px-6 mt-4">
-        <div className="bg-primary/10 dark:bg-primary/20 border border-primary/20 p-5 rounded-3xl flex items-center justify-between">
-          <div className="flex gap-4 items-center">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white">
-              <span className="material-icons-round">verified_user</span>
-            </div>
-            <div>
-              <h4 className="font-bold text-secondary dark:text-primary">{t('home.member_status')}</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-400">{t('home.member_active')}</p>
-            </div>
-          </div>
-          <span className="material-icons-round text-slate-400">chevron_right</span>
-        </div>
-      </section>
+
 
       <section className="px-6 mt-4 mb-12">
          <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden">

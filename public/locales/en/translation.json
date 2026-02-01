@@ -13,11 +13,12 @@
     "extraescolars": "Activities",
     "fees": "Fees",
     "calendar": "Calendar",
+    "course_current": "Year 2025 - 2026",
+    "view_details": "View Details",
     "news_title": "Latest News",
     "see_all": "See all",
     "events_title": "Upcoming Events",
-    "member_status": "Membership Status",
-    "member_active": "Year 2024-2025 Active",
+
     "about_title": "What does the AFA do?",
     "about_text_1": "The AFA is the association formed by the majority of the school's families. The board of directors is responsible for coordinating various activities. Joining the board is voluntary. Therefore, any help from you, no matter how small, will be very welcome.",
     "about_text_2": "The board organizes and manages extracurricular activities intended to complement the children's education, and collaborates in many other activities throughout the school year.",
@@ -36,6 +37,39 @@
     "news_archive": {
       "subtitle": "Keep up to date with everything happening in our school and AFA projects."
     }
+  },
+  "fees_page": {
+    "title": "AFA Fees",
+    "subtitle": "Your collaboration allows us to continue improving the educational experience for all children in the school.",
+    "purpose_title": "What is it for?",
+    "purpose_text": "The AFA is a non-profit association formed by parents. The annual fee is our main source of funding to carry out projects and activities.",
+    "purpose_list": [
+      "Purchase of educational and play material for the school.",
+      "Organization of traditional festivals (Castanyada, Carnival, End of Year).",
+      "Subsidizing talks and workshops for families.",
+      "Management of extracurricular activities and childcare."
+    ],
+    "annual_quota": "Annual Fee per Family",
+    "single_payment": "A single payment per school year that benefits all your children.",
+    "payment_ref_label": "Payment Reference",
+    "payment_ref_value": "COURSE 2025-2026",
+    "transfer_info_title": "Transfer Information",
+    "iban_label": "AFA IBAN",
+    "copy_iban": "Copy IBAN",
+    "important_label": "Very Important!",
+    "important_text": "In the transfer concept, please: STATE THE NAME OF YOUR SON OR DAUGHTER AND THE GRADE.",
+    "entity_label": "Entity",
+    "holder_label": "Holder",
+    "footer_note": "Once the transfer is made, remember to keep the receipt in case it is necessary."
+  },
+  "shop_page": {
+    "subtitle": "Reserve school clothing and pick it up at the AFA.",
+    "search_placeholder": "Search products...",
+    "filter_all": "All",
+    "filter_uniform": "Uniform",
+    "filter_accessories": "Accessories",
+    "view_options": "View Options",
+    "member_price": "Member"
   },
   "featured_projects": {
     "title": "Your support transforms the school",

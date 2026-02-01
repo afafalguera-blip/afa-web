@@ -13,11 +13,12 @@
     "extraescolars": "Extraescolares",
     "fees": "Cuotas",
     "calendar": "Calendario",
+    "course_current": "Curso 2025 - 2026",
+    "view_details": "Ver Detalles",
     "news_title": "Últimas Noticias",
     "see_all": "Ver todo",
     "events_title": "Próximos Eventos",
-    "member_status": "Estatus de Socio",
-    "member_active": "Curso 2024-2025 Activo",
+
     "about_title": "¿Qué hace el AFA?",
     "about_text_1": "El AFA es la asociación formada por la mayoría de las familias de la escuela. La junta directiva es la responsable y la que coordina las diversas actividades. Formar parte de la junta es voluntario. Por tanto, cualquier ayuda vuestra, por pequeña que sea, será muy bien acogida.",
     "about_text_2": "La junta organiza y gestiona las actividades extraescolares con las cuales pretende complementar la formación de los niños y niñas de la escuela, y colabora en muchas otras actividades que van surgiendo a lo largo del curso.",
@@ -36,6 +37,39 @@
     "news_archive": {
       "subtitle": "Mantente al día de todo lo que sucede en nuestra escuela y de los proyectos de la AFA."
     }
+  },
+  "fees_page": {
+    "title": "Cuota del AFA",
+    "subtitle": "Tu colaboración nos permite seguir mejorando la experiencia educativa de todos los niños de la escuela.",
+    "purpose_title": "¿Para qué sirve?",
+    "purpose_text": "El AFA es una asociación sin ánimo de lucro formada por padres y madres. La cuota anual es nuestra principal fuente de financiación para realizar proyectos y actividades.",
+    "purpose_list": [
+      "Compra de material pedagógico y lúdico para la escuela.",
+      "Organización de fiestas tradicionales (Castañada, Carnaval, Fin de curso).",
+      "Subvención de charlas y talleres para familias.",
+      "Gestión de las actividades extraescolares y la acogida."
+    ],
+    "annual_quota": "Cuota Anual por Familia",
+    "single_payment": "Un único pago por curso escolar que beneficia a todos tus hijos/as.",
+    "payment_ref_label": "Referencia de pago",
+    "payment_ref_value": "CURSO 2025-2026",
+    "transfer_info_title": "Información para la Transferencia",
+    "iban_label": "IBAN del AFA",
+    "copy_iban": "Copiar IBAN",
+    "important_label": "¡Muy Importante!",
+    "important_text": "En el concepto de la transferencia, por favor: HAZ CONSTAR EL NOMBRE DE TU HIJO O HIJA Y EL CURSO.",
+    "entity_label": "Entidad",
+    "holder_label": "Titular",
+    "footer_note": "Una vez realizada la transferencia, recuerda guardar el comprobante por si fuera necesario."
+  },
+  "shop_page": {
+    "subtitle": "Reserva la ropa escolar y recógela en el AFA.",
+    "search_placeholder": "Buscar productos...",
+    "filter_all": "Todos",
+    "filter_uniform": "Uniforme",
+    "filter_accessories": "Accesorios",
+    "view_options": "Ver Opciones",
+    "member_price": "Socio"
   },
   "featured_projects": {
     "title": "Tu apoyo transforma el colegio",
