@@ -1,3 +1,4 @@
+import type { ShopProduct } from '../types/shop';
 import { supabase } from '../lib/supabase';
 import { FinanceService } from './FinanceService';
 
@@ -12,6 +13,18 @@ function transformOrder(order: any) {
 }
 
 export const ShopService = {
+  async updateProduct(id: string, updates: Partial<ShopProduct>) {
+    const { data, error } = await supabase
+      .from('shop_products')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
   async getOrders() {
     const { data, error } = await supabase
       .from('shop_orders')

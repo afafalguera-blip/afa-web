@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Activity, ScheduleSession } from '../../services/ActivityService';
+import { useContentTranslation } from '../../hooks/useContentTranslation';
 
 interface ActivitiesCalendarProps {
   activities: Activity[];
@@ -18,6 +19,7 @@ const DAYS = [
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 8); // 8:00 to 21:00
 
 export function ActivitiesCalendar({ activities, onActivityClick }: ActivitiesCalendarProps) {
+  const { tContent } = useContentTranslation();
 
   const sessions = useMemo(() => {
     const allSessions: { activity: Activity; session: ScheduleSession; groupName: string }[] = [];
@@ -108,7 +110,7 @@ export function ActivitiesCalendar({ activities, onActivityClick }: ActivitiesCa
                             {item.groupName}
                           </div>
                           <div className="text-[11px] font-extrabold leading-tight mb-1 line-clamp-2">
-                            {item.activity.title}
+                            {tContent(item.activity, 'title')}
                           </div>
                           <div className="text-[9px] font-medium opacity-90">
                             {item.session.startTime} - {item.session.endTime}

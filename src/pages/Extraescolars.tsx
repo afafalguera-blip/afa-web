@@ -4,12 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { ActivityDetailModal } from '../components/public/ActivityDetailModal';
 import { ActivitiesCalendar } from '../components/public/ActivitiesCalendar';
+import { useContentTranslation } from '../hooks/useContentTranslation';
 import { ActivityService } from '../services/ActivityService';
 import type { Activity } from '../services/ActivityService';
 import { useAuth } from '../contexts/AuthContext';
 
 export function Extraescolars() {
   const { t } = useTranslation();
+  const { tContent } = useContentTranslation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -38,8 +40,11 @@ export function Extraescolars() {
   const categories = ['all', ...Array.from(new Set(activities.map(a => a.category)))];
 
   const filteredActivities = activities.filter(activity => {
-    const matchesSearch = activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         activity.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const title = tContent(activity, 'title');
+    const description = tContent(activity, 'description');
+    
+    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -169,14 +174,14 @@ export function Extraescolars() {
                       )}
                       <div className="relative h-44 overflow-hidden shrink-0">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                        <img src={activity.image_url} alt={activity.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={activity.image_url} alt={tContent(activity, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         <span className={`absolute top-4 right-4 ${activity.color || 'bg-blue-500'}/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider z-20`}>
                           {activity.category}
                         </span>
                       </div>
                       <div className="p-5 flex flex-col flex-1">
                         <div className="flex justify-between items-start mb-3">
-                          <h3 className="text-xl font-bold text-slate-800 dark:text-white leading-tight">{activity.title}</h3>
+                          <h3 className="text-xl font-bold text-slate-800 dark:text-white leading-tight">{tContent(activity, 'title')}</h3>
                           <div className="text-right shrink-0 ml-2">
                             <div className="flex flex-col items-end">
                               <p className="text-lg font-bold text-primary">
@@ -195,11 +200,11 @@ export function Extraescolars() {
                         <div className="space-y-2 mb-6 flex-1">
                           <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
                             <CalendarIcon className="text-primary w-4 h-4 mr-2 shrink-0" />
-                            <span className="truncate">{activity.schedule_summary}</span>
+                            <span className="truncate">{tContent(activity, 'schedule_summary')}</span>
                           </div>
                           <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
                             <User className="text-primary w-4 h-4 mr-2 shrink-0" />
-                            <span className="truncate">{activity.grades}</span>
+                            <span className="truncate">{tContent(activity, 'grades')}</span>
                           </div>
                         </div>
                         <button className="w-full py-3.5 bg-primary hover:bg-opacity-90 text-white font-semibold rounded-2xl shadow-lg shadow-primary/20 transition-all">

@@ -38,6 +38,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [currentLang, setCurrentLang] = useState<'es' | 'ca' | 'en'>('es');
 
   useEffect(() => {
     if (activity) {
@@ -58,7 +59,29 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
   };
 
   const handleChange = (field: keyof Activity, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // If it's a translatable field, update the specific language field
+    const translatableFields = ['title', 'description', 'grades', 'schedule_summary', 'important_note'];
+    
+    if (translatableFields.includes(field)) {
+        const langKey = `${field}_${currentLang}` as keyof Activity;
+        setFormData(prev => ({ 
+            ...prev, 
+            [langKey]: value,
+            // If editing Spanish, also update the legacy field for backward compatibility
+            ...(currentLang === 'es' ? { [field]: value } : {})
+        }));
+    } else {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    }
+  };
+
+  const getValue = (field: keyof Activity): string => {
+      const langKey = `${field}_${currentLang}` as keyof Activity;
+      // @ts-ignore
+      const val = formData[langKey];
+      if (val !== undefined && val !== null) return String(val);
+      
+      return currentLang === 'es' && formData[field] ? String(formData[field]) : '';
   };
 
   // Schedule Details Handler
@@ -154,24 +177,50 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          {/* Language Tabs */}
+          <div className="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-700 pb-1">
+             <button 
+                type="button"
+                onClick={() => setCurrentLang('es')}
+                className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'es' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+                🇪🇸 Español
+             </button>
+             <button 
+                type="button"
+                onClick={() => setCurrentLang('ca')}
+                className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'ca' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+                🏴 Català
+             </button>
+             <button 
+                type="button"
+                onClick={() => setCurrentLang('en')}
+                className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'en' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+                🇬🇧 English
+             </button>
+          </div>
+
           <form id="activity-form" onSubmit={handleSubmit} className="space-y-6">
             
             {/* Main Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.title')}</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.title')} ({currentLang.toUpperCase()})</label>
                 <input 
-                  required 
+                  required={currentLang === 'es'} 
                   className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  value={formData.title} 
+                  value={getValue('title')} 
                   onChange={e => handleChange('title', e.target.value)}
+                  placeholder={currentLang !== 'es' ? '(Optional) Leave empty to use default' : ''}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.category')}</label>
                 <select 
                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                   value={formData.category}
+                   value={formData.category} // Category is universal
                    onChange={e => handleChange('category', e.target.value)}
                 >
                     <option value="educational">{t('admin.editor.categories.educational')}</option>
@@ -185,11 +234,11 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
 
             {/* Description */}
             <div className="space-y-2">
-               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.description')}</label>
+               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.description')} ({currentLang.toUpperCase()})</label>
                <textarea 
                   rows={3}
                   className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  value={formData.description} 
+                  value={getValue('description')} 
                   onChange={e => handleChange('description', e.target.value)}
                 />
             </div>
@@ -201,7 +250,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                   <input 
                     type="number"
                     className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    value={formData.price_member} 
+                    value={formData.price_member ?? 0} 
                     onChange={e => handleChange('price_member', parseFloat(e.target.value))}
                   />
                </div>
@@ -210,7 +259,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                   <input 
                     type="number"
                     className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    value={formData.price_non_member} 
+                    value={formData.price_non_member ?? 0} 
                     onChange={e => handleChange('price_non_member', parseFloat(e.target.value))}
                   />
                </div>
@@ -218,7 +267,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.price_unit')}</label>
                   <input 
                     className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    value={formData.price_info} 
+                    value={formData.price_info ?? ''} 
                     onChange={e => handleChange('price_info', e.target.value)}
                   />
                </div>
@@ -227,7 +276,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                   <input 
                     type="number"
                     className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    value={formData.spots} 
+                    value={formData.spots ?? 0} 
                     onChange={e => handleChange('spots', parseInt(e.target.value))}
                   />
                </div>
@@ -333,8 +382,8 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
              {/* Extra Fields */}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.grades')}</label>
-                    <input className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" value={formData.grades} onChange={e => handleChange('grades', e.target.value)} placeholder="Ex: 3r - 6è" />
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.grades')} ({currentLang.toUpperCase()})</label>
+                    <input className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" value={getValue('grades')} onChange={e => handleChange('grades', e.target.value)} placeholder="Ex: 3r - 6è" />
                 </div>
                  <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.place')}</label>
@@ -348,6 +397,17 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.icon')}</label>
                     <input className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" value={formData.category_icon} onChange={e => handleChange('category_icon', e.target.value)} placeholder="Ex: school" />
                 </div>
+            </div>
+            
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('inscription.activity_modal.note_label')} ({currentLang.toUpperCase()})</label>
+                <textarea 
+                  rows={2}
+                  className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  value={getValue('important_note')} 
+                  onChange={e => handleChange('important_note', e.target.value)}
+                  placeholder="Important note..."
+                />
             </div>
             
              <div className="flex items-center gap-2">

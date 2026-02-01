@@ -1,7 +1,13 @@
 export interface ShopProduct {
   id: string;
   name: string;
+  name_es?: string;
+  name_ca?: string;
+  name_en?: string;
   description?: string;
+  description_es?: string;
+  description_ca?: string;
+  description_en?: string;
   category: 'uniforme' | 'accessoris';
   image_url?: string;
   variants?: ShopVariant[];

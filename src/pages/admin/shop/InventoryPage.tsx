@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import type { ShopProduct } from '../../../types/shop';
-import { Search } from 'lucide-react';
+import { Search, Edit } from 'lucide-react';
+import { ProductEditorModal } from '../../../components/admin/ProductEditorModal';
+import { useContentTranslation } from '../../../hooks/useContentTranslation';
 
 export function InventoryPage() {
+  const { tContent } = useContentTranslation();
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ShopProduct | null>(null);
 
   useEffect(() => {
     fetchInventory();
@@ -106,9 +110,19 @@ export function InventoryPage() {
                 product.variants?.map((variant, idx) => (
                   <tr key={variant.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     {idx === 0 && (
-                      <td rowSpan={product.variants?.length} className="px-6 py-4 font-medium text-slate-900 dark:text-white border-r border-slate-50 dark:border-slate-800">
-                        {product.name}
-                        <span className="block text-xs font-normal text-slate-400">{product.category}</span>
+                      <td rowSpan={product.variants?.length} className="px-6 py-4 font-medium text-slate-900 dark:text-white border-r border-slate-50 dark:border-slate-800 relative group">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                {tContent(product, 'name')}
+                                <span className="block text-xs font-normal text-slate-400">{product.category}</span>
+                            </div>
+                            <button 
+                                onClick={() => setEditingProduct(product)}
+                                className="p-1 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                                <Edit className="w-4 h-4" />
+                            </button>
+                        </div>
                       </td>
                     )}
                     <td className="px-6 py-4 font-mono">{variant.size}</td>
@@ -140,6 +154,18 @@ export function InventoryPage() {
           </table>
         </div>
       </div>
+    
+      {editingProduct && (
+        <ProductEditorModal 
+            isOpen={true}
+            onClose={() => setEditingProduct(null)}
+            product={editingProduct}
+            onSaved={() => {
+                fetchInventory();
+                setEditingProduct(null);
+            }}
+        />
+      )}
     </div>
   );
 }

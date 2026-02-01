@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useContentTranslation } from '../../hooks/useContentTranslation';
 import type { Activity } from '../../services/ActivityService';
 
 interface ActivityDetailModalProps {
@@ -10,6 +11,7 @@ interface ActivityDetailModalProps {
 
 export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: ActivityDetailModalProps) {
   const { t } = useTranslation();
+  const { tContent } = useContentTranslation();
 
   if (!isOpen) return null;
 
@@ -68,7 +70,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
           {/* Title & Price */}
           <div className="flex justify-between items-start mb-6">
             <h1 className="text-[#111813] dark:text-white text-3xl font-bold leading-[1.1] tracking-tight max-w-[70%]">
-              {activity.title}
+              {tContent(activity, 'title')}
             </h1>
             <div className="text-right">
               <div className="flex flex-col items-end">
@@ -92,7 +94,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">child_care</span>
               <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.grades')}</span>
-              <span className="text-sm font-semibold dark:text-gray-200">{activity.grades}</span>
+              <span className="text-sm font-semibold dark:text-gray-200">{tContent(activity, 'grades')}</span>
             </div>
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">location_on</span>
@@ -110,7 +112,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
           <div className="mb-8">
             <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-3">{t('inscription.activity_modal.about')}</h3>
             <p className="text-[#4b5563] dark:text-gray-300 text-base leading-relaxed font-light">
-              {activity.description || t('inscription.activity_modal.default_description')}
+              {tContent(activity, 'description') || t('inscription.activity_modal.default_description')}
             </p>
           </div>
 
@@ -163,7 +165,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
             <div className="flex gap-3 p-4 rounded-xl bg-accent-terracotta/10 border border-accent-terracotta/20 mb-8">
               <span className="material-symbols-outlined text-accent-terracotta">info</span>
               <p className="text-xs text-[#8c5e4d] dark:text-accent-terracotta leading-snug">
-                <span className="font-bold">{t('inscription.activity_modal.note_label')}</span> {activity.important_note}
+                <span className="font-bold">{t('inscription.activity_modal.note_label')}</span> {tContent(activity, 'important_note')}
               </p>
             </div>
           )}

@@ -3,11 +3,13 @@ import { supabase } from '../../lib/supabase';
 import type { ShopProduct } from '../../types/shop';
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useContentTranslation } from '../../hooks/useContentTranslation';
 // We'll placeholder the internal components first
 import { ProductModal } from '../../components/shop/ProductModal';
 
 export function ShopLanding() {
   const { t } = useTranslation();
+  const { tContent } = useContentTranslation();
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<'all' | 'uniforme' | 'accessoris'>('all');
@@ -101,7 +103,7 @@ export function ShopLanding() {
                         </div>
                     )}
                 </div>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1 line-clamp-2">{product.name}</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-1 line-clamp-2">{tContent(product, 'name')}</h3>
                 
                 <div className="mt-auto">
                     {product.variants && product.variants.length > 0 && (

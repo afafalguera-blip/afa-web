@@ -15,14 +15,26 @@ export interface Activity {
   id: number;
   created_at?: string;
   title: string;
+  title_es?: string;
+  title_ca?: string;
+  title_en?: string;
   category: string;
   description: string;
+  description_es?: string;
+  description_ca?: string;
+  description_en?: string;
   price: number;
   price_member?: number;
   price_non_member?: number;
   price_info: string;
   grades: string;
+  grades_es?: string;
+  grades_ca?: string;
+  grades_en?: string;
   schedule_summary: string;
+  schedule_summary_es?: string;
+  schedule_summary_ca?: string;
+  schedule_summary_en?: string;
   schedule_details: ScheduleDetail[]; // Structured JSON
   place: string;
   spots: number;
@@ -31,6 +43,9 @@ export interface Activity {
   category_icon: string;
   is_stem_approved: boolean;
   important_note?: string;
+  important_note_es?: string;
+  important_note_ca?: string;
+  important_note_en?: string;
 }
 
 export const ActivityService = {

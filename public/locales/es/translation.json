@@ -402,7 +402,10 @@
         "thu": "Jueves",
         "fri": "Viernes",
         "sat": "Sábado"
-      }
+      },
+      "edit_product": "Editar Producto",
+      "new_product": "Nuevo Producto",
+      "product_name": "Nombre del Producto"
     },
     "news": {
       "title": "Gestión de Noticias",
