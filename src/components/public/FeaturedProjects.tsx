@@ -1,15 +1,17 @@
 import { motion } from 'framer-motion';
-import { Landmark, Users, CheckCircle, Clock, Vote, Edit } from 'lucide-react';
+import { Landmark, Users, CheckCircle, Clock, Vote, Edit, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { ProjectDetailModal } from './ProjectDetailModal';
 
 interface Project {
   id: string;
   title: string;
   description: string;
+  details?: string;
   imageAfter: string;
   budget?: number;
   status: 'completed' | 'in_progress' | 'voting' | 'active' | 'archived';
@@ -55,10 +57,11 @@ export const FeaturedProjects = () => {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [i18n.language]);
 
   const fetchProjects = async () => {
     try {
@@ -79,11 +82,12 @@ export const FeaturedProjects = () => {
             id: p.id,
             title: translation?.title || p.title,
             description: translation?.description || p.description,
+            details: translation?.details || '', 
+            impact: translation?.impact || '',
+            participants: translation?.participants || '',
             imageAfter: p.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop',
             status: p.status,
-            budget: 0, 
-            impact: '',
-            participants: ''
+            budget: 0
           };
         }));
       } else {
@@ -128,7 +132,8 @@ export const FeaturedProjects = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-xl ring-1 ring-slate-900/5 transition-all hover:-translate-y-1 hover:shadow-2xl relative"
+              onClick={() => setSelectedProject(project)}
+              className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-xl ring-1 ring-slate-900/5 transition-all hover:-translate-y-1 hover:shadow-2xl relative cursor-pointer"
             >
               {isAdmin && (
                 <button
@@ -154,10 +159,10 @@ export const FeaturedProjects = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
                 {project.budget && project.budget > 0 && (
-                  <div className="absolute bottom-4 left-4 text-white">
-                    <p className="text-sm font-medium opacity-90">{t('featured_projects.investment_label')}</p>
-                    <p className="text-lg font-bold">{new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(project.budget)}</p>
-                  </div>
+                    <div className="absolute bottom-4 left-4 text-white">
+                        <p className="text-sm font-medium opacity-90">{t('featured_projects.investment_label')}</p>
+                        <p className="text-lg font-bold">{new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(project.budget)}</p>
+                    </div>
                 )}
               </div>
 
@@ -165,31 +170,32 @@ export const FeaturedProjects = () => {
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                   {project.title}
                 </h3>
-                <p className="mt-3 flex-auto text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="mt-3 flex-auto text-base text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
                   {project.description}
                 </p>
 
-                {(project.participants || project.impact) && (
-                  <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 space-y-3">
-                    {project.participants && (
-                      <div className="flex items-center text-sm text-slate-600 dark:text-slate-300">
-                        <Users className="w-4 h-4 mr-2 text-indigo-500" />
-                        <span>{project.participants}</span>
-                      </div>
+                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                    <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:gap-2 transition-all">
+                        {t('common.read_more')} <ArrowRight size={16} />
+                    </span>
+                    {(project.participants || project.impact) && (
+                        <div className="flex -space-x-2">
+                            {project.participants && <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-[10px] border border-white" title={t('admin.projects.field_participants')}><Users size={12} /></div>}
+                            {project.impact && <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-[10px] border border-white" title={t('admin.projects.field_impact')}><Landmark size={12} /></div>}
+                        </div>
                     )}
-                    {project.impact && (
-                      <div className="flex items-center text-sm text-slate-600 dark:text-slate-300">
-                        <Landmark className="w-4 h-4 mr-2 text-indigo-500" />
-                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{project.impact}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                </div>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
+
+      <ProjectDetailModal 
+        isOpen={!!selectedProject}
+        onClose={() => setSelectedProject(null)}
+        project={selectedProject}
+      />
     </section>
   );
 };

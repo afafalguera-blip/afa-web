@@ -453,6 +453,13 @@
       "title_placeholder": "Título del proyecto",
       "field_description": "Descripción",
       "description_placeholder": "Describe el proyecto...",
+      "field_details": "Contenido Detallado",
+      "details_placeholder": "Descripción completa... (Markdown)",
+      "field_impact": "Impacto Directo",
+      "impact_placeholder": "Ej: +450 alumnos, mejora del patio...",
+      "field_participants": "Participantes",
+      "participants_placeholder": "Ej: Familias, Alumnos...",
+
       "field_image_url": "URL de la imagen"
     },
     "calendar": {
@@ -488,6 +495,7 @@
     "save": "Guardar",
     "saving": "Guardando...",
     "edit": "Editar",
+    "close": "Cerrar",
     "delete": "Eliminar",
     "refresh": "Actualizar",
     "read_more_external": "Leer noticia original",

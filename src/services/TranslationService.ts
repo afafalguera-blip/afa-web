@@ -3,6 +3,9 @@ export interface TranslationResult {
   content?: string;
   excerpt?: string;
   description?: string;
+  details?: string;
+  impact?: string;
+  participants?: string;
 }
 
 export const TranslationService = {

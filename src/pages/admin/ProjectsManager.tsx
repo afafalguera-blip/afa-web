@@ -23,14 +23,26 @@ interface Project {
   display_order: number;
   created_at: string;
   updated_at: string;
-  translations?: Record<string, { title: string; description: string }>;
+  translations?: Record<string, { 
+    title: string; 
+    description: string;
+    details?: string;
+    impact?: string;
+    participants?: string;
+  }>;
 }
 
 interface ProjectFormData {
   title: string;
   description: string;
   image_url: string;
-  translations: Record<string, { title: string; description: string }>;
+  translations: Record<string, { 
+    title: string; 
+    description: string;
+    details: string;
+    impact: string;
+    participants: string;
+  }>;
 }
 
 export default function ProjectsManager() {
@@ -46,9 +58,9 @@ export default function ProjectsManager() {
     description: '',
     image_url: '',
     translations: {
-      ca: { title: '', description: '' },
-      es: { title: '', description: '' },
-      en: { title: '', description: '' }
+      ca: { title: '', description: '', details: '', impact: '', participants: '' },
+      es: { title: '', description: '', details: '', impact: '', participants: '' },
+      en: { title: '', description: '', details: '', impact: '', participants: '' }
     }
   });
   const [activeLang, setActiveLang] = useState<'ca' | 'es' | 'en'>('es');
@@ -83,9 +95,9 @@ export default function ProjectsManager() {
       description: '', 
       image_url: '',
       translations: {
-        ca: { title: '', description: '' },
-        es: { title: '', description: '' },
-        en: { title: '', description: '' }
+        ca: { title: '', description: '', details: '', impact: '', participants: '' },
+        es: { title: '', description: '', details: '', impact: '', participants: '' },
+        en: { title: '', description: '', details: '', impact: '', participants: '' }
       }
     });
     setActiveLang('es');
@@ -99,9 +111,9 @@ export default function ProjectsManager() {
       description: project.description || '',
       image_url: project.image_url || '',
       translations: {
-        ca: { title: '', description: '' },
-        es: { title: project.title, description: project.description || '' },
-        en: { title: '', description: '' },
+        ca: { title: '', description: '', details: '', impact: '', participants: '' },
+        es: { title: project.title, description: project.description || '', details: '', impact: '', participants: '' },
+        en: { title: '', description: '', details: '', impact: '', participants: '' },
         ...(project.translations || {})
       }
     });
@@ -164,7 +176,10 @@ export default function ProjectsManager() {
         if (translated) {
           updatedTranslations[lang] = {
             title: translated.title || '',
-            description: translated.description || ''
+            description: translated.description || '',
+            details: translated.details || '',
+            impact: translated.impact || '',
+            participants: translated.participants || ''
           };
         }
       }
@@ -417,6 +432,7 @@ export default function ProjectsManager() {
                     placeholder={t('admin.projects.title_placeholder')}
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     {t('admin.projects.field_description')} ({activeLang.toUpperCase()})
@@ -424,10 +440,49 @@ export default function ProjectsManager() {
                   <textarea
                     value={formData.translations[activeLang]?.description || ''}
                     onChange={e => updateTranslationField(activeLang, 'description', e.target.value)}
-                    rows={5}
+                    rows={3}
                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                     placeholder={t('admin.projects.description_placeholder')}
                   />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium text-slate-700 mb-1">
+                      {t('admin.projects.field_details')} ({activeLang.toUpperCase()}) - Markdown Supported
+                   </label>
+                   <textarea
+                      value={formData.translations[activeLang]?.details || ''}
+                      onChange={e => updateTranslationField(activeLang, 'details', e.target.value)}
+                      rows={6}
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
+                      placeholder={t('admin.projects.details_placeholder')}
+                   />
+                   <p className="text-xs text-slate-500 mt-1">Use **bold**, - lists, ### headers for formatting.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            {t('admin.projects.field_impact')} ({activeLang.toUpperCase()})
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.translations[activeLang]?.impact || ''}
+                            onChange={e => updateTranslationField(activeLang, 'impact', e.target.value)}
+                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            placeholder={t('admin.projects.impact_placeholder')}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            {t('admin.projects.field_participants')} ({activeLang.toUpperCase()})
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.translations[activeLang]?.participants || ''}
+                            onChange={e => updateTranslationField(activeLang, 'participants', e.target.value)}
+                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                            placeholder={t('admin.projects.participants_placeholder')}
+                        />
+                    </div>
                 </div>
               </div>
               

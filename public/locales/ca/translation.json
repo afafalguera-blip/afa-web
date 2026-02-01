@@ -451,6 +451,12 @@
       "title_placeholder": "Títol del projecte",
       "field_description": "Descripció",
       "description_placeholder": "Descriu el projecte...",
+      "field_details": "Contingut Detallat",
+      "details_placeholder": "Descripció completa del projecte, objectius, metodologia... (Markdown suportat)",
+      "field_impact": "Impacte Directe",
+      "impact_placeholder": "Ex: +450 alumnes, millora del pati...",
+      "field_participants": "Participants",
+      "participants_placeholder": "Ex: Famílies, Alumnes, Docents...",
       "field_image_url": "URL de la imatge"
     },
     "calendar": {
@@ -486,6 +492,7 @@
     "save": "Desar",
     "saving": "Desant...",
     "edit": "Editar",
+    "close": "Tancar",
     "delete": "Eliminar",
     "refresh": "Actualitzar",
     "read_more_external": "Llegir notícia original",
