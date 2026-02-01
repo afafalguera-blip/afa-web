@@ -14,9 +14,12 @@ function transformOrder(order: any) {
 
 export const ShopService = {
   async updateProduct(id: string, updates: Partial<ShopProduct>) {
+    // Sanitize updates: remove relational and read-only fields that PostgREST would reject
+    const { variants, id: _id, created_at, ...cleanUpdates } = updates as any;
+
     const { data, error } = await supabase
       .from('shop_products')
-      .update(updates)
+      .update(cleanUpdates)
       .eq('id', id)
       .select()
       .single();
