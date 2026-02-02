@@ -2,22 +2,24 @@ import { useMemo } from 'react';
 import type { Activity, ScheduleSession } from '../../services/ActivityService';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ActivitiesCalendarProps {
   activities: Activity[];
   onActivityClick?: (activity: Activity) => void;
 }
 
-const DAYS = [
-  { id: 1, label: 'Dilluns' },
-  { id: 2, label: 'Dimarts' },
-  { id: 3, label: 'Dimecres' },
-  { id: 4, label: 'Dijous' },
-  { id: 5, label: 'Divendres' },
-];
-
 export function ActivitiesCalendar({ activities, onActivityClick }: ActivitiesCalendarProps) {
+  const { t } = useTranslation();
   const { tContent } = useContentTranslation();
+
+  const DAYS = [
+    { id: 1, label: t('admin.editor.days.mon'), key: 'mon' },
+    { id: 2, label: t('admin.editor.days.tue'), key: 'tue' },
+    { id: 3, label: t('admin.editor.days.wed'), key: 'wed' },
+    { id: 4, label: t('admin.editor.days.thu'), key: 'thu' },
+    { id: 5, label: t('admin.editor.days.fri'), key: 'fri' },
+  ];
 
   const sessions = useMemo(() => {
     const allSessions: { activity: Activity; session: ScheduleSession; groupName: string }[] = [];

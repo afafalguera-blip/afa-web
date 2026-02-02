@@ -37,6 +37,26 @@ export function Extraescolars() {
     }
   };
 
+  // Helper to translate categories
+  const tCategory = (cat: string) => {
+    if (cat === 'all') return t('common.all');
+    // Try to find translation in admin.editor.categories
+    const key = `admin.editor.categories.${cat.toLowerCase()}`;
+    const translated = t(key as any);
+    // If translation returns the key itself (miss), check common mappings or return capitalized
+    if (translated === key) {
+        // Fallback for known hardcoded categories if they differ from keys
+        if (cat === 'sport' || cat === 'sports') return t('admin.editor.categories.sports');
+        if (cat === 'music') return t('admin.editor.categories.music');
+        if (cat === 'language' || cat === 'languages') return t('admin.editor.categories.languages');
+        if (cat === 'art' || cat === 'artistic') return t('admin.editor.categories.artistic');
+        if (cat === 'education' || cat === 'educational') return t('admin.editor.categories.educational');
+        
+        return cat.charAt(0).toUpperCase() + cat.slice(1);
+    }
+    return translated as string;
+  };
+
   const categories = ['all', ...Array.from(new Set(activities.map(a => a.category)))];
 
   const filteredActivities = activities.filter(activity => {
@@ -78,7 +98,7 @@ export function Extraescolars() {
                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
             >
-                <LayoutGrid className="w-4 h-4" /> {t('common.list' as any)}
+                <LayoutGrid className="w-4 h-4" /> {t('common.list')}
             </button>
             <button 
                 onClick={() => setViewMode('calendar')}
@@ -99,7 +119,7 @@ export function Extraescolars() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                     type="text"
-                    placeholder={t('common.search' as any)}
+                    placeholder={t('common.search')}
                     className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none shadow-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -116,7 +136,7 @@ export function Extraescolars() {
                               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'
                           }`}
                       >
-                          {cat === 'all' ? t('common.all' as any) : cat}
+                          {tCategory(cat)}
                       </button>
                   ))}
               </div>
@@ -176,7 +196,7 @@ export function Extraescolars() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
                         <img src={activity.image_url} alt={tContent(activity, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         <span className={`absolute top-4 right-4 ${activity.color || 'bg-blue-500'}/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider z-20`}>
-                          {activity.category}
+                          {tCategory(activity.category)}
                         </span>
                       </div>
                       <div className="p-5 flex flex-col flex-1">
