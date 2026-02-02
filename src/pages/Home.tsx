@@ -60,7 +60,7 @@ export function Home() {
         .select('*')
         .gte('event_date', new Date().toISOString().split('T')[0])
         .order('event_date', { ascending: true })
-        .limit(8);
+        .limit(4);
 
       if (error) throw error;
       setEvents(data || []);
@@ -301,6 +301,32 @@ export function Home() {
             })
           )}
         </div>
+      </section>
+
+      <section className="px-6 mt-6 mb-8">
+        <Link 
+          to="/assemblea"
+          className="block bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                  {t('home.assemblea_banner.tag')}
+                </span>
+                <span className="text-blue-200 text-xs font-medium">{t('home.course_current')}</span>
+              </div>
+              <h3 className="text-xl font-bold mb-1">{t('home.assemblea_banner.title')}</h3>
+              <p className="text-blue-100 text-sm max-w-[250px]">
+                {t('home.assemblea_banner.description')}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-blue-600 transition-colors">
+              <span className="material-icons-round">description</span>
+            </div>
+          </div>
+        </Link>
       </section>
 
       <NewsDetailModal 

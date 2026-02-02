@@ -37,6 +37,106 @@
     ],
     "news_archive": {
       "subtitle": "Mantén-te al dia de tot el que passa a la nostra escola i dels projectes de l'AFA."
+    },
+    "assemblea_banner": {
+       "tag": "Documentació",
+       "title": "Assemblea General",
+       "description": "Resum d'acords, estat de comptes i nous projectes de l'AFA."
+    }
+  },
+  "assemblea": {
+    "title": "Assemblea General",
+    "course": "Curs 2025-2026",
+    "subtitle": "Resum dels punts tractats, estat de comptes i nous projectes de l'AFA Escola Falguera.",
+    "sections": {
+      "agenda": {
+        "title": "Ordre del Dia",
+        "items": [
+          "Estat de Comptes",
+          "Projectes Realitzats",
+          "Canvi de Junta de l'AFA",
+          "Torn Obert de Preguntes"
+        ]
+      },
+      "economics": {
+        "title": "Situació Econòmica",
+        "items": [
+           "Saldo positiu i estalvi de seguretat.",
+           "Sense deutes ni pagaments pendents.",
+           "Increment de la recaptació gràcies a l'alta participació.",
+           "Fons de reserva destinat a futures inversions.",
+           "Gestió transparent i auditada."
+        ]
+      },
+      "investments": {
+        "title": "Inversions i Previsions",
+        "items": [
+          "Millores al pati infantil i primària.",
+          "Compra de material digital (e-readers i tablets).",
+          "Renovació de material esportiu.",
+          "Subvenció per a colònies i excursions.",
+          "Fons solidari per a famílies."
+        ]
+      },
+      "functions": {
+         "title": "Funcions de l'AFA",
+         "items": [
+           "Gestió d'extraescolars",
+           "Organització de festes",
+           "Recaptació de fons",
+           "Intermediació famílies-escola",
+           "Millora d'instal·lacions",
+           "Socialització de llibres",
+           "Suport a famílies"
+         ]
+      },
+      "quota": {
+         "title": "A què destinem la quota?",
+         "items": [
+           "Material escolar col·lectiu",
+           "Festes tradicionales (Castanyada, etc.)",
+           "Xerrades educatives",
+           "Digitalització de l'escola",
+           "Fons d'ajuda escolar"
+         ]
+      },
+      "projects": {
+        "title": "Projectes i Millores",
+        "brigade": {
+           "title": "Brigada de Famílies",
+           "desc": "Un grup actiu de famílies per ajudar a millorar les instal·lacions de l'escola."
+        },
+        "done": {
+           "title": "Fet (24-25)",
+           "items": [
+             "Pintura pista",
+             "Hort escolar",
+             "Ombra infantil",
+             "Banc de llibres"
+           ]
+        },
+        "future": {
+           "title": "Propera (25-26)",
+           "items": [
+             "Renovació biblioteca",
+             "Pati inclusiu",
+             "Cuina pròpia",
+             "Aula polivalent"
+           ]
+        }
+      },
+      "board_change": {
+        "title": "Canvi Junta AFA",
+        "desc": "Renovación de càrrecs i noves incorporacions.",
+        "important_title": "IMPORTANT",
+        "important_desc": "És vital treballar junts per seguir endavant.",
+        "call_to_action_title": "ET NECESSITEM A TU!",
+        "call_to_action_desc": "L'AFA necessita implicació de les famílies per seguir millorant l'escola dels nostres fills i filles."
+      },
+      "contact": {
+        "contact_us": "Contactar",
+        "instagram": "Instagram"
+      }
     }
   },
   "fees_page": {

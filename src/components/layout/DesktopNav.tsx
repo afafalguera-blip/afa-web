@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { icon: Home, labelKey: 'nav.home', path: '/' },
   { icon: LayoutGrid, labelKey: 'nav.extraescolars', path: '/extraescolars' },
   { icon: ShoppingBag, labelKey: 'nav.shop', path: '/botiga' },
+  { icon: LayoutGrid, labelKey: 'AFA Docs', path: '/documents' },
   // { icon: User, labelKey: 'nav.profile', path: '/perfil' },
 ];
 

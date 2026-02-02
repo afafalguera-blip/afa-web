@@ -36,6 +36,106 @@
     ],
     "news_archive": {
       "subtitle": "Keep up to date with everything happening in our school and AFA projects."
+    },
+    "assemblea_banner": {
+       "tag": "Documentation",
+       "title": "General Assembly",
+       "description": "Summary of agreements, financial status, and new AFA projects."
+    }
+  },
+  "assemblea": {
+    "title": "General Assembly",
+    "course": "Year 2025-2026",
+    "subtitle": "Summary of points discussed, financial status, and new AFA School Falguera projects.",
+    "sections": {
+      "agenda": {
+        "title": "Agenda",
+        "items": [
+          "Financial Status",
+          "Completed Projects",
+          "AFA Board Change",
+          "Open Question Time"
+        ]
+      },
+      "economics": {
+        "title": "Economic Situation",
+        "items": [
+           "Positive balance and safety savings.",
+           "No debts or pending payments.",
+           "Increased revenue thanks to high participation.",
+           "Reserve fund destined for future investments.",
+           "Transparent and audited management."
+        ]
+      },
+      "investments": {
+        "title": "Investments and Forecasts",
+        "items": [
+          "Improvements to the infant and primary playground.",
+          "Purchase of digital material (e-readers and tablets).",
+          "Renovation of sports equipment.",
+          "Subsidy for colonies and excursions.",
+          "Solidarity fund for families."
+        ]
+      },
+      "functions": {
+         "title": "AFA Functions",
+         "items": [
+           "Management of extracurriculars",
+           "Organization of festivals",
+           "Fundraising",
+           "Family-school intermediation",
+           "Improvement of facilities",
+           "Book socialization",
+           "Support for families"
+         ]
+      },
+      "quota": {
+         "title": "What is the fee used for?",
+         "items": [
+           "Collective school material",
+           "Traditional festivals (Castanyada, etc.)",
+           "Educational talks",
+           "School digitalization",
+           "School aid fund"
+         ]
+      },
+      "projects": {
+        "title": "Projects and Improvements",
+        "brigade": {
+           "title": "Family Brigade",
+           "desc": "An active group of families to help improve the school facilities."
+        },
+        "done": {
+           "title": "Done (24-25)",
+           "items": [
+             "Track painting",
+             "School garden",
+             "Infant shade",
+             "Book bench"
+           ]
+        },
+        "future": {
+           "title": "Next (25-26)",
+           "items": [
+             "Library renovation",
+             "Inclusive patio",
+             "Own kitchen",
+             "Multipurpose room"
+           ]
+        }
+      },
+      "board_change": {
+        "title": "AFA Board Change",
+        "desc": "Renewal of positions and new additions.",
+        "important_title": "IMPORTANT",
+        "important_desc": "It is vital to work together to keep moving forward.",
+        "call_to_action_title": "WE NEED YOU!",
+        "call_to_action_desc": "The AFA needs family involvement to continue improving our children's school."
+      },
+      "contact": {
+        "contact_us": "Contact Us",
+        "instagram": "Instagram"
+      }
     }
   },
   "fees_page": {

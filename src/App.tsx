@@ -18,9 +18,12 @@ import NewsManager from './pages/admin/NewsManager';
 import ProjectsManager from './pages/admin/ProjectsManager';
 import EventsManager from './pages/admin/EventsManager';
 import NotificationManager from './pages/admin/NotificationManager';
+import DocumentsManager from './pages/admin/DocumentsManager';
 import AdminObservability from './pages/admin/AdminObservability';
 
 import { NewsPage } from './pages/NewsPage';
+import { AssembleaPage } from './pages/AssembleaPage';
+import { DocumentsPage } from './pages/DocumentsPage';
 
 import { ShopLanding } from './pages/shop/ShopLanding';
 
@@ -51,6 +54,8 @@ function App() {
             <Route path="botiga" element={<ShopLanding />} />
             <Route path="quotes" element={<FeesPage />} />
             <Route path="calendari" element={<GeneralCalendarPage />} />
+            <Route path="assemblea" element={<AssembleaPage />} />
+            <Route path="documents" element={<DocumentsPage />} />
             {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
           </Route>
           
@@ -67,6 +72,7 @@ function App() {
              <Route path="news" element={<NewsManager />} />
              <Route path="projects" element={<ProjectsManager />} />
              <Route path="calendar" element={<EventsManager />} />
+             <Route path="documents" element={<DocumentsManager />} />
              <Route path="notifications" element={<NotificationManager />} />
              <Route path="observability" element={<AdminObservability />} />
           </Route>

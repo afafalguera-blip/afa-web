@@ -36,6 +36,106 @@
     ],
     "news_archive": {
       "subtitle": "Mantente al día de todo lo que sucede en nuestra escuela y de los proyectos de la AFA."
+    },
+    "assemblea_banner": {
+       "tag": "Documentación",
+       "title": "Asamblea General",
+       "description": "Resumen de acuerdos, estado de cuentas y nuevos proyectos del AFA."
+    }
+  },
+  "assemblea": {
+    "title": "Asamblea General",
+    "course": "Curso 2025-2026",
+    "subtitle": "Resumen de los puntos tratados, estado de cuentas y nuevos proyectos del AFA Escola Falguera.",
+    "sections": {
+      "agenda": {
+        "title": "Orden del Día",
+        "items": [
+          "Estado de Cuentas",
+          "Proyectos Realizados",
+          "Cambio de Junta del AFA",
+          "Turno Abierto de Preguntas"
+        ]
+      },
+      "economics": {
+        "title": "Situación Económica",
+        "items": [
+           "Saldo positivo y ahorro de seguridad.",
+           "Sin deudas ni pagos pendientes.",
+           "Incremento de la recaudación gracias a la alta participación.",
+           "Fondo de reserva destinado a futuras inversiones.",
+           "Gestión transparente y auditada."
+        ]
+      },
+      "investments": {
+        "title": "Inversiones y Previsiones",
+        "items": [
+          "Mejoras en el patio infantil y primaria.",
+          "Compra de material digital (e-readers y tablets).",
+          "Renovación de material deportivo.",
+          "Subvención para colonias y excursiones.",
+          "Fondo solidario para familias."
+        ]
+      },
+      "functions": {
+         "title": "Funciones del AFA",
+         "items": [
+           "Gestión de extraescolares",
+           "Organización de fiestas",
+           "Recaudación de fondos",
+           "Intermediación familias-escuela",
+           "Mejora de instalaciones",
+           "Socialización de libros",
+           "Apoyo a familias"
+         ]
+      },
+      "quota": {
+         "title": "¿A qué destinamos la cuota?",
+         "items": [
+           "Material escolar colectivo",
+           "Fiestas tradicionales (Castañada, etc.)",
+           "Charlas educativas",
+           "Digitalización de la escuela",
+           "Fondo de ayuda escolar"
+         ]
+      },
+      "projects": {
+        "title": "Proyectos y Mejoras",
+        "brigade": {
+           "title": "Brigada de Familias",
+           "desc": "Un grupo activo de familias para ayudar a mejorar las instalaciones de la escuela."
+        },
+        "done": {
+           "title": "Hecho (24-25)",
+           "items": [
+             "Pintura pista",
+             "Huerto escolar",
+             "Sombra infantil",
+             "Banco de libros"
+           ]
+        },
+        "future": {
+           "title": "Próximo (25-26)",
+           "items": [
+             "Renovación biblioteca",
+             "Patio inclusivo",
+             "Cocina propia",
+             "Aula polivalente"
+           ]
+        }
+      },
+      "board_change": {
+        "title": "Cambio Junta AFA",
+        "desc": "Renovación de cargos y nuevas incorporaciones.",
+        "important_title": "IMPORTANTE",
+        "important_desc": "Es vital trabajar juntos para seguir adelante.",
+        "call_to_action_title": "¡TE NECESITAMOS A TI!",
+        "call_to_action_desc": "El AFA necesita implicación de las familias para seguir mejorando la escuela de nuestros hijos e hijas."
+      },
+      "contact": {
+        "contact_us": "Contactar",
+        "instagram": "Instagram"
+      }
     }
   },
   "fees_page": {
