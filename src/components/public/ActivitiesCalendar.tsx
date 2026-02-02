@@ -106,13 +106,13 @@ export function ActivitiesCalendar({ activities, onActivityClick }: ActivitiesCa
                             zIndex: 10
                           }}
                         >
-                          <div className="text-[9px] font-bold uppercase opacity-80 leading-none mb-1 truncate">
+                          <div className="text-[9px] font-bold uppercase opacity-90 leading-none mb-1 truncate" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
                             {item.groupName}
                           </div>
-                          <div className="text-[11px] font-extrabold leading-tight mb-1 line-clamp-2">
+                          <div className="text-[11px] font-extrabold leading-tight mb-1 line-clamp-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
                             {tContent(item.activity, 'title')}
                           </div>
-                          <div className="text-[9px] font-medium opacity-90">
+                          <div className="text-[9px] font-medium opacity-95" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
                             {item.session.startTime} - {item.session.endTime}
                           </div>
                           

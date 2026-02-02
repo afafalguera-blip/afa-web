@@ -40,14 +40,15 @@
   },
   "fees_page": {
     "title": "Cuota del AFA",
-    "subtitle": "Tu colaboración nos permite seguir mejorando la experiencia educativa de todos los niños de la escuela.",
+    "subtitle": "Tu colaboración nos permite seguir mejorando la experiencia educativa de todos los niños y niñas de la escuela.",
     "purpose_title": "¿Para qué sirve?",
     "purpose_text": "El AFA es una asociación sin ánimo de lucro formada por padres y madres. La cuota anual es nuestra principal fuente de financiación para realizar proyectos y actividades.",
     "purpose_list": [
       "Compra de material pedagógico y lúdico para la escuela.",
       "Organización de fiestas tradicionales (Castañada, Carnaval, Fin de curso).",
       "Subvención de charlas y talleres para familias.",
-      "Gestión de las actividades extraescolares y la acogida."
+      "Gestión de las actividades extraescolares y la acogida.",
+      "Proyecto de socialización de libros."
     ],
     "annual_quota": "Cuota Anual por Familia",
     "single_payment": "Un único pago por curso escolar que beneficia a todos tus hijos/as.",

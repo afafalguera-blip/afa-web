@@ -137,7 +137,7 @@ export function Extraescolars() {
             </p>
           </div>
           <button 
-            onClick={() => navigate('/inscripcions')}
+            onClick={() => navigate('/extraescolars/inscripcio')}
             className="px-6 py-3 bg-white text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-50 transition-colors shadow-lg whitespace-nowrap"
           >
             {t('inscription.activity_modal.signup_btn')}
