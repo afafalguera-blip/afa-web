@@ -543,20 +543,36 @@ export default function EventsManager() {
                 </div>
               </div>
             </div>
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {saving ? t('common.saving') : t('common.save')}
-              </button>
+            <div className="p-6 border-t border-slate-200 flex justify-between gap-3">
+              {editingEvent && (
+                <button
+                  onClick={() => {
+                    if (confirm(t('admin.calendar.delete_confirm'))) {
+                      handleDelete(editingEvent.id);
+                      setIsModalOpen(false);
+                    }
+                  }}
+                  className="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {t('common.delete')}
+                </button>
+              )}
+              <div className="flex gap-3 ml-auto">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? t('common.saving') : t('common.save')}
+                </button>
+              </div>
             </div>
           </div>
         </div>

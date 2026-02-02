@@ -87,23 +87,67 @@ export function ActivitiesCalendar({ activities, onActivityClick }: ActivitiesCa
 
             {/* Activities Overlay */}
             <div className="absolute top-0 left-[80px] right-0 bottom-0 pointer-events-none grid grid-cols-6 h-full">
-              {[1, 2, 3, 4, 5, 6].map(dayId => (
-                <div key={dayId} className="relative h-full">
-                  {sessions
-                    .filter(s => s.session.day === dayId)
-                    .map((item, idx) => {
+              {[1, 2, 3, 4, 5, 6].map(dayId => {
+                const daySessions = sessions
+                  .filter(s => s.session.day === dayId)
+                  .sort((a, b) => {
+                    const [Ah, Am] = a.session.startTime.split(':').map(Number);
+                    const [Bh, Bm] = b.session.startTime.split(':').map(Number);
+                    return (Ah * 60 + Am) - (Bh * 60 + Bm);
+                  });
+
+                // Calculate overlap layout
+                const layoutItems = daySessions.map((item, index) => {
+                   const [sh, sm] = item.session.startTime.split(':').map(Number);
+                   const [eh, em] = item.session.endTime.split(':').map(Number);
+                   const start = sh * 60 + sm;
+                   const end = eh * 60 + em;
+                   return { ...item, originalIndex: index, start, end, col: 0, totalCols: 1 };
+                });
+
+                // Simple column packing
+                const columns: number[] = []; // Stores end time of last event in each column
+                
+                layoutItems.forEach(item => {
+                  let placed = false;
+                  for (let i = 0; i < columns.length; i++) {
+                    if (columns[i] <= item.start) {
+                      item.col = i;
+                      columns[i] = item.end;
+                      placed = true;
+                      break;
+                    }
+                  }
+                  if (!placed) {
+                    item.col = columns.length;
+                    columns.push(item.end);
+                  }
+                });
+
+                // Update totalCols for all items to match the max columns needed
+                // Note: This is a simplification; for disconnected clusters it might squeeze needlessly, 
+                // but it guarantees no overlap. For a school schedule this is usually fine.
+                const maxCols = columns.length; 
+                
+                return (
+                  <div key={dayId} className="relative h-full border-r border-slate-100 dark:border-slate-800 last:border-r-0">
+                    {layoutItems.map((item, idx) => {
                       const top = getTimePosition(item.session.startTime);
                       const height = getDurationHeight(item.session.startTime, item.session.endTime);
+                      const width = 100 / maxCols;
+                      const left = item.col * width;
                       
                       return (
                         <div
                           key={`${item.activity.id}-${idx}`}
                           onClick={() => onActivityClick?.(item.activity)}
-                          className={`absolute left-1 right-1 rounded-xl p-2 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95 pointer-events-auto overflow-hidden ${item.activity.color || 'bg-blue-500'} text-white border-2 border-white dark:border-slate-900 shadow-md group`}
+                          className={`absolute rounded-xl p-2 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg active:scale-95 pointer-events-auto overflow-hidden ${item.activity.color || 'bg-blue-500'} text-white border-2 border-white dark:border-slate-900 shadow-md group`}
                           style={{
                             top: `${top}px`,
                             height: `${height}px`,
-                            zIndex: 10
+                            left: `${left}%`,
+                            width: `${width}%`,
+                            zIndex: 10 + item.col
                           }}
                         >
                           <div className="text-[9px] font-bold uppercase opacity-90 leading-none mb-1 truncate" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
@@ -116,13 +160,13 @@ export function ActivitiesCalendar({ activities, onActivityClick }: ActivitiesCa
                             {item.session.startTime} - {item.session.endTime}
                           </div>
                           
-                          {/* Tooltip on hover (built-in browser tooltip for simplicity or we can do more) */}
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
                         </div>
                       );
                     })}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
