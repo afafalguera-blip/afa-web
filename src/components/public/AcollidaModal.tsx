@@ -156,7 +156,7 @@ export function AcollidaModal({ isOpen, onClose }: AcollidaModalProps) {
                                     {/* Mobile Cards - Compact and Fixed */}
                                     <div className="md:hidden space-y-2">
                                         {rates.map((rate, index) => (
-                                            <div key={index} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-2.5 border border-slate-100 dark:border-slate-800">
+                                            <div key={index} className="bg-slate-50 dark:bg-slate-800 rounded-xl p-2.5 border border-slate-100 dark:border-slate-800">
                                                 <div className="flex items-center gap-1.5 mb-2 text-slate-900 dark:text-white font-black border-b border-slate-200 dark:border-slate-700 pb-1 text-[10px] uppercase">
                                                     <Clock size={12} className="text-primary" />
                                                     {rate.horari}

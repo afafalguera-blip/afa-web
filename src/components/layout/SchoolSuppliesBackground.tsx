@@ -66,7 +66,7 @@ export function SchoolSuppliesBackground() {
                         ease: "linear",
                         delay: item.delay
                     }}
-                    className="absolute text-primary/25 dark:text-primary/20"
+                    className="absolute text-primary/10 dark:text-primary/10 blur-[0.4px]"
                 >
                     <item.Icon size={item.size} strokeWidth={1.5} />
                 </motion.div>

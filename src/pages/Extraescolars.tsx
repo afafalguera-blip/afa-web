@@ -45,14 +45,14 @@ export function Extraescolars() {
     const translated = t(key as any);
     // If translation returns the key itself (miss), check common mappings or return capitalized
     if (translated === key) {
-        // Fallback for known hardcoded categories if they differ from keys
-        if (cat === 'sport' || cat === 'sports') return t('admin.editor.categories.sports');
-        if (cat === 'music') return t('admin.editor.categories.music');
-        if (cat === 'language' || cat === 'languages') return t('admin.editor.categories.languages');
-        if (cat === 'art' || cat === 'artistic') return t('admin.editor.categories.artistic');
-        if (cat === 'education' || cat === 'educational') return t('admin.editor.categories.educational');
-        
-        return cat.charAt(0).toUpperCase() + cat.slice(1);
+      // Fallback for known hardcoded categories if they differ from keys
+      if (cat === 'sport' || cat === 'sports') return t('admin.editor.categories.sports');
+      if (cat === 'music') return t('admin.editor.categories.music');
+      if (cat === 'language' || cat === 'languages') return t('admin.editor.categories.languages');
+      if (cat === 'art' || cat === 'artistic') return t('admin.editor.categories.artistic');
+      if (cat === 'education' || cat === 'educational') return t('admin.editor.categories.educational');
+
+      return cat.charAt(0).toUpperCase() + cat.slice(1);
     }
     return translated as string;
   };
@@ -62,9 +62,9 @@ export function Extraescolars() {
   const filteredActivities = activities.filter(activity => {
     const title = tContent(activity, 'title');
     const description = tContent(activity, 'description');
-    
+
     const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         description.toLowerCase().includes(searchQuery.toLowerCase());
+      description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -90,57 +90,54 @@ export function Extraescolars() {
         </div>
 
         <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl shadow-inner inline-flex self-start">
-            <button 
-                onClick={() => setViewMode('list')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${
-                    viewMode === 'list' 
-                    ? 'bg-white dark:bg-slate-700 text-primary shadow-md' 
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-            >
-                <LayoutGrid className="w-4 h-4" /> {t('common.list')}
-            </button>
-            <button 
-                onClick={() => setViewMode('calendar')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${
-                    viewMode === 'calendar' 
-                    ? 'bg-white dark:bg-slate-700 text-primary shadow-md' 
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-            >
-                <CalendarIcon className="w-4 h-4" /> {t('home.calendar')}
-            </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${viewMode === 'list'
+                ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+          >
+            <LayoutGrid className="w-4 h-4" /> {t('common.list')}
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${viewMode === 'calendar'
+                ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+          >
+            <CalendarIcon className="w-4 h-4" /> {t('home.calendar')}
+          </button>
         </div>
       </div>
 
       {viewMode === 'list' && (
-          <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                    type="text"
-                    placeholder={t('common.search')}
-                    className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none shadow-sm"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-                  {categories.map(cat => (
-                      <button
-                          key={cat}
-                          onClick={() => setSelectedCategory(cat)}
-                          className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${
-                              selectedCategory === cat
-                              ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
-                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'
-                          }`}
-                      >
-                          {tCategory(cat)}
-                      </button>
-                  ))}
-              </div>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder={t('common.search')}
+              className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none shadow-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat
+                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'
+                  }`}
+              >
+                {tCategory(cat)}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Special Offer Banner */}
@@ -156,7 +153,7 @@ export function Extraescolars() {
               {t('inscription.pricing.offer_banner_body')}
             </p>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/extraescolars/inscripcio')}
             className="px-6 py-3 bg-white text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-50 transition-colors shadow-lg whitespace-nowrap"
           >
@@ -167,93 +164,93 @@ export function Extraescolars() {
 
       <div className="transition-all duration-300">
         {viewMode === 'list' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredActivities.map((activity) => (
-                    <div 
-                      key={activity.id} 
-                      onClick={() => {
-                          setSelectedActivity({
-                              ...activity,
-                              image: activity.image_url
-                          });
-                          setIsModalOpen(true);
-                      }}
-                      className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-white/5 group transition-all active:scale-[0.98] hover:shadow-md hover:scale-[1.01] flex flex-col cursor-pointer relative"
-                    >
-                      {isAdmin && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate('/admin/activities');
-                          }}
-                          className="absolute top-4 right-4 z-30 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 scale-0 group-hover:scale-100 transition-transform flex items-center gap-1 text-xs px-3"
-                        >
-                          <Edit size={14} />
-                          {t('common.edit')}
-                        </button>
-                      )}
-                      <div className="relative h-44 overflow-hidden shrink-0">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                        <img src={activity.image_url} alt={tContent(activity, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <span className={`absolute top-4 right-4 ${activity.color || 'bg-blue-500'}/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider z-20`}>
-                          {tCategory(activity.category)}
-                        </span>
-                      </div>
-                      <div className="p-5 flex flex-col flex-1">
-                        <div className="flex justify-between items-start mb-3">
-                          <h3 className="text-xl font-bold text-slate-800 dark:text-white leading-tight">{tContent(activity, 'title')}</h3>
-                          <div className="text-right shrink-0 ml-2">
-                            <div className="flex flex-col items-end">
-                              <p className="text-lg font-bold text-primary">
-                                {activity.price_member || activity.price}€
-                                <span className="text-[10px] font-medium text-slate-400 ml-1">({t('inscription.pricing.price_member')})</span>
-                              </p>
-                              {activity.price_non_member && (
-                                <p className="text-sm font-bold text-slate-400 -mt-1">
-                                  {activity.price_non_member}€
-                                  <span className="text-[9px] font-medium text-slate-400/70 ml-1">({t('inscription.pricing.price_non_member')})</span>
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-2 mb-6 flex-1">
-                          <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
-                            <CalendarIcon className="text-primary w-4 h-4 mr-2 shrink-0" />
-                            <span className="truncate">{tContent(activity, 'schedule_summary')}</span>
-                          </div>
-                          <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
-                            <User className="text-primary w-4 h-4 mr-2 shrink-0" />
-                            <span className="truncate">{tContent(activity, 'grades')}</span>
-                          </div>
-                        </div>
-                        <button className="w-full py-3.5 bg-primary hover:bg-opacity-90 text-white font-semibold rounded-2xl shadow-lg shadow-primary/20 transition-all">
-                          {t('home.view_details')}
-                        </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredActivities.map((activity) => (
+              <div
+                key={activity.id}
+                onClick={() => {
+                  setSelectedActivity({
+                    ...activity,
+                    image: activity.image_url
+                  });
+                  setIsModalOpen(true);
+                }}
+                className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-white/5 group transition-all active:scale-[0.98] hover:shadow-md hover:scale-[1.01] flex flex-col cursor-pointer relative z-10"
+              >
+                {isAdmin && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/admin/activities');
+                    }}
+                    className="absolute top-4 right-4 z-30 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 scale-0 group-hover:scale-100 transition-transform flex items-center gap-1 text-xs px-3"
+                  >
+                    <Edit size={14} />
+                    {t('common.edit')}
+                  </button>
+                )}
+                <div className="relative h-44 overflow-hidden shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+                  <img src={activity.image_url} alt={tContent(activity, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <span className={`absolute top-4 right-4 ${activity.color || 'bg-blue-500'}/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider z-20`}>
+                    {tCategory(activity.category)}
+                  </span>
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-white leading-tight">{tContent(activity, 'title')}</h3>
+                    <div className="text-right shrink-0 ml-2">
+                      <div className="flex flex-col items-end">
+                        <p className="text-lg font-bold text-primary">
+                          {activity.price_member || activity.price}€
+                          <span className="text-[10px] font-medium text-slate-400 ml-1">({t('inscription.pricing.price_member')})</span>
+                        </p>
+                        {activity.price_non_member && (
+                          <p className="text-sm font-bold text-slate-400 -mt-1">
+                            {activity.price_non_member}€
+                            <span className="text-[9px] font-medium text-slate-400/70 ml-1">({t('inscription.pricing.price_non_member')})</span>
+                          </p>
+                        )}
                       </div>
                     </div>
-                ))}
-            </div>
+                  </div>
+                  <div className="space-y-2 mb-6 flex-1">
+                    <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
+                      <CalendarIcon className="text-primary w-4 h-4 mr-2 shrink-0" />
+                      <span className="truncate">{tContent(activity, 'schedule_summary')}</span>
+                    </div>
+                    <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
+                      <User className="text-primary w-4 h-4 mr-2 shrink-0" />
+                      <span className="truncate">{tContent(activity, 'grades')}</span>
+                    </div>
+                  </div>
+                  <button className="w-full py-3.5 bg-primary hover:bg-opacity-90 text-white font-semibold rounded-2xl shadow-lg shadow-primary/20 transition-all">
+                    {t('home.view_details')}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-            <ActivitiesCalendar 
-                activities={activities} 
-                onActivityClick={(activity) => {
-                    setSelectedActivity({
-                        ...activity,
-                        image: activity.image_url
-                    });
-                    setIsModalOpen(true);
-                }}
-            />
+          <ActivitiesCalendar
+            activities={activities}
+            onActivityClick={(activity) => {
+              setSelectedActivity({
+                ...activity,
+                image: activity.image_url
+              });
+              setIsModalOpen(true);
+            }}
+          />
         )}
       </div>
 
       {selectedActivity && (
-        <ActivityDetailModal 
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            activity={selectedActivity}
-            onSignUp={() => navigate('/extraescolars/inscripcio')}
+        <ActivityDetailModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          activity={selectedActivity}
+          onSignUp={() => navigate('/extraescolars/inscripcio')}
         />
       )}
     </div>

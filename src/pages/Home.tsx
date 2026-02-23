@@ -210,7 +210,7 @@ export function Home() {
               <div
                 key={item.id}
                 onClick={() => handleOpenDetail(item)}
-                className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative cursor-pointer"
+                className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative cursor-pointer z-10"
               >
                 {isAdmin && (
                   <button
@@ -300,7 +300,7 @@ export function Home() {
               const month = date.toLocaleDateString(i18n.language, { month: 'short' });
 
               return (
-                <div key={event.id} className="flex items-center gap-4 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow group">
+                <div key={event.id} className="flex items-center gap-4 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow group relative z-10">
                   <div
                     className="w-14 h-14 flex flex-col items-center justify-center rounded-xl text-secondary dark:text-primary transition-colors"
                     style={{ backgroundColor: event.color ? `${event.color}15` : 'rgba(var(--color-primary), 0.1)' }}
@@ -367,8 +367,8 @@ export function Home() {
 
 
 
-      <section className="px-6 mt-4 mb-12">
-        <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <section className="px-6 mt-4 mb-12 relative z-10">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm">
           <button
             onClick={() => setAboutExpanded(!aboutExpanded)}
             className="w-full flex items-center justify-between p-5 text-left"

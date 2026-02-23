@@ -1,0 +1,45 @@
+Type of pdf: object
+pdf export: Object [Module] {
+  AbortException: [class gr extends Error],
+  FormatError: [class dr extends Error],
+  InvalidPDFException: [class hr extends Error],
+  Line: [class yr extends fr],
+  LineDirection: {
+    '0': 'None',
+    '1': 'Horizontal',
+    '2': 'Vertical',
+    None: 0,
+    Horizontal: 1,
+    Vertical: 2
+  },
+  LineStore: [class Ar],
+  PDFParse: [class (anonymous)],
+  PasswordException: [class cr extends Error],
+  Point: [class br extends fr],
+  Rectangle: [class _r extends fr],
+  ResponseException: [class pr extends Error],
+  Shape: [class fr] { tolerance: 2 },
+  Table: [class xr],
+  UnknownErrorException: [class ur extends Error],
+  VerbosityLevel: { ERRORS: 0, WARNINGS: 1, INFOS: 5 },
+  getException: [Function: mr]
+}
+Reading PDF from: c:\Users\Administrator\Desktop\Proyectos\AFA\25-26 ASSEMBLEA GENERAL AFA ESCOLA FALGUERA.pdf
+PDF parse library not loaded correctly. Keys: [
+  'AbortException',
+  'FormatError',
+  'InvalidPDFException',
+  'Line',
+  'LineDirection',
+  'LineStore',
+  'PDFParse',
+  'PasswordException',
+  'Point',
+  'Rectangle',
+  'ResponseException',
+  'Shape',
+  'Table',
+  'UnknownErrorException',
+  'VerbosityLevel',
+  'getException'
+]
