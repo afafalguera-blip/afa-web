@@ -13,6 +13,7 @@
     "extraescolars": "Extraescolars",
     "fees": "Quotes",
     "calendar": "Calendari",
+    "acollida": "Acollida",
     "course_current": "Curs 2025 - 2026",
     "view_details": "Veure Detalls",
     "news_title": "Últimes Notícies",
@@ -322,6 +323,16 @@
       "english": "Anglès",
       "skating": "Patinatge",
       "drums": "Timbals"
+    },
+    "acollida_modal": {
+      "title": "SERVEI D'ACOLLIDA",
+      "subtitle": "Horaris i tarifes del curs actual",
+      "horari": "Horari",
+      "price_member": "Preu Soci",
+      "price_non_member": "Preu No Soci",
+      "per_month": "mes",
+      "occasional": "ocasional",
+      "footer_note": "Els preus ocasionals s'apliquen a dies puntuals. Per a més informació o inscripcions permanents, contacteu amb l'AFA."
     }
   },
   "admin": {
@@ -341,8 +352,16 @@
       "news": "Notícies",
       "projects": "Projectes",
       "calendar": "Calendari Gen.",
+      "acollida": "Gestió Acollida",
       "observability": "Auditoria",
       "logout": "Tancar Sessió"
+    },
+    "acollidaManager": {
+      "addRate": "Afegir Nova Tarifa",
+      "adminNote": {
+        "title": "Nota per a l'Administrador",
+        "description": "Els canvis realitzats aquí es reflectiran immediatament en el modal públic de la pàgina d'inici. Assegura't d'incloure el símbol d'Euro (€) per mantenir la consistència visual."
+      }
     },
     "dashboard": {
       "title": "Inscripcions",

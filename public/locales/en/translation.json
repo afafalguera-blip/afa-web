@@ -13,6 +13,7 @@
     "extraescolars": "Activities",
     "fees": "Fees",
     "calendar": "Calendar",
+    "acollida": "Childcare",
     "course_current": "Year 2025 - 2026",
     "view_details": "View Details",
     "news_title": "Latest News",
@@ -320,9 +321,44 @@
       "english": "English",
       "skating": "Skating",
       "drums": "Drums"
+    },
+    "acollida_modal": {
+      "title": "CHILDCARE SERVICE",
+      "subtitle": "Schedules and rates for the current school year",
+      "horari": "Schedule",
+      "price_member": "Member Price",
+      "price_non_member": "Non-Member Price",
+      "per_month": "month",
+      "occasional": "occasional",
+      "footer_note": "Occasional prices apply to single days. For more information or permanent registrations, contact the AFA."
     }
   },
   "admin": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "management": "Management",
+      "inscriptions": "Inscriptions",
+      "payments": "Payments",
+      "activities": "Activities",
+      "finances": "Finances",
+      "shop": "Shop",
+      "orders": "Orders",
+      "inventory": "Inventory",
+      "content": "Content",
+      "news": "News",
+      "projects": "Projects",
+      "calendar": "Main Calendar",
+      "acollida": "Childcare Management",
+      "observability": "Auditing",
+      "logout": "Logout"
+    },
+    "acollidaManager": {
+      "addRate": "Add New Rate",
+      "adminNote": {
+        "title": "Note for Administrator",
+        "description": "Changes made here will be reflected immediately in the public modal on the home page. Make sure to include the Euro symbol (€) for visual consistency."
+      }
+    },
     "editor": {
       "edit_title": "Edit Activity",
       "new_title": "New Activity",
@@ -375,6 +411,7 @@
     "error_generic": "An error occurred",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "close": "Close",
     "save": "Save",
     "saving": "Saving...",
     "edit": "Edit",

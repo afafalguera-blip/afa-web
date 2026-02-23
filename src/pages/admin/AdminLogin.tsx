@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthService } from '../../services/AuthService';
 import { Lock, User, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { SchoolSuppliesBackground } from '../../components/layout/SchoolSuppliesBackground';
 
 export function AdminLogin() {
   const [username, setUsername] = useState('');
@@ -17,7 +18,7 @@ export function AdminLogin() {
     setError(null);
 
     const result = await AuthService.login(username, password);
-    
+
     if (result.success) {
       navigate('/admin/dashboard');
     } else {
@@ -27,8 +28,9 @@ export function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-600 to-purple-700">
-      <div className="bg-white/95 backdrop-blur-md w-full max-w-md p-8 rounded-2xl shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-600 to-purple-700 relative overflow-hidden">
+      <SchoolSuppliesBackground />
+      <div className="bg-white/95 backdrop-blur-md w-full max-w-md p-8 rounded-2xl shadow-2xl relative z-10">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30">
             <Lock className="w-8 h-8 text-white" />
@@ -42,8 +44,8 @@ export function AdminLogin() {
             <label className="block text-sm font-medium text-slate-700 mb-2">Usuari</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -57,7 +59,7 @@ export function AdminLogin() {
             <label className="block text-sm font-medium text-slate-700 mb-2">Contrasenya</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input 
+              <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -65,7 +67,7 @@ export function AdminLogin() {
                 className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                 placeholder="Ingressa la teva contrasenya"
               />
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
@@ -82,8 +84,8 @@ export function AdminLogin() {
             </div>
           )}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-3 px-4 rounded-xl font-semibold shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
@@ -99,9 +101,9 @@ export function AdminLogin() {
         </form>
 
         <div className="mt-8 text-center">
-            <a href="/" className="text-sm text-slate-500 hover:text-blue-600 transition-colors">
-                ← Tornar a l'inici
-            </a>
+          <a href="/" className="text-sm text-slate-500 hover:text-blue-600 transition-colors">
+            ← Tornar a l'inici
+          </a>
         </div>
       </div>
     </div>

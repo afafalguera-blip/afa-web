@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  LayoutDashboard, 
-  Users, 
-  CreditCard, 
-  LogOut, 
-  Menu, 
-  X, 
-  TrendingUp, 
-  Calendar, 
-  Newspaper, 
+import {
+  LayoutDashboard,
+  Users,
+  CreditCard,
+  LogOut,
+  Menu,
+  X,
+  TrendingUp,
+  Calendar,
+  Newspaper,
   FolderHeart,
   CalendarRange,
   History,
@@ -36,9 +36,9 @@ export function AdminLayout() {
       if (!user) {
         navigate('/login');
       } else if (profile && profile.role !== 'admin') {
-         // Optionally show unauthorised page or redirect to /botiga
-         alert(t('admin.access_denied'));
-         navigate('/botiga');
+        // Optionally show unauthorised page or redirect to /botiga
+        alert(t('admin.access_denied'));
+        navigate('/botiga');
       }
     }
   }, [user, profile, loading, navigate]);
@@ -49,18 +49,18 @@ export function AdminLayout() {
   };
 
   if (loading) return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
   );
-  
+
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -75,7 +75,7 @@ export function AdminLayout() {
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             {t('admin.title')}
           </h1>
-          <button 
+          <button
             className="ml-auto lg:hidden"
             onClick={() => setSidebarOpen(false)}
           >
@@ -84,13 +84,13 @@ export function AdminLayout() {
         </div>
 
         <nav className="p-4 space-y-1">
-          <NavLink 
+          <NavLink
             to="/admin/dashboard"
             onClick={() => setSidebarOpen(false)}
             className={({ isActive }) => `
               flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-              ${isActive 
-                ? 'bg-blue-50 text-blue-700 shadow-sm' 
+              ${isActive
+                ? 'bg-blue-50 text-blue-700 shadow-sm'
                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
             `}
           >
@@ -102,26 +102,26 @@ export function AdminLayout() {
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
               {t('admin.sidebar.management')}
             </p>
-            <NavLink 
+            <NavLink
               to="/admin/inscriptions"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
               <Users className="w-5 h-5" />
               {t('admin.sidebar.inscriptions')}
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/admin/payments"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
@@ -129,13 +129,13 @@ export function AdminLayout() {
               <CreditCard className="w-5 h-5" />
               {t('admin.sidebar.payments')}
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/admin/finances"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
@@ -150,26 +150,26 @@ export function AdminLayout() {
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
               {t('admin.sidebar.shop')}
             </p>
-            <NavLink 
+            <NavLink
               to="/admin/shop/orders"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
               <CreditCard className="w-5 h-5" />
               {t('admin.sidebar.orders')}
             </NavLink>
-             <NavLink 
+            <NavLink
               to="/admin/shop/inventory"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
@@ -182,26 +182,26 @@ export function AdminLayout() {
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
               {t('admin.sidebar.content')}
             </p>
-            <NavLink 
+            <NavLink
               to="/admin/activities"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
               <Calendar className="w-5 h-5" />
               {t('admin.sidebar.activities')}
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/admin/news"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
@@ -209,65 +209,78 @@ export function AdminLayout() {
               {t('admin.sidebar.news')}
             </NavLink>
 
-            <NavLink 
+            <NavLink
               to="/admin/projects"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
               <FolderHeart className="w-5 h-5" />
               {t('admin.sidebar.projects')}
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/admin/calendar"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
               <CalendarRange className="w-5 h-5" />
               {t('admin.sidebar.calendar')}
             </NavLink>
-            <NavLink 
+            <NavLink
+              to="/admin/acollida"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <Users className="w-5 h-5" />
+              {t('admin.sidebar.acollida')}
+            </NavLink>
+            <NavLink
               to="/admin/notifications"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
               <Bell className="w-5 h-5" />
               Notificaciones
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/admin/documents"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
               <FolderHeart className="w-5 h-5" />
               Documentos
             </NavLink>
-            <NavLink 
+            <NavLink
               to="/admin/observability"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
                 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive 
-                  ? 'bg-blue-50 text-blue-700 shadow-sm' 
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
@@ -287,7 +300,7 @@ export function AdminLayout() {
               <p className="text-xs text-slate-500 capitalize">{profile?.role || 'User'}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-white hover:text-red-600 transition-colors"
           >
@@ -301,7 +314,7 @@ export function AdminLayout() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
         <header className="bg-white border-b border-slate-200 lg:hidden px-4 h-16 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 -ml-2 text-slate-500"
           >

@@ -20,6 +20,7 @@ import EventsManager from './pages/admin/EventsManager';
 import NotificationManager from './pages/admin/NotificationManager';
 import DocumentsManager from './pages/admin/DocumentsManager';
 import AdminObservability from './pages/admin/AdminObservability';
+import AcollidaManager from './pages/admin/AcollidaManager';
 
 import { NewsPage } from './pages/NewsPage';
 import { AssembleaPage } from './pages/AssembleaPage';
@@ -45,7 +46,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          
+
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="extraescolars" element={<Extraescolars />} />
@@ -58,23 +59,24 @@ function App() {
             <Route path="documents" element={<DocumentsPage />} />
             {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
           </Route>
-          
+
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
-             {/* ... admin routes */}
-             <Route path="dashboard" element={<Dashboard />} />
-             <Route path="inscriptions" element={<InscriptionsPage />} />
-             <Route path="payments" element={<PaymentsPage />} />
-             <Route path="finances" element={<FinanceDashboard />} />
-             <Route path="shop/inventory" element={<InventoryPage />} />
-             <Route path="shop/orders" element={<OrdersPage />} />
-             <Route path="activities" element={<ActivitiesManager />} />
-             <Route path="news" element={<NewsManager />} />
-             <Route path="projects" element={<ProjectsManager />} />
-             <Route path="calendar" element={<EventsManager />} />
-             <Route path="documents" element={<DocumentsManager />} />
-             <Route path="notifications" element={<NotificationManager />} />
-             <Route path="observability" element={<AdminObservability />} />
+            {/* ... admin routes */}
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="inscriptions" element={<InscriptionsPage />} />
+            <Route path="payments" element={<PaymentsPage />} />
+            <Route path="finances" element={<FinanceDashboard />} />
+            <Route path="shop/inventory" element={<InventoryPage />} />
+            <Route path="shop/orders" element={<OrdersPage />} />
+            <Route path="activities" element={<ActivitiesManager />} />
+            <Route path="news" element={<NewsManager />} />
+            <Route path="projects" element={<ProjectsManager />} />
+            <Route path="calendar" element={<EventsManager />} />
+            <Route path="documents" element={<DocumentsManager />} />
+            <Route path="notifications" element={<NotificationManager />} />
+            <Route path="acollida" element={<AcollidaManager />} />
+            <Route path="observability" element={<AdminObservability />} />
           </Route>
         </Routes>
       </BrowserRouter>

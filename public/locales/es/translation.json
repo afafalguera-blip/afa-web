@@ -13,6 +13,7 @@
     "extraescolars": "Extraescolares",
     "fees": "Cuotas",
     "calendar": "Calendario",
+    "acollida": "Acogida",
     "course_current": "Curso 2025 - 2026",
     "view_details": "Ver Detalles",
     "news_title": "Últimas Noticias",
@@ -321,6 +322,16 @@
       "english": "Inglés",
       "skating": "Patinaje",
       "drums": "Timbales"
+    },
+    "acollida_modal": {
+      "title": "SERVICIO DE ACOGIDA",
+      "subtitle": "Horarios y tarifas del curso actual",
+      "horari": "Horario",
+      "price_member": "Precio Socio",
+      "price_non_member": "Precio No Socio",
+      "per_month": "mes",
+      "occasional": "ocasional",
+      "footer_note": "Los precios ocasionales se aplican a días puntuales. Para más información o inscripciones permanentes, contactad con el AFA."
     }
   },
   "admin": {
@@ -340,8 +351,16 @@
       "news": "Noticias",
       "projects": "Proyectos",
       "calendar": "Calendario Gen.",
+      "acollida": "Gestión Acogida",
       "observability": "Auditoría",
       "logout": "Cerrar Sesión"
+    },
+    "acollidaManager": {
+      "addRate": "Añadir Nueva Tarifa",
+      "adminNote": {
+        "title": "Nota para el Administrador",
+        "description": "Los cambios realizados aquí se reflejarán inmediatamente en el modal público de la página de inicio. Asegúrate de incluir el símbolo de Euro (€) para mantener la consistencia visual."
+      }
     },
       "dashboard": {
         "title": "Inscripciones",
@@ -593,10 +612,10 @@
     "error_generic": "Se ha producido un error",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
+    "close": "Cerrar",
     "save": "Guardar",
     "saving": "Guardando...",
     "edit": "Editar",
-    "close": "Cerrar",
     "delete": "Eliminar",
     "refresh": "Actualizar",
     "read_more_external": "Leer noticia original",

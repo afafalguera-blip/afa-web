@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { FeaturedProjects } from '../components/public/FeaturedProjects';
 import { NewsDetailModal } from '../components/public/NewsDetailModal';
+import { AcollidaModal } from '../components/public/AcollidaModal';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -47,6 +48,7 @@ export function Home() {
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isAcollidaModalOpen, setIsAcollidaModalOpen] = useState(false);
 
   useEffect(() => {
     fetchNews();
@@ -99,22 +101,22 @@ export function Home() {
 
       {/* Hero Section - Responsive */}
       <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none">
-        <img 
+        <img
           src="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/sign/Imagenes/hero_escuela.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84NjM3Yjc4My1lYzY4LTRjMjMtYmMyNS04MTA2ODk5ZjhjMGIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZW5lcy9oZXJvX2VzY3VlbGEucG5nIiwiaWF0IjoxNzY5NTU0NjAxLCJleHAiOjMzMzA1NTU0NjAxfQ.fZrP8adLhMw8UjClDHTCdao7eDbB-2-8tgQBTlhpOwQ"
           alt="Escola Hero"
           className="w-full h-full object-cover bg-slate-200"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4 lg:p-8">
-            <h1 className="hidden lg:block text-4xl font-bold text-white drop-shadow-md leading-tight">
-                {t('home.welcome_title' as any) || "Benvinguts a l'AFA Falguera"}
-            </h1>
+          <h1 className="hidden lg:block text-4xl font-bold text-white drop-shadow-md leading-tight">
+            {t('home.welcome_title' as any) || "Benvinguts a l'AFA Falguera"}
+          </h1>
         </div>
       </div>
-      
+
       {/* Navigation: Mobile Grid | Desktop Floating Pill */}
       <section className="px-6 py-4 relative z-20 mb-6">
         {/* Mobile Grid */}
-        <div className="grid grid-cols-3 gap-6 lg:hidden">
+        <div className="grid grid-cols-4 gap-4 lg:hidden">
           <Link to="/extraescolars" className="flex flex-col items-center gap-1.5 group">
             <div className="w-14 h-14 flex items-center justify-center bg-primary rounded-2xl text-white shadow-lg shadow-primary/20 group-active:scale-95 transition-transform">
               <span className="material-icons-round text-2xl">sports_soccer</span>
@@ -133,36 +135,57 @@ export function Home() {
             </div>
             <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.calendar')}</span>
           </Link>
+          <button
+            onClick={() => setIsAcollidaModalOpen(true)}
+            className="flex flex-col items-center gap-1.5 group"
+          >
+            <div className="w-14 h-14 flex items-center justify-center bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-2xl">home_work</span>
+            </div>
+            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.acollida')}</span>
+          </button>
         </div>
 
         {/* Desktop Floating Pill Nav */}
         <div className="hidden lg:flex justify-center">
-            <div className="bg-white dark:bg-slate-800 rounded-full shadow-xl shadow-slate-200/50 dark:shadow-black/50 p-2 flex items-center gap-2 border border-slate-100 dark:border-slate-700">
-                <Link to="/extraescolars" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
-                    <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                        <span className="material-icons-round">sports_soccer</span>
-                    </div>
-                    <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.extraescolars')}</span>
-                </Link>
+          <div className="bg-white dark:bg-slate-800 rounded-full shadow-xl shadow-slate-200/50 dark:shadow-black/50 p-2 flex items-center gap-2 border border-slate-100 dark:border-slate-700">
+            <Link to="/extraescolars" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
+              <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                <span className="material-icons-round">sports_soccer</span>
+              </div>
+              <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.extraescolars')}</span>
+            </Link>
 
-                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
 
-                <Link to="/quotes" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
-                    <div className="w-10 h-10 bg-secondary/10 text-secondary rounded-full flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors">
-                        <span className="material-icons-round">payments</span>
-                    </div>
-                    <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.fees')}</span>
-                </Link>
-                
-                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+            <Link to="/quotes" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
+              <div className="w-10 h-10 bg-secondary/10 text-secondary rounded-full flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors">
+                <span className="material-icons-round">payments</span>
+              </div>
+              <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.fees')}</span>
+            </Link>
 
-                <Link to="/calendari" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
-                    <div className="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                        <span className="material-icons-round">calendar_today</span>
-                    </div>
-                    <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.calendar')}</span>
-                </Link>
-            </div>
+            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+
+            <Link to="/calendari" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <span className="material-icons-round">calendar_today</span>
+              </div>
+              <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.calendar')}</span>
+            </Link>
+
+            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+
+            <button
+              onClick={() => setIsAcollidaModalOpen(true)}
+              className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group"
+            >
+              <div className="w-10 h-10 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                <span className="material-icons-round">home_work</span>
+              </div>
+              <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.acollida')}</span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -171,20 +194,20 @@ export function Home() {
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('home.news_title')}</h2>
           <Link to="/noticies" className="text-sm font-semibold text-primary">{t('home.see_all')}</Link>
         </div>
-        
+
         {/* Mobile: Horizontal Scroll | Desktop: Grid */}
         <div className="flex overflow-x-auto px-6 gap-4 hide-scrollbar snap-x pb-4 lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0">
           {loadingNews ? (
-             Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="min-w-[85%] lg:min-w-0 bg-slate-100 dark:bg-slate-800 rounded-3xl h-64 animate-pulse"></div>
-             ))
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="min-w-[85%] lg:min-w-0 bg-slate-100 dark:bg-slate-800 rounded-3xl h-64 animate-pulse"></div>
+            ))
           ) : news.length === 0 ? (
-             <div className="col-span-3 py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
-                {t('common.no_news' as any) || "No hi ha notícies actualment"}
-             </div>
+            <div className="col-span-3 py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+              {t('common.no_news' as any) || "No hi ha notícies actualment"}
+            </div>
           ) : (
             news.map((item) => (
-              <div 
+              <div
                 key={item.id}
                 onClick={() => handleOpenDetail(item)}
                 className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative cursor-pointer"
@@ -201,11 +224,11 @@ export function Home() {
                     {t('common.edit')}
                   </button>
                 )}
-                
+
                 <div className="h-40 bg-slate-200 relative overflow-hidden">
-                  <img 
-                    alt={item.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  <img
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     src={item.image_url || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}
                   />
                   <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
@@ -231,7 +254,7 @@ export function Home() {
                         {item.sources || 'Font externa'}
                       </span>
                       {item.news_url && (
-                        <a 
+                        <a
                           href={item.news_url}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -256,7 +279,7 @@ export function Home() {
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('home.events_title')}</h2>
           <Link to="/calendari" className="text-sm font-semibold text-primary">{t('home.see_all')}</Link>
         </div>
-        
+
         <div className="space-y-4">
           {loadingEvents ? (
             <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-2xl animate-pulse">
@@ -275,10 +298,10 @@ export function Home() {
               const date = new Date(event.event_date);
               const day = date.getDate();
               const month = date.toLocaleDateString(i18n.language, { month: 'short' });
-              
+
               return (
                 <div key={event.id} className="flex items-center gap-4 bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow group">
-                  <div 
+                  <div
                     className="w-14 h-14 flex flex-col items-center justify-center rounded-xl text-secondary dark:text-primary transition-colors"
                     style={{ backgroundColor: event.color ? `${event.color}15` : 'rgba(var(--color-primary), 0.1)' }}
                   >
@@ -304,7 +327,7 @@ export function Home() {
       </section>
 
       <section className="px-6 mt-6 mb-8">
-        <Link 
+        <Link
           to="/assemblea"
           className="block bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group relative overflow-hidden"
         >
@@ -329,10 +352,15 @@ export function Home() {
         </Link>
       </section>
 
-      <NewsDetailModal 
+      <NewsDetailModal
         article={selectedArticle}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
+      />
+
+      <AcollidaModal
+        isOpen={isAcollidaModalOpen}
+        onClose={() => setIsAcollidaModalOpen(false)}
       />
 
       <FeaturedProjects />
@@ -340,41 +368,41 @@ export function Home() {
 
 
       <section className="px-6 mt-4 mb-12">
-         <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden">
-            <button 
-                onClick={() => setAboutExpanded(!aboutExpanded)}
-                className="w-full flex items-center justify-between p-5 text-left"
-            >
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center text-primary">
-                        <span className="material-icons-round">info</span>
-                    </div>
-                    <h2 className="font-bold text-lg text-slate-900 dark:text-white">{t('home.about_title')}</h2>
-                </div>
-                {aboutExpanded ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
-            </button>
-            
-            {aboutExpanded && (
-                <div className="px-5 pb-5 text-sm text-slate-600 dark:text-slate-300 space-y-4 animate-in slide-in-from-top-2">
-                    <p>{t('home.about_text_1')}</p>
-                    <p>{t('home.about_text_2')}</p>
-                    <p>{t('home.about_text_3')}</p>
-                    
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
-                        <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
-                        <ul className="list-disc pl-4 space-y-1 marker:text-primary">
-                            {((t('home.about_functions', { returnObjects: true }) as any) || []).map((func: string, i: number) => (
-                                <li key={i}>{func}</li>
-                            ))}
-                        </ul>
-                    </div>
+        <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+          <button
+            onClick={() => setAboutExpanded(!aboutExpanded)}
+            className="w-full flex items-center justify-between p-5 text-left"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center text-primary">
+                <span className="material-icons-round">info</span>
+              </div>
+              <h2 className="font-bold text-lg text-slate-900 dark:text-white">{t('home.about_title')}</h2>
+            </div>
+            {aboutExpanded ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
+          </button>
 
-                    <p className="text-xs italic text-slate-500 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20">
-                        {t('home.about_contact')}
-                    </p>
-                </div>
-            )}
-         </div>
+          {aboutExpanded && (
+            <div className="px-5 pb-5 text-sm text-slate-600 dark:text-slate-300 space-y-4 animate-in slide-in-from-top-2">
+              <p>{t('home.about_text_1')}</p>
+              <p>{t('home.about_text_2')}</p>
+              <p>{t('home.about_text_3')}</p>
+
+              <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
+                <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
+                <ul className="list-disc pl-4 space-y-1 marker:text-primary">
+                  {((t('home.about_functions', { returnObjects: true }) as any) || []).map((func: string, i: number) => (
+                    <li key={i}>{func}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <p className="text-xs italic text-slate-500 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20">
+                {t('home.about_contact')}
+              </p>
+            </div>
+          )}
+        </div>
       </section>
     </>
   );
