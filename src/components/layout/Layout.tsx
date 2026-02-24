@@ -10,13 +10,13 @@ export function Layout() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300 relative overflow-x-hidden">
       <SchoolSuppliesBackground />
 
-      <AnnouncementBanner />
-
       <DesktopNav />
       <MobileTopNav />
 
       {/* Status bar spacer - Mobile only (adjusted for new TopNav) */}
       <div className="h-16 w-full lg:hidden"></div>
+
+      <AnnouncementBanner />
 
       <main className="pb-24 lg:pb-12 max-w-7xl mx-auto w-full">
         <Outlet />
