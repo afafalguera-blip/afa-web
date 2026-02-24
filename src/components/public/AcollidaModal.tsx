@@ -17,15 +17,9 @@ interface AcollidaModalProps {
     onClose: () => void;
 }
 
-const defaultRates: AcollidaRate[] = [
-    { horari: '7:30H A 9H', preu_soci_mes: '64€', preu_soci_ocasional: '10€', preu_no_soci_mes: '68€', preu_no_soci_ocasional: '14€' },
-    { horari: '8H A 9H', preu_soci_mes: '46€', preu_soci_ocasional: '7€', preu_no_soci_mes: '50€', preu_no_soci_ocasional: '11€' },
-    { horari: '8:30H A 9H', preu_soci_mes: '27€', preu_soci_ocasional: '4€', preu_no_soci_mes: '31€', preu_no_soci_ocasional: '8€' }
-];
-
 export function AcollidaModal({ isOpen, onClose }: AcollidaModalProps) {
     const { t } = useTranslation();
-    const [rates, setRates] = useState<AcollidaRate[]>(defaultRates);
+    const [rates, setRates] = useState<AcollidaRate[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -36,16 +30,15 @@ export function AcollidaModal({ isOpen, onClose }: AcollidaModalProps) {
 
     const fetchRates = async () => {
         try {
+            setLoading(true);
             const { data, error } = await supabase
                 .from('acollida_rates')
                 .select('*')
                 .order('order_index', { ascending: true });
 
             if (error) throw error;
-            if (data && data.length > 0) {
-                // Filter out "Tarda" if it comes from the DB
-                const filtered = data.filter(r => !r.horari.toUpperCase().includes('TARDA'));
-                setRates(filtered.length > 0 ? filtered : defaultRates);
+            if (data) {
+                setRates(data);
             }
         } catch (err) {
             console.error('Error fetching acollida rates:', err);

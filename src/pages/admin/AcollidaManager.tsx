@@ -67,11 +67,7 @@ export default function AcollidaManager() {
         setSaving(true);
         setError(null);
         try {
-            // Since we don't have the table yet in some environments, we simulate it or use local storage
-            // but for this project we assume the table exists as I requested SQL execution.
-            // We do an upsert or clear and insert.
-
-            // First, delete existing
+            // First, delete existing to replace with the current list
             const { error: delError } = await supabase
                 .from('acollida_rates')
                 .delete()
