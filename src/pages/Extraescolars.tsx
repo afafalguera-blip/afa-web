@@ -8,6 +8,7 @@ import { useContentTranslation } from '../hooks/useContentTranslation';
 import { ActivityService } from '../services/ActivityService';
 import type { Activity } from '../services/ActivityService';
 import { useAuth } from '../contexts/AuthContext';
+import { LazyImage } from '../components/common/LazyImage';
 
 export function Extraescolars() {
   const { t } = useTranslation();
@@ -197,7 +198,7 @@ export function Extraescolars() {
                 )}
                 <div className="relative h-44 overflow-hidden shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                  <img src={activity.image_url} alt={tContent(activity, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <LazyImage src={activity.image_url} alt={tContent(activity, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <span className={`absolute top-4 right-4 ${activity.color || 'bg-blue-500'}/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider z-20`}>
                     {tCategory(activity.category)}
                   </span>

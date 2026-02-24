@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ProjectDetailModal } from './ProjectDetailModal';
+import { LazyImage } from '../common/LazyImage';
 
 interface Project {
   id: string;
@@ -152,7 +153,7 @@ export const FeaturedProjects = () => {
                 <div className="absolute top-4 left-4 z-10">
                   <StatusBadge status={project.status} />
                 </div>
-                <img
+                <LazyImage
                   src={project.imageAfter}
                   alt={project.title}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

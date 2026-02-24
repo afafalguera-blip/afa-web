@@ -7,6 +7,7 @@ import { NewsDetailModal } from '../components/public/NewsDetailModal';
 import { AcollidaModal } from '../components/public/AcollidaModal';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { LazyImage } from '../components/common/LazyImage';
 
 interface NewsArticle {
   id: string;
@@ -241,7 +242,7 @@ export function Home() {
                 )}
 
                 <div className="h-40 bg-slate-200 relative overflow-hidden">
-                  <img
+                  <LazyImage
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     src={item.image_url || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}

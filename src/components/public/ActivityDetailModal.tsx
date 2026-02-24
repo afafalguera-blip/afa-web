@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import type { Activity } from '../../services/ActivityService';
+import { LazyImage } from '../common/LazyImage';
 
 interface ActivityDetailModalProps {
   activity: Activity;
@@ -17,13 +18,13 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
+      <div
         className="relative w-full max-w-lg h-full sm:h-auto sm:max-h-[90vh] bg-background-light dark:bg-background-dark sm:rounded-3xl shadow-2xl overflow-y-auto hide-scrollbar animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Navigation */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-4 backdrop-blur-md bg-white/20 dark:bg-black/20">
-          <button 
+          <button
             onClick={onClose}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 dark:bg-gray-800 shadow-sm transition-transform active:scale-90"
           >
@@ -40,13 +41,13 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
         </div>
 
         {/* Header Image */}
-        <div className="relative h-[40vh] min-h-[300px] w-full -mt-16">
-          <div 
-            className="h-full w-full bg-cover bg-center" 
-            style={{ backgroundImage: `url("${activity.image_url}")` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background-light dark:to-background-dark"></div>
-          </div>
+        <div className="relative h-[40vh] min-h-[300px] w-full -mt-16 overflow-hidden">
+          <LazyImage
+            src={activity.image_url}
+            alt={tContent(activity, 'title')}
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background-light dark:to-background-dark"></div>
         </div>
 
         {/* Content Container */}
@@ -124,29 +125,27 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
                 {activity.schedule_details.map((group, groupIdx) => (
                   <div key={groupIdx} className="space-y-2">
                     {group.sessions.map((session, sessionIdx) => (
-                      <div 
+                      <div
                         key={`${groupIdx}-${sessionIdx}`}
-                        className={`relative flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-                          groupIdx === 0 && sessionIdx === 0
-                          ? 'border-primary bg-primary/5 dark:bg-primary/10' 
+                        className={`relative flex items-center justify-between p-4 rounded-xl border-2 transition-all ${groupIdx === 0 && sessionIdx === 0
+                          ? 'border-primary bg-primary/5 dark:bg-primary/10'
                           : 'border-transparent bg-white dark:bg-gray-800/50 shadow-sm'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                            groupIdx === 0 && sessionIdx === 0 ? 'bg-primary text-white' : 'bg-[#f2f4f7] dark:bg-gray-700 text-[#667085]'
-                          }`}>
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${groupIdx === 0 && sessionIdx === 0 ? 'bg-primary text-white' : 'bg-[#f2f4f7] dark:bg-gray-700 text-[#667085]'
+                            }`}>
                             <span className="material-symbols-outlined text-[20px]">calendar_today</span>
                           </div>
                           <div>
                             <p className="font-bold text-sm dark:text-white">
                               {group.group}: {
                                 session.day === 1 ? t('admin.editor.days.mon') :
-                                session.day === 2 ? t('admin.editor.days.tue') :
-                                session.day === 3 ? t('admin.editor.days.wed') :
-                                session.day === 4 ? t('admin.editor.days.thu') :
-                                session.day === 5 ? t('admin.editor.days.fri') :
-                                t('admin.editor.days.sat')
+                                  session.day === 2 ? t('admin.editor.days.tue') :
+                                    session.day === 3 ? t('admin.editor.days.wed') :
+                                      session.day === 4 ? t('admin.editor.days.thu') :
+                                        session.day === 5 ? t('admin.editor.days.fri') :
+                                          t('admin.editor.days.sat')
                               }
                             </p>
                             <p className="text-xs text-[#667085] dark:text-gray-400">{session.startTime} - {session.endTime}</p>
@@ -174,7 +173,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
         {/* Sticky Footer CTA */}
         <div className="fixed bottom-0 left-0 right-0 p-6 pb-10 bg-white/80 dark:bg-[#1e3e29]/90 backdrop-blur-xl border-t border-black/5 dark:border-white/5 z-30">
           <div className="flex gap-4 items-center max-w-md mx-auto">
-            <button 
+            <button
               onClick={onSignUp}
               className="flex h-14 w-full items-center justify-center rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/30 active:scale-95 transition-transform"
             >
