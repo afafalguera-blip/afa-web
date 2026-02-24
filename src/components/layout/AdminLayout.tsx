@@ -16,7 +16,8 @@ import {
   CalendarRange,
   History,
   Bell,
-  Megaphone
+  Megaphone,
+  MessageSquare
 } from 'lucide-react';
 
 export function AdminLayout() {
@@ -261,6 +262,19 @@ export function AdminLayout() {
             >
               <Megaphone className="w-5 h-5" />
               Banner Anuncios
+            </NavLink>
+            <NavLink
+              to="/admin/contactes"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <MessageSquare className="w-5 h-5" />
+              Mensajes Web
             </NavLink>
             <NavLink
               to="/admin/notifications"

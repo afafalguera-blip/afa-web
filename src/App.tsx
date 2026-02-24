@@ -22,6 +22,7 @@ import DocumentsManager from './pages/admin/DocumentsManager';
 import AdminObservability from './pages/admin/AdminObservability';
 import AcollidaManager from './pages/admin/AcollidaManager';
 import AnnouncementManager from './pages/admin/AnnouncementManager';
+import ContactManager from './pages/admin/ContactManager';
 
 import { NewsPage } from './pages/NewsPage';
 import { AssembleaPage } from './pages/AssembleaPage';
@@ -80,6 +81,7 @@ function App() {
             <Route path="notifications" element={<NotificationManager />} />
             <Route path="acollida" element={<AcollidaManager />} />
             <Route path="banner" element={<AnnouncementManager />} />
+            <Route path="contactes" element={<ContactManager />} />
             <Route path="observability" element={<AdminObservability />} />
           </Route>
         </Routes>

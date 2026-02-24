@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Clock, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ContactService } from '../services/ContactService';
 
 export function ContactPage() {
     const { t } = useTranslation();
@@ -12,17 +13,23 @@ export function ContactPage() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError(null);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        setIsSubmitting(false);
-        setIsSubmitted(true);
-        setFormData({ name: '', email: '', subject: '', message: '' });
+        try {
+            await ContactService.submitMessage(formData);
+            setIsSubmitted(true);
+            setFormData({ name: '', email: '', subject: '', message: '' });
+        } catch (err) {
+            console.error('Error submitting contact form:', err);
+            setError('Hi ha hagut un error en enviar el missatge. Si us plau, torna-ho a intentar.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -46,6 +53,13 @@ export function ContactPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 {/* Form Section */}
                 <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
+                    {error && (
+                        <div className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 p-4 rounded-xl mb-6 flex items-center gap-3 border border-red-100 dark:border-red-900/20">
+                            <AlertCircle size={20} />
+                            <p className="text-sm font-medium">{error}</p>
+                        </div>
+                    )}
+
                     {isSubmitted ? (
                         <div className="h-full flex flex-col items-center justify-center text-center py-12">
                             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mb-6">
