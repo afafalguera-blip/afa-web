@@ -93,8 +93,8 @@ export function Extraescolars() {
           <button
             onClick={() => setViewMode('list')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${viewMode === 'list'
-                ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
+              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
               }`}
           >
             <LayoutGrid className="w-4 h-4" /> {t('common.list')}
@@ -102,8 +102,8 @@ export function Extraescolars() {
           <button
             onClick={() => setViewMode('calendar')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${viewMode === 'calendar'
-                ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
-                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
+              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
               }`}
           >
             <CalendarIcon className="w-4 h-4" /> {t('home.calendar')}
@@ -129,8 +129,8 @@ export function Extraescolars() {
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat
-                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'
+                  ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'
                   }`}
               >
                 {tCategory(cat)}
@@ -140,22 +140,28 @@ export function Extraescolars() {
         </div>
       )}
 
-      {/* Special Offer Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group mb-10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl transition-transform group-hover:scale-110 duration-1000"></div>
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-          <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-md">
-            <Rocket className="w-8 h-8 text-white" />
+      {/* Special Offer Banner - Elegant Redesign */}
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all mb-10 group relative z-10">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <Rocket className="w-7 h-7" />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-xl md:text-2xl font-bold mb-2">{t('inscription.pricing.offer_banner_title')}</h2>
-            <p className="text-blue-50/90 text-sm md:text-base leading-relaxed">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+              <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded text-[10px] font-bold uppercase tracking-wider">
+                {t('common.offer' as any) || 'Oferta'}
+              </span>
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
+              {t('inscription.pricing.offer_banner_title')}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed max-w-2xl">
               {t('inscription.pricing.offer_banner_body')}
             </p>
           </div>
           <button
             onClick={() => navigate('/extraescolars/inscripcio')}
-            className="px-6 py-3 bg-white text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-50 transition-colors shadow-lg whitespace-nowrap"
+            className="w-full md:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap"
           >
             {t('inscription.activity_modal.signup_btn')}
           </button>
