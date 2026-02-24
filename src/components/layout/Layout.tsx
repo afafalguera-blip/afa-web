@@ -3,11 +3,14 @@ import { BottomNav } from './BottomNav';
 import { DesktopNav } from './DesktopNav';
 import { MobileTopNav } from './MobileTopNav';
 import { SchoolSuppliesBackground } from './SchoolSuppliesBackground';
+import { AnnouncementBanner } from '../public/AnnouncementBanner';
 
 export function Layout() {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300 relative overflow-x-hidden">
       <SchoolSuppliesBackground />
+
+      <AnnouncementBanner />
 
       <DesktopNav />
       <MobileTopNav />

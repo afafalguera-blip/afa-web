@@ -21,10 +21,12 @@ import NotificationManager from './pages/admin/NotificationManager';
 import DocumentsManager from './pages/admin/DocumentsManager';
 import AdminObservability from './pages/admin/AdminObservability';
 import AcollidaManager from './pages/admin/AcollidaManager';
+import AnnouncementManager from './pages/admin/AnnouncementManager';
 
 import { NewsPage } from './pages/NewsPage';
 import { AssembleaPage } from './pages/AssembleaPage';
 import { DocumentsPage } from './pages/DocumentsPage';
+import { ContactPage } from './pages/ContactPage';
 
 import { ShopLanding } from './pages/shop/ShopLanding';
 
@@ -57,6 +59,7 @@ function App() {
             <Route path="calendari" element={<GeneralCalendarPage />} />
             <Route path="assemblea" element={<AssembleaPage />} />
             <Route path="documents" element={<DocumentsPage />} />
+            <Route path="contacte" element={<ContactPage />} />
             {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
           </Route>
 
@@ -76,6 +79,7 @@ function App() {
             <Route path="documents" element={<DocumentsManager />} />
             <Route path="notifications" element={<NotificationManager />} />
             <Route path="acollida" element={<AcollidaManager />} />
+            <Route path="banner" element={<AnnouncementManager />} />
             <Route path="observability" element={<AdminObservability />} />
           </Route>
         </Routes>

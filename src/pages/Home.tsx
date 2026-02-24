@@ -116,34 +116,40 @@ export function Home() {
       {/* Navigation: Mobile Grid | Desktop Floating Pill */}
       <section className="px-6 py-4 relative z-20 mb-6">
         {/* Mobile Grid */}
-        <div className="grid grid-cols-4 gap-4 lg:hidden">
+        <div className="grid grid-cols-5 gap-2 lg:hidden">
           <Link to="/extraescolars" className="flex flex-col items-center gap-1.5 group">
-            <div className="w-14 h-14 flex items-center justify-center bg-primary rounded-2xl text-white shadow-lg shadow-primary/20 group-active:scale-95 transition-transform">
-              <span className="material-icons-round text-2xl">sports_soccer</span>
+            <div className="w-12 h-12 flex items-center justify-center bg-primary rounded-2xl text-white shadow-lg shadow-primary/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-xl">sports_soccer</span>
             </div>
-            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.extraescolars')}</span>
+            <span className="text-[9px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight text-center">{t('home.extraescolars')}</span>
           </Link>
           <Link to="/quotes" className="flex flex-col items-center gap-1.5 group">
-            <div className="w-14 h-14 flex items-center justify-center bg-secondary rounded-2xl text-white shadow-lg shadow-secondary/20 group-active:scale-95 transition-transform">
-              <span className="material-icons-round text-2xl">payments</span>
+            <div className="w-12 h-12 flex items-center justify-center bg-secondary rounded-2xl text-white shadow-lg shadow-secondary/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-xl">payments</span>
             </div>
-            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.fees')}</span>
+            <span className="text-[9px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight text-center">{t('home.fees')}</span>
           </Link>
           <Link to="/calendari" className="flex flex-col items-center gap-1.5 group">
-            <div className="w-14 h-14 flex items-center justify-center bg-amber-500 rounded-2xl text-white shadow-lg shadow-amber-500/20 group-active:scale-95 transition-transform">
-              <span className="material-icons-round text-2xl">calendar_today</span>
+            <div className="w-12 h-12 flex items-center justify-center bg-amber-500 rounded-2xl text-white shadow-lg shadow-amber-500/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-xl">calendar_today</span>
             </div>
-            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.calendar')}</span>
+            <span className="text-[9px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight text-center">{t('home.calendar')}</span>
           </Link>
           <button
             onClick={() => setIsAcollidaModalOpen(true)}
             className="flex flex-col items-center gap-1.5 group"
           >
-            <div className="w-14 h-14 flex items-center justify-center bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/20 group-active:scale-95 transition-transform">
-              <span className="material-icons-round text-2xl">home_work</span>
+            <div className="w-12 h-12 flex items-center justify-center bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-xl">home_work</span>
             </div>
-            <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight">{t('home.acollida')}</span>
+            <span className="text-[9px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight text-center">{t('home.acollida')}</span>
           </button>
+          <Link to="/contacte" className="flex flex-col items-center gap-1.5 group">
+            <div className="w-12 h-12 flex items-center justify-center bg-emerald-500 rounded-2xl text-white shadow-lg shadow-emerald-500/20 group-active:scale-95 transition-transform">
+              <span className="material-icons-round text-xl">mail</span>
+            </div>
+            <span className="text-[9px] font-bold text-slate-900 dark:text-slate-200 uppercase tracking-tight text-center">{t('home.contact')}</span>
+          </Link>
         </div>
 
         {/* Desktop Floating Pill Nav */}
@@ -185,6 +191,15 @@ export function Home() {
               </div>
               <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.acollida')}</span>
             </button>
+
+            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
+
+            <Link to="/contacte" className="flex items-center gap-3 px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors group">
+              <div className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <span className="material-icons-round">mail</span>
+              </div>
+              <span className="font-bold text-slate-700 dark:text-slate-200">{t('home.contact')}</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -326,7 +341,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="px-6 mt-6 mb-8">
+      <section className="px-6 mt-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link
           to="/assemblea"
           className="block bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group relative overflow-hidden"
@@ -347,6 +362,29 @@ export function Home() {
             </div>
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-blue-600 transition-colors">
               <span className="material-icons-round">description</span>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          to="/contacte"
+          className="block bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+          <div className="relative z-10 flex items-center justify-between h-full">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                  {t('home.contact_banner.tag')}
+                </span>
+              </div>
+              <h3 className="text-xl font-bold mb-1">{t('home.contact_banner.title')}</h3>
+              <p className="text-amber-50 text-sm max-w-[250px]">
+                {t('home.contact_banner.description')}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-amber-600 transition-colors">
+              <span className="material-icons-round">mail</span>
             </div>
           </div>
         </Link>
@@ -397,9 +435,13 @@ export function Home() {
                 </ul>
               </div>
 
-              <p className="text-xs italic text-slate-500 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20">
-                {t('home.about_contact')}
-              </p>
+              <div className="text-xs italic text-slate-500 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/20 space-y-2">
+                <p className="font-bold text-amber-800 dark:text-amber-200 not-italic uppercase tracking-wider text-[10px]">
+                  {t('contact_page.schedule_title')}
+                </p>
+                <p>{t('home.about_contact')}</p>
+                <p className="text-primary font-semibold">{t('contact_page.email_demand')}</p>
+              </div>
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@
     "home": "Inici",
     "extraescolars": "Extraescolars",
     "shop": "Botiga",
+    "contact": "Contacte",
     "profile": "Perfil"
   },
   "home": {
@@ -14,6 +15,7 @@
     "fees": "Quotes",
     "calendar": "Calendari",
     "acollida": "Acollida",
+    "contact": "Contacte",
     "course_current": "Curs 2025 - 2026",
     "view_details": "Veure Detalls",
     "news_title": "Últimes Notícies",
@@ -25,7 +27,7 @@
     "about_text_1": "L’AFA és l’associació formada per la majoria de les famílies de l’escola. La junta directiva n’és la responsable i la que coordina les diverses activitats. Formar part de la junta és voluntari. Per tant, qualsevol ajuda vostra, per petita que sigui, serà molt ben acollida.",
     "about_text_2": "La junta organitza i gestiona les activitats extraescolars amb les quals pretén complementar la formació dels nens-nenes de l’escola, i col·labora en mulltes altres activitats que van sorgint al llarg del curs.",
     "about_text_3": "També participa en l’organització de les festes populars: Castanyada, Tió, Sant Jordi, Final de curs,…",
-    "about_contact": "Per qualsevol informació ens trobareu al despatx de l’AFA de l’escola els dimarts de les 9:00 a 9:30 i els divendres de 16:30 a 17:00.",
+    "about_contact": "Per qualsevol informació ens trobareu al despatx de l’AFA de l’escola els dimarts de les 9:00 a 9:30.",
     "about_functions_title": "Les seves funcions principals són:",
     "about_functions": [
       "Sensibilitzar i orientar els pares i mares sobre la seva responsabilitat pel que fa a l’educació dels seus fills i filles.",
@@ -43,7 +45,31 @@
        "tag": "Documentació",
        "title": "Assemblea General",
        "description": "Resum d'acords, estat de comptes i nous projectes de l'AFA."
+    },
+    "contact_banner": {
+      "tag": "Cita Prèvia",
+      "title": "Vols parlar amb nosaltres?",
+      "description": "Atenció presencial al despatx els dimarts (9:00-9:30), sempre sota demanda enviant un correu previ.",
+      "button": "Formulari de Contacte"
     }
+  },
+  "contact_page": {
+    "title": "Contacte",
+    "subtitle": "Estem aquí per ajudar-te. Envia'ns el teu dubte o suggeriment.",
+    "form_name": "Nom",
+    "form_name_placeholder": "El teu nom",
+    "form_email": "Correu electrònic",
+    "form_subject": "Assumpte",
+    "form_subject_placeholder": "Assumpte del missatge",
+    "form_message": "Missatge",
+    "form_message_placeholder": "Com et podem ajudar?",
+    "form_submit": "Enviar Missatge",
+    "form_success": "Missatge enviat correctament! Et respondrem el més aviat possible.",
+    "schedule_title": "Atenció Presencial",
+    "schedule_description": "Per a qualsevol gestió presencial, ens trobaràs al despatx de l'AFA en el següent horari (sempre amb cita prèvia via email):",
+    "schedule_tue": "Dimarts de 9:00 a 9:30h",
+    "email_demand": "Recordeu que cal enviar un correu electrònic abans per concertar la cita.",
+    "other_ways": "Altres vies"
   },
   "assemblea": {
     "title": "Assemblea General",

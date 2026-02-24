@@ -6,6 +6,7 @@
     "home": "Inicio",
     "extraescolars": "Extraescolares",
     "shop": "Tienda",
+    "contact": "Contacto",
     "profile": "Perfil"
   },
   "home": {
@@ -14,6 +15,7 @@
     "fees": "Cuotas",
     "calendar": "Calendario",
     "acollida": "Acogida",
+    "contact": "Contacto",
     "course_current": "Curso 2025 - 2026",
     "view_details": "Ver Detalles",
     "news_title": "Últimas Noticias",
@@ -24,7 +26,7 @@
     "about_text_1": "El AFA es la asociación formada por la mayoría de las familias de la escuela. La junta directiva es la responsable y la que coordina las diversas actividades. Formar parte de la junta es voluntario. Por tanto, cualquier ayuda vuestra, por pequeña que sea, será muy bien acogida.",
     "about_text_2": "La junta organiza y gestiona las actividades extraescolares con las cuales pretende complementar la formación de los niños y niñas de la escuela, y colabora en muchas otras actividades que van surgiendo a lo largo del curso.",
     "about_text_3": "También participa en la organización de las fiestas populares: Castañada, Tió, Sant Jordi, Final de curso...",
-    "about_contact": "Para cualquier información nos encontraréis en el despacho del AFA de la escuela los martes de las 9:00 a 9:30 y los viernes de 16:30 a 17:00.",
+    "about_contact": "Para cualquier información nos encontraréis en el despacho del AFA de la escuela los martes de las 9:00 a 9:30.",
     "about_functions_title": "Sus funciones principales son:",
     "about_functions": [
       "Sensibilizar y orientar a los padres y madres sobre su responsabilidad en relación con la educación de sus hijos e hijas.",
@@ -42,7 +44,31 @@
        "tag": "Documentación",
        "title": "Asamblea General",
        "description": "Resumen de acuerdos, estado de cuentas y nuevos proyectos del AFA."
+    },
+    "contact_banner": {
+      "tag": "Cita Previa",
+      "title": "¿Quieres hablar con nosotros?",
+      "description": "Atención presencial en el despacho los martes (9:00-9:30), siempre bajo demanda enviando un email previo.",
+      "button": "Formulario de Contacto"
     }
+  },
+  "contact_page": {
+    "title": "Contacto",
+    "subtitle": "Estamos aquí para ayudarte. Envíanos tu duda o sugerencia.",
+    "form_name": "Nombre",
+    "form_name_placeholder": "Tu nombre",
+    "form_email": "Correo electrónico",
+    "form_subject": "Asunto",
+    "form_subject_placeholder": "Asunto del mensaje",
+    "form_message": "Mensaje",
+    "form_message_placeholder": "¿Cómo te podemos ayudar?",
+    "form_submit": "Enviar Mensaje",
+    "form_success": "¡Mensaje enviado correctamente! Te responderemos lo antes posible.",
+    "schedule_title": "Atención Presencial",
+    "schedule_description": "Para cualquier gestión presencial, nos encontrarás en el despacho del AFA en el siguiente horario (siempre con cita previa vía email):",
+    "schedule_tue": "Martes de 9:00 a 9:30h",
+    "email_demand": "Recuerda que es necesario enviar un correo electrónico antes para concertar la cita.",
+    "other_ways": "Otras vías"
   },
   "assemblea": {
     "title": "Asamblea General",
