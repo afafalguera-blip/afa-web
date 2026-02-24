@@ -341,53 +341,49 @@ export function Home() {
         </div>
       </section>
 
-      <section className="px-6 mt-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link
-          to="/assemblea"
-          className="block bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+      <section className="px-6 mt-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Link
+            to="/assemblea"
+            className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <span className="material-icons-round">description</span>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
                   {t('home.assemblea_banner.tag')}
                 </span>
-                <span className="text-blue-200 text-xs font-medium">{t('home.course_current')}</span>
+                <span className="text-slate-400 text-[10px] font-medium">{t('home.course_current')}</span>
               </div>
-              <h3 className="text-xl font-bold mb-1">{t('home.assemblea_banner.title')}</h3>
-              <p className="text-blue-100 text-sm max-w-[250px]">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{t('home.assemblea_banner.title')}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-1">
                 {t('home.assemblea_banner.description')}
               </p>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-blue-600 transition-colors">
-              <span className="material-icons-round">description</span>
-            </div>
-          </div>
-        </Link>
+          </Link>
 
-        <Link
-          to="/contacte"
-          className="block bg-gradient-to-r from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-          <div className="relative z-10 flex items-center justify-between h-full">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+          <Link
+            to="/contacte"
+            className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <span className="material-icons-round">mail</span>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
                   {t('home.contact_banner.tag')}
                 </span>
               </div>
-              <h3 className="text-xl font-bold mb-1">{t('home.contact_banner.title')}</h3>
-              <p className="text-amber-50 text-sm max-w-[250px]">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">{t('home.contact_banner.title')}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-1">
                 {t('home.contact_banner.description')}
               </p>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-amber-600 transition-colors">
-              <span className="material-icons-round">mail</span>
-            </div>
-          </div>
-        </Link>
+          </Link>
+        </div>
       </section>
 
       <NewsDetailModal

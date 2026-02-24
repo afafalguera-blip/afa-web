@@ -26,7 +26,7 @@
     "about_text_1": "El AFA es la asociación formada por la mayoría de las familias de la escuela. La junta directiva es la responsable y la que coordina las diversas actividades. Formar parte de la junta es voluntario. Por tanto, cualquier ayuda vuestra, por pequeña que sea, será muy bien acogida.",
     "about_text_2": "La junta organiza y gestiona las actividades extraescolares con las cuales pretende complementar la formación de los niños y niñas de la escuela, y colabora en muchas otras actividades que van surgiendo a lo largo del curso.",
     "about_text_3": "También participa en la organización de las fiestas populares: Castañada, Tió, Sant Jordi, Final de curso...",
-    "about_contact": "Para cualquier información nos encontraréis en el despacho del AFA de la escuela los martes de las 9:00 a 9:30.",
+    "about_contact": "Para cualquier información nos encontraréis en el espacio AFA de la escuela los martes de las 9:00 a 9:30.",
     "about_functions_title": "Sus funciones principales son:",
     "about_functions": [
       "Sensibilizar y orientar a los padres y madres sobre su responsabilidad en relación con la educación de sus hijos e hijas.",
@@ -48,7 +48,7 @@
     "contact_banner": {
       "tag": "Cita Previa",
       "title": "¿Quieres hablar con nosotros?",
-      "description": "Atención presencial en el despacho los martes (9:00-9:30), siempre bajo demanda enviando un email previo.",
+      "description": "Atención presencial en el espacio AFA los martes (9:00-9:30), siempre bajo demanda enviando un email previo.",
       "button": "Formulario de Contacto"
     }
   },
@@ -65,7 +65,7 @@
     "form_submit": "Enviar Mensaje",
     "form_success": "¡Mensaje enviado correctamente! Te responderemos lo antes posible.",
     "schedule_title": "Atención Presencial",
-    "schedule_description": "Para cualquier gestión presencial, nos encontrarás en el despacho del AFA en el siguiente horario (siempre con cita previa vía email):",
+    "schedule_description": "Para cualquier gestión presencial, nos encontrarás en el espacio AFA en el siguiente horario (siempre con cita previa vía email):",
     "schedule_tue": "Martes de 9:00 a 9:30h",
     "email_demand": "Recuerda que es necesario enviar un correo electrónico antes para concertar la cita.",
     "other_ways": "Otras vías"

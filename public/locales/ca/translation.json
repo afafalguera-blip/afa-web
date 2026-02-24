@@ -27,7 +27,7 @@
     "about_text_1": "L’AFA és l’associació formada per la majoria de les famílies de l’escola. La junta directiva n’és la responsable i la que coordina les diverses activitats. Formar part de la junta és voluntari. Per tant, qualsevol ajuda vostra, per petita que sigui, serà molt ben acollida.",
     "about_text_2": "La junta organitza i gestiona les activitats extraescolars amb les quals pretén complementar la formació dels nens-nenes de l’escola, i col·labora en mulltes altres activitats que van sorgint al llarg del curs.",
     "about_text_3": "També participa en l’organització de les festes populars: Castanyada, Tió, Sant Jordi, Final de curs,…",
-    "about_contact": "Per qualsevol informació ens trobareu al despatx de l’AFA de l’escola els dimarts de les 9:00 a 9:30.",
+    "about_contact": "Per qualsevol informació ens trobareu a l'espai AFA de l'escola els dimarts de les 9:00 a 9:30.",
     "about_functions_title": "Les seves funcions principals són:",
     "about_functions": [
       "Sensibilitzar i orientar els pares i mares sobre la seva responsabilitat pel que fa a l’educació dels seus fills i filles.",
@@ -49,7 +49,7 @@
     "contact_banner": {
       "tag": "Cita Prèvia",
       "title": "Vols parlar amb nosaltres?",
-      "description": "Atenció presencial al despatx els dimarts (9:00-9:30), sempre sota demanda enviant un correu previ.",
+      "description": "Atenció presencial a l'espai AFA els dimarts (9:00-9:30), sempre sota demanda enviant un correu previ.",
       "button": "Formulari de Contacte"
     }
   },
@@ -66,7 +66,7 @@
     "form_submit": "Enviar Missatge",
     "form_success": "Missatge enviat correctament! Et respondrem el més aviat possible.",
     "schedule_title": "Atenció Presencial",
-    "schedule_description": "Per a qualsevol gestió presencial, ens trobaràs al despatx de l'AFA en el següent horari (sempre amb cita prèvia via email):",
+    "schedule_description": "Per a qualsevol gestió presencial, ens trobaràs a l'espai AFA en el següent horari (sempre amb cita prèvia via email):",
     "schedule_tue": "Dimarts de 9:00 a 9:30h",
     "email_demand": "Recordeu que cal enviar un correu electrònic abans per concertar la cita.",
     "other_ways": "Altres vies"
