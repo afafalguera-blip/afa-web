@@ -379,6 +379,11 @@
       "projects": "Projectes",
       "calendar": "Calendari Gen.",
       "acollida": "Gestió Acollida",
+      "communication": "Comunicació",
+      "contact_messages": "Missatges Web",
+      "banner": "Banner Anuncis",
+      "notifications": "Notificacions",
+      "system": "Sistema",
       "observability": "Auditoria",
       "logout": "Tancar Sessió"
     },

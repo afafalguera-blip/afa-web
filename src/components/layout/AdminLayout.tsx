@@ -146,8 +146,6 @@ export function AdminLayout() {
             </NavLink>
           </div>
 
-
-
           <div className="pt-4 mt-4 border-t border-slate-100">
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
               {t('admin.sidebar.shop')}
@@ -177,6 +175,51 @@ export function AdminLayout() {
             >
               <LayoutDashboard className="w-5 h-5" />
               {t('admin.sidebar.inventory')}
+            </NavLink>
+          </div>
+
+          <div className="pt-4 mt-4 border-t border-slate-100">
+            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              {t('admin.sidebar.communication')}
+            </p>
+            <NavLink
+              to="/admin/contactes"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <MessageSquare className="w-5 h-5" />
+              {t('admin.sidebar.contact_messages')}
+            </NavLink>
+            <NavLink
+              to="/admin/notifications"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <Bell className="w-5 h-5" />
+              {t('admin.sidebar.notifications')}
+            </NavLink>
+            <NavLink
+              to="/admin/banner"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <Megaphone className="w-5 h-5" />
+              {t('admin.sidebar.banner')}
             </NavLink>
           </div>
 
@@ -210,7 +253,6 @@ export function AdminLayout() {
               <Newspaper className="w-5 h-5" />
               {t('admin.sidebar.news')}
             </NavLink>
-
             <NavLink
               to="/admin/projects"
               onClick={() => setSidebarOpen(false)}
@@ -251,45 +293,6 @@ export function AdminLayout() {
               {t('admin.sidebar.acollida')}
             </NavLink>
             <NavLink
-              to="/admin/banner"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Megaphone className="w-5 h-5" />
-              Banner Anuncios
-            </NavLink>
-            <NavLink
-              to="/admin/contactes"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <MessageSquare className="w-5 h-5" />
-              Mensajes Web
-            </NavLink>
-            <NavLink
-              to="/admin/notifications"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Bell className="w-5 h-5" />
-              Notificaciones
-            </NavLink>
-            <NavLink
               to="/admin/documents"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
@@ -302,6 +305,12 @@ export function AdminLayout() {
               <FolderHeart className="w-5 h-5" />
               Documentos
             </NavLink>
+          </div>
+
+          <div className="pt-4 mt-4 border-t border-slate-100 pb-10">
+            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              {t('admin.sidebar.system')}
+            </p>
             <NavLink
               to="/admin/observability"
               onClick={() => setSidebarOpen(false)}

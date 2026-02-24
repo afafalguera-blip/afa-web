@@ -378,6 +378,11 @@
       "projects": "Proyectos",
       "calendar": "Calendario Gen.",
       "acollida": "Gestión Acogida",
+      "communication": "Comunicación",
+      "contact_messages": "Mensajes Web",
+      "banner": "Banner Anuncios",
+      "notifications": "Notificaciones",
+      "system": "Sistema",
       "observability": "Auditoría",
       "logout": "Cerrar Sesión"
     },
