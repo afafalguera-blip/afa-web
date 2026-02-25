@@ -1,6 +1,25 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/icon?family=Material+Icons+Round");
+@import "material-icons/iconfont/material-icons.css";
+@import "material-icons-round/iconfont/material-icons-round.css";
+
+/* Custom Scrollbar for Admin Sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
 
 @tailwind base;
 @tailwind components;

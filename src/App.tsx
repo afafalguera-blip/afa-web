@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { Home } from './pages/Home';
@@ -74,6 +74,7 @@ function App() {
 
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
             {/* ... admin routes */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="inscriptions" element={<InscriptionsPage />} />

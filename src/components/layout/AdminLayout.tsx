@@ -72,9 +72,10 @@ export function AdminLayout() {
       {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static
+        flex flex-col h-screen overflow-hidden
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 flex items-center px-6 border-b border-slate-100">
+        <div className="h-16 flex-shrink-0 flex items-center px-6 border-b border-slate-100 bg-white">
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             {t('admin.title')}
           </h1>
@@ -86,7 +87,7 @@ export function AdminLayout() {
           </button>
         </div>
 
-        <nav className="p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
           <NavLink
             to="/admin/dashboard"
             onClick={() => setSidebarOpen(false)}
@@ -224,7 +225,7 @@ export function AdminLayout() {
             </NavLink>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-100 pb-20 lg:pb-0">
+          <div className="pt-4 mt-4 border-t border-slate-100">
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
               {t('admin.sidebar.content')}
             </p>
@@ -308,7 +309,7 @@ export function AdminLayout() {
             </NavLink>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-100 pb-10">
+          <div className="pt-4 mt-4 border-t border-slate-100">
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
               {t('admin.sidebar.system')}
             </p>
@@ -341,7 +342,7 @@ export function AdminLayout() {
           </div>
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100 bg-slate-50/50">
+        <div className="flex-shrink-0 p-4 border-t border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-3 px-2 mb-3">
             <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase">
               {profile?.full_name?.substring(0, 2) || user?.email?.substring(0, 2)}
