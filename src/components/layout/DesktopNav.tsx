@@ -2,6 +2,8 @@ import { Home, LayoutGrid, ShoppingBag, LogOut, MessageSquare } from 'lucide-rea
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../common/NotificationBell';
+import { useAuth } from '../../contexts/AuthContext';
+import { Shield } from 'lucide-react';
 
 const NAV_ITEMS = [
   { icon: Home, labelKey: 'nav.home', path: '/' },
@@ -13,6 +15,7 @@ const NAV_ITEMS = [
 
 export function DesktopNav() {
   const { t, i18n } = useTranslation();
+  const { isAdmin } = useAuth();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -61,6 +64,19 @@ export function DesktopNav() {
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
 
         <NotificationBell />
+
+        {isAdmin && (
+          <>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
+            <NavLink
+              to="/admin"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all font-bold shadow-sm shadow-blue-600/20"
+            >
+              <Shield className="w-4 h-4" />
+              <span className="text-sm">Admin</span>
+            </NavLink>
+          </>
+        )}
 
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
 

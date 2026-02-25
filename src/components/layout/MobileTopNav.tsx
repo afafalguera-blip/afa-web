@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { NotificationBell } from '../common/NotificationBell';
+import { useAuth } from '../../contexts/AuthContext';
+import { Shield } from 'lucide-react';
 
 export function MobileTopNav() {
   const { i18n } = useTranslation();
+  const { isAdmin } = useAuth();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -14,15 +17,15 @@ export function MobileTopNav() {
       {/* Left: Branding & Greeting */}
       <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
         <div className="w-10 h-10 rounded-full border border-slate-100 dark:border-slate-700 overflow-hidden bg-white shadow-sm shrink-0">
-          <img 
-            alt="AFA Logo" 
-            className="w-full h-full object-cover p-0.5" 
+          <img
+            alt="AFA Logo"
+            className="w-full h-full object-cover p-0.5"
             src="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/sign/Imagenes/logo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84NjM3Yjc4My1lYzY4LTRjMjMtYmMyNS04MTA2ODk5ZjhjMGIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZW5lcy9sb2dvLnBuZyIsImlhdCI6MTc2OTU1NDU3MiwiZXhwIjozMzMwNTU1NDU3Mn0.aZV-8wmEyaHeDITRf_SsMh4vj1um_jHjwD1-izQqEnc"
           />
         </div>
         <div className="flex flex-col">
-            <span className="text-[10px] text-slate-500 font-medium leading-none mb-0.5">Bon dia Família 👋</span>
-            <span className="font-bold text-sm text-primary dark:text-white leading-none">AFA Escola Falguera</span>
+          <span className="text-[10px] text-slate-500 font-medium leading-none mb-0.5">Bon dia Família 👋</span>
+          <span className="font-bold text-sm text-primary dark:text-white leading-none">AFA Escola Falguera</span>
         </div>
       </Link>
 
@@ -30,24 +33,34 @@ export function MobileTopNav() {
       <div className="flex items-center gap-3">
         {/* Languages (Compact & Rounded) */}
         <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 p-1 rounded-full border border-slate-100 dark:border-slate-700">
-            {['ca', 'es', 'en'].map((lang) => (
-                <button 
-                    key={lang}
-                    onClick={() => changeLanguage(lang)} 
-                    translate="no" 
-                    className={`notranslate text-[10px] font-bold px-2 py-1 rounded-full transition-all ${
-                        i18n.language === lang 
-                        ? 'bg-white dark:bg-slate-600 text-primary shadow-sm' 
-                        : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                >
-                    {lang.toUpperCase()}
-                </button>
-            ))}
+          {['ca', 'es', 'en'].map((lang) => (
+            <button
+              key={lang}
+              onClick={() => changeLanguage(lang)}
+              translate="no"
+              className={`notranslate text-[10px] font-bold px-2 py-1 rounded-full transition-all ${i18n.language === lang
+                  ? 'bg-white dark:bg-slate-600 text-primary shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600'
+                }`}
+            >
+              {lang.toUpperCase()}
+            </button>
+          ))}
         </div>
 
         {/* Bell */}
         <NotificationBell />
+
+        {/* Admin Link */}
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 border border-blue-100"
+            title="Admin"
+          >
+            <Shield className="w-5 h-5" />
+          </Link>
+        )}
       </div>
     </div>
   );
