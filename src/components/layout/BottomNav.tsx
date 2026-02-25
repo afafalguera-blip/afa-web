@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, ShoppingBag, MessageSquare, FileText } from 'lucide-react';
+import { Home, ShoppingBag, MessageSquare, FileText } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +10,6 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { icon: Home, labelKey: 'nav.home', path: '/' },
-  { icon: LayoutGrid, labelKey: 'nav.extraescolars', path: '/extraescolars' },
   { icon: ShoppingBag, labelKey: 'nav.shop', path: '/botiga' },
   { icon: FileText, labelKey: 'nav.documents', path: '/documents' },
   { icon: MessageSquare, labelKey: 'nav.suggestions', path: '/contacte?subject=Sugeriment' },
