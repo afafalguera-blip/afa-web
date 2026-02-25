@@ -4,18 +4,22 @@ import './index.css'
 import './i18n'
 import App from './App.tsx'
 
+import { HelmetProvider } from 'react-helmet-async'
+
 function Loading() {
-    return (
-        <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-slate-900">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-    );
+  return (
+    <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-slate-900">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  );
 }
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Suspense fallback={<Loading />}>
+    <HelmetProvider>
+      <Suspense fallback={<Loading />}>
         <App />
-    </Suspense>
+      </Suspense>
+    </HelmetProvider>
   </StrictMode>,
 )

@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, ShoppingBag, LogOut, MessageSquare } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingBag, LogOut, MessageSquare, FileText } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../common/NotificationBell';
@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { icon: Home, labelKey: 'nav.home', path: '/' },
   { icon: LayoutGrid, labelKey: 'nav.extraescolars', path: '/extraescolars' },
   { icon: ShoppingBag, labelKey: 'nav.shop', path: '/botiga' },
-  { icon: LayoutGrid, labelKey: 'AFA Docs', path: '/documents' },
+  { icon: FileText, labelKey: 'nav.documents', path: '/documents' },
   { icon: MessageSquare, labelKey: 'nav.suggestions', path: '/contacte?subject=Sugeriment' },
 ];
 

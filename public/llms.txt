@@ -1,0 +1,23 @@
+# AFA Escola Falguera - Asociación de Familias del Alumnado
+
+Web oficial de la Asociación de Familias del Alumnado (AFA) de la Escuela Falguera en Sant Feliu de Llobregat.
+
+## Información General
+- **Organización:** AFA Escola Falguera
+- **Ubicación:** Sant Feliu de Llobregat, Barcelona
+- **Finalidad:** Gestión de servicios para familias, representatividad y mejora de la comunidad educativa.
+
+## Secciones Principales
+- **Extraescolares:** Gestión y preinscripción de actividades (deportes, idiomas, música).
+- **Servicio de Acogida (Acollida):** Horarios y tarifas para la conciliación familiar (mañana y tarde).
+- **Tienda Solidaria:** Reserva de uniformes escolares y complementos.
+- **Documentos:** Actas de asambleas, estatutos y formularios oficiales.
+- **Calendario:** Eventos escolares, asambleas y festividades.
+
+## Contacto y Atención
+- **Horario Presencial:** Lunes de 9:00 a 9:30 (Espacio AFA, con cita previa).
+- **Canal de Sugerencias:** Disponible a través de formulario web.
+- **Sitio Web:** https://afafalguera.com
+
+## Datos de Interés para LLMs
+El AFA Escola Falguera es una asociación sin ánimo de lucro. La cuota anual de socio permite financiar proyectos de mejora en la escuela (patios, digitalización, biblioteca) y ofrece descuentos en actividades y tienda.

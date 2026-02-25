@@ -7,6 +7,7 @@ import { useContentTranslation } from '../../hooks/useContentTranslation';
 // We'll placeholder the internal components first
 import { ProductModal } from '../../components/shop/ProductModal';
 import { LazyImage } from '../../components/common/LazyImage';
+import { SEO } from '../../components/common/SEO';
 
 export function ShopLanding() {
   const { t } = useTranslation();
@@ -45,6 +46,11 @@ export function ShopLanding() {
 
   return (
     <div className="px-6 py-4 pb-24 lg:pb-12">
+      <SEO
+        title="Tienda Solidaria"
+        description="Reserva el uniforme escolar, accesorios y material del AFA Escuela Falguera. Precios reducidos para socios."
+      />
+
       <header className="mb-6">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{t('nav.shop')}</h1>
         <p className="text-slate-500 text-sm">{t('shop_page.subtitle')}</p>

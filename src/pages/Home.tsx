@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import { LazyImage } from '../components/common/LazyImage';
 import { HeroSettingsModal } from '../components/public/HeroSettingsModal';
 import { ConfigService, type HeroConfig, type AboutConfig, type ContactConfig } from '../services/ConfigService';
+import { SEO } from '../components/common/SEO';
 
 interface NewsArticle {
   id: string;
@@ -117,6 +118,48 @@ export function Home() {
 
   return (
     <>
+      <SEO
+        title="Inicio"
+        description="Bienvenidos a la web oficial del AFA de l'Escola Falguera. Gestiona inscripciones a extraescolares, consulta el calendario, noticias y servicios de acogida."
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "AFA Escola Falguera",
+          "url": "https://afafalguera.com",
+          "logo": "https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/Imagenes/logo.png",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "hola@afafalguera.com",
+            "contactType": "customer service"
+          },
+          "sameAs": [
+            "https://www.instagram.com/afafalguera"
+          ],
+          "hasPart": [
+            {
+              "@type": "WebPage",
+              "name": "Extraescolares",
+              "url": "https://afafalguera.com/extraescolars"
+            },
+            {
+              "@type": "WebPage",
+              "name": "Tienda",
+              "url": "https://afafalguera.com/botiga"
+            },
+            {
+              "@type": "WebPage",
+              "name": "Calendario",
+              "url": "https://afafalguera.com/calendari"
+            },
+            {
+              "@type": "WebPage",
+              "name": "Documentos",
+              "url": "https://afafalguera.com/documents"
+            }
+          ]
+        }}
+      />
+
 
       {/* Hero Section - Responsive */}
       <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none group">

@@ -9,6 +9,7 @@ import { ActivityService } from '../services/ActivityService';
 import type { Activity } from '../services/ActivityService';
 import { useAuth } from '../contexts/AuthContext';
 import { LazyImage } from '../components/common/LazyImage';
+import { SEO } from '../components/common/SEO';
 
 export function Extraescolars() {
   const { t } = useTranslation();
@@ -80,6 +81,11 @@ export function Extraescolars() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 px-4 lg:px-6">
+      <SEO
+        title="Actividades Extraescolares"
+        description="Explora las actividades extraescolares disponibles en el AFA Escuela Falguera: deportes, música, idiomas y más. Consulta horarios y precios para el curso actual."
+      />
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
