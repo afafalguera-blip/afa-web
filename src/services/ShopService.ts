@@ -143,5 +143,13 @@ export const ShopService = {
       .delete()
       .eq('id', itemId);
     if (error) throw error;
+  },
+
+  async deleteOrder(orderId: string) {
+    const { error } = await supabase
+      .from('shop_orders')
+      .delete()
+      .eq('id', orderId);
+    if (error) throw error;
   }
 };
