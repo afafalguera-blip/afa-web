@@ -76,6 +76,24 @@
     "title": "Assemblea General",
     "course": "Curs 2025-2026",
     "subtitle": "Resum dels punts tractats, estat de comptes i nous projectes de l'AFA Escola Falguera.",
+    "hero": {
+      "title": "L'Assemblea: El cor de la nostra comunitat",
+      "subtitle": "Descobreix com les teves idees i participació transformen l'escola cada dia."
+    },
+    "cards": {
+      "members": {
+        "title": "Més de 400 famílies",
+        "desc": "Som una xarxa forta compromesa amb l'educació dels nostres fills."
+      },
+      "meetings": {
+        "title": "Assemblees Obertes",
+        "desc": "Espais participatius per debatre i decidir junts el futur del centre."
+      },
+      "decisions": {
+        "title": "Decidim entre tots",
+        "desc": "Vota les iniciatives i projectes que vols veure realitzats a l'escola."
+      }
+    },
     "sections": {
       "agenda": {
         "title": "Ordre del Dia",
