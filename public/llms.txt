@@ -10,7 +10,7 @@ Web oficial de la Asociación de Familias del Alumnado (AFA) de la Escuela Falgu
 ## Secciones Principales
 - **Extraescolares:** Gestión y preinscripción de actividades (deportes, idiomas, música).
 - **Servicio de Acogida (Acollida):** Horarios y tarifas para la conciliación familiar (mañana y tarde).
-- **Tienda Solidaria:** Reserva de uniformes escolares y complementos.
+- **Tienda:** Reserva de uniformes escolares y complementos.
 - **Documentos:** Actas de asambleas, estatutos y formularios oficiales.
 - **Calendario:** Eventos escolares, asambleas y festividades.
 

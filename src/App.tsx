@@ -48,10 +48,13 @@ import { ShopLanding } from './pages/shop/ShopLanding';
 import { AuthProvider } from './contexts/AuthContext';
 import { LoginPage } from './pages/auth/LoginPage';
 
+import { GoogleAnalytics } from './components/common/GoogleAnalytics';
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <GoogleAnalytics />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 
