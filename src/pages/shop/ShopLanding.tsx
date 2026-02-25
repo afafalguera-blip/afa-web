@@ -108,10 +108,16 @@ export function ShopLanding() {
 
               <div className="mt-auto">
                 {product.variants && product.variants.length > 0 && (
-                  <p className="text-primary font-bold">
-                    {Math.min(...product.variants.map(v => Number(v.price_member)))}€
-                    <span className="text-xs text-slate-400 font-normal ml-1">{t('shop_page.member_price')}</span>
-                  </p>
+                  <div className="space-y-1">
+                    <p className="text-primary font-bold">
+                      {Math.min(...product.variants.map(v => Number(v.price_member)))}€
+                      <span className="text-[10px] text-slate-400 font-normal ml-1 uppercase tracking-wider">{t('shop_page.member_price')}</span>
+                    </p>
+                    <p className="text-slate-500 text-sm">
+                      {Math.min(...product.variants.map(v => Number(v.price_non_member)))}€
+                      <span className="text-[10px] text-slate-400 font-normal ml-1 uppercase tracking-wider">{t('shop_page.non_member_price')}</span>
+                    </p>
+                  </div>
                 )}
                 <button className="w-full mt-3 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-lg pointer-events-none">
                   {t('shop_page.view_options')}

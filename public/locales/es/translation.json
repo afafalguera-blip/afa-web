@@ -129,9 +129,9 @@
       },
       "projects": {
         "title": "Proyectos y Mejoras",
-        "brigade": {
-           "title": "Brigada de Familias",
-           "desc": "Un grupo activo de familias para ayudar a mejorar las instalaciones de la escuela."
+        "commissions": {
+           "title": "Comisiones de Familias",
+           "desc": "Grupos activos de familias que trabajan para mejorar la escuela y dinamizar la comunidad educativa."
         },
         "done": {
            "title": "Hecho (24-25)",
@@ -198,7 +198,8 @@
     "filter_uniform": "Uniforme",
     "filter_accessories": "Accesorios",
     "view_options": "Ver Opciones",
-    "member_price": "Socio"
+    "member_price": "Socio",
+    "non_member_price": "No Socio"
   },
   "featured_projects": {
     "title": "Tu apoyo transforma el colegio",

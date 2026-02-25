@@ -152,12 +152,11 @@ export function AcollidaModal({ isOpen, onClose }: AcollidaModalProps) {
                                         </table>
                                     </div>
 
-                                    {/* Mobile Cards - Compact and Fixed */}
-                                    <div className="md:hidden space-y-2">
+                                    <div className="md:hidden space-y-1.5">
                                         {rates.map((rate, index) => (
-                                            <div key={index} className="bg-slate-50 dark:bg-slate-800 rounded-xl p-2.5 border border-slate-100 dark:border-slate-800">
-                                                <div className="flex items-center gap-1.5 mb-2 text-slate-900 dark:text-white font-black border-b border-slate-200 dark:border-slate-700 pb-1 text-[10px] uppercase">
-                                                    <Clock size={12} className="text-primary" />
+                                            <div key={index} className="bg-slate-50 dark:bg-slate-800 rounded-xl p-2 border border-slate-100 dark:border-slate-800">
+                                                <div className="flex items-center gap-1.5 mb-1.5 text-slate-900 dark:text-white font-black border-b border-slate-200 dark:border-slate-700 pb-1 text-[9px] uppercase">
+                                                    <Clock size={10} className="text-primary" />
                                                     {tContent(rate, 'horari')}
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2">

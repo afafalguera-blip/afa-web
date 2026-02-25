@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Check } from 'lucide-react';
 import type { ShopProduct } from '../../types/shop';
 import { supabase } from '../../lib/supabase';
@@ -11,6 +12,7 @@ interface ProductModalProps {
 }
 
 export function ProductModal({ product, onClose }: ProductModalProps) {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [customerName, setCustomerName] = useState('');
@@ -83,13 +85,13 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white dark:bg-card-dark rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+      <div className="bg-white dark:bg-card-dark w-full h-full sm:h-auto max-w-2xl sm:max-h-[90vh] overflow-y-auto sm:rounded-3xl shadow-2xl relative">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 transition-colors z-10"
+          className="absolute right-4 top-4 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-colors z-10"
         >
-          <X className="w-5 h-5 text-slate-500" />
+          <X className="w-5 h-5" />
         </button>
 
         <div className="grid md:grid-cols-2">
@@ -135,11 +137,11 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               {selectedVariant && (
                 <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-slate-500">Preu Soci</span>
+                    <span className="text-sm text-slate-500">{t('shop_page.member_price')}</span>
                     <span className="font-bold text-lg text-primary">{selectedVariant.price_member}€</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-400">No Soci</span>
+                    <span className="text-slate-400">{t('shop_page.non_member_price')}</span>
                     <span className="text-slate-600 dark:text-slate-400">{selectedVariant.price_non_member}€</span>
                   </div>
                   <div className="pt-2 border-t border-slate-200 dark:border-slate-700 mt-2">

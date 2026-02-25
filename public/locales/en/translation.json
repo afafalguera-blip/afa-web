@@ -129,9 +129,9 @@
       },
       "projects": {
         "title": "Projects and Improvements",
-        "brigade": {
-           "title": "Family Brigade",
-           "desc": "An active group of families to help improve the school facilities."
+        "commissions": {
+           "title": "Family Commissions",
+           "desc": "Active groups of families working to improve the school and energize the educational community."
         },
         "done": {
            "title": "Done (24-25)",
@@ -197,7 +197,8 @@
     "filter_uniform": "Uniform",
     "filter_accessories": "Accessories",
     "view_options": "View Options",
-    "member_price": "Member"
+    "member_price": "Member",
+    "non_member_price": "Non-Member"
   },
   "featured_projects": {
     "title": "Your support transforms the school",

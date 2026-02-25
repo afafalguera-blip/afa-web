@@ -33,19 +33,19 @@ export function NewsDetailModal({ article, isOpen, onClose }: NewsDetailModalPro
   const eventDate = article.event_date ? new Date(article.event_date) : null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
-      
+
       {/* Modal Content */}
-      <div className="relative bg-white dark:bg-slate-800 w-full max-w-3xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
+      <div className="relative bg-white dark:bg-slate-800 w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[90vh] sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col animate-in zoom-in-95 duration-300">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white transition-colors"
+          className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-full text-white transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -66,10 +66,10 @@ export function NewsDetailModal({ article, isOpen, onClose }: NewsDetailModalPro
             <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
-                {new Date(article.created_at).toLocaleDateString(i18n.language, { 
-                  day: 'numeric', 
-                  month: 'long', 
-                  year: 'numeric' 
+                {new Date(article.created_at).toLocaleDateString(i18n.language, {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
                 })}
               </span>
               {article.sources && (

@@ -130,9 +130,9 @@
       },
       "projects": {
         "title": "Projectes i Millores",
-        "brigade": {
-           "title": "Brigada de Famílies",
-           "desc": "Un grup actiu de famílies per ajudar a millorar les instal·lacions de l'escola."
+        "commissions": {
+           "title": "Comissions de Famílies",
+           "desc": "Grups actius de famílies que treballen per millorar l'escola i dinamitzar la comunitat educativa."
         },
         "done": {
            "title": "Fet (24-25)",
@@ -199,7 +199,8 @@
     "filter_uniform": "Uniforme",
     "filter_accessories": "Accessoris",
     "view_options": "Veure Opcions",
-    "member_price": "Soci"
+    "member_price": "Soci",
+    "non_member_price": "No Soci"
   },
   "featured_projects": {
     "title": "El teu suport transforma l'escola",

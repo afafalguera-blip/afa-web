@@ -17,7 +17,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div
         className="relative w-full max-w-lg h-full sm:h-auto sm:max-h-[90vh] bg-background-light dark:bg-background-dark sm:rounded-3xl shadow-2xl overflow-y-auto hide-scrollbar animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
@@ -26,9 +26,9 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
         <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-4 backdrop-blur-md bg-white/20 dark:bg-black/20">
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 dark:bg-gray-800 shadow-sm transition-transform active:scale-90"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all active:scale-90"
           >
-            <span className="material-symbols-outlined text-primary">arrow_back_ios_new</span>
+            <span className="material-symbols-outlined">close</span>
           </button>
           <div className="flex gap-2">
             <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 dark:bg-gray-800 shadow-sm transition-transform active:scale-90">
@@ -41,13 +41,13 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
         </div>
 
         {/* Header Image */}
-        <div className="relative h-[40vh] min-h-[300px] w-full -mt-16 overflow-hidden">
+        <div className="relative h-[30vh] sm:h-[40vh] min-h-[220px] sm:min-h-[300px] w-full -mt-16 overflow-hidden">
           <LazyImage
             src={activity.image_url}
             alt={tContent(activity, 'title')}
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-background-light dark:to-background-dark"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-background-light dark:to-background-dark"></div>
         </div>
 
         {/* Content Container */}
