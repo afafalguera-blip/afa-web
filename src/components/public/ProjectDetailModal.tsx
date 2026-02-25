@@ -4,6 +4,8 @@ import { X, Users, Landmark } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
+import { useContentTranslation } from '../../hooks/useContentTranslation';
+
 interface ProjectDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,11 +19,13 @@ interface ProjectDetailModalProps {
     participants?: string;
     budget?: number;
     status: 'completed' | 'in_progress' | 'voting' | 'active' | 'archived';
+    translations?: any;
   } | null;
 }
 
 export const ProjectDetailModal = ({ isOpen, onClose, project }: ProjectDetailModalProps) => {
   const { t } = useTranslation();
+  const { tContent } = useContentTranslation();
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -41,16 +45,17 @@ export const ProjectDetailModal = ({ isOpen, onClose, project }: ProjectDetailMo
   const renderDetails = (text?: string) => {
     if (!text) return null;
     return text.split('\n').map((line, index) => {
-        if (line.startsWith('###')) {
-             return <h3 key={index} className="text-xl font-bold text-slate-800 dark:text-white mt-6 mb-3">{line.replace('###', '').trim()}</h3>;
-        }
-        if (line.startsWith('**') && line.endsWith('**')) {
-             return <strong key={index} className="block mt-4 mb-2 text-slate-900 dark:text-white">{line.replace(/\*\*/g, '')}</strong>;
-        }
-        if (line.trim().startsWith('- ')) {
-             return <li key={index} className="ml-4 mb-1 text-slate-600 dark:text-slate-300 list-disc">{line.replace('- ', '')}</li>;
-        }
-        return <p key={index} className="mb-4 text-slate-600 dark:text-slate-300 leading-relaxed">{line}</p>;
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith('###')) {
+        return <h3 key={index} className="text-xl font-bold text-slate-800 dark:text-white mt-6 mb-3">{trimmedLine.replace('###', '').trim()}</h3>;
+      }
+      if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+        return <strong key={index} className="block mt-4 mb-2 text-slate-900 dark:text-white">{trimmedLine.replace(/\*\*/g, '')}</strong>;
+      }
+      if (trimmedLine.startsWith('- ')) {
+        return <li key={index} className="ml-4 mb-1 text-slate-600 dark:text-slate-300 list-disc">{trimmedLine.replace('- ', '')}</li>;
+      }
+      return <p key={index} className="mb-4 text-slate-600 dark:text-slate-300 leading-relaxed">{line}</p>;
     });
   };
 
@@ -65,7 +70,7 @@ export const ProjectDetailModal = ({ isOpen, onClose, project }: ProjectDetailMo
             onClick={onClose}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           />
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -85,97 +90,96 @@ export const ProjectDetailModal = ({ isOpen, onClose, project }: ProjectDetailMo
               >
                 <X size={24} />
               </button>
-              
+
               <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                <span className={`inline-block px-3 py-1 mb-3 text-xs font-bold rounded-full uppercase tracking-wider ${
-                    project.status === 'completed' ? 'bg-green-500 text-white' : 
-                    project.status === 'voting' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'
-                }`}>
-                    {(() => {
-                        const statusMap: Record<string, string> = {
-                            'completed': 'featured_projects.status.completed',
-                            'in_progress': 'featured_projects.status.in_progress',
-                            'voting': 'featured_projects.status.voting',
-                            'active': 'admin.projects.status_active',
-                            'archived': 'admin.projects.status_archived'
-                        };
-                        return t(statusMap[project.status] as any || 'admin.projects.status_active');
-                    })()}
+                <span className={`inline-block px-3 py-1 mb-3 text-xs font-bold rounded-full uppercase tracking-wider ${project.status === 'completed' ? 'bg-green-500 text-white' :
+                  project.status === 'voting' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'
+                  }`}>
+                  {(() => {
+                    const statusMap: Record<string, string> = {
+                      'completed': 'featured_projects.status.completed',
+                      'in_progress': 'featured_projects.status.in_progress',
+                      'voting': 'featured_projects.status.voting',
+                      'active': 'admin.projects.status_active',
+                      'archived': 'admin.projects.status_archived'
+                    };
+                    return t(statusMap[project.status] as any || 'admin.projects.status_active');
+                  })()}
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">{project.title}</h2>
-                <p className="text-white/90 text-lg sm:text-xl max-w-2xl line-clamp-2">{project.description}</p>
+                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">{tContent(project, 'title')}</h2>
+                <p className="text-white/90 text-lg sm:text-xl max-w-2xl line-clamp-2">{tContent(project, 'description')}</p>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 sm:p-8">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-6">
-                  {project.details ? (
-                      <div className="prose dark:prose-invert max-w-none">
-                          {renderDetails(project.details)}
-                      </div>
+                  {(project.details || (project.translations && tContent(project, 'details'))) ? (
+                    <div className="prose dark:prose-invert max-w-none">
+                      {renderDetails(tContent(project, 'details'))}
+                    </div>
                   ) : (
-                      <div className="text-slate-500 italic">No details available.</div>
+                    <div className="text-slate-500 italic">No details available.</div>
                   )}
                 </div>
 
                 <div className="space-y-6">
-                    <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700">
-                        <h4 className="text-sm font-bold uppercase text-slate-400 mb-4 tracking-wider">Detalles del Proyecto</h4>
-                        
-                        <div className="space-y-4">
-                            {project.impact && (
-                                <div className="flex items-start gap-3">
-                                    <div className="p-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg shrink-0">
-                                        <Landmark size={18} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-slate-500 uppercase font-medium mb-0.5">{t('admin.projects.field_impact')}</p>
-                                        <p className="text-slate-800 dark:text-slate-200 font-medium">{project.impact}</p>
-                                    </div>
-                                </div>
-                            )}
+                  <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-6 border border-slate-100 dark:border-slate-700">
+                    <h4 className="text-sm font-bold uppercase text-slate-400 mb-4 tracking-wider">{t('featured_projects.details_title')}</h4>
 
-                            {project.participants && (
-                                <div className="flex items-start gap-3">
-                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg shrink-0">
-                                        <Users size={18} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-slate-500 uppercase font-medium mb-0.5">{t('admin.projects.field_participants')}</p>
-                                        <p className="text-slate-800 dark:text-slate-200 font-medium">{project.participants}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                             {project.budget && project.budget > 0 && (
-                                <div className="flex items-start gap-3">
-                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg shrink-0">
-                                        <span className="font-bold text-sm">€</span>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-slate-500 uppercase font-medium mb-0.5">{t('featured_projects.investment_label')}</p>
-                                        <p className="text-slate-800 dark:text-slate-200 font-medium">
-                                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(project.budget)}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
+                    <div className="space-y-4">
+                      {project.impact && (
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg shrink-0">
+                            <Landmark size={18} />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-500 uppercase font-medium mb-0.5">{t('admin.projects.field_impact')}</p>
+                            <p className="text-slate-800 dark:text-slate-200 font-medium">{project.impact}</p>
+                          </div>
                         </div>
-                    </div>
+                      )}
 
-                    
+                      {project.participants && (
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg shrink-0">
+                            <Users size={18} />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-500 uppercase font-medium mb-0.5">{t('admin.projects.field_participants')}</p>
+                            <p className="text-slate-800 dark:text-slate-200 font-medium">{project.participants}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {project.budget && project.budget > 0 && (
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg shrink-0">
+                            <span className="font-bold text-sm">€</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-500 uppercase font-medium mb-0.5">{t('featured_projects.investment_label')}</p>
+                            <p className="text-slate-800 dark:text-slate-200 font-medium">
+                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(project.budget)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+
                 </div>
               </div>
             </div>
-            
+
             <div className="p-4 border-t border-slate-100 dark:border-slate-700 flex justify-end">
-                <button
-                    onClick={onClose}
-                    className="px-6 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors"
-                >
-                    {t('common.close') || 'Cerrar'}
-                </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors"
+              >
+                {t('common.close') || 'Cerrar'}
+              </button>
             </div>
           </motion.div>
         </div>

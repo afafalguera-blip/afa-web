@@ -205,12 +205,13 @@
     "subtitle_prefix": "No solo gestionamos, creamos",
     "subtitle_highlight": "ambientes motivadores",
     "subtitle_suffix": "Mira lo que estamos consiguiendo gracias a familias como la tuya.",
-    "investment_label": "Inversión AFA",
     "status": {
-      "completed": "¡Logrado!",
-      "in_progress": "En Marcha",
-      "voting": "En Votación"
+      "completed": "Finalizado",
+      "in_progress": "En curso",
+      "voting": "En votación"
     },
+    "details_title": "Detalles del Proyecto",
+    "investment_label": "Inversión",
     "projects": {
       "1": {
         "title": "Smart Classroom & Espacios Vivos",
@@ -316,13 +317,13 @@
       "grades": "Cursos",
       "location": "Lugar",
       "spots": "Plazas",
-      "spots_available": "Disponibles",
+      "spots_available": "Plazas disponibles",
       "about": "Sobre la actividad",
-      "default_description": "Únete a nuestra actividad donde los alumnos aprenden y se divierten en un entorno colaborativo. ¡No se requiere experiencia previa!",
-      "schedule_title": "Horarios Disponibles",
-      "note_label": "Nota:",
-      "signup_btn": "Inscribirse Ahora",
-      "per_month": "por mes"
+      "default_description": "No hay descripción disponible.",
+      "schedule_title": "Horarios y Grupos",
+      "note_label": "Nota importante:",
+      "signup_btn": "Inscribirse ahora",
+      "stem_approved": "Aprobado STEM"
     },
     "days": {
       "tue": "Martes",

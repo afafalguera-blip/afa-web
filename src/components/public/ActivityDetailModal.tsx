@@ -58,12 +58,12 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
               <span className="material-symbols-outlined text-primary text-[18px]">
                 {activity.category_icon || 'school'}
               </span>
-              <p className="text-primary text-xs font-bold uppercase tracking-wider">{activity.category}</p>
+              <p className="text-primary text-xs font-bold uppercase tracking-wider">{tContent(activity, 'category')}</p>
             </div>
             {activity.is_stem_approved && (
               <div className="flex h-8 items-center justify-center gap-x-2 rounded-full bg-white/50 dark:bg-white/10 px-4 backdrop-blur-sm border border-black/5 dark:border-white/5">
                 <span className="material-symbols-outlined text-[#667085] text-[18px]">military_tech</span>
-                <p className="text-[#667085] dark:text-gray-300 text-xs font-medium">STEM Approved</p>
+                <p className="text-[#667085] dark:text-gray-300 text-xs font-medium">{t('inscription.activity_modal.stem_approved')}</p>
               </div>
             )}
           </div>
@@ -100,7 +100,7 @@ export function ActivityDetailModal({ activity, isOpen, onClose, onSignUp }: Act
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">location_on</span>
               <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.location')}</span>
-              <span className="text-sm font-semibold dark:text-gray-200 line-clamp-1">{activity.place || 'Escola'}</span>
+              <span className="text-sm font-semibold dark:text-gray-200 line-clamp-1">{tContent(activity, 'place') || 'Escola'}</span>
             </div>
             <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
               <span className="material-symbols-outlined text-accent-terracotta mb-1">groups</span>

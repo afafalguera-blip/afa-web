@@ -204,12 +204,13 @@
     "subtitle_prefix": "We don’t just manage, we create",
     "subtitle_highlight": "motivating environments",
     "subtitle_suffix": "See what we are achieving thanks to families like yours.",
-    "investment_label": "AFA Investment",
+    "investment_label": "Investment",
     "status": {
-      "completed": "Achieved!",
-      "in_progress": "In Progress",
+      "completed": "Completed",
+      "in_progress": "In progress",
       "voting": "Voting"
     },
+    "details_title": "Project Details",
     "projects": {
       "1": {
         "title": "Smart Classroom & Living Spaces",
@@ -315,13 +316,14 @@
       "grades": "Grades",
       "location": "Location",
       "spots": "Spots",
-      "spots_available": "Available",
+      "spots_available": "Spots available",
       "about": "About the activity",
-      "default_description": "Join our activity where students learn and have fun in a collaborative environment. No previous experience required!",
-      "schedule_title": "Available Schedules",
-      "note_label": "Note:",
-      "signup_btn": "Sign Up Now",
-      "per_month": "per month"
+      "default_description": "No description available.",
+      "schedule_title": "Schedule and Groups",
+      "note_label": "Important note:",
+      "signup_btn": "Sign up now",
+      "per_month": "per month",
+      "stem_approved": "STEM Approved"
     },
     "days": {
       "tue": "Tuesday",

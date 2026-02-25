@@ -206,12 +206,13 @@
     "subtitle_prefix": "No només gestionem, creem",
     "subtitle_highlight": "ambients motivadors",
     "subtitle_suffix": "Mira el que estem aconseguint gràcies a famílies com la teva.",
-    "investment_label": "Inversió AFA",
+    "investment_label": "Inversió",
     "status": {
-      "completed": "Aconseguit!",
-      "in_progress": "En Marxa",
-      "voting": "En Votació"
+      "completed": "Finalitzat",
+      "in_progress": "En curs",
+      "voting": "En votació"
     },
+    "details_title": "Detalls del Projecte",
     "projects": {
       "1": {
         "title": "Smart Classroom & Espais Vius",
@@ -317,13 +318,14 @@
       "grades": "Cursos",
       "location": "Lloc",
       "spots": "Places",
-      "spots_available": "Disponibles",
+      "spots_available": "Places disponibles",
       "about": "Sobre l'activitat",
-      "default_description": "Uneix-te a nuestra actividad donde los alumnos aprenden y se divierten en un entorno colaborativo. No se requiere experiencia previa!",
-      "schedule_title": "Horaris Disponibles",
-      "note_label": "Nota:",
-      "signup_btn": "Inscriure's Ara",
-      "per_month": "per mes"
+      "default_description": "No hi ha descripció disponible.",
+      "schedule_title": "Horaris i Grups",
+      "note_label": "Nota important:",
+      "signup_btn": "Inscriure's ara",
+      "per_month": "per mes",
+      "stem_approved": "Aprovat STEM"
     },
     "days": {
       "tue": "Dimarts",
