@@ -87,11 +87,11 @@ export function Extraescolars() {
       />
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        <div className="space-y-1">
+          <h1 className="text-2xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             {t('home.extraescolars')}
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">
+          <p className="text-slate-400 dark:text-slate-500 text-sm lg:text-lg font-medium">
             {t('home.course_current')}
           </p>
         </div>
@@ -120,7 +120,7 @@ export function Extraescolars() {
 
       {viewMode === 'list' && (
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
+          <div className="relative flex-1 hidden md:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
@@ -135,7 +135,7 @@ export function Extraescolars() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat
+                className={`px-4 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat
                   ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'
                   }`}
@@ -147,33 +147,35 @@ export function Extraescolars() {
         </div>
       )}
 
-      {/* Special Offer Banner - Elegant Redesign */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-5 md:p-6 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all mb-10 group relative z-10">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-            <Rocket className="w-7 h-7" />
-          </div>
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-              <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded text-[10px] font-bold uppercase tracking-wider">
-                {t('common.offer' as any) || 'Oferta'}
-              </span>
+      {/* Special Offer Banner - Simplified and conditional */}
+      {viewMode === 'list' && (
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 md:p-6 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all mb-6 lg:mb-10 group relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                <Rocket className="w-6 h-6 md:w-7 md:h-7" />
+              </div>
+              <div className="hidden md:block">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                  {t('inscription.pricing.offer_banner_title')}
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-2xl">
+                  {t('inscription.pricing.offer_banner_body')}
+                </p>
+              </div>
+              <div className="md:hidden">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Bonificació per activitats</h2>
+              </div>
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
-              {t('inscription.pricing.offer_banner_title')}
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed max-w-2xl">
-              {t('inscription.pricing.offer_banner_body')}
-            </p>
+            <button
+              onClick={() => navigate('/extraescolars/inscripcio')}
+              className="w-full md:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap"
+            >
+              {t('inscription.activity_modal.signup_btn')}
+            </button>
           </div>
-          <button
-            onClick={() => navigate('/extraescolars/inscripcio')}
-            className="w-full md:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap"
-          >
-            {t('inscription.activity_modal.signup_btn')}
-          </button>
         </div>
-      </div>
+      )}
 
       <div className="transition-all duration-300">
         {viewMode === 'list' ? (
