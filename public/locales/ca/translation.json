@@ -679,6 +679,7 @@
     "refresh": "Actualitzar",
     "read_more_external": "Llegir notícia original",
     "read_more": "Llegir més",
-    "loading": "Carregant..."
+    "loading": "Carregant...",
+    "no_activities": "Sense activitats"
   }
 }

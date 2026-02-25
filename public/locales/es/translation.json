@@ -681,6 +681,7 @@
     "refresh": "Actualizar",
     "read_more_external": "Leer noticia original",
     "read_more": "Leer más",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "no_activities": "No hay actividades"
   }
 }

@@ -147,30 +147,15 @@ export function Extraescolars() {
         </div>
       )}
 
-      {/* Special Offer Banner - Simplified and conditional */}
+      {/* Special Offer Banner - Only signup button */}
       {viewMode === 'list' && (
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 md:p-6 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all mb-6 lg:mb-10 group relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <Rocket className="w-6 h-6 md:w-7 md:h-7" />
-              </div>
-              <div className="hidden md:block">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                  {t('inscription.pricing.offer_banner_title')}
-                </h2>
-                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-2xl">
-                  {t('inscription.pricing.offer_banner_body')}
-                </p>
-              </div>
-              <div className="md:hidden">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Bonificació per activitats</h2>
-              </div>
-            </div>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
             <button
               onClick={() => navigate('/extraescolars/inscripcio')}
-              className="w-full md:w-auto px-8 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap"
+              className="w-full md:w-auto px-12 py-3 bg-primary text-white rounded-xl font-bold text-sm lg:text-base hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap flex items-center justify-center gap-2"
             >
+              <Rocket className="w-5 h-5" />
               {t('inscription.activity_modal.signup_btn')}
             </button>
           </div>

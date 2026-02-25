@@ -450,6 +450,7 @@
     "refresh": "Refresh",
     "read_more_external": "Read original news",
     "read_more": "Read more",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "no_activities": "No activities"
   }
 }
