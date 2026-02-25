@@ -128,6 +128,12 @@
            "Fons d'ajuda escolar"
          ]
       },
+      "importance": {
+        "title": "Per què és important participar?",
+        "reason1": "La teva veu compta en les decisions clau de l'escola.",
+        "reason2": "Ajudes a prioritzar les inversions i millores del centre.",
+        "reason3": "Fomentem una comunitat escolar més forta i transparent."
+      },
       "projects": {
         "title": "Projectes i Millores",
         "commissions": {
@@ -136,6 +142,7 @@
         },
         "done": {
            "title": "Fet (24-25)",
+           "desc": "Projectes i millores executades amb èxit durant el darrer curs.",
            "items": [
              "Pintura pista",
              "Hort escolar",
@@ -145,6 +152,7 @@
         },
         "future": {
            "title": "Propera (25-26)",
+           "desc": "Nous reptes i iniciatives planificades per al curs vinent.",
            "items": [
              "Renovació biblioteca",
              "Pati inclusiu",

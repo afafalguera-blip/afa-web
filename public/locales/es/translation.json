@@ -127,6 +127,12 @@
            "Fondo de ayuda escolar"
          ]
       },
+      "importance": {
+        "title": "¿Por qué es importante participar?",
+        "reason1": "Tu voz cuenta en las decisiones clave de la escuela.",
+        "reason2": "Ayudas a priorizar las inversiones y mejoras del centro.",
+        "reason3": "Fomentamos una comunidad escolar más fuerte y transparente."
+      },
       "projects": {
         "title": "Proyectos y Mejoras",
         "commissions": {
@@ -135,6 +141,7 @@
         },
         "done": {
            "title": "Hecho (24-25)",
+           "desc": "Proyectos y mejoras ejecutadas con éxito durante el último curso.",
            "items": [
              "Pintura pista",
              "Huerto escolar",
@@ -144,6 +151,7 @@
         },
         "future": {
            "title": "Próximo (25-26)",
+           "desc": "Nuevos retos e iniciativas planificadas para el curso que viene.",
            "items": [
              "Renovación biblioteca",
              "Patio inclusivo",
