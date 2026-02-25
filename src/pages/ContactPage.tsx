@@ -1,22 +1,31 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Clock, Send, CheckCircle2, AlertCircle, Instagram, Twitter, Facebook } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { ContactService } from '../services/ContactService';
 import { ConfigService, type ContactConfig, type SocialConfig } from '../services/ConfigService';
 
 export function ContactPage() {
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
     const [contact, setContact] = useState<ContactConfig | null>(null);
     const [social, setSocial] = useState<SocialConfig | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        subject: '',
+        subject: searchParams.get('subject') || '',
         message: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const subjectParam = searchParams.get('subject');
+        if (subjectParam) {
+            setFormData(prev => ({ ...prev, subject: subjectParam }));
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         const fetchConfig = async () => {

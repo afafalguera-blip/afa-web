@@ -1,4 +1,4 @@
-import { Home, LayoutGrid, ShoppingBag } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingBag, MessageSquare } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +12,7 @@ const NAV_ITEMS: NavItem[] = [
   { icon: Home, labelKey: 'nav.home', path: '/' },
   { icon: LayoutGrid, labelKey: 'nav.extraescolars', path: '/extraescolars' },
   { icon: ShoppingBag, labelKey: 'nav.shop', path: '/botiga' },
-  // { icon: User, labelKey: 'nav.profile', path: '/perfil' },
+  { icon: MessageSquare, labelKey: 'nav.suggestions', path: '/contacte?subject=Sugeriment' },
 ];
 
 export function BottomNav() {
@@ -25,8 +25,7 @@ export function BottomNav() {
           key={path}
           to={path}
           className={({ isActive }) =>
-            `flex flex-col items-center gap-1 transition-colors ${
-              isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+            `flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
             }`
           }
         >
