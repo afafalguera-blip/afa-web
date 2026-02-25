@@ -8,6 +8,8 @@ import { AcollidaModal } from '../components/public/AcollidaModal';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { LazyImage } from '../components/common/LazyImage';
+import { HeroSettingsModal } from '../components/public/HeroSettingsModal';
+import { ConfigService, type HeroConfig, type AboutConfig, type ContactConfig } from '../services/ConfigService';
 
 interface NewsArticle {
   id: string;
@@ -50,11 +52,27 @@ export function Home() {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAcollidaModalOpen, setIsAcollidaModalOpen] = useState(false);
+  const [heroConfig, setHeroConfig] = useState<HeroConfig | null>(null);
+  const [aboutConfig, setAboutConfig] = useState<AboutConfig | null>(null);
+  const [contactConfig, setContactConfig] = useState<ContactConfig | null>(null);
+  const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
 
   useEffect(() => {
     fetchNews();
     fetchEvents();
+    fetchConfigs();
   }, []);
+
+  const fetchConfigs = async () => {
+    const [hero, about, contact] = await Promise.all([
+      ConfigService.getHeroConfig(),
+      ConfigService.getAboutConfig(),
+      ConfigService.getContactConfig()
+    ]);
+    if (hero) setHeroConfig(hero);
+    if (about) setAboutConfig(about);
+    if (contact) setContactConfig(contact);
+  };
 
   const fetchEvents = async () => {
     try {
@@ -101,17 +119,27 @@ export function Home() {
     <>
 
       {/* Hero Section - Responsive */}
-      <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none">
-        <img
-          src="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/sign/Imagenes/hero_escuela.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84NjM3Yjc4My1lYzY4LTRjMjMtYmMyNS04MTA2ODk5ZjhjMGIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZW5lcy9oZXJvX2VzY3VlbGEucG5nIiwiaWF0IjoxNzY5NTU0NjAxLCJleHAiOjMzMzA1NTU0NjAxfQ.fZrP8adLhMw8UjClDHTCdao7eDbB-2-8tgQBTlhpOwQ"
+      <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none group">
+        <LazyImage
+          src={heroConfig?.image_url || "https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/Imagenes/hero_escuela.png"}
           alt="Escola Hero"
           className="w-full h-full object-cover bg-slate-200"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4 lg:p-8">
           <h1 className="hidden lg:block text-4xl font-bold text-white drop-shadow-md leading-tight">
-            {t('home.welcome_title' as any) || "Benvinguts a l'AFA Falguera"}
+            {heroConfig?.title || t('home.welcome_title' as any) || "Benvinguts a l'AFA Falguera"}
           </h1>
         </div>
+
+        {isAdmin && (
+          <button
+            onClick={() => setIsHeroModalOpen(true)}
+            className="absolute top-4 right-4 z-30 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-white p-2.5 rounded-full shadow-xl hover:scale-110 active:scale-95 transition-all flex items-center gap-2 px-4 backdrop-blur-sm border border-white/20"
+          >
+            <Edit size={18} className="text-primary" />
+            <span className="text-sm font-bold">Editar Hero</span>
+          </button>
+        )}
       </div>
 
       {/* Navigation: Mobile Grid | Desktop Floating Pill */}
@@ -402,6 +430,13 @@ export function Home() {
 
 
 
+      <HeroSettingsModal
+        isOpen={isHeroModalOpen}
+        onClose={() => setIsHeroModalOpen(false)}
+        currentConfig={heroConfig}
+        onUpdate={(newConfig) => setHeroConfig(newConfig)}
+      />
+
       <section className="px-6 mt-4 mb-12 relative z-10">
         <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm">
           <button
@@ -419,25 +454,52 @@ export function Home() {
 
           {aboutExpanded && (
             <div className="px-5 pb-5 text-sm text-slate-600 dark:text-slate-300 space-y-4 animate-in slide-in-from-top-2">
-              <p>{t('home.about_text_1')}</p>
-              <p>{t('home.about_text_2')}</p>
-              <p>{t('home.about_text_3')}</p>
+              {aboutConfig?.text ? (
+                <div
+                  className="whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: aboutConfig.text.replace(/\n/g, '<br/>') }}
+                />
+              ) : (
+                <>
+                  <p>{t('home.about_text_1')}</p>
+                  <p>{t('home.about_text_2')}</p>
+                  <p>{t('home.about_text_3')}</p>
+                </>
+              )}
 
-              <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
-                <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
-                <ul className="list-disc pl-4 space-y-1 marker:text-primary">
-                  {((t('home.about_functions', { returnObjects: true }) as any) || []).map((func: string, i: number) => (
-                    <li key={i}>{func}</li>
-                  ))}
-                </ul>
-              </div>
+              {(aboutConfig?.functions && aboutConfig.functions.length > 0) ? (
+                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
+                  <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
+                  <ul className="list-disc pl-4 space-y-1 marker:text-primary">
+                    {aboutConfig.functions.map((func: string, i: number) => (
+                      <li key={i}>{func}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
+                  <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
+                  <ul className="list-disc pl-4 space-y-1 marker:text-primary">
+                    {((t('home.about_functions', { returnObjects: true }) as any) || []).map((func: string, i: number) => (
+                      <li key={i}>{func}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="text-xs italic text-slate-500 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/20 space-y-2">
                 <p className="font-bold text-amber-800 dark:text-amber-200 not-italic uppercase tracking-wider text-[10px]">
                   {t('contact_page.schedule_title')}
                 </p>
-                <p>{t('home.about_contact')}</p>
-                <p className="text-primary font-semibold">{t('contact_page.email_demand')}</p>
+                <p>{contactConfig?.schedule || t('home.about_contact')}</p>
+                <p className="text-primary font-semibold">
+                  {contactConfig?.schedule_info || t('contact_page.email_demand')}
+                </p>
+                {contactConfig?.email && (
+                  <a href={`mailto:${contactConfig.email}`} className="text-primary font-semibold hover:underline block">
+                    {contactConfig.email}
+                  </a>
+                )}
               </div>
             </div>
           )}

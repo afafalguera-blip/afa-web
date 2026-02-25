@@ -23,11 +23,16 @@ import AdminObservability from './pages/admin/AdminObservability';
 import AcollidaManager from './pages/admin/AcollidaManager';
 import AnnouncementManager from './pages/admin/AnnouncementManager';
 import ContactManager from './pages/admin/ContactManager';
+import SiteSettingsManager from './pages/admin/SiteSettingsManager';
+
 
 import { NewsPage } from './pages/NewsPage';
 import { AssembleaPage } from './pages/AssembleaPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { ContactPage } from './pages/ContactPage';
+import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
+import CookiesPolicy from './pages/Legal/CookiesPolicy';
+
 
 import { ShopLanding } from './pages/shop/ShopLanding';
 
@@ -61,6 +66,9 @@ function App() {
             <Route path="assemblea" element={<AssembleaPage />} />
             <Route path="documents" element={<DocumentsPage />} />
             <Route path="contacte" element={<ContactPage />} />
+            <Route path="privacitat" element={<PrivacyPolicy />} />
+            <Route path="cookies" element={<CookiesPolicy />} />
+
             {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
           </Route>
 
@@ -82,7 +90,9 @@ function App() {
             <Route path="acollida" element={<AcollidaManager />} />
             <Route path="banner" element={<AnnouncementManager />} />
             <Route path="contactes" element={<ContactManager />} />
+            <Route path="settings" element={<SiteSettingsManager />} />
             <Route path="observability" element={<AdminObservability />} />
+
           </Route>
         </Routes>
       </BrowserRouter>

@@ -14,10 +14,11 @@ import {
   Newspaper,
   FolderHeart,
   CalendarRange,
-  History,
+  History as HistoryIcon,
   Bell,
   Megaphone,
-  MessageSquare
+  MessageSquare,
+  Settings
 } from 'lucide-react';
 
 export function AdminLayout() {
@@ -312,6 +313,19 @@ export function AdminLayout() {
               {t('admin.sidebar.system')}
             </p>
             <NavLink
+              to="/admin/settings"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <Settings className="w-5 h-5" />
+              Configuració General
+            </NavLink>
+            <NavLink
               to="/admin/observability"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
@@ -321,7 +335,7 @@ export function AdminLayout() {
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
               `}
             >
-              <History className="w-5 h-5" />
+              <HistoryIcon className="w-5 h-5" />
               {t('admin.sidebar.observability')}
             </NavLink>
           </div>

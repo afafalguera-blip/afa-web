@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Clock, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, Clock, Send, CheckCircle2, AlertCircle, Instagram, Twitter, Facebook } from 'lucide-react';
 import { ContactService } from '../services/ContactService';
+import { ConfigService, type ContactConfig, type SocialConfig } from '../services/ConfigService';
 
 export function ContactPage() {
     const { t } = useTranslation();
+    const [contact, setContact] = useState<ContactConfig | null>(null);
+    const [social, setSocial] = useState<SocialConfig | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -14,6 +17,18 @@ export function ContactPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            const [contactData, socialData] = await Promise.all([
+                ConfigService.getContactConfig(),
+                ConfigService.getSocialConfig()
+            ]);
+            setContact(contactData);
+            setSocial(socialData);
+        };
+        fetchConfig();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -168,37 +183,63 @@ export function ContactPage() {
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                                 <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                                {t('contact_page.schedule_tue')}
+                                {contact?.schedule || t('contact_page.schedule_tue')}
                             </div>
                         </div>
                         <div className="mt-8 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-amber-100 dark:border-amber-900/10 flex items-start gap-3">
                             <Mail className="text-primary mt-1 shrink-0" size={18} />
                             <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                {t('contact_page.email_demand')}
+                                {contact?.schedule_info || t('contact_page.email_demand')}
                             </p>
                         </div>
+
                     </div>
 
                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-slate-800">
                         <h4 className="font-bold text-slate-900 dark:text-white mb-4">{t('contact_page.other_ways' as any) || "Altres vies"}</h4>
                         <div className="space-y-4">
                             <a
-                                href="mailto:ampafalguera@hotmail.es"
+                                href={`mailto:${contact?.email || 'ampafalguera@hotmail.es'}`}
                                 className="flex items-center gap-3 text-primary hover:underline font-medium"
                             >
                                 <Mail size={18} />
-                                ampafalguera@hotmail.es
+                                {contact?.email || 'ampafalguera@hotmail.es'}
                             </a>
-                            <a
-                                href="https://instagram.com/afafalguera"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-3 text-pink-600 hover:underline font-medium"
-                            >
-                                <span className="material-icons-round text-[18px]">instagram</span>
-                                @afafalguera
-                            </a>
+                            {social?.instagram && (
+                                <a
+                                    href={social.instagram}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 text-pink-600 hover:underline font-medium"
+                                >
+                                    <Instagram className="w-[18px] h-[18px]" />
+                                    {social.instagram.split('/').pop()?.startsWith('@') ? social.instagram.split('/').pop() : `@${social.instagram.split('/').pop()}`}
+                                </a>
+                            )}
+                            {social?.twitter && (
+                                <a
+                                    href={social.twitter}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 text-sky-600 hover:underline font-medium"
+                                >
+                                    <Twitter className="w-[18px] h-[18px]" />
+                                    {social.twitter.split('/').pop()}
+                                </a>
+                            )}
+                            {social?.facebook && (
+                                <a
+                                    href={social.facebook}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 text-blue-700 hover:underline font-medium"
+                                >
+                                    <Facebook className="w-[18px] h-[18px]" />
+                                    Facebook
+                                </a>
+                            )}
                         </div>
+
                     </div>
                 </div>
             </div>

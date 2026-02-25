@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ConfigService, type ContactConfig, type SocialConfig } from '../services/ConfigService';
 import {
   FileText,
   TrendingUp,
@@ -12,6 +14,20 @@ import {
 
 export function AssembleaPage() {
   const { t } = useTranslation();
+  const [contact, setContact] = useState<ContactConfig | null>(null);
+  const [social, setSocial] = useState<SocialConfig | null>(null);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      const [contactData, socialData] = await Promise.all([
+        ConfigService.getContactConfig(),
+        ConfigService.getSocialConfig()
+      ]);
+      setContact(contactData);
+      setSocial(socialData);
+    };
+    fetchConfig();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-24 pb-12">
@@ -185,15 +201,16 @@ export function AssembleaPage() {
               {t('assemblea.sections.board_change.call_to_action_desc')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-              <a href="mailto:ampafalguera@hotmail.es" className="flex-1 flex items-center justify-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors">
+              <a href={`mailto:${contact?.email || 'ampafalguera@hotmail.es'}`} className="flex-1 flex items-center justify-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors">
                 <Mail className="w-5 h-5" />
                 {t('assemblea.sections.contact.contact_us')}
               </a>
-              <a href="https://instagram.com/afaescolafalguera" target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 bg-indigo-800/50 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-800/70 transition-colors backdrop-blur-sm">
+              <a href={social?.instagram || "https://instagram.com/afafalguera"} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-2 bg-indigo-800/50 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-800/70 transition-colors backdrop-blur-sm">
                 <Instagram className="w-5 h-5" />
                 {t('assemblea.sections.contact.instagram')}
               </a>
             </div>
+
           </div>
         </div>
 
