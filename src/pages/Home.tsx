@@ -372,8 +372,10 @@ export function Home() {
 
       <section className="px-6 mt-8 mb-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Link
-            to="/assemblea"
+          <a
+            href="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/documents/actes/1770072824500-8l989f.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
           >
             <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
@@ -391,7 +393,7 @@ export function Home() {
                 {t('home.assemblea_banner.description')}
               </p>
             </div>
-          </Link>
+          </a>
 
           <Link
             to="/contacte"

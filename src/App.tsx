@@ -27,7 +27,7 @@ import SiteSettingsManager from './pages/admin/SiteSettingsManager';
 
 
 import { NewsPage } from './pages/NewsPage';
-import { AssembleaPage } from './pages/AssembleaPage';
+// import { AssembleaPage } from './pages/AssembleaPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { ContactPage } from './pages/ContactPage';
 import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
@@ -63,7 +63,7 @@ function App() {
             <Route path="botiga" element={<ShopLanding />} />
             <Route path="quotes" element={<FeesPage />} />
             <Route path="calendari" element={<GeneralCalendarPage />} />
-            <Route path="assemblea" element={<AssembleaPage />} />
+            {/* <Route path="assemblea" element={<AssembleaPage />} /> */}
             <Route path="documents" element={<DocumentsPage />} />
             <Route path="contacte" element={<ContactPage />} />
             <Route path="privacitat" element={<PrivacyPolicy />} />
