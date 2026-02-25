@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Cookie, X } from 'lucide-react';
+import { CookieService } from '../../services/CookieService';
 
 export function CookieBanner() {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        const consent = localStorage.getItem('cookie-consent');
-        if (!consent) {
+        if (!CookieService.hasConsent()) {
             const timer = setTimeout(() => {
                 setIsVisible(true);
             }, 1000);
@@ -15,8 +15,8 @@ export function CookieBanner() {
         }
     }, []);
 
-    const handleAccept = () => {
-        localStorage.setItem('cookie-consent', 'accepted');
+    const handleAcceptAll = () => {
+        CookieService.acceptAll();
         setIsVisible(false);
     };
 
@@ -43,13 +43,13 @@ export function CookieBanner() {
                             </button>
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                            Utilitzem cookies per millorar la teva experiència. En continuar navegant, acceptes la nostra{' '}
+                            Utilitzem cookies per millorar la teva experiència. Pots configurar les teves preferències o acceptar-les totes. Consulta la nostra{' '}
                             <Link to="/privacitat" className="text-primary hover:underline font-bold">Política de privacitat</Link> i{' '}
                             <Link to="/cookies" className="text-primary hover:underline font-bold">Cookies</Link>.
                         </p>
                         <div className="flex gap-3 pt-2">
                             <button
-                                onClick={handleAccept}
+                                onClick={handleAcceptAll}
                                 className="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20"
                             >
                                 Acceptar totes
@@ -57,6 +57,7 @@ export function CookieBanner() {
                             <Link
                                 to="/cookies"
                                 className="flex-1 bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-xs font-bold py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 transition-all text-center"
+                                onClick={() => setIsVisible(false)}
                             >
                                 Configurar
                             </Link>
