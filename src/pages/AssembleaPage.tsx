@@ -7,10 +7,7 @@ import {
   Heart,
   Megaphone,
   Mail,
-  Instagram,
-  FileText,
-  TrendingUp,
-  CheckCircle2
+  Instagram
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ConfigService, type SocialConfig } from '../services/ConfigService';
