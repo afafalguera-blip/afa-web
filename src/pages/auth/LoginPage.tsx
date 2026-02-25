@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { SchoolSuppliesBackground } from '../../components/layout/SchoolSuppliesBackground';
 
@@ -13,14 +13,17 @@ export function LoginPage() {
     const [isSignUp, setIsSignUp] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
+    const location = useLocation();
+    const from = location.state?.from || '/botiga';
+
     useEffect(() => {
         if (user) {
             const timer = setTimeout(() => {
-                navigate('/botiga');
-            }, 1500);
+                navigate(from);
+            }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [user, navigate]);
+    }, [user, navigate, from]);
 
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -55,7 +58,7 @@ export function LoginPage() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin + '/botiga'
+                    redirectTo: window.location.origin + from
                 }
             });
             if (error) throw error;
@@ -70,7 +73,7 @@ export function LoginPage() {
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <h2 className="text-xl font-bold text-slate-700">Ja has iniciat sessió!</h2>
-                    <p className="text-slate-500">Et redirigim a la botiga...</p>
+                    <p className="text-slate-500 italic">Et redirigim...</p>
                 </div>
             </div>
         );

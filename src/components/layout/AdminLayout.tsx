@@ -37,7 +37,7 @@ export function AdminLayout() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        navigate('/login');
+        navigate('/login', { state: { from: window.location.pathname } });
       } else if (profile && profile.role !== 'admin') {
         // Optionally show unauthorised page or redirect to /botiga
         alert(t('admin.access_denied'));
