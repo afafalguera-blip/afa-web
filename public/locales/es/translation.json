@@ -38,7 +38,7 @@
       "Colaborar en las fiestas y actos culturales de la escuela."
     ],
     "news_archive": {
-      "subtitle": "Mantente al día de todo lo que sucede en nuestra escuela y de los proyectos de la AFA."
+      "subtitle": "Mantente al día de todo lo que sucede en nuestra escuela y de los proyectos del AFA."
     },
     "assemblea_banner": {
        "tag": "Documentación",
@@ -587,7 +587,7 @@
     },
     "projects": {
       "title": "Gestión de Proyectos",
-      "subtitle": "Administra los proyectos e iniciativas de la AFA.",
+      "subtitle": "Administra los proyectos e iniciativas del AFA.",
       "new_project": "Nuevo Proyecto",
       "edit_project": "Editar Proyecto",
       "search_placeholder": "Buscar proyecto...",
@@ -615,7 +615,7 @@
     },
     "calendar": {
       "title": "Calendario de Eventos",
-      "subtitle": "Gestiona el calendario general de la AFA.",
+      "subtitle": "Gestiona el calendario general del AFA.",
       "new_event": "Nuevo Evento",
       "edit_event": "Editar Evento",
       "search_placeholder": "Buscar evento...",

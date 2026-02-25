@@ -125,8 +125,8 @@ export function Home() {
           alt="Escola Hero"
           className="w-full h-full object-cover bg-slate-200"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-4 lg:p-8">
-          <h1 className="hidden lg:block text-4xl font-bold text-white drop-shadow-md leading-tight">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 lg:p-8">
+          <h1 className="text-2xl lg:text-4xl font-bold text-white drop-shadow-md leading-tight">
             {heroConfig?.title || t('home.welcome_title' as any) || "Benvinguts a l'AFA Falguera"}
           </h1>
         </div>
