@@ -27,7 +27,7 @@
     "about_text_1": "The AFA is the association formed by the majority of the school's families. The board of directors is responsible for coordinating various activities. Joining the board is voluntary. Therefore, any help from you, no matter how small, will be very welcome.",
     "about_text_2": "The board organizes and manages extracurricular activities intended to complement the children's education, and collaborates in many other activities throughout the school year.",
     "about_text_3": "It also participates in organizing popular festivals: Castanyada, Tió, Sant Jordi, End of Year...",
-    "about_contact": "For any information, you can find us at the AFA office on Tuesdays from 9:00 to 9:30.",
+    "about_contact": "For any information, you can find us at the AFA office on Mondays from 9:00 to 9:30.",
     "about_functions_title": "Its main functions are:",
     "about_functions": [
       "Raise awareness and guide parents regarding their responsibility for their children's education.",
@@ -49,7 +49,7 @@
     "contact_banner": {
       "tag": "Prior Appointment",
       "title": "Want to talk to us?",
-      "description": "In-person assistance at the office on Tuesdays (9:00-9:30), always on demand by prior email.",
+      "description": "In-person assistance at the office on Mondays (9:00-9:30), always on demand by prior email.",
       "button": "Contact Form"
     }
   },
@@ -67,7 +67,7 @@
     "form_success": "Message sent successfully! We will get back to you as soon as possible.",
     "schedule_title": "In-Person Assistance",
     "schedule_description": "For any in-person management, you will find us at the AFA office during the following hours (always with prior appointment via email):",
-    "schedule_tue": "Tuesdays from 9:00 to 9:30 AM",
+    "schedule_mon": "Mondays from 9:00 to 9:30 AM",
     "email_demand": "Remember that you must send an email beforehand to schedule the appointment.",
     "other_ways": "Other ways"
   },

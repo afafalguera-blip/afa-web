@@ -192,7 +192,7 @@ export function ContactPage() {
                         <div className="space-y-4">
                             <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                                 <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                                {contact?.schedule || t('contact_page.schedule_tue')}
+                                {contact?.schedule || t('contact_page.schedule_mon')}
                             </div>
                         </div>
                         <div className="mt-8 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-amber-100 dark:border-amber-900/10 flex items-start gap-3">
