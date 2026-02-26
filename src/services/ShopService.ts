@@ -1,4 +1,4 @@
-import type { ShopProduct } from '../types/shop';
+import type { ShopProduct, ShopVariant } from '../types/shop';
 import { supabase } from '../lib/supabase';
 import { FinanceService } from './FinanceService';
 
@@ -13,8 +13,29 @@ function transformOrder(order: any) {
 }
 
 export const ShopService = {
+  async createProduct(product: Partial<ShopProduct>) {
+    const { data, error } = await supabase
+      .from('shop_products')
+      .insert({
+        name: product.name,
+        name_es: product.name_es || product.name,
+        name_ca: product.name_ca,
+        name_en: product.name_en,
+        description: product.description,
+        description_es: product.description_es || product.description,
+        description_ca: product.description_ca,
+        description_en: product.description_en,
+        category: product.category || 'uniforme',
+        image_url: product.image_url
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
   async updateProduct(id: string, updates: Partial<ShopProduct>) {
-    // Define explicit allowed columns to prevent PostgREST from failing on relational/extra fields
     const allowedColumns = [
       'name', 'name_es', 'name_ca', 'name_en',
       'description', 'description_es', 'description_ca', 'description_en',
@@ -37,6 +58,50 @@ export const ShopService = {
 
     if (error) throw error;
     return data;
+  },
+
+  async deleteProduct(id: string) {
+    // Delete variants first (though DB should handle cascade if configured)
+    await supabase.from('shop_variants').delete().eq('product_id', id);
+    
+    const { error } = await supabase
+      .from('shop_products')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  async createVariant(variant: Partial<ShopVariant>) {
+    const { data, error } = await supabase
+      .from('shop_variants')
+      .insert(variant)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateVariant(id: string, updates: Partial<ShopVariant>) {
+    const { data, error } = await supabase
+      .from('shop_variants')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteVariant(id: string) {
+    const { error } = await supabase
+      .from('shop_variants')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
   },
 
   async getOrders() {
