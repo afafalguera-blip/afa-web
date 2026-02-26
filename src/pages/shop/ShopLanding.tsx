@@ -8,6 +8,7 @@ import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { ProductModal } from '../../components/shop/ProductModal';
 import { LazyImage } from '../../components/common/LazyImage';
 import { SEO } from '../../components/common/SEO';
+import { calculateChandalStock } from '../../utils/productUtils';
 
 export function ShopLanding() {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export function ShopLanding() {
         `);
 
       if (error) throw error;
-      setProducts(data || []);
+      setProducts(calculateChandalStock(data || []));
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {

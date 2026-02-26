@@ -39,3 +39,49 @@ export function sortSizes<T extends { size?: string }>(variants: T[]): T[] {
     return sizeA.localeCompare(sizeB);
   });
 }
+
+// Chandal Stock Calculation Logic
+export const isChandalPants = (name: string) => {
+  const n = name.toLowerCase();
+  return (n.includes('pantaló') && n.includes('xandall')) || (n.includes('pantalon') && n.includes('chandal'));
+};
+
+export const isChandalSweatshirt = (name: string) => {
+  const n = name.toLowerCase();
+  return (n.includes('sudadera') || n.includes('jaqueta')) && (n.includes('xandall') || n.includes('chandal'));
+};
+
+export const isChandalComplete = (name: string) => {
+  const n = name.toLowerCase();
+  return n.includes('complet') && (n.includes('xandall') || n.includes('chandal'));
+};
+
+export function calculateChandalStock<T extends { id: string; name: string; variants?: any[] }>(products: T[]): T[] {
+  const pantsProduct = products.find(p => isChandalPants(p.name));
+  const sweatshirtProduct = products.find(p => isChandalSweatshirt(p.name));
+  const completeProduct = products.find(p => isChandalComplete(p.name));
+
+  if (!pantsProduct || !sweatshirtProduct || !completeProduct) {
+    return products;
+  }
+
+  return products.map(p => {
+    if (p.id !== completeProduct.id) return p;
+
+    // Update complete tracksuit variants
+    const updatedVariants = p.variants?.map(v => {
+      // Find same size in pants and sweatshirts
+      const matchingPants = pantsProduct.variants?.find(pv => pv.size === v.size);
+      const matchingSweatshirt = sweatshirtProduct.variants?.find(sv => sv.size === v.size);
+
+      if (matchingPants && matchingSweatshirt) {
+        // Full tracksuit stock is the minimum of both
+        const calculatedStock = Math.min(matchingPants.stock, matchingSweatshirt.stock);
+        return { ...v, stock: calculatedStock, isCalculated: true };
+      }
+      return v;
+    });
+
+    return { ...p, variants: updatedVariants, isCalculated: true };
+  });
+}

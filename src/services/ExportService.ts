@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
+import { sortSizes } from '../utils/productUtils';
 
 // Helper to flatten inscription data
 const getFlattenedData = (inscriptions: any[], shouldSort: boolean = false) => {
@@ -229,6 +230,157 @@ export const ExportService = {
     }
 
     doc.save(`${filename}_${type}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+  },
+  
+  exportInventoryPDF(products: any[], filename: string = 'inventari') {
+    const doc = new jsPDF('p', 'mm', 'a4');
+
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(41, 128, 185);
+    doc.text('Informe d\'Inventari i Estoc', 14, 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`AFA Escola Falguera - Generat el ${new Date().toLocaleString('es-ES')}`, 14, 27);
+    
+    let yPos = 35;
+
+    products.forEach((product) => {
+      // Check for page break
+      if (yPos > 240) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setTextColor(44, 62, 80);
+      doc.setFont('helvetica', 'bold');
+      doc.text(product.name, 14, yPos);
+      yPos += 6;
+
+      // Sort variants by size using the utility
+      const variants = sortSizes(product.variants || []);
+      
+      const tableData = variants.map((v: any) => [
+        v.size,
+        `${v.price_member}€`,
+        `${v.price_non_member}€`,
+        v.stock,
+        v.stock <= 0 ? 'Esgotat' : (v.stock <= 5 ? 'Baix estoc' : 'En estoc')
+      ]);
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Talla', 'Preu Soci', 'Preu No Soci', 'Estoc', 'Estat']],
+        body: tableData,
+        theme: 'striped',
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [41, 128, 185] },
+        margin: { left: 14, right: 14 },
+        didParseCell: (data) => {
+          if (data.section === 'body' && data.column.index === 4) {
+             const stockValue = (variants as any[])[data.row.index].stock;
+             if (stockValue <= 0) {
+                data.cell.styles.textColor = [231, 76, 60]; // Red
+                data.cell.styles.fontStyle = 'bold';
+             } else if (stockValue <= 5) {
+                data.cell.styles.textColor = [230, 126, 34]; // Orange
+                data.cell.styles.fontStyle = 'bold';
+             }
+          }
+        }
+      });
+
+      // @ts-ignore
+      yPos = doc.lastAutoTable.finalY + 10;
+    });
+
+    // Add a Summary Page/Section for Low/Out of stock items
+    const lowStockItems: any[] = [];
+    
+    // We sort products and variants first to ensure the summary is ordered
+    const sortedProductsForSummary = [...products].sort((a, b) => a.name.localeCompare(b.name));
+
+    sortedProductsForSummary.forEach(p => {
+      // Sort variants within the product
+      const sortedVariants = sortSizes(p.variants || []);
+      
+      sortedVariants.forEach((v: any) => {
+        if (v.stock <= 5) {
+          lowStockItems.push({
+            name: p.name,
+            size: v.size,
+            stock: v.stock,
+            status: v.stock <= 0 ? 'Esgotat' : 'Baix estoc'
+          });
+        }
+      });
+    });
+
+    if (lowStockItems.length > 0) {
+      doc.addPage();
+      doc.setFontSize(20);
+      doc.setTextColor(192, 57, 43); // More aggressive Red for critical report
+      doc.setFont('helvetica', 'bold');
+      doc.text('RESUM CRÍTIC DE REPOSICIÓ', 14, 20);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(127, 140, 141);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Llistat prioritatit per producte i talla.', 14, 27);
+
+      const summaryData = lowStockItems.map(item => [
+        item.name,
+        item.size,
+        item.stock,
+        item.status
+      ]);
+
+      autoTable(doc, {
+        startY: 35,
+        head: [['Producte', 'Talla', 'Estoc', 'Estat']],
+        body: summaryData,
+        theme: 'grid',
+        headStyles: { fillColor: [192, 57, 43], fontStyle: 'bold' },
+        styles: { fontSize: 9, cellPadding: 3 },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 80 }
+        },
+        didParseCell: (data) => {
+          // Add border top when product changes for better differentiation
+          if (data.section === 'body' && data.row.index > 0) {
+            const currentProduct = summaryData[data.row.index][0];
+            const prevProduct = summaryData[data.row.index - 1][0];
+            
+            if (currentProduct !== prevProduct) {
+              // @ts-ignore
+              data.cell.styles.lineWidth = { top: 0.5 };
+              // @ts-ignore
+              data.cell.styles.lineColor = [44, 62, 80];
+            } else if (data.column.index === 0) {
+              // Mute repeating product names but keep them for clarity on page breaks
+              data.cell.styles.textColor = [150, 150, 150];
+              data.cell.styles.fontStyle = 'normal';
+            }
+          }
+
+          // Coloring the status
+          if (data.section === 'body' && data.column.index === 3) {
+            const status = summaryData[data.row.index][3];
+            if (status === 'Esgotat') {
+              data.cell.styles.textColor = [231, 76, 60];
+              data.cell.styles.fontStyle = 'bold';
+            } else {
+              data.cell.styles.textColor = [230, 126, 34];
+              data.cell.styles.fontStyle = 'bold';
+            }
+          }
+        }
+      });
+    }
+
+    doc.save(`${filename}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
   },
   
   exportPaymentsCSV(payments: any[], filename: string = 'pagos') {

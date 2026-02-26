@@ -216,5 +216,21 @@ export const ShopService = {
       .delete()
       .eq('id', orderId);
     if (error) throw error;
+  },
+
+  async createEmptyOrder(customerName: string) {
+    const { data, error } = await supabase
+      .from('shop_orders')
+      .insert({
+        customer_name: customerName,
+        total_amount: 0,
+        payment_status: 'pending',
+        delivery_status: 'pending'
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
   }
 };
