@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { Calendar, ArrowRight, Newspaper } from 'lucide-react';
-import { NewsDetailModal } from '../components/public/NewsDetailModal';
+import { Link } from 'react-router-dom';
 
 interface NewsArticle {
   id: string;
+  slug: string;
   title: string;
   content: string;
   excerpt: string;
@@ -23,7 +24,6 @@ export function NewsPage() {
   const { t, i18n } = useTranslation();
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
 
   useEffect(() => {
     fetchNews();
@@ -75,15 +75,16 @@ export function NewsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
             {news.map((article) => {
               const currentLang = i18n.language;
               const title = article.translations?.[currentLang]?.title || article.title;
               const excerpt = article.translations?.[currentLang]?.excerpt || article.excerpt;
-              
+
               return (
-                <div 
+                <Link
                   key={article.id}
+                  to={`/noticies/${article.slug}`}
                   className="group bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 flex flex-col h-full"
                 >
                   <div className="relative h-56 overflow-hidden">
@@ -94,47 +95,38 @@ export function NewsPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  
+
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest mb-3">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(article.created_at).toLocaleDateString(i18n.language, { 
-                        day: 'numeric', 
-                        month: 'short', 
-                        year: 'numeric' 
+                      {new Date(article.created_at).toLocaleDateString(i18n.language, {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
                       })}
                     </div>
-                    
+
                     <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors">
                       {title}
                     </h3>
-                    
+
                     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 line-clamp-3">
                       {excerpt}
                     </p>
-                    
+
                     <div className="mt-auto">
-                      <button
-                        onClick={() => setSelectedArticle(article)}
-                        className="flex items-center gap-2 text-sm font-black text-primary group/btn"
-                      >
+                      <div className="flex items-center gap-2 text-sm font-black text-primary group/btn">
                         {t('common.read_more') || 'Llegir més'}
                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
         )}
       </div>
-
-      <NewsDetailModal
-        article={selectedArticle}
-        isOpen={!!selectedArticle}
-        onClose={() => setSelectedArticle(null)}
-      />
     </div>
   );
 }

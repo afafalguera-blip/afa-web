@@ -4,6 +4,11 @@ export interface Announcement {
   id: string;
   is_active: boolean;
   message: string;
+  translations?: {
+    ca?: string;
+    es?: string;
+    en?: string;
+  };
   type: 'info' | 'warning' | 'success';
   link?: string;
   updated_at?: string;

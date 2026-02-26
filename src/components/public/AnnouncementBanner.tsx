@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { AnnouncementService, type Announcement } from '../../services/AnnouncementService';
 import { Megaphone, ExternalLink } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export function AnnouncementBanner() {
+    const { i18n } = useTranslation();
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
 
     useEffect(() => {
@@ -19,6 +21,9 @@ export function AnnouncementBanner() {
 
     if (!announcement) return null;
 
+    const currentLang = i18n.language as 'ca' | 'es' | 'en';
+    const message = announcement.translations?.[currentLang] || announcement.message;
+
     const bgClass = {
         info: 'bg-primary dark:bg-primary-600',
         warning: 'bg-amber-500',
@@ -32,7 +37,7 @@ export function AnnouncementBanner() {
                     <Megaphone size={16} className="text-white" />
                 </span>
                 <p className="text-sm sm:text-base font-bold text-center flex items-center gap-2">
-                    {announcement.message}
+                    {message}
                     {announcement.link && <ExternalLink size={14} className="opacity-70" />}
                 </p>
             </div>

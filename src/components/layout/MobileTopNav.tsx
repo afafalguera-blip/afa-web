@@ -24,7 +24,6 @@ export function MobileTopNav() {
           />
         </div>
         <div className="flex flex-col">
-          <span className="text-[10px] text-slate-500 font-medium leading-none mb-0.5">Bon dia Família 👋</span>
           <span className="font-bold text-sm text-primary dark:text-white leading-none">AFA Escola Falguera</span>
         </div>
       </Link>
@@ -39,8 +38,8 @@ export function MobileTopNav() {
               onClick={() => changeLanguage(lang)}
               translate="no"
               className={`notranslate text-[10px] font-bold px-2 py-1 rounded-full transition-all ${i18n.language === lang
-                  ? 'bg-white dark:bg-slate-600 text-primary shadow-sm'
-                  : 'text-slate-400 hover:text-slate-600'
+                ? 'bg-white dark:bg-slate-600 text-primary shadow-sm'
+                : 'text-slate-400 hover:text-slate-600'
                 }`}
             >
               {lang.toUpperCase()}

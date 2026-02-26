@@ -55,7 +55,21 @@ export default function SiteSettingsManager() {
 
             if (contactData) setContact(contactData);
             if (socialData) setSocial(socialData);
-            if (aboutData) setAbout(aboutData);
+            if (aboutData) {
+                // Ensure translations exists for the About section
+                if (!aboutData.translations) {
+                    const oldAbout = aboutData as any;
+                    setAbout({
+                        translations: {
+                            ca: { text: oldAbout.text || '', functions: oldAbout.functions || [] },
+                            es: { text: oldAbout.text || '', functions: oldAbout.functions || [] },
+                            en: { text: oldAbout.text || '', functions: oldAbout.functions || [] }
+                        }
+                    });
+                } else {
+                    setAbout(aboutData);
+                }
+            }
             if (privacyData) setPrivacy(privacyData);
             if (cookiesData) setCookies(cookiesData);
         } catch (err) {
@@ -96,21 +110,32 @@ export default function SiteSettingsManager() {
     };
 
     const handleAboutFunctionChange = (index: number, value: string) => {
-        if (!about) return;
-        const newFunctions = [...about.functions];
+        if (!about || !about.translations?.[activeLang]) return;
+        const newTranslations = { ...about.translations };
+        const langData = { ...newTranslations[activeLang] };
+        const newFunctions = [...langData.functions];
         newFunctions[index] = value;
-        setAbout({ ...about, functions: newFunctions });
+        langData.functions = newFunctions;
+        newTranslations[activeLang] = langData;
+        setAbout({ ...about, translations: newTranslations });
     };
 
     const addAboutFunction = () => {
-        if (!about) return;
-        setAbout({ ...about, functions: [...about.functions, ""] });
+        if (!about || !about.translations?.[activeLang]) return;
+        const newTranslations = { ...about.translations };
+        const langData = { ...newTranslations[activeLang] };
+        langData.functions = [...langData.functions, ""];
+        newTranslations[activeLang] = langData;
+        setAbout({ ...about, translations: newTranslations });
     };
 
     const removeAboutFunction = (index: number) => {
-        if (!about) return;
-        const newFunctions = about.functions.filter((_, i) => i !== index);
-        setAbout({ ...about, functions: newFunctions });
+        if (!about || !about.translations?.[activeLang]) return;
+        const newTranslations = { ...about.translations };
+        const langData = { ...newTranslations[activeLang] };
+        langData.functions = langData.functions.filter((_, i) => i !== index);
+        newTranslations[activeLang] = langData;
+        setAbout({ ...about, translations: newTranslations });
     };
 
     if (loading) {
@@ -310,17 +335,45 @@ export default function SiteSettingsManager() {
 
                 {activeTab === 'about' && about && (
                     <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6 border-b border-slate-50 dark:border-slate-700 pb-4">
-                            Informació Corporativa (Sobre l'AFA)
-                        </h3>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-50 dark:border-slate-700 pb-4 mb-6">
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+                                Informació Corporativa (Sobre l'AFA)
+                            </h3>
+
+                            {/* Language Switcher for About */}
+                            <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
+                                {(['ca', 'es', 'en'] as LangType[]).map((lang) => (
+                                    <button
+                                        key={lang}
+                                        type="button"
+                                        onClick={() => setActiveLang(lang)}
+                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
+                                            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
+                                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                                            }`}
+                                    >
+                                        {lang.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
                         <div className="space-y-6">
+                            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4">
+                                <Globe size={18} />
+                                <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Descripció Principal (Qui som)</label>
                                 <textarea
                                     required
-                                    value={about.text}
-                                    onChange={(e) => setAbout({ ...about, text: e.target.value })}
+                                    value={about.translations?.[activeLang]?.text || ""}
+                                    onChange={(e) => {
+                                        const newTranslations = { ...about.translations };
+                                        newTranslations[activeLang] = { ...newTranslations[activeLang], text: e.target.value };
+                                        setAbout({ ...about, translations: newTranslations });
+                                    }}
                                     rows={8}
                                     className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed"
                                     placeholder="Explica la missió i valors de l'AFA..."
@@ -340,7 +393,7 @@ export default function SiteSettingsManager() {
                                 </div>
 
                                 <div className="space-y-3">
-                                    {about.functions.map((func, index) => (
+                                    {(about.translations?.[activeLang]?.functions || []).map((func, index) => (
                                         <div key={index} className="flex gap-2">
                                             <div className="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-lg text-xs font-bold shrink-0 mt-2">
                                                 {index + 1}
@@ -361,7 +414,7 @@ export default function SiteSettingsManager() {
                                             </button>
                                         </div>
                                     ))}
-                                    {about.functions.length === 0 && (
+                                    {(about.translations?.[activeLang]?.functions || []).length === 0 && (
                                         <p className="text-xs text-slate-400 italic text-center py-4">No hi ha funcions definides.</p>
                                     )}
                                 </div>

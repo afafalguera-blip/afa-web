@@ -98,6 +98,14 @@ export function ContactPage() {
                                 {contact?.schedule_info || t('contact_page.email_demand')}
                             </p>
                         </div>
+
+                        {/* Appointment notice */}
+                        <div className="mt-3 p-3 bg-amber-100/50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-900/30 flex items-start gap-3">
+                            <AlertCircle className="text-amber-600 dark:text-amber-500 mt-0.5 shrink-0" size={14} />
+                            <p className="text-[11px] md:text-xs font-medium text-amber-700 dark:text-amber-400 leading-tight">
+                                {t('contact_page.schedule_appointment_mobile')}
+                            </p>
+                        </div>
                     </div>
 
                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-800">

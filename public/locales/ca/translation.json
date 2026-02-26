@@ -11,6 +11,20 @@
     "suggestions": "Suggeriments",
     "profile": "Perfil"
   },
+  "legal": {
+    "privacy_title": "Política de Privacitat",
+    "cookies_title": "Política de Cookies",
+    "no_content": "No hi ha contingut disponible.",
+    "cookies_prefs": "Configura les teves preferències",
+    "cookies_technical": "Tècniques",
+    "cookies_technical_desc": "Necessàries per al funcionament.",
+    "cookies_analytics": "Analítiques",
+    "cookies_analytics_desc": "Per mesurar el rendiment i ús.",
+    "cookies_personalization": "Personalització",
+    "cookies_personalization_desc": "Per recordar les teves preferències i configuració.",
+    "cookies_save": "Desar preferències",
+    "cookies_saved": "Guardat Correctament!"
+  },
   "home": {
     "welcome_title": "Benvinguts a l'AFA Falguera",
     "extraescolars": "Extraescolars",
@@ -71,7 +85,22 @@
     "schedule_description": "Per a qualsevol gestió presencial, ens trobaràs a l'espai AFA en el següent horari (sempre amb cita prèvia via email):",
     "schedule_mon": "Dilluns de 9:00 a 9:30h",
     "email_demand": "Recordeu que cal enviar un correu electrònic abans per concertar la cita.",
+    "schedule_appointment_mobile": "Per a qualsevol altre dia, cal sol·licitar cita prèvia a través del formulari.",
     "other_ways": "Altres vies"
+  },
+  "calendar": {
+    "title": "Calendari d'Activitats",
+    "subtitle": "Esdeveniments i dates importants de la nostra comunitat",
+    "view_month": "Mes",
+    "view_week": "Setmana",
+    "view_day": "Dia",
+    "today": "Avui",
+    "no_events": "No hi ha esdeveniments per aquest dia",
+    "no_events_month": "No hi ha esdeveniments programats per aquest mes",
+    "close": "Tancar",
+    "location": "Lloc",
+    "time": "Hora",
+    "description": "Descripció"
   },
   "assemblea": {
     "title": "Assemblea General",
@@ -662,6 +691,7 @@
     }
   },
   "common": {
+    "all_day": "Tot el dia",
     "list": "Llista",
     "search": "Buscar...",
     "all": "Totes",
@@ -681,5 +711,8 @@
     "read_more": "Llegir més",
     "loading": "Carregant...",
     "no_activities": "Sense activitats"
+  },
+  "footer": {
+    "all_rights_reserved": "Tots els drets reservats."
   }
 }

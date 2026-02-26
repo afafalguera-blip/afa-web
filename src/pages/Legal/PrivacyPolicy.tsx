@@ -4,7 +4,7 @@ import { Lock } from 'lucide-react';
 import { ConfigService, type LegalConfig } from '../../services/ConfigService';
 
 export default function PrivacyPolicy() {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const [config, setConfig] = useState<LegalConfig | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
                         <Lock className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">
-                        {currentLang === 'ca' ? 'Política de Privacitat' : currentLang === 'es' ? 'Política de Privacidad' : 'Privacy Policy'}
+                        {t('legal.privacy_title')}
                     </h1>
                 </div>
 
@@ -49,7 +49,7 @@ export default function PrivacyPolicy() {
                         />
                     ) : (
                         <div className="text-center py-12 text-slate-400 italic">
-                            {currentLang === 'ca' ? 'No hi ha contingut disponible.' : currentLang === 'es' ? 'No hay contenido disponible.' : 'No content available.'}
+                            {t('legal.no_content')}
                         </div>
                     )}
                 </div>

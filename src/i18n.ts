@@ -9,16 +9,24 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'ca',
+    supportedLngs: ['ca', 'es', 'en'],
     interpolation: {
       escapeValue: false
     },
     detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'] // Persist language selection
+      order: ['localStorage', 'cookie', 'navigator', 'htmlTag'],
+      lookupLocalStorage: 'i18nextLng',
+      lookupCookie: 'i18next',
+      caches: ['localStorage', 'cookie']
     },
     backend: {
         loadPath: '/locales/{{lng}}/{{ns}}.json',
     }
   });
+
+// Update lang attribute in HTML
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng;
+});
 
 export default i18n;

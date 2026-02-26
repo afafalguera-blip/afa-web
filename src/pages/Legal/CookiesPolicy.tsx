@@ -5,7 +5,7 @@ import { ConfigService, type LegalConfig } from '../../services/ConfigService';
 import { CookieService, type CookieConsent } from '../../services/CookieService';
 
 export default function CookiesPolicy() {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const [config, setConfig] = useState<LegalConfig | null>(null);
     const [loading, setLoading] = useState(true);
     const [consent, setConsent] = useState<CookieConsent>({
@@ -62,7 +62,7 @@ export default function CookiesPolicy() {
                         <Cookie className="w-8 h-8 text-amber-600 dark:text-amber-400" />
                     </div>
                     <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">
-                        {currentLang === 'ca' ? 'Política de Cookies' : currentLang === 'es' ? 'Política de Cookies' : 'Cookies Policy'}
+                        {t('legal.cookies_title')}
                     </h1>
                 </div>
 
@@ -71,7 +71,7 @@ export default function CookiesPolicy() {
                     <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 pb-4">
                         <ShieldCheck className="w-6 h-6 text-primary" />
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                            {currentLang === 'ca' ? 'Configura les teves preferències' : currentLang === 'es' ? 'Configura tus preferencias' : 'Configure your preferences'}
+                            {t('legal.cookies_prefs')}
                         </h2>
                     </div>
 
@@ -82,10 +82,10 @@ export default function CookiesPolicy() {
                                 <ShieldCheck className="w-5 h-5 text-slate-400" />
                                 <div>
                                     <p className="font-bold text-slate-900 dark:text-white">
-                                        {currentLang === 'ca' ? 'Tècniques' : currentLang === 'es' ? 'Técnicas' : 'Technical'}
+                                        {t('legal.cookies_technical')}
                                     </p>
                                     <p className="text-xs text-slate-500">
-                                        {currentLang === 'ca' ? 'Necessàries per al funcionament.' : currentLang === 'es' ? 'Necesarias para el funcionamiento.' : 'Necessary for operation.'}
+                                        {t('legal.cookies_technical_desc')}
                                     </p>
                                 </div>
                             </div>
@@ -103,10 +103,10 @@ export default function CookiesPolicy() {
                                 <PieChart className="w-5 h-5 text-primary" />
                                 <div>
                                     <p className="font-bold text-slate-900 dark:text-white">
-                                        {currentLang === 'ca' ? 'Analítiques' : currentLang === 'es' ? 'Analíticas' : 'Analytics'}
+                                        {t('legal.cookies_analytics')}
                                     </p>
                                     <p className="text-xs text-slate-500">
-                                        {currentLang === 'ca' ? 'Per mesurar el rendiment i ús.' : currentLang === 'es' ? 'Para medir el rendimiento y uso.' : 'To measure performance and usage.'}
+                                        {t('legal.cookies_analytics_desc')}
                                     </p>
                                 </div>
                             </div>
@@ -124,10 +124,10 @@ export default function CookiesPolicy() {
                                 <Target className="w-5 h-5 text-primary" />
                                 <div>
                                     <p className="font-bold text-slate-900 dark:text-white">
-                                        {currentLang === 'ca' ? 'Personalització' : currentLang === 'es' ? 'Personalización' : 'Personalization'}
+                                        {t('legal.cookies_personalization')}
                                     </p>
                                     <p className="text-xs text-slate-500">
-                                        {currentLang === 'ca' ? 'Per recordar les teves preferències i configuració.' : currentLang === 'es' ? 'Para recordar tus preferencias y configuración.' : 'To remember your preferences and settings.'}
+                                        {t('legal.cookies_personalization_desc')}
                                     </p>
                                 </div>
                             </div>
@@ -145,10 +145,10 @@ export default function CookiesPolicy() {
                         {saved ? (
                             <>
                                 <Check className="w-5 h-5" />
-                                {currentLang === 'ca' ? 'Guardat Correctament!' : currentLang === 'es' ? '¡Guardado Correctamente!' : 'Saved Successfully!'}
+                                {t('legal.cookies_saved')}
                             </>
                         ) : (
-                            currentLang === 'ca' ? 'Desar preferències' : currentLang === 'es' ? 'Guardar preferencias' : 'Save preferences'
+                            t('legal.cookies_save')
                         )}
                     </button>
                 </div>
@@ -162,7 +162,7 @@ export default function CookiesPolicy() {
                         />
                     ) : (
                         <div className="text-center py-12 text-slate-400 italic">
-                            {currentLang === 'ca' ? 'No hi ha contingut disponible.' : currentLang === 'es' ? 'No hay contenido disponible.' : 'No content available.'}
+                            {t('legal.no_content')}
                         </div>
                     )}
                 </div>

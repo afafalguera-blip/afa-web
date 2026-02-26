@@ -3,17 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { FeaturedProjects } from '../components/public/FeaturedProjects';
-import { NewsDetailModal } from '../components/public/NewsDetailModal';
 import { AcollidaModal } from '../components/public/AcollidaModal';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { LazyImage } from '../components/common/LazyImage';
 import { HeroSettingsModal } from '../components/public/HeroSettingsModal';
+import { AboutSettingsModal } from '../components/public/AboutSettingsModal';
 import { ConfigService, type HeroConfig, type AboutConfig, type ContactConfig } from '../services/ConfigService';
 import { SEO } from '../components/common/SEO';
 
 interface NewsArticle {
   id: string;
+  slug: string;
   title: string;
   content: string;
   excerpt: string;
@@ -50,13 +51,12 @@ export function Home() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loadingNews, setLoadingNews] = useState(true);
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAcollidaModalOpen, setIsAcollidaModalOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<HeroConfig | null>(null);
   const [aboutConfig, setAboutConfig] = useState<AboutConfig | null>(null);
   const [contactConfig, setContactConfig] = useState<ContactConfig | null>(null);
   const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
   useEffect(() => {
     fetchNews();
@@ -111,10 +111,6 @@ export function Home() {
     }
   };
 
-  const handleOpenDetail = (article: NewsArticle) => {
-    setSelectedArticle(article);
-    setIsDetailModalOpen(true);
-  };
 
   return (
     <>
@@ -294,14 +290,15 @@ export function Home() {
             </div>
           ) : (
             news.map((item) => (
-              <div
+              <Link
                 key={item.id}
-                onClick={() => handleOpenDetail(item)}
+                to={`/noticies/${item.slug}`}
                 className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative cursor-pointer z-10"
               >
                 {isAdmin && (
                   <button
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       navigate('/admin/news');
                     }}
@@ -318,9 +315,7 @@ export function Home() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     src={item.image_url || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}
                   />
-                  <div className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                    Notícia
-                  </div>
+
                   {item.event_date && (
                     <div className="absolute top-3 right-3 bg-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-lg flex items-center gap-1.5 animate-pulse">
                       <span className="material-icons-round text-xs">event</span>
@@ -329,7 +324,7 @@ export function Home() {
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-lg leading-tight mb-2 text-slate-900 dark:text-white line-clamp-2">
+                  <h3 className="font-bold text-lg leading-tight mb-2 text-slate-900 dark:text-white line-clamp-2 transition-colors group-hover:text-primary">
                     {item.translations?.[i18n.language]?.title || item.title}
                   </h3>
                   <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
@@ -340,22 +335,14 @@ export function Home() {
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[150px]">
                         {item.sources || 'Font externa'}
                       </span>
-                      {item.news_url && (
-                        <a
-                          href={item.news_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Llegir més
-                          <span className="material-icons-round text-xs">open_in_new</span>
-                        </a>
-                      )}
+                      <div className="text-xs font-bold text-primary flex items-center gap-1">
+                        Llegir més
+                        <span className="material-icons-round text-xs">arrow_forward</span>
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>
@@ -460,12 +447,6 @@ export function Home() {
         </div>
       </section>
 
-      <NewsDetailModal
-        article={selectedArticle}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-      />
-
       <AcollidaModal
         isOpen={isAcollidaModalOpen}
         onClose={() => setIsAcollidaModalOpen(false)}
@@ -482,11 +463,18 @@ export function Home() {
         onUpdate={(newConfig) => setHeroConfig(newConfig)}
       />
 
+      <AboutSettingsModal
+        isOpen={isAboutModalOpen}
+        onClose={() => setIsAboutModalOpen(false)}
+        currentConfig={aboutConfig}
+        onUpdate={(newConfig) => setAboutConfig(newConfig)}
+      />
+
       <section className="px-6 mt-4 mb-12 relative z-10">
         <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm">
-          <button
+          <div
             onClick={() => setAboutExpanded(!aboutExpanded)}
-            className="w-full flex items-center justify-between p-5 text-left"
+            className="w-full flex items-center justify-between p-5 text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center text-primary">
@@ -494,15 +482,34 @@ export function Home() {
               </div>
               <h2 className="font-bold text-lg text-slate-900 dark:text-white">{t('home.about_title')}</h2>
             </div>
-            {aboutExpanded ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
-          </button>
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsAboutModalOpen(true);
+                  }}
+                  className="p-2 bg-slate-100 dark:bg-slate-700 text-primary rounded-full hover:scale-110 active:scale-95 transition-all"
+                >
+                  <Edit size={16} />
+                </button>
+              )}
+              {aboutExpanded ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
+            </div>
+          </div>
 
           {aboutExpanded && (
             <div className="px-5 pb-5 text-sm text-slate-600 dark:text-slate-300 space-y-4 animate-in slide-in-from-top-2">
-              {aboutConfig?.text ? (
+              {aboutConfig?.translations?.[i18n.language as 'ca' | 'es' | 'en']?.text ? (
                 <div
                   className="whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: aboutConfig.text.replace(/\n/g, '<br/>') }}
+                  dangerouslySetInnerHTML={{ __html: aboutConfig.translations[i18n.language as 'ca' | 'es' | 'en'].text.replace(/\n/g, '<br/>') }}
+                />
+              ) : (aboutConfig as any)?.text ? (
+                /* Fallback for old simple structure if migration fails */
+                <div
+                  className="whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ __html: (aboutConfig as any).text.replace(/\n/g, '<br/>') }}
                 />
               ) : (
                 <>
@@ -512,11 +519,20 @@ export function Home() {
                 </>
               )}
 
-              {(aboutConfig?.functions && aboutConfig.functions.length > 0) ? (
+              {aboutConfig?.translations?.[i18n.language as 'ca' | 'es' | 'en']?.functions ? (
                 <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
                   <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
                   <ul className="list-disc pl-4 space-y-1 marker:text-primary">
-                    {aboutConfig.functions.map((func: string, i: number) => (
+                    {aboutConfig.translations[i18n.language as 'ca' | 'es' | 'en'].functions.map((func: string, i: number) => (
+                      <li key={i}>{func}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : ((aboutConfig as any)?.functions && (aboutConfig as any).functions.length > 0) ? (
+                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
+                  <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
+                  <ul className="list-disc pl-4 space-y-1 marker:text-primary">
+                    {(aboutConfig as any).functions.map((func: string, i: number) => (
                       <li key={i}>{func}</li>
                     ))}
                   </ul>

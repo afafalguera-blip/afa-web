@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 import { DesktopNav } from './DesktopNav';
@@ -9,6 +10,8 @@ import { Link } from 'react-router-dom';
 
 
 export function Layout() {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300 relative overflow-x-hidden">
       <SchoolSuppliesBackground />
@@ -27,10 +30,10 @@ export function Layout() {
 
       <footer className="hidden lg:block border-t border-slate-100 dark:border-white/5 py-8 mt-12 mb-6">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
-          <p>© {new Date().getFullYear()} AFA Escola Falguera. Tots els drets reservats.</p>
+          <p>© {new Date().getFullYear()} AFA Escola Falguera. {t('footer.all_rights_reserved', 'Tots els drets reservats.')}</p>
           <div className="flex gap-6">
-            <Link to="/privacitat" className="hover:text-primary transition-colors">Política de Privacitat</Link>
-            <Link to="/cookies" className="hover:text-primary transition-colors">Política de Cookies</Link>
+            <Link to="/privacitat" className="hover:text-primary transition-colors">{t('legal.privacy_title')}</Link>
+            <Link to="/cookies" className="hover:text-primary transition-colors">{t('legal.cookies_title')}</Link>
           </div>
         </div>
       </footer>

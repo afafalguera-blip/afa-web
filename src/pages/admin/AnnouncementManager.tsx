@@ -8,7 +8,8 @@ import {
     AlertCircle,
     CheckCircle2,
     Info,
-    ExternalLink
+    ExternalLink,
+    Languages
 } from "lucide-react";
 
 export default function AnnouncementManager() {
@@ -17,6 +18,7 @@ export default function AnnouncementManager() {
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [activeLang, setActiveLang] = useState<'ca' | 'es' | 'en'>('ca');
 
     useEffect(() => {
         fetchAnnouncement();
@@ -26,6 +28,13 @@ export default function AnnouncementManager() {
         setLoading(true);
         try {
             const data = await AnnouncementService.getLatest();
+            if (data && !data.translations) {
+                data.translations = {
+                    ca: data.message,
+                    es: data.message,
+                    en: data.message
+                };
+            }
             setAnnouncement(data);
         } catch (err) {
             console.error(err);
@@ -44,15 +53,32 @@ export default function AnnouncementManager() {
         setError(null);
 
         try {
-            await AnnouncementService.update(announcement);
+            // Update the main message with the active language content for backward compatibility
+            const updatedAnnouncement = {
+                ...announcement,
+                message: announcement.translations?.[activeLang] || announcement.message
+            };
+            await AnnouncementService.update(updatedAnnouncement);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             console.error(err);
-            setError("Error al guardar els canvis");
+            setError("Error al guardar els canvis. Recorda carregar la migració de la base de dades.");
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleMessageChange = (val: string) => {
+        if (!announcement) return;
+        const newTranslations = {
+            ...(announcement.translations || { ca: announcement.message, es: announcement.message, en: announcement.message }),
+            [activeLang]: val
+        };
+        setAnnouncement({
+            ...announcement,
+            translations: newTranslations
+        });
     };
 
     const toggleActive = async () => {
@@ -84,6 +110,8 @@ export default function AnnouncementManager() {
         );
     }
 
+    const previewMessage = announcement.translations?.[activeLang] || announcement.message;
+
     return (
         <div className="p-6 max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
@@ -111,27 +139,45 @@ export default function AnnouncementManager() {
 
                     {/* Preview */}
                     <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Preview del Banner</label>
+                        <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Preview del Banner ({activeLang.toUpperCase()})</label>
                         <div className={`${{ info: 'bg-primary', warning: 'bg-amber-500', success: 'bg-emerald-500' }[announcement.type]
                             } p-3 rounded-xl text-white text-center font-bold text-sm shadow-inner flex items-center justify-center gap-2 max-w-2xl mx-auto overflow-hidden ring-4 ring-slate-100 dark:ring-slate-700/50`}>
                             <Megaphone size={16} />
-                            <span className="truncate">{announcement.message || "Escriu un missatge..."}</span>
+                            <span className="truncate">{previewMessage || "Escriu un missatge..."}</span>
                             {announcement.link && <ExternalLink size={14} className="opacity-70" />}
                         </div>
                     </div>
 
                     <hr className="border-slate-100 dark:border-slate-700" />
 
+                    {/* Language Selector */}
+                    <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl">
+                        {(['ca', 'es', 'en'] as const).map((lang) => (
+                            <button
+                                key={lang}
+                                type="button"
+                                onClick={() => setActiveLang(lang)}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${activeLang === lang
+                                    ? 'bg-white dark:bg-slate-800 text-primary shadow-sm'
+                                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    }`}
+                            >
+                                <Languages size={16} />
+                                {lang === 'ca' ? 'Català' : lang === 'es' ? 'Castellano' : 'English'}
+                            </button>
+                        ))}
+                    </div>
+
                     {/* Message Input */}
                     <div className="space-y-2">
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-200">Text del Missatge</label>
+                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 text-left">Text del Missatge ({activeLang.toUpperCase()})</label>
                         <textarea
                             required
-                            value={announcement.message}
-                            onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })}
+                            value={announcement.translations?.[activeLang] || ''}
+                            onChange={(e) => handleMessageChange(e.target.value)}
                             rows={3}
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                            placeholder="Ex: Recordeu fer el pagament de la quota abans del dia 10!"
+                            placeholder={`Missatge en ${activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellano' : 'English'}...`}
                         />
                     </div>
 

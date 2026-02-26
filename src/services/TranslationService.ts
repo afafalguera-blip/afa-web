@@ -9,76 +9,64 @@ export interface TranslationResult {
 }
 
 export const TranslationService = {
+  /**
+   * Traducción gratuita con protección de HTML mejorada.
+   */
   async translateContent(
     source: TranslationResult,
     targetLang: string,
     sourceLang: string = 'es'
   ): Promise<TranslationResult> {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    
+    const langMap: Record<string, string> = { 'ca': 'ca', 'es': 'es', 'en': 'en' };
+    const sl = langMap[sourceLang] || 'auto';
+    const tl = langMap[targetLang] || 'es';
 
-    if (!apiKey) {
-      console.warn('OpenAI API key not found. Returning source content.');
-      return source;
-    }
+    const translatedResult: TranslationResult = { ...source };
 
-    const fieldsToTranslate = Object.entries(source)
-      .filter(([_, value]) => value && typeof value === 'string' && value.trim() !== '')
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('\n');
+    for (const key of Object.keys(source)) {
+      let text = (source as any)[key];
+      if (!text || typeof text !== 'string' || text.trim() === '') continue;
 
-    if (!fieldsToTranslate) return source;
+      try {
+        // --- PROTECCIÓN DE HTML ---
+        // Extraemos las etiquetas HTML para que Google no las toque ni las rompa
+        const placeholders: string[] = [];
+        const protectedText = text.replace(/<[^>]+>/g, (match) => {
+          placeholders.push(match);
+          return ` [[${placeholders.length - 1}]] `;
+        });
 
-    const prompt = `
-      Translate the following content from ${sourceLang} to ${targetLang}. 
-      Return only a JSON object with the corresponding keys.
-      Maintain the same tone and format.
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&q=${encodeURIComponent(protectedText)}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error en Google Translate');
+        
+        const data = await response.json();
+        
+        if (data && data[0]) {
+          let translatedText = data[0].map((part: any) => part[0]).join('');
 
-      ${fieldsToTranslate}
-    `;
+          // --- RESTAURAR HTML ---
+          // Volvemos a poner las etiquetas originales en su sitio
+          placeholders.forEach((tag, i) => {
+            const regex = new RegExp(`\\s?\\[\\[${i}\\]\\]\\s?`, 'g');
+            translatedText = translatedText.replace(regex, tag);
+          });
 
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { 
-              role: 'system', 
-              content: 'You are a professional translator for a school AFA (Associació de Famílies d\'Alumnes). Translate to Catalan, Spanish, or English as requested.' 
-            },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.3,
-          response_format: { type: 'json_object' }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Translation API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const result = JSON.parse(data.choices[0].message.content);
-      
-      const translatedResult: TranslationResult = { ...source };
-      for (const key in source) {
-        if (result[key]) {
-          (translatedResult as any)[key] = result[key];
+          // Limpieza final de guiones manuales que a veces mete la IA
+          translatedText = translatedText.replace(/(\w)-\s+(\w)/g, '$1$2'); // quita sumar- vos -> sumarvos
+          
+          (translatedResult as any)[key] = translatedText;
         }
+      } catch (error) {
+        console.error(`Error en campo ${key}:`, error);
       }
-      
-      return translatedResult;
-    } catch (error) {
-      console.error('Translation failed:', error);
-      return source;
     }
+
+    return translatedResult;
   },
 
-  // Backward compatibility wrapper
   async translateNews(source: TranslationResult, targetLang: string, sourceLang: string = 'es') {
     return this.translateContent(source, targetLang, sourceLang);
   }

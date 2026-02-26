@@ -15,6 +15,7 @@ import ActivitiesManager from './pages/admin/ActivitiesManager';
 import FeesPage from './pages/FeesPage';
 import GeneralCalendarPage from './pages/GeneralCalendarPage';
 import NewsManager from './pages/admin/NewsManager';
+import NewsEditorPage from './pages/admin/NewsEditorPage';
 import ProjectsManager from './pages/admin/ProjectsManager';
 import EventsManager from './pages/admin/EventsManager';
 import NotificationManager from './pages/admin/NotificationManager';
@@ -27,6 +28,7 @@ import SiteSettingsManager from './pages/admin/SiteSettingsManager';
 
 
 import { NewsPage } from './pages/NewsPage';
+import NewsDetailPage from './pages/NewsDetailPage';
 // import { AssembleaPage } from './pages/AssembleaPage';
 import { DocumentsPage } from './pages/DocumentsPage';
 import { ContactPage } from './pages/ContactPage';
@@ -62,6 +64,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="extraescolars" element={<Extraescolars />} />
             <Route path="noticies" element={<NewsPage />} />
+            <Route path="noticies/:slug" element={<NewsDetailPage />} />
             <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
             <Route path="botiga" element={<ShopLanding />} />
             <Route path="quotes" element={<FeesPage />} />
@@ -87,6 +90,7 @@ function App() {
             <Route path="shop/orders" element={<OrdersPage />} />
             <Route path="activities" element={<ActivitiesManager />} />
             <Route path="news" element={<NewsManager />} />
+            <Route path="news/:id" element={<NewsEditorPage />} />
             <Route path="projects" element={<ProjectsManager />} />
             <Route path="calendar" element={<EventsManager />} />
             <Route path="documents" element={<DocumentsManager />} />

@@ -11,6 +11,20 @@
     "suggestions": "Suggestions",
     "profile": "Profile"
   },
+  "legal": {
+    "privacy_title": "Privacy Policy",
+    "cookies_title": "Cookies Policy",
+    "no_content": "No content available.",
+    "cookies_prefs": "Configure your preferences",
+    "cookies_technical": "Technical",
+    "cookies_technical_desc": "Necessary for operation.",
+    "cookies_analytics": "Analytics",
+    "cookies_analytics_desc": "To measure performance and usage.",
+    "cookies_personalization": "Personalization",
+    "cookies_personalization_desc": "To remember your preferences and settings.",
+    "cookies_save": "Save preferences",
+    "cookies_saved": "Saved Successfully!"
+  },
   "home": {
     "welcome_title": "Welcome to AFA Falguera",
     "extraescolars": "Activities",
@@ -70,7 +84,22 @@
     "schedule_description": "For any in-person management, you will find us at the AFA office during the following hours (always with prior appointment via email):",
     "schedule_mon": "Mondays from 9:00 to 9:30 AM",
     "email_demand": "Remember that you must send an email beforehand to schedule the appointment.",
+    "schedule_appointment_mobile": "For any other day, an appointment must be requested through the form.",
     "other_ways": "Other ways"
+  },
+  "calendar": {
+    "title": "Activities Calendar",
+    "subtitle": "Important events and dates for our community",
+    "view_month": "Month",
+    "view_week": "Week",
+    "view_day": "Day",
+    "today": "Today",
+    "no_events": "No events for this day",
+    "no_events_month": "No events scheduled for this month",
+    "close": "Close",
+    "location": "Location",
+    "time": "Time",
+    "description": "Description"
   },
   "assemblea": {
     "title": "General Assembly",
@@ -434,6 +463,7 @@
     }
   },
   "common": {
+    "all_day": "All Day",
     "list": "List",
     "search": "Search...",
     "all": "All",
@@ -452,5 +482,8 @@
     "read_more": "Read more",
     "loading": "Loading...",
     "no_activities": "No activities"
+  },
+  "footer": {
+    "all_rights_reserved": "All rights reserved."
   }
 }

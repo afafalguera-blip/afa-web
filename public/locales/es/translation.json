@@ -11,6 +11,20 @@
     "suggestions": "Sugerencias",
     "profile": "Perfil"
   },
+  "legal": {
+    "privacy_title": "Política de Privacidad",
+    "cookies_title": "Política de Cookies",
+    "no_content": "No hay contenido disponible.",
+    "cookies_prefs": "Configura tus preferencias",
+    "cookies_technical": "Técnicas",
+    "cookies_technical_desc": "Necesarias para el funcionamiento.",
+    "cookies_analytics": "Analíticas",
+    "cookies_analytics_desc": "Para medir el rendimiento y uso.",
+    "cookies_personalization": "Personalización",
+    "cookies_personalization_desc": "Para recordar tus preferencias y configuración.",
+    "cookies_save": "Guardar preferencias",
+    "cookies_saved": "¡Guardado Correctamente!"
+  },
   "home": {
     "welcome_title": "Bienvenidos al AFA Falguera",
     "extraescolars": "Extraescolares",
@@ -70,7 +84,22 @@
     "schedule_description": "Para cualquier gestión presencial, nos encontrarás en el espacio AFA en el siguiente horario (siempre con cita previa vía email):",
     "schedule_mon": "Lunes de 9:00 a 9:30h",
     "email_demand": "Recuerda que es necesario enviar un correo electrónico antes para concertar la cita.",
+    "schedule_appointment_mobile": "Para cualquier otro día, es necesario solicitar cita previa a través del formulario.",
     "other_ways": "Otras vías"
+  },
+  "calendar": {
+    "title": "Calendario de Actividades",
+    "subtitle": "Eventos y fechas importantes de nuestra comunidad",
+    "view_month": "Mes",
+    "view_week": "Semana",
+    "view_day": "Día",
+    "today": "Hoy",
+    "no_events": "No hay eventos para este día",
+    "no_events_month": "No hay eventos programados para este mes",
+    "close": "Cerrar",
+    "location": "Lugar",
+    "time": "Hora",
+    "description": "Descripción"
   },
   "assemblea": {
     "title": "Asamblea General",
@@ -664,6 +693,7 @@
     }
   },
   "common": {
+    "all_day": "Todo el día",
     "list": "Lista",
     "search": "Buscar...",
     "all": "Todas",
@@ -683,5 +713,8 @@
     "read_more": "Leer más",
     "loading": "Cargando...",
     "no_activities": "No hay actividades"
+  },
+  "footer": {
+    "all_rights_reserved": "Todos los derechos reservados."
   }
 }
