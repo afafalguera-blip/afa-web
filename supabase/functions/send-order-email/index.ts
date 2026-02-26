@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
-const NOTIFICATION_EMAIL = "afafalguera@gmail.com";
+const NOTIFICATION_EMAILS = ["afafalguera@gmail.com", "ampafalguera@hotmail.es"];
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -82,8 +82,8 @@ Deno.serve(async (req) => {
     `).join("");
 
     const emailPayload = {
-      from: FROM_EMAIL,
-      to: [NOTIFICATION_EMAIL],
+      from: `TiendaAFA <${FROM_EMAIL}>`,
+      to: NOTIFICATION_EMAILS,
       subject: `👕 Nova comanda botiga: ${record.customer_name}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
