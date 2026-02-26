@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
-const NOTIFICATION_EMAILS = ["afafalguera@gmail.com", "ampafalguera@hotmail.es"];
+const NOTIFICATION_EMAILS = ["afafalguera@gmail.com"];
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -56,9 +56,10 @@ Deno.serve(async (req) => {
         .eq("id", record.id)
         .single();
       
-      if (data && data.items && data.items.length > 0) {
+      if (data) {
         order = data;
-        break;
+        // If it has items, we're good. If not, maybe it's a manual order just created.
+        if (data.items && data.items.length > 0) break;
       }
       
       orderError = error;
@@ -70,16 +71,16 @@ Deno.serve(async (req) => {
       throw new Error(`Error fetching order or no items found after retries: ${orderError?.message || "Not found"}`);
     }
 
-    console.log(`Found order with ${order.items.length} items`);
-
-    const itemsHtml = order.items.map((item: any) => `
-      <tr>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${item.variant?.product?.name || 'Producte'}</td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${item.variant?.size || '-'}</td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${item.quantity}</td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: right;">${item.price_at_time}€</td>
-      </tr>
-    `).join("");
+    const itemsHtml = order.items && order.items.length > 0 
+      ? order.items.map((item: any) => `
+        <tr>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${item.variant?.product?.name || 'Producte'}</td>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${item.variant?.size || '-'}</td>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${item.quantity}</td>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: right;">${item.price_at_time}€</td>
+        </tr>
+      `).join("")
+      : `<tr><td colspan="4" style="padding: 20px; text-align: center; color: #64748b; font-style: italic;">Comanda manual sense productes encara.</td></tr>`;
 
     const emailPayload = {
       from: `TiendaAFA <${FROM_EMAIL}>`,
