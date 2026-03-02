@@ -4,6 +4,7 @@ import { X, Check } from 'lucide-react';
 import type { ShopProduct } from '../../types/shop';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { ConfigService, type ShopConfig } from '../../services/ConfigService';
 import { LazyImage } from '../common/LazyImage';
 import { sortSizes } from '../../utils/productUtils';
 
@@ -21,12 +22,22 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [shopConfig, setShopConfig] = useState<ShopConfig | null>(null);
 
-  // Auto-fill name if profile exists
+  const { i18n } = useTranslation();
+  const currentLang = (i18n.language || 'ca') as 'ca' | 'es' | 'en';
+
+  // Auto-fill name if profile exists, and fetch shop config
   useEffect(() => {
     if (profile?.full_name) {
       setCustomerName(profile.full_name);
     }
+
+    const fetchConfig = async () => {
+      const config = await ConfigService.getShopConfig();
+      if (config) setShopConfig(config);
+    };
+    fetchConfig();
   }, [profile]);
 
   const variants = sortSizes(product.variants || []);
@@ -79,7 +90,9 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
             <Check className="w-8 h-8" />
           </div>
           <h3 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">Reserva Confirmada!</h3>
-          <p className="text-slate-500 mb-6">Pots passar a recollir-la a l'AFA en l'horari habitual.</p>
+          <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+            {shopConfig?.translations?.[currentLang] || "Pots passar a recollir-la a l'AFA en l'horari habitual."}
+          </p>
         </div>
       </div>
     );

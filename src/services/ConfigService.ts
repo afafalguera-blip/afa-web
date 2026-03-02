@@ -33,8 +33,16 @@ export interface LegalConfig {
   en: string;
 }
 
+export interface ShopConfig {
+  translations: {
+    ca: string;
+    es: string;
+    en: string;
+  };
+}
+
 export const ConfigService = {
-  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies'): Promise<T | null> {
+  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop'): Promise<T | null> {
     const { data, error } = await supabase
       .from('site_config')
       .select('value')
@@ -48,7 +56,7 @@ export const ConfigService = {
     return data.value as T;
   },
 
-  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies', config: T): Promise<void> {
+  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop', config: T): Promise<void> {
     const { error } = await supabase
       .from('site_config')
       .update({ value: config, updated_at: new Date().toISOString() })
@@ -103,6 +111,14 @@ export const ConfigService = {
 
   async updateCookiesConfig(config: LegalConfig): Promise<void> {
     return this.updateConfig('cookies', config);
+  },
+
+  async getShopConfig(): Promise<ShopConfig | null> {
+    return this.getConfig<ShopConfig>('shop');
+  },
+
+  async updateShopConfig(config: ShopConfig): Promise<void> {
+    return this.updateConfig('shop', config);
   },
 
   async uploadHeroImage(file: File): Promise<string> {

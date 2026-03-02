@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ConfigService, type ContactConfig, type SocialConfig, type AboutConfig, type LegalConfig } from "../../services/ConfigService";
+import { ConfigService, type ContactConfig, type SocialConfig, type AboutConfig, type LegalConfig, type ShopConfig } from "../../services/ConfigService";
 import {
     Save,
     Mail,
@@ -17,10 +17,11 @@ import {
     X,
     FileLock2,
     Cookie,
-    Globe
+    Globe,
+    ShoppingBag
 } from "lucide-react";
 
-type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies';
+type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop';
 type LangType = 'ca' | 'es' | 'en';
 
 export default function SiteSettingsManager() {
@@ -30,6 +31,8 @@ export default function SiteSettingsManager() {
     const [about, setAbout] = useState<AboutConfig | null>(null);
     const [privacy, setPrivacy] = useState<LegalConfig | null>(null);
     const [cookies, setCookies] = useState<LegalConfig | null>(null);
+    const [shop, setShop] = useState<ShopConfig | null>(null);
+
 
     const [activeLang, setActiveLang] = useState<LangType>('ca');
 
@@ -45,12 +48,13 @@ export default function SiteSettingsManager() {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const [contactData, socialData, aboutData, privacyData, cookiesData] = await Promise.all([
+            const [contactData, socialData, aboutData, privacyData, cookiesData, shopData] = await Promise.all([
                 ConfigService.getContactConfig(),
                 ConfigService.getSocialConfig(),
                 ConfigService.getAboutConfig(),
                 ConfigService.getPrivacyConfig(),
-                ConfigService.getCookiesConfig()
+                ConfigService.getCookiesConfig(),
+                ConfigService.getShopConfig()
             ]);
 
             if (contactData) setContact(contactData);
@@ -72,6 +76,8 @@ export default function SiteSettingsManager() {
             }
             if (privacyData) setPrivacy(privacyData);
             if (cookiesData) setCookies(cookiesData);
+            if (shopData) setShop(shopData);
+
         } catch (err) {
             console.error(err);
             setError("Error al carregar la configuració del lloc");
@@ -97,7 +103,10 @@ export default function SiteSettingsManager() {
                 await ConfigService.updatePrivacyConfig(privacy);
             } else if (activeTab === 'cookies' && cookies) {
                 await ConfigService.updateCookiesConfig(cookies);
+            } else if (activeTab === 'shop' && shop) {
+                await ConfigService.updateShopConfig(shop);
             }
+
 
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
@@ -205,7 +214,17 @@ export default function SiteSettingsManager() {
                 >
                     <Cookie size={16} /> Cookies
                 </button>
+                <button
+                    onClick={() => setActiveTab('shop')}
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === 'shop'
+                        ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
+                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                        }`}
+                >
+                    <ShoppingBag size={16} /> Botiga
+                </button>
             </div>
+
 
             <form onSubmit={handleSave} className="space-y-6">
                 {activeTab === 'contact' && contact && (
@@ -476,6 +495,57 @@ export default function SiteSettingsManager() {
                     </div>
                 )}
 
+                {activeTab === 'shop' && shop && (
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-50 dark:border-slate-700 pb-4 mb-6">
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+                                Configuració de la Botiga (Reserves)
+                            </h3>
+
+                            {/* Language Switcher */}
+                            <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
+                                {(['ca', 'es', 'en'] as LangType[]).map((lang) => (
+                                    <button
+                                        key={lang}
+                                        type="button"
+                                        onClick={() => setActiveLang(lang)}
+                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
+                                            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
+                                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                                            }`}
+                                    >
+                                        {lang.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4">
+                                <Globe size={18} />
+                                <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Missatge de Confirmació de Reserva</label>
+                                <p className="text-xs text-slate-500 mb-2 italic">Aquest missatge apareixerà a la web un cop l'usuari finalitzi la seva reserva.</p>
+                                <textarea
+                                    required
+                                    value={shop.translations?.[activeLang] || ""}
+                                    onChange={(e) => {
+                                        const newTranslations = { ...shop.translations };
+                                        newTranslations[activeLang] = e.target.value;
+                                        setShop({ ...shop, translations: newTranslations });
+                                    }}
+                                    rows={4}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed"
+                                    placeholder="Ex: Pots passar a recollir la teva comanda..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Feedback Messages */}
                 {error && (
                     <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-xl animate-shake">
@@ -503,7 +573,7 @@ export default function SiteSettingsManager() {
                         ) : (
                             <>
                                 <Save size={20} />
-                                Guardar Canvis de {activeTab === 'contact' ? 'Contacte' : activeTab === 'social' ? 'Xarxes' : activeTab === 'about' ? 'Sobre l\'AFA' : activeTab === 'privacy' ? 'Privacitat' : 'Cookies'}
+                                Guardar Canvis de {activeTab === 'contact' ? 'Contacte' : activeTab === 'social' ? 'Xarxes' : activeTab === 'about' ? 'Sobre l\'AFA' : activeTab === 'privacy' ? 'Privacitat' : activeTab === 'cookies' ? 'Cookies' : 'Botiga'}
                             </>
                         )}
                     </button>
