@@ -3,6 +3,7 @@ import { X, Plus, Trash2, Save, ShoppingBag, User } from 'lucide-react';
 import { ShopService } from '../../services/ShopService';
 import { supabase } from '../../lib/supabase';
 import type { ShopProduct } from '../../types/shop';
+import { sortSizes } from '../../utils/productUtils';
 
 interface OrderEditModalProps {
   order: any;
@@ -100,17 +101,17 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
       <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col border border-white/10">
-        
+
         {/* Header */}
         <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                <ShoppingBag className="w-5 h-5" />
-             </div>
-             <div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Gestionar Comanda</h2>
-                <span className="text-xs font-mono text-slate-400">ID: {order.id.slice(0,8)}</span>
-             </div>
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Gestionar Comanda</h2>
+              <span className="text-xs font-mono text-slate-400">ID: {order.id.slice(0, 8)}</span>
+            </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors">
             <X className="w-5 h-5 text-slate-500" />
@@ -118,23 +119,23 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          
+
           {/* Customer Info */}
           <section className="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/5">
             <div className="flex items-center justify-between mb-4">
-               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                 <User className="w-4 h-4" /> Client
-               </h3>
-               {!editingName && (
-                 <button onClick={() => setEditingName(true)} className="text-xs text-primary font-bold hover:underline">Editar</button>
-               )}
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <User className="w-4 h-4" /> Client
+              </h3>
+              {!editingName && (
+                <button onClick={() => setEditingName(true)} className="text-xs text-primary font-bold hover:underline">Editar</button>
+              )}
             </div>
-            
+
             {editingName ? (
               <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  value={customerName} 
+                <input
+                  type="text"
+                  value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
                   className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg text-sm"
                 />
@@ -150,13 +151,13 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
           {/* Items Table */}
           <section>
             <div className="flex items-center justify-between mb-4">
-               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Articles</h3>
-               <button 
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Articles</h3>
+              <button
                 onClick={() => setShowAddProduct(true)}
                 className="flex items-center gap-1.5 text-xs font-bold bg-primary text-white px-3 py-1.5 rounded-full hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20"
-               >
-                 <Plus className="w-3.5 h-3.5" /> Afegir Producte
-               </button>
+              >
+                <Plus className="w-3.5 h-3.5" /> Afegir Producte
+              </button>
             </div>
 
             <div className="space-y-3">
@@ -165,32 +166,32 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                   <div className="flex-1">
                     <p className="font-bold text-slate-800 dark:text-white leading-tight">{item.variant?.product?.name}</p>
                     <div className="flex items-center gap-3 mt-1">
-                       <select 
+                      <select
                         value={item.variant_id}
                         onChange={(e) => handleUpdateItem(item.id, e.target.value, item.quantity, item.price_at_time)}
                         className="text-xs bg-slate-100 dark:bg-slate-800 border-none rounded py-0.5 px-2 outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-                       >
-                         {products.find(p => p.name === item.variant?.product?.name)?.variants?.map(v => (
-                           <option key={v.id} value={v.id}>Talla {v.size} ({v.stock} disp.)</option>
-                         ))}
-                       </select>
-                       <span className="text-xs text-slate-400 font-mono">{item.price_at_time}€</span>
+                      >
+                        {sortSizes(products.find(p => p.name === item.variant?.product?.name)?.variants || []).map(v => (
+                          <option key={v.id} value={v.id}>Talla {v.size} ({v.stock} disp.)</option>
+                        ))}
+                      </select>
+                      <span className="text-xs text-slate-400 font-mono">{item.price_at_time}€</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-                       <button 
+                      <button
                         onClick={() => handleUpdateItem(item.id, item.variant_id, Math.max(1, item.quantity - 1), item.price_at_time)}
                         className="w-6 h-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 transition-colors"
-                       >-</button>
-                       <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
-                       <button 
+                      >-</button>
+                      <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
+                      <button
                         onClick={() => handleUpdateItem(item.id, item.variant_id, item.quantity + 1, item.price_at_time)}
                         className="w-6 h-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 transition-colors"
-                       >+</button>
+                      >+</button>
                     </div>
-                    <button 
+                    <button
                       onClick={() => handleDeleteItem(item.id)}
                       className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
                     >
@@ -211,69 +212,69 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
 
         {/* Footer */}
         <div className="p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex items-center justify-between">
-           <div>
-              <p className="text-xs text-slate-400 uppercase font-black tracking-widest mb-0.5">Total Comanda</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white uppercase">{order.total_amount?.toFixed(2)}€</p>
-           </div>
-           <button 
+          <div>
+            <p className="text-xs text-slate-400 uppercase font-black tracking-widest mb-0.5">Total Comanda</p>
+            <p className="text-2xl font-black text-slate-900 dark:text-white uppercase">{order.total_amount?.toFixed(2)}€</p>
+          </div>
+          <button
             onClick={onClose}
             className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold shadow-xl hover:scale-105 transition-all"
-           >
-             Tancar
-           </button>
+          >
+            Tancar
+          </button>
         </div>
 
         {/* Add Product Sub-Modal */}
         {showAddProduct && (
           <div className="absolute inset-0 z-20 bg-white dark:bg-slate-900 flex flex-col animate-in slide-in-from-bottom duration-300">
-             <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
-                <h3 className="font-bold">Afegir Article</h3>
-                <button onClick={() => setShowAddProduct(false)} className="p-2"><X className="w-5 h-5" /></button>
-             </div>
-             <div className="p-6 space-y-6">
-                <div>
-                   <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Producte</label>
-                   <select 
-                    value={selectedProductId} 
-                    onChange={e => {
-                      setSelectedProductId(e.target.value);
-                      setSelectedVariantId('');
-                    }}
-                    className="w-full p-4 bg-slate-100 dark:bg-white/5 rounded-2xl border-none outline-none focus:ring-2 focus:ring-primary"
-                   >
-                     <option value="">Selecciona producte...</option>
-                     {products.map(p => (
-                       <option key={p.id} value={p.id}>{p.name}</option>
-                     ))}
-                   </select>
-                </div>
-
-                {selectedProduct && (
-                   <div>
-                     <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Talla</label>
-                     <div className="flex flex-wrap gap-2">
-                        {selectedProduct.variants?.map(v => (
-                          <button 
-                            key={v.id}
-                            onClick={() => setSelectedVariantId(v.id)}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${selectedVariantId === v.id ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10'}`}
-                          >
-                            {v.size} ({v.stock} disp.)
-                          </button>
-                        ))}
-                     </div>
-                   </div>
-                )}
-             </div>
-             <div className="mt-auto p-6 border-t border-slate-100 dark:border-white/5">
-                <button 
-                  disabled={!selectedVariantId || loading}
-                  onClick={handleAddItem}
-                  className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 disabled:opacity-50"
+            <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
+              <h3 className="font-bold">Afegir Article</h3>
+              <button onClick={() => setShowAddProduct(false)} className="p-2"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Producte</label>
+                <select
+                  value={selectedProductId}
+                  onChange={e => {
+                    setSelectedProductId(e.target.value);
+                    setSelectedVariantId('');
+                  }}
+                  className="w-full p-4 bg-slate-100 dark:bg-white/5 rounded-2xl border-none outline-none focus:ring-2 focus:ring-primary"
                 >
-                  {loading ? 'Processant...' : 'Confirmar i Afegir'}
-                </button>
-             </div>
+                  <option value="">Selecciona producte...</option>
+                  {products.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedProduct && (
+                <div>
+                  <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Talla</label>
+                  <div className="flex flex-wrap gap-2">
+                    {sortSizes(selectedProduct.variants || []).map(v => (
+                      <button
+                        key={v.id}
+                        onClick={() => setSelectedVariantId(v.id)}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${selectedVariantId === v.id ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10'}`}
+                      >
+                        {v.size} ({v.stock} disp.)
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="mt-auto p-6 border-t border-slate-100 dark:border-white/5">
+              <button
+                disabled={!selectedVariantId || loading}
+                onClick={handleAddItem}
+                className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 disabled:opacity-50"
+              >
+                {loading ? 'Processant...' : 'Confirmar i Afegir'}
+              </button>
+            </div>
           </div>
         )}
 

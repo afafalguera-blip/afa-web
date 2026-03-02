@@ -5,6 +5,7 @@ import type { ShopProduct } from '../../types/shop';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { LazyImage } from '../common/LazyImage';
+import { sortSizes } from '../../utils/productUtils';
 
 interface ProductModalProps {
   product: ShopProduct;
@@ -28,7 +29,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
     }
   }, [profile]);
 
-  const variants = product.variants || [];
+  const variants = sortSizes(product.variants || []);
   const selectedVariant = variants.find(v => v.size === selectedSize);
 
   // Determine if out of stock

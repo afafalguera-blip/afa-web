@@ -1,44 +1,59 @@
 
+
 export const SIZE_ORDER: Record<string, number> = {
-  'Única': 0,
-  'XS': 1,
-  'S': 2,
-  'M': 3,
-  'L': 4,
-  'XL': 5,
-  'XXL': 6,
-  'XXXL': 7,
-  'XXS': 0.5,
+  'XXS': 1,
+  'XS': 2,
+  'S': 3,
+  'M': 4,
+  'L': 5,
+  'XL': 6,
+  'XXL': 7,
+  'XXXL': 8,
+  'ÚNICA': 99, // Usually at the end if mixed with standard sizes
+  'UNICA': 99,
 };
 
 export function sortSizes<T extends { size?: string }>(variants: T[]): T[] {
   return [...variants].sort((a, b) => {
-    const sizeA = (a.size || '').trim();
-    const sizeB = (b.size || '').trim();
+    const sizeA = (a.size || '').trim().toUpperCase();
+    const sizeB = (b.size || '').trim().toUpperCase();
 
-    // Check if both are defined in the SIZE_ORDER map
+    // 1. Both are in SIZE_ORDER map
     if (SIZE_ORDER[sizeA] !== undefined && SIZE_ORDER[sizeB] !== undefined) {
       return SIZE_ORDER[sizeA] - SIZE_ORDER[sizeB];
     }
 
-    // Try to extract numbers (e.g., "38", "4-6y", "10")
-    const numA = parseFloat(sizeA.match(/\d+/)?.[0] || '');
-    const numB = parseFloat(sizeB.match(/\d+/)?.[0] || '');
+    // 2. Try to extract numbers (e.g., "10", "12", "Anys 4")
+    // We only consider it a numeric size if it contains digits
+    const numMatchA = sizeA.match(/\d+/);
+    const numMatchB = sizeB.match(/\d+/);
+    
+    const numA = numMatchA ? parseFloat(numMatchA[0]) : NaN;
+    const numB = numMatchB ? parseFloat(numMatchB[0]) : NaN;
 
     if (!isNaN(numA) && !isNaN(numB)) {
       if (numA !== numB) return numA - numB;
-      // If numbers are the same, compare the full string for cases like "4y" vs "4a"
       return sizeA.localeCompare(sizeB);
     }
 
-    // Fallback if one has a number and the other doesn't
+    // 3. One is a number and the other is a predefined string size
+    // Numbers (children sizes) always come before string sizes (adult sizes)
+    if (!isNaN(numA) && SIZE_ORDER[sizeB] !== undefined) return -1;
+    if (!isNaN(numB) && SIZE_ORDER[sizeA] !== undefined) return 1;
+
+    // 4. One has a number and the other doesn't (and isn't in SIZE_ORDER)
     if (!isNaN(numA)) return -1;
     if (!isNaN(numB)) return 1;
 
-    // Last fallback: just compare alphabetically
+    // 5. One is in SIZE_ORDER and the other is a random custom string
+    if (SIZE_ORDER[sizeA] !== undefined) return -1;
+    if (SIZE_ORDER[sizeB] !== undefined) return 1;
+
+    // 6. Last fallback: alphabetical
     return sizeA.localeCompare(sizeB);
   });
 }
+
 
 // Chandal Stock Calculation Logic
 export const isChandalPants = (name: string) => {
