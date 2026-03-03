@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Pencil, Square as Ruler, BookOpen, GraduationCap, School, Eraser, Calculator, Backpack, PenTool } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface SupplyItem {
     id: number;
@@ -14,9 +14,7 @@ interface SupplyItem {
 }
 
 export function SchoolSuppliesBackground() {
-    const [items, setItems] = useState<SupplyItem[]>([]);
-
-    useEffect(() => {
+    const [items] = useState<SupplyItem[]>(() => {
         const icons = [Pencil, Ruler, BookOpen, GraduationCap, School, Eraser, Calculator, Backpack, PenTool];
         const newItems: SupplyItem[] = [];
 
@@ -32,8 +30,8 @@ export function SchoolSuppliesBackground() {
                 rotate: Math.random() * 360,
             });
         }
-        setItems(newItems);
-    }, []);
+        return newItems;
+    });
 
     return (
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 select-none">
