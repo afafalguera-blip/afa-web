@@ -228,7 +228,18 @@
     "filter_accessories": "Accessories",
     "view_options": "View Options",
     "member_price": "Member",
-    "non_member_price": "Non-Member"
+    "non_member_price": "Non-Member",
+    "add_to_cart": "Add to cart",
+    "cart_title": "My Cart",
+    "empty_cart": "The cart is empty",
+    "back_to_shop": "Back to shop",
+    "checkout_btn": "Finalize Reservation",
+    "subtotal": "Subtotal",
+    "total": "Total due",
+    "contact_details": "Contact information",
+    "payment_note": "Cash or card payment upon pickup",
+    "success_title": "Reservation Confirmed!",
+    "success_message": "Thanks for your reservation. You can pick up your order at the AFA."
   },
   "featured_projects": {
     "title": "Your support transforms the school",

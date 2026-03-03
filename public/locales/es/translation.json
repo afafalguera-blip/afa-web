@@ -255,7 +255,18 @@
     "filter_accessories": "Accesorios",
     "view_options": "Ver Opciones",
     "member_price": "Socio",
-    "non_member_price": "No Socio"
+    "non_member_price": "No Socio",
+    "add_to_cart": "Añadir a la cesta",
+    "cart_title": "Mi Cesta",
+    "empty_cart": "La cesta está vacía",
+    "back_to_shop": "Volver a la tienda",
+    "checkout_btn": "Finalizar Reserva",
+    "subtotal": "Subtotal",
+    "total": "Total a pagar",
+    "contact_details": "Datos de contacto",
+    "payment_note": "Pago en efectivo o tarjeta al recoger",
+    "success_title": "¡Reserva Confirmada!",
+    "success_message": "Gracias por tu reserva. Puedes pasar a recoger tu pedido en el AFA."
   },
   "featured_projects": {
     "title": "Tu apoyo transforma el colegio",

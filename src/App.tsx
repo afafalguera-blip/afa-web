@@ -48,6 +48,7 @@ import { ShopLanding } from './pages/shop/ShopLanding';
 
 // ... imports
 import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import { LoginPage } from './pages/auth/LoginPage';
 
 import { GoogleAnalytics } from './components/common/GoogleAnalytics';
@@ -55,55 +56,58 @@ import { GoogleAnalytics } from './components/common/GoogleAnalytics';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <GoogleAnalytics />
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+      <CartProvider>
+        <BrowserRouter>
+          <GoogleAnalytics />
+          <Routes>
+            {/* ... same routes */}
+            <Route path="/login" element={<LoginPage />} />
 
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="extraescolars" element={<Extraescolars />} />
-            <Route path="noticies" element={<NewsPage />} />
-            <Route path="noticies/:slug" element={<NewsDetailPage />} />
-            <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
-            <Route path="botiga" element={<ShopLanding />} />
-            <Route path="quotes" element={<FeesPage />} />
-            <Route path="calendari" element={<GeneralCalendarPage />} />
-            {/* <Route path="assemblea" element={<AssembleaPage />} /> */}
-            <Route path="documents" element={<DocumentsPage />} />
-            <Route path="contacte" element={<ContactPage />} />
-            <Route path="privacitat" element={<PrivacyPolicy />} />
-            <Route path="cookies" element={<CookiesPolicy />} />
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="extraescolars" element={<Extraescolars />} />
+              <Route path="noticies" element={<NewsPage />} />
+              <Route path="noticies/:slug" element={<NewsDetailPage />} />
+              <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
+              <Route path="botiga" element={<ShopLanding />} />
+              <Route path="quotes" element={<FeesPage />} />
+              <Route path="calendari" element={<GeneralCalendarPage />} />
+              {/* <Route path="assemblea" element={<AssembleaPage />} /> */}
+              <Route path="documents" element={<DocumentsPage />} />
+              <Route path="contacte" element={<ContactPage />} />
+              <Route path="privacitat" element={<PrivacyPolicy />} />
+              <Route path="cookies" element={<CookiesPolicy />} />
 
-            {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
-          </Route>
+              {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
+            </Route>
 
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            {/* ... admin routes */}
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="inscriptions" element={<InscriptionsPage />} />
-            <Route path="payments" element={<PaymentsPage />} />
-            <Route path="finances" element={<FinanceDashboard />} />
-            <Route path="shop/inventory" element={<InventoryPage />} />
-            <Route path="shop/orders" element={<OrdersPage />} />
-            <Route path="activities" element={<ActivitiesManager />} />
-            <Route path="news" element={<NewsManager />} />
-            <Route path="news/:id" element={<NewsEditorPage />} />
-            <Route path="projects" element={<ProjectsManager />} />
-            <Route path="calendar" element={<EventsManager />} />
-            <Route path="documents" element={<DocumentsManager />} />
-            <Route path="notifications" element={<NotificationManager />} />
-            <Route path="acollida" element={<AcollidaManager />} />
-            <Route path="banner" element={<AnnouncementManager />} />
-            <Route path="contactes" element={<ContactManager />} />
-            <Route path="settings" element={<SiteSettingsManager />} />
-            <Route path="observability" element={<AdminObservability />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              {/* ... admin routes */}
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="inscriptions" element={<InscriptionsPage />} />
+              <Route path="payments" element={<PaymentsPage />} />
+              <Route path="finances" element={<FinanceDashboard />} />
+              <Route path="shop/inventory" element={<InventoryPage />} />
+              <Route path="shop/orders" element={<OrdersPage />} />
+              <Route path="activities" element={<ActivitiesManager />} />
+              <Route path="news" element={<NewsManager />} />
+              <Route path="news/:id" element={<NewsEditorPage />} />
+              <Route path="projects" element={<ProjectsManager />} />
+              <Route path="calendar" element={<EventsManager />} />
+              <Route path="documents" element={<DocumentsManager />} />
+              <Route path="notifications" element={<NotificationManager />} />
+              <Route path="acollida" element={<AcollidaManager />} />
+              <Route path="banner" element={<AnnouncementManager />} />
+              <Route path="contactes" element={<ContactManager />} />
+              <Route path="settings" element={<SiteSettingsManager />} />
+              <Route path="observability" element={<AdminObservability />} />
 
-          </Route>
-        </Routes>
-      </BrowserRouter>
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
   );
 }

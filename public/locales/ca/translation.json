@@ -256,7 +256,18 @@
     "filter_accessories": "Accessoris",
     "view_options": "Veure Opcions",
     "member_price": "Soci",
-    "non_member_price": "No Soci"
+    "non_member_price": "No Soci",
+    "add_to_cart": "Afegir a la cistella",
+    "cart_title": "La meva Cistella",
+    "empty_cart": "La cistella està buida",
+    "back_to_shop": "Tornar a la botiga",
+    "checkout_btn": "Finalitzar Reserva",
+    "subtotal": "Subtotal",
+    "total": "Total a pagar",
+    "contact_details": "Dades de contacte",
+    "payment_note": "Pagament en efectiu o targeta a la recollida",
+    "success_title": "Reserva Confirmada!",
+    "success_message": "Gràcies per la teva reserva. Pots passar a recollir la teva comanda a l'AFA."
   },
   "featured_projects": {
     "title": "El teu suport transforma l'escola",
