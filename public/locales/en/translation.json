@@ -237,9 +237,12 @@
     "subtotal": "Subtotal",
     "total": "Total due",
     "contact_details": "Contact information",
-    "payment_note": "Cash or card payment upon pickup",
+    "payment_note": "Cash payment upon pickup",
     "success_title": "Reservation Confirmed!",
-    "success_message": "Thanks for your reservation. You can pick up your order at the AFA."
+    "success_message": "Thanks for your reservation. You can pick up your order at the AFA.",
+    "added_success": "Added to cart!",
+    "go_to_cart": "Go to cart",
+    "continue_shopping": "Continue shopping"
   },
   "featured_projects": {
     "title": "Your support transforms the school",

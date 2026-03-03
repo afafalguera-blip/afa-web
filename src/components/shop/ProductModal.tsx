@@ -8,9 +8,10 @@ import { useCart } from '../../contexts/CartContext';
 interface ProductModalProps {
   product: ShopProduct;
   onClose: () => void;
+  onGoToCart?: () => void;
 }
 
-export function ProductModal({ product, onClose }: ProductModalProps) {
+export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { addItem } = useCart();
@@ -26,10 +27,6 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
 
     addItem(product, selectedVariant, quantity);
     setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      onClose();
-    }, 1500);
   };
 
   return (
@@ -81,10 +78,10 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                     disabled={v.stock <= 0}
                     onClick={() => setSelectedSize(v.size)}
                     className={`min-w-[56px] px-4 py-3 rounded-xl font-bold text-sm transition-all border-2 ${selectedSize === v.size
-                        ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-lg shadow-slate-200 dark:shadow-none'
-                        : v.stock <= 0
-                          ? 'opacity-30 cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400'
-                          : 'bg-white dark:bg-card-dark border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-primary'
+                      ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-lg shadow-slate-200 dark:shadow-none'
+                      : v.stock <= 0
+                        ? 'opacity-30 cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400'
+                        : 'bg-white dark:bg-card-dark border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-primary'
                       }`}
                   >
                     {v.size}
@@ -124,26 +121,37 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
               </div>
             )}
 
-            <button
-              disabled={!selectedSize || isOutOfStock || success}
-              onClick={handleAddToCart}
-              className={`w-full py-5 rounded-2xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-3 ${success
-                  ? 'bg-green-500 shadow-green-200'
-                  : 'bg-slate-900 dark:bg-white dark:text-slate-900 shadow-slate-200 dark:shadow-none active:scale-95 disabled:opacity-50 disabled:grayscale'
-                }`}
-            >
-              {success ? (
-                <>
-                  <Check className="w-6 h-6" />
-                  Afegit correctament
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-5 h-5" />
-                  {t('shop_page.add_to_cart')}
-                </>
-              )}
-            </button>
+            {success ? (
+              <div className="flex flex-col gap-3">
+                <div className="bg-green-50 dark:bg-green-900/20 text-green-600 p-4 rounded-xl flex items-center justify-center gap-2 font-bold mb-2">
+                  <Check className="w-5 h-5" />
+                  {t('shop_page.added_success', 'S\'ha afegit a la cistella')}
+                </div>
+                {onGoToCart && (
+                  <button
+                    onClick={onGoToCart}
+                    className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    <ShoppingCart className="w-5 h-5" /> {t('shop_page.go_to_cart', 'Anar a la cistella')}
+                  </button>
+                )}
+                <button
+                  onClick={() => { setSuccess(false); onClose(); }}
+                  className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl flex items-center justify-center hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  {t('shop_page.continue_shopping', 'Seguir comprant')}
+                </button>
+              </div>
+            ) : (
+              <button
+                disabled={!selectedSize || isOutOfStock || success}
+                onClick={handleAddToCart}
+                className="w-full py-5 rounded-2xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-3 bg-slate-900 dark:bg-white dark:text-slate-900 shadow-slate-200 dark:shadow-none active:scale-95 disabled:opacity-50 disabled:grayscale"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {t('shop_page.add_to_cart')}
+              </button>
+            )}
           </div>
         </div>
       </div>

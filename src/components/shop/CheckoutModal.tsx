@@ -56,7 +56,8 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                     quantity: item.quantity,
                     price_at_time: user ? item.variant.price_member : item.variant.price_non_member
                 })),
-                p_user_id: user?.id || null
+                p_user_id: user?.id || null,
+                p_language: currentLang
             });
 
             if (rpcError) throw rpcError;

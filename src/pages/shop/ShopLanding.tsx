@@ -159,13 +159,13 @@ export function ShopLanding() {
         <div className="fixed bottom-6 left-6 right-6 z-[40] md:max-w-xs md:left-auto md:right-10 animate-in slide-in-from-bottom-10 duration-500">
           <button
             onClick={() => setIsCheckoutOpen(true)}
-            className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 font-bold group hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="w-full py-5 bg-primary text-white rounded-2xl shadow-2xl shadow-primary/40 flex items-center justify-center gap-3 font-black text-lg group hover:scale-[1.02] active:scale-[0.98] transition-all hover:bg-primary/90 border border-white/20 backdrop-blur-md"
           >
-            <div className="relative">
-              <ShoppingBag className="w-5 h-5" />
-              <span className="absolute -top-2 -right-2 w-4 h-4 bg-primary text-white text-[8px] rounded-full flex items-center justify-center">{itemCount}</span>
+            <div className="relative animate-bounce">
+              <ShoppingBag className="w-6 h-6" />
+              <span className="absolute -top-2 -right-2 w-5 h-5 bg-white text-primary text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm">{itemCount}</span>
             </div>
-            <span>Veure Cistella</span>
+            <span>{t('shop_page.cart_title')}</span>
           </button>
         </div>
       )}
@@ -174,6 +174,10 @@ export function ShopLanding() {
         <ProductModal
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
+          onGoToCart={() => {
+            setSelectedProduct(null);
+            setIsCheckoutOpen(true);
+          }}
         />
       )}
 

@@ -264,9 +264,12 @@
     "subtotal": "Subtotal",
     "total": "Total a pagar",
     "contact_details": "Datos de contacto",
-    "payment_note": "Pago en efectivo o tarjeta al recoger",
+    "payment_note": "Pago en efectivo al recoger el pedido",
     "success_title": "¡Reserva Confirmada!",
-    "success_message": "Gracias por tu reserva. Puedes pasar a recoger tu pedido en el AFA."
+    "success_message": "Gracias por tu reserva. Puedes pasar a recoger tu pedido en el AFA.",
+    "added_success": "¡Añadido a la cesta!",
+    "go_to_cart": "Ir a la cesta",
+    "continue_shopping": "Seguir comprando"
   },
   "featured_projects": {
     "title": "Tu apoyo transforma el colegio",
