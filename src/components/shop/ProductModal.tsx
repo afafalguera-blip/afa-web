@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, ShoppingCart } from 'lucide-react';
 import type { ShopProduct } from '../../types/shop';
