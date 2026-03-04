@@ -18,7 +18,6 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
   const [success, setSuccess] = useState(false);
 
   const selectedVariant = product.variants?.find(v => v.size === selectedSize);
-  const isOutOfStock = selectedVariant ? selectedVariant.stock <= 0 : true;
 
   const handleAddToCart = () => {
     if (!selectedVariant) return;
@@ -91,14 +90,10 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
                 <div className="flex flex-wrap gap-2">
                   {product.variants?.map(v => (
                     <button
-                      key={v.id}
-                      disabled={v.stock <= 0}
                       onClick={() => setSelectedSize(v.size)}
                       className={`min-w-[56px] px-4 py-3 rounded-xl font-bold text-sm transition-all border-2 ${selectedSize === v.size
                         ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-lg shadow-slate-200 dark:shadow-none'
-                        : v.stock <= 0
-                          ? 'opacity-30 cursor-not-allowed border-slate-100 bg-slate-50 text-slate-400'
-                          : 'bg-white dark:bg-card-dark border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-primary'
+                        : 'bg-white dark:bg-card-dark border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:border-primary'
                         }`}
                     >
                       {v.size}
@@ -106,9 +101,12 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
                   ))}
                 </div>
                 {selectedVariant && (
-                  <p className={`text-xs mt-3 font-medium ${selectedVariant.stock < 5 ? 'text-orange-500' : 'text-slate-400'}`}>
+                  <p className={`text-xs mt-3 font-medium ${selectedVariant.stock <= 0 ? 'text-amber-500 font-bold' : selectedVariant.stock < 5 ? 'text-orange-500' : 'text-slate-400'}`}>
                     {selectedVariant.stock <= 0 ? (
-                      <span className="text-red-500 font-bold">Sense estoc disponible</span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                        Disponible sota comanda (sense estoc immediat)
+                      </span>
                     ) : (
                       `En estoc: ${selectedVariant.stock} unitats`
                     )}
@@ -117,7 +115,7 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
               </div>
 
               {/* Quantity Selector */}
-              {selectedSize && !isOutOfStock && (
+              {selectedSize && (
                 <div className="flex items-center gap-4">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Quantitat</label>
                   <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
@@ -129,7 +127,7 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
                     </button>
                     <span className="w-10 text-center font-bold">{quantity}</span>
                     <button
-                      onClick={() => setQuantity(q => Math.min(selectedVariant?.stock || 99, q + 1))}
+                      onClick={() => setQuantity(q => q + 1)}
                       className="w-10 h-10 flex items-center justify-center font-bold text-lg hover:bg-white dark:hover:bg-card-dark rounded-lg transition-colors"
                     >
                       +
@@ -161,7 +159,7 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
                 </div>
               ) : (
                 <button
-                  disabled={!selectedSize || isOutOfStock || success}
+                  disabled={!selectedSize || success}
                   onClick={handleAddToCart}
                   className="w-full py-5 rounded-2xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-3 bg-slate-900 dark:bg-white dark:text-slate-900 shadow-slate-200 dark:shadow-none active:scale-95 disabled:opacity-50 disabled:grayscale"
                 >

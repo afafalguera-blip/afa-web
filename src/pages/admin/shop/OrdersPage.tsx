@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ShopService } from '../../../features/shop/services/ShopService';
-import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2 } from 'lucide-react';
+import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
 import { OrderEditModal } from '../../../features/shop/components/OrderEditModal';
@@ -253,10 +253,15 @@ export function OrdersPage() {
 
                                     <div className="flex flex-wrap gap-2">
                                         {order.items?.map((item) => (
-                                            <div key={item.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800 text-[11px]">
+                                            <div key={item.id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] ${item.variant && item.variant.stock < item.quantity
+                                                ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/10 dark:border-amber-900/20'
+                                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300'}`}>
+                                                {item.variant && item.variant.stock < item.quantity && (
+                                                    <AlertTriangle className="w-3 h-3 text-amber-500" />
+                                                )}
                                                 <span className="font-black text-primary">{item.quantity}x</span>
-                                                <span className="text-slate-600 dark:text-slate-300 font-bold">{item.variant?.product?.name}</span>
-                                                <span className="text-slate-400 text-[9px] uppercase font-bold">T- {item.variant?.size}</span>
+                                                <span className="font-bold">{item.variant?.product?.name}</span>
+                                                <span className={`${item.variant && item.variant.stock < item.quantity ? 'text-amber-600/70' : 'text-slate-400'} text-[9px] uppercase font-bold`}>T- {item.variant?.size}</span>
                                             </div>
                                         ))}
                                         {(!order.items || order.items.length === 0) && (
