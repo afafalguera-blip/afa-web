@@ -30,6 +30,7 @@ export function BottomNav() {
           }
         >
           <Icon className="w-6 h-6" strokeWidth={2} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <span className="text-[10px] font-medium uppercase tracking-wide">{t(labelKey as any)}</span>
         </NavLink>
       ))}

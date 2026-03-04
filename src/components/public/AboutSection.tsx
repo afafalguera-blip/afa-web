@@ -59,10 +59,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                                 className="whitespace-pre-wrap"
                                 dangerouslySetInnerHTML={{ __html: aboutConfig.translations[currentLang].text.replace(/\n/g, '<br/>') }}
                             />
-                        ) : (aboutConfig as any)?.text ? (
+                        ) : aboutConfig?.text ? (
                             <div
                                 className="whitespace-pre-wrap"
-                                dangerouslySetInnerHTML={{ __html: (aboutConfig as any).text.replace(/\n/g, '<br/>') }}
+                                dangerouslySetInnerHTML={{ __html: aboutConfig.text.replace(/\n/g, '<br/>') }}
                             />
                         ) : (
                             <>
@@ -81,11 +81,11 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                                     ))}
                                 </ul>
                             </div>
-                        ) : ((aboutConfig as any)?.functions && (aboutConfig as any).functions.length > 0) ? (
+                        ) : (aboutConfig?.functions && aboutConfig.functions.length > 0) ? (
                             <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
                                 <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
                                 <ul className="list-disc pl-4 space-y-1 marker:text-primary">
-                                    {(aboutConfig as any).functions.map((func: string, i: number) => (
+                                    {aboutConfig.functions.map((func: string, i: number) => (
                                         <li key={i}>{func}</li>
                                     ))}
                                 </ul>
@@ -94,7 +94,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                             <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl">
                                 <h4 className="font-semibold mb-2 text-primary">{t('home.about_functions_title')}</h4>
                                 <ul className="list-disc pl-4 space-y-1 marker:text-primary">
-                                    {((t('home.about_functions' as any, { returnObjects: true }) as any) || []).map((func: string, i: number) => (
+                                    {(t('home.about_functions', { returnObjects: true }) as string[] || []).map((func, i) => (
                                         <li key={i}>{func}</li>
                                     ))}
                                 </ul>

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, ShoppingCart } from 'lucide-react';
 import type { ShopProduct } from '../types/shop';
-import { useAuth } from '../../../hooks/useAuth';
 import { useCart } from '../contexts/CartContext';
 
 interface ProductModalProps {
@@ -13,8 +12,7 @@ interface ProductModalProps {
 
 export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const { addItem } = useCart();
+  const { addItem, isMember, setIsMember } = useCart();
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [success, setSuccess] = useState(false);
@@ -57,13 +55,31 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
             <div className="p-8 space-y-6">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">{product.name}</h2>
-                <div className="flex items-center gap-3">
-                  <p className="text-2xl font-black text-primary">
-                    {selectedVariant ? (user ? selectedVariant.price_member : selectedVariant.price_non_member) : (user ? product.variants?.[0]?.price_member : product.variants?.[0]?.price_non_member)}€
-                  </p>
-                  <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded uppercase tracking-wider">
-                    {user ? t('shop_page.member_price') : t('shop_page.non_member_price')}
-                  </span>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <p className="text-2xl font-black text-primary">
+                      {selectedVariant ? (isMember ? selectedVariant.price_member : selectedVariant.price_non_member) : (isMember ? product.variants?.[0]?.price_member : product.variants?.[0]?.price_non_member)}€
+                    </p>
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded uppercase tracking-wider">
+                      {isMember ? t('shop_page.member_price') : t('shop_page.non_member_price')}
+                    </span>
+                  </div>
+
+                  {/* Membership Toggle */}
+                  <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-fit">
+                    <button
+                      onClick={() => setIsMember(true)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${isMember ? 'bg-white dark:bg-slate-900 text-primary shadow-sm' : 'text-slate-500'}`}
+                    >
+                      {t('shop_page.member_price')}
+                    </button>
+                    <button
+                      onClick={() => setIsMember(false)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${!isMember ? 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 shadow-sm' : 'text-slate-500'}`}
+                    >
+                      {t('shop_page.non_member_price')}
+                    </button>
+                  </div>
                 </div>
               </div>
 

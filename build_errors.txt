@@ -1,0 +1,12 @@
+src/pages/admin/dashboard/Dashboard.tsx(54,43): error TS2345: Argument of type 'InscriptionFlat[]' is not assignable to parameter of type '(Inscription | InscriptionFlat)[]'.
+  Type 'InscriptionFlat' is not assignable to type 'Inscription | InscriptionFlat'.
+    Type 'import("C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/types/inscription").InscriptionFlat' is not assignable to type 'import("C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/services/ExportService").InscriptionFlat'.
+      Type 'InscriptionFlat' is missing the following properties from type 'Inscription': id, parent_name, parent_dni, parent_phone_1, and 2 more.
+src/pages/admin/dashboard/Dashboard.tsx(58,41): error TS2345: Argument of type 'InscriptionFlat[]' is not assignable to parameter of type '(Inscription | InscriptionFlat)[]'.
+  Type 'InscriptionFlat' is not assignable to type 'Inscription | InscriptionFlat'.
+    Type 'import("C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/types/inscription").InscriptionFlat' is not assignable to type 'import("C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/services/ExportService").InscriptionFlat'.
+      Type 'InscriptionFlat' is missing the following properties from type 'Inscription': id, parent_name, parent_dni, parent_phone_1, and 2 more.
+src/pages/admin/inscriptions/InscriptionsPage.tsx(251,73): error TS2345: Argument of type '"full" | "compact"' is not assignable to parameter of type '"basic" | "full" | undefined'.
+  Type '"compact"' is not assignable to type '"basic" | "full" | undefined'.
+src/pages/admin/inscriptions/InscriptionsPage.tsx(253,71): error TS2345: Argument of type '"list" | "full"' is not assignable to parameter of type '"basic" | "full" | undefined'.
+  Type '"list"' is not assignable to type '"basic" | "full" | undefined'.

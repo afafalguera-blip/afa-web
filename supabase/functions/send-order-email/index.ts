@@ -1,9 +1,9 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import "edge-runtime";
+import { createClient } from "supabase";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
-const ADMIN_EMAILS = ["afafalguera@gmail.com"];
+const ADMIN_EMAILS_DEFAULT = ["afafalguera@gmail.com"];
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -15,7 +15,7 @@ const corsHeaders = {
 };
 
 const getTranslations = (lang: string) => {
-  const translations: Record<string, any> = {
+  const translations: Record<string, Record<string, string>> = {
     es: {
       subject: "👕 Confirmación de tu reserva AFA Falguera",
       title: "¡Reserva Confirmada!",
@@ -65,7 +65,7 @@ const getTranslations = (lang: string) => {
   return translations[lang] || translations['ca'];
 };
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -124,8 +124,24 @@ Deno.serve(async (req) => {
 
     const t = getTranslations(record.language || 'ca');
 
+    // Fetch dynamic shop config
+    let shopConfig = null;
+    try {
+      const { data: configData } = await supabase
+        .from('site_config')
+        .select('value')
+        .eq('key', 'shop')
+        .single();
+      shopConfig = configData?.value;
+    } catch (e) {
+      console.error("Could not fetch shop config", e);
+    }
+
+    const pickupBodyText = shopConfig?.translations?.[record.language || 'ca'] || shopConfig?.translations?.['ca'] || t.pickupBody;
+    const adminEmails = shopConfig?.admin_emails || ADMIN_EMAILS_DEFAULT;
+
     const itemsHtml = order.items && order.items.length > 0 
-      ? order.items.map((item: any) => `
+      ? order.items.map((item: { variant: { product: { name: string }, size: string }, quantity: number, price_at_time: number }) => `
         <tr>
           <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${item.variant?.product?.name || 'Producte'}</td>
           <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${item.variant?.size || '-'}</td>
@@ -136,15 +152,18 @@ Deno.serve(async (req) => {
       : `<tr><td colspan="4" style="padding: 20px; text-align: center; color: #64748b; font-style: italic;">Sense productes</td></tr>`;
 
     // Determine recipients. Send to the customer and the admins.
-    const recipients = [...ADMIN_EMAILS];
+    const recipients = [...adminEmails];
     if (record.customer_email && record.customer_email.includes('@')) {
       recipients.push(record.customer_email);
     }
 
+    // Try to get reply_to from admin emails or a fixed one
+    const replyToEmail = adminEmails[0] || "afafalguera@gmail.com";
+
     const emailPayload = {
       from: `TiendaAFA <${FROM_EMAIL}>`,
       to: recipients,
-      reply_to: "afafalguera@gmail.com",
+      reply_to: replyToEmail,
       subject: t.subject,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
@@ -184,7 +203,7 @@ Deno.serve(async (req) => {
 
           <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
             <p style="margin: 0 0 8px 0; color: #166534; font-size: 16px; font-weight: 800;">${t.pickupTitle}</p>
-            <p style="margin: 0 0 12px 0; color: #15803d; font-size: 15px; line-height: 1.5;">${t.pickupBody}</p>
+            <p style="margin: 0 0 12px 0; color: #15803d; font-size: 15px; line-height: 1.5;">${pickupBodyText}</p>
             <p style="margin: 0; color: #166534; font-size: 13px; opacity: 0.9;">${t.pickupAlt}</p>
           </div>
 
@@ -213,9 +232,10 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: res.status, // Use the actual status from Resend
     });
-  } catch (error: any) {
-    console.error("Critical Error:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error desconocido";
+    console.error("Critical Error:", message);
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

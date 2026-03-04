@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, type Locale } from 'date-fns';
 import { Calendar as CalendarIcon, Clock, MapPin, ExternalLink, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ interface CalendarAgendaViewProps {
     getEventsForDay: (day: Date) => CalendarEvent[];
     isToday: (day: Date) => boolean;
     onEventClick: (event: CalendarEvent) => void;
-    locale: any;
+    locale: Locale;
 }
 
 export function CalendarAgendaView({

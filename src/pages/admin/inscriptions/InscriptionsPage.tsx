@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminService } from '../../../services/AdminService';
+import { AdminInscriptionsService } from '../../../services/admin/AdminInscriptionsService';
 import { ExportService } from '../../../services/ExportService';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, Search, Edit, Trash2, FileSpreadsheet } from 'lucide-react';
@@ -27,7 +27,7 @@ export default function InscriptionsPage() {
   const fetchInscriptions = async () => {
     try {
       setLoading(true);
-      const data = await AdminService.getInscriptions();
+      const data = await AdminInscriptionsService.getInscriptions();
       console.log('Inscriptions loaded:', data.length);
       setInscriptions(data);
     } catch (error) {
@@ -41,8 +41,7 @@ export default function InscriptionsPage() {
     if (!window.confirm(t('admin.inscriptions.delete_confirm'))) return;
 
     try {
-      // @ts-ignore - ID type mismatch handling
-      await AdminService.deleteInscription(id);
+      await AdminInscriptionsService.deleteInscription(id);
       setInscriptions(prev => prev.filter(ins => ins.id !== id));
     } catch (error) {
       console.error('Error deleting:', error);
@@ -57,8 +56,7 @@ export default function InscriptionsPage() {
 
   const handleSaveEdit = async (id: string, updates: Partial<Inscription>) => {
     try {
-      // @ts-ignore
-      await AdminService.updateInscription(id, updates);
+      await AdminInscriptionsService.updateInscription(id, updates);
 
       // Update local state without refetching if possible, but deep nested updates suggest refetch is safer or careful merge
       setInscriptions(prev => prev.map(ins => ins.id === id ? { ...ins, ...updates } as Inscription : ins));

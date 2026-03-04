@@ -3,48 +3,94 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { sortSizes } from '../utils/productUtils';
-import type { Inscription, InscriptionFlat } from '../types/inscription';
+import type { Inscription, InscriptionFlat, InscriptionStudent } from '../types/inscription';
+import type { ShopProduct, ShopVariant } from '../features/shop/types/shop';
+import type { Payment } from '../types/payment';
+
+interface jsPDFExtended extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
+  };
+}
+
+interface FlattenedInscriptionRow {
+  name: string;
+  surname: string;
+  course: string;
+  activities: string[];
+  suspended: boolean;
+  single_activity: string;
+  parent: {
+    id: string | number;
+    created_at?: string;
+    parent_name?: string;
+    parent_dni?: string;
+    parent_phone_1?: string;
+    parent_phone_2?: string;
+    parent_email_1?: string;
+    parent_email_2?: string;
+    afa_member: boolean;
+    health_info?: string;
+    image_auth_consent?: string;
+    can_leave_alone?: boolean;
+    authorized_pickup?: string;
+  };
+}
 
 export const ExportService = {
   // Helper to flatten inscription data
-  getFlattenedData(inscriptions: (Inscription | InscriptionFlat)[], fields: 'basic' | 'full') {
-    const rows: any[] = [];
-    const shouldSort = fields === 'basic'; // 'basic' implies compact/list view, which usually needs sorting and exploding by activity
+  getFlattenedData(inscriptions: (Inscription | InscriptionFlat)[], fields: 'basic' | 'full'): FlattenedInscriptionRow[] {
+    const rows: FlattenedInscriptionRow[] = [];
+    const shouldSort = fields === 'basic';
 
     inscriptions.forEach(ins => {
-      // Handle both legacy flat structure and new nested students array
-      const record = ins as (Inscription & Record<string, any>);
-      const students = record.students && Array.isArray(record.students) ?
-        record.students :
+      // Normalize parent data
+      const parentData = {
+        id: ('id' in ins) ? ins.id : ins.inscription_id,
+        created_at: ins.created_at,
+        parent_name: ('parent_name' in ins) ? ins.parent_name : '',
+        parent_dni: ('parent_dni' in ins) ? ins.parent_dni : '',
+        parent_phone_1: ('parent_phone_1' in ins) ? ins.parent_phone_1 : ins.parent_phone || '',
+        parent_phone_2: ('parent_phone_2' in ins) ? ins.parent_phone_2 : '',
+        parent_email_1: ('parent_email_1' in ins) ? ins.parent_email_1 : ins.parent_email || '',
+        parent_email_2: ('parent_email_2' in ins) ? ins.parent_email_2 : '',
+        afa_member: ins.afa_member,
+        health_info: ('health_info' in ins) ? ins.health_info : '',
+        image_auth_consent: ('image_auth_consent' in ins) ? ins.image_auth_consent : '',
+        can_leave_alone: ('can_leave_alone' in ins) ? ins.can_leave_alone : false,
+        authorized_pickup: ('authorized_pickup' in ins) ? ins.authorized_pickup : ''
+      };
+
+      const students: InscriptionStudent[] = ('students' in ins && Array.isArray(ins.students)) ?
+        ins.students :
         [{
-          name: record.student_name,
-          surname: record.student_surname,
-          course: record.student_course,
-          activities: record.selected_activities || [],
-          suspended: record.suspended
+          name: (ins as InscriptionFlat).name || '',
+          surname: (ins as InscriptionFlat).surname || '',
+          course: (ins as InscriptionFlat).course || '',
+          activities: (ins as InscriptionFlat).activities || [],
+          suspended: (ins as InscriptionFlat).suspended || false
         }];
 
-      students.forEach((student: any) => {
-        // If student is suspended, we might want to filter or mark them.
-        // For now we include them but can access student.suspended status.
-
-        const activities = Array.isArray(student.activities) ? student.activities : [];
+      students.forEach((student) => {
+        const activities = student.activities || [];
 
         if (shouldSort && activities.length > 0) {
-          // Create a row per activity for "Listado por Actividad" mode
           activities.forEach((activity: string) => {
             rows.push({
               ...student,
+              suspended: !!student.suspended,
+              activities: activities,
               single_activity: activity,
-              parent: ins
+              parent: parentData
             });
           });
         } else {
-          // One row per student
           rows.push({
             ...student,
+            suspended: !!student.suspended,
+            activities: activities,
             single_activity: activities.join(', '),
-            parent: ins
+            parent: parentData
           });
         }
       });
@@ -79,7 +125,7 @@ export const ExportService = {
   ) {
     const rows = this.getFlattenedData(inscriptions, fields);
 
-    let exportData: any[] = [];
+    let exportData: Record<string, string | number | boolean>[] = [];
 
     if (fields === 'basic') {
       exportData = rows.map(r => ({
@@ -88,27 +134,27 @@ export const ExportService = {
         'Nombre': r.name,
         'Apellidos': r.surname,
         'Socio AFA': r.parent.afa_member ? 'Sí' : 'No',
-        'Teléfono': r.parent.parent_phone_1 || ''
+        'Teléfono': String(r.parent.parent_phone_1 || '')
       }));
     } else {
       exportData = rows.map(r => ({
-        'ID': r.parent.id,
+        'ID': String(r.parent.id),
         'Fecha': r.parent.created_at ? new Date(r.parent.created_at).toLocaleDateString('es-ES') : '',
         'Actividad': r.single_activity,
         'Curso': r.course,
         'Nombre Alumno': r.name,
         'Apellidos Alumno': r.surname,
-        'Padre/Madre/Tutor': r.parent.parent_name || '',
-        'DNI': r.parent.parent_dni || '',
-        'Teléfono 1': r.parent.parent_phone_1 || '',
-        'Teléfono 2': r.parent.parent_phone_2 || '',
-        'Email 1': r.parent.parent_email_1 || '',
-        'Email 2': r.parent.parent_email_2 || '',
+        'Padre/Madre/Tutor': String(r.parent.parent_name || ''),
+        'DNI': String(r.parent.parent_dni || ''),
+        'Teléfono 1': String(r.parent.parent_phone_1 || ''),
+        'Teléfono 2': String(r.parent.parent_phone_2 || ''),
+        'Email 1': String(r.parent.parent_email_1 || ''),
+        'Email 2': String(r.parent.parent_email_2 || ''),
         'Socio AFA': r.parent.afa_member ? 'Sí' : 'No',
-        'Salud/Alergias': r.parent.health_info || '',
-        'Autorización Imagen': r.parent.image_auth_consent ? 'Sí' : 'No',
+        'Salud/Alergias': String(r.parent.health_info || ''),
+        'Autorización Imagen': String(r.parent.image_auth_consent || 'No'),
         'Sale Solo': r.parent.can_leave_alone ? 'Sí' : 'No',
-        'Autorizados Recogida': r.parent.authorized_pickup || ''
+        'Autorizados Recogida': String(r.parent.authorized_pickup || '')
       }));
     }
 
@@ -168,7 +214,7 @@ export const ExportService = {
     } else {
       // List Mode - Group by Activity
       let currentActivity = '';
-      let groupData: any[] = [];
+      let groupData: (string | number)[][] = [];
 
       rows.forEach((r, index) => {
         const activity = r.single_activity || 'Sin Actividad';
@@ -184,8 +230,7 @@ export const ExportService = {
               theme: 'striped',
               headStyles: { fillColor: [41, 128, 185] }
             });
-            // @ts-ignore
-            yPos = doc.lastAutoTable.finalY + 15;
+            yPos = (doc as jsPDFExtended).lastAutoTable.finalY + 15;
           }
 
           // Check page break
@@ -200,7 +245,7 @@ export const ExportService = {
           doc.setFont('helvetica', 'bold');
           doc.text(`Actividad: ${activity.toUpperCase()}`, 14, yPos);
 
-          const count = rows.filter((row: any) => row.single_activity === activity).length;
+          const count = rows.filter(row => row.single_activity === activity).length;
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(127, 140, 141);
@@ -237,7 +282,7 @@ export const ExportService = {
     doc.save(`${filename}_${fields}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
   },
   
-  exportInventoryPDF(products: any[], filename: string = 'inventari') {
+  exportInventoryPDF(products: ShopProduct[], filename: string = 'inventari') {
     const doc = new jsPDF('p', 'mm', 'a4');
 
     // Header
@@ -267,7 +312,7 @@ export const ExportService = {
       // Sort variants by size using the utility
       const variants = sortSizes(product.variants || []);
       
-      const tableData = variants.map((v: any) => [
+      const tableData = variants.map((v: ShopVariant) => [
         v.size,
         `${v.price_member}€`,
         `${v.price_non_member}€`,
@@ -285,7 +330,7 @@ export const ExportService = {
         margin: { left: 14, right: 14 },
         didParseCell: (data) => {
           if (data.section === 'body' && data.column.index === 4) {
-             const stockValue = (variants as any[])[data.row.index].stock;
+             const stockValue = (variants as ShopVariant[])[data.row.index].stock;
              if (stockValue <= 0) {
                 data.cell.styles.textColor = [231, 76, 60]; // Red
                 data.cell.styles.fontStyle = 'bold';
@@ -297,12 +342,11 @@ export const ExportService = {
         }
       });
 
-      // @ts-ignore
-      yPos = doc.lastAutoTable.finalY + 10;
+      yPos = (doc as jsPDFExtended).lastAutoTable.finalY + 10;
     });
 
     // Add a Summary Page/Section for Low/Out of stock items
-    const lowStockItems: any[] = [];
+    const lowStockItems: { name: string; size: string; stock: number; status: string }[] = [];
     
     // We sort products and variants first to ensure the summary is ordered
     const sortedProductsForSummary = [...products].sort((a, b) => a.name.localeCompare(b.name));
@@ -311,7 +355,7 @@ export const ExportService = {
       // Sort variants within the product
       const sortedVariants = sortSizes(p.variants || []);
       
-      sortedVariants.forEach((v: any) => {
+      sortedVariants.forEach((v: ShopVariant) => {
         if (v.stock <= 5) {
           lowStockItems.push({
             name: p.name,
@@ -359,9 +403,7 @@ export const ExportService = {
             const prevProduct = summaryData[data.row.index - 1][0];
             
             if (currentProduct !== prevProduct) {
-              // @ts-ignore
-              data.cell.styles.lineWidth = { top: 0.5 };
-              // @ts-ignore
+              data.cell.styles.lineWidth = 0.5;
               data.cell.styles.lineColor = [44, 62, 80];
             } else if (data.column.index === 0) {
               // Mute repeating product names but keep them for clarity on page breaks
@@ -388,7 +430,7 @@ export const ExportService = {
     doc.save(`${filename}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
   },
   
-  exportPaymentsCSV(payments: any[], filename: string = 'pagos') {
+  exportPaymentsCSV(payments: Payment[], filename: string = 'pagos') {
       const rows = [
           ['Estudiante', 'Curso', 'Actividades', 'Importe', 'Vencimiento', 'Estado', 'Fecha de pago', 'Referencia bancaria', 'Notas'],
           ...payments.map(payment => [

@@ -56,9 +56,10 @@ export function HeroSettingsModal({ isOpen, onClose, currentConfig, onUpdate }: 
                 onClose();
                 setSuccess(false);
             }, 2000);
-        } catch (err: any) {
-            console.error(err);
-            setError(err.message || "Error al guardar la configuració");
+        } catch (err) {
+            const error = err as Error;
+            console.error(error);
+            setError(error.message || "Error al guardar la configuració");
         } finally {
             setSaving(false);
         }

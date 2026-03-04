@@ -9,6 +9,7 @@ export const CategoryUtils = {
     
     const cat = category.toLowerCase();
     const key = `admin.editor.categories.${cat}`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const translated = t(key as any);
     
     // If translation returns the key itself (no translation found)

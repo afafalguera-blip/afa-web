@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { AdminService } from '../services/AdminService';
+import { AdminInscriptionsService } from '../services/admin/AdminInscriptionsService';
 import { flattenInscriptions, filterInscriptions } from '../logic/inscriptionFilters';
 import { STATUS_FILTER } from '../constants/status';
 import type { Inscription, InscriptionFlat, InscriptionFilters, InscriptionStatus } from '../types/inscription';
@@ -56,7 +56,7 @@ export function useInscriptions(): UseInscriptionsReturn {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await AdminService.getInscriptions();
+      const data = await AdminInscriptionsService.getInscriptions();
       setInscriptions(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error loading inscriptions';
@@ -103,7 +103,7 @@ export function useInscriptions(): UseInscriptionsReturn {
     }
 
     try {
-      await AdminService.deleteInscription(id);
+      await AdminInscriptionsService.deleteInscription(id);
       await loadInscriptions();
       return true;
     } catch (err) {
@@ -122,7 +122,7 @@ export function useInscriptions(): UseInscriptionsReturn {
     newStatus: InscriptionStatus
   ): Promise<boolean> => {
     try {
-      await AdminService.updateStatus(id, newStatus);
+      await AdminInscriptionsService.updateStatus(id, newStatus);
       await loadInscriptions();
       return true;
     } catch (err) {

@@ -1,0 +1,11 @@
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\shop\components\OrderEditModal.tsx
+  13:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\shop\services\ShopService.ts
+   5:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 4 problems (4 errors, 0 warnings)
+

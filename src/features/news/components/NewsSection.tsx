@@ -43,6 +43,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ isAdmin }) => {
                     ))
                 ) : news.length === 0 ? (
                     <div className="col-span-3 py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {t('common.no_news' as any)}
                     </div>
                 ) : (

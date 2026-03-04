@@ -1,4 +1,4 @@
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, type Locale } from 'date-fns';
 import { Calendar as CalendarIcon, Clock, MapPin, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { CalendarEvent } from '../../../services/CalendarService';
@@ -6,7 +6,7 @@ import type { CalendarEvent } from '../../../services/CalendarService';
 interface EventDetailModalProps {
     event: CalendarEvent;
     onClose: () => void;
-    locale: any;
+    locale: Locale;
 }
 
 export function EventDetailModal({ event, onClose, locale }: EventDetailModalProps) {

@@ -60,7 +60,7 @@ export interface InscriptionRaw {
     activities: string[];
   }[];
   // Internal properties that are sometimes unpacked
-  [key: string]: any;
+  [key: string]: string | number | boolean | string[] | undefined | null | object;
 }
 
 export interface InscriptionFlat {

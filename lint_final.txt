@@ -1,0 +1,36 @@
+
+> afa-web@0.0.0 lint
+> eslint .
+
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\ProjectDetailModal.tsx
+   22:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\calendar\CalendarAgendaView.tsx
+  12:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\calendar\EventDetailModal.tsx
+  9:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\documents\DocumentFilters.tsx
+  43:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\events\components\EventsSection.tsx
+  43:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\news\components\NewsSection.tsx
+  46:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\shop\pages\ShopLanding.tsx
+  109:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\InscriptionPage.tsx
+  126:5  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\NewsPage.tsx
+  13:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+Γ£û 10 problems (9 errors, 1 warning)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

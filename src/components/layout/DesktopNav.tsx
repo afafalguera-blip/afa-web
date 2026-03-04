@@ -48,6 +48,7 @@ export function DesktopNav() {
               }
             >
               <Icon className="w-4 h-4" />
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <span className="text-sm">{t(labelKey as any)}</span>
             </NavLink>
           ))}

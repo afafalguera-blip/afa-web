@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Save, Loader2 } from 'lucide-react';
-import { AdminService } from '../../../services/AdminService';
+import { AdminInscriptionsService } from '../../../services/admin/AdminInscriptionsService';
 import type { InscriptionFlat } from '../../../types/inscription';
 
 /** Extended inscription type with optional student_index for editing */
@@ -83,7 +83,7 @@ export function InscriptionEditModal({ inscription, onClose, onSave }: Inscripti
           .filter(Boolean),
       };
 
-      await AdminService.updateInscription(
+      await AdminInscriptionsService.updateInscription(
         inscription.inscription_id,
         updates,
         inscription.student_index

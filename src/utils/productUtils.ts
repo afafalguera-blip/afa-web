@@ -1,4 +1,4 @@
-
+import type { ShopVariant } from '../features/shop/types/shop';
 
 export const SIZE_ORDER: Record<string, number> = {
   'XXS': 1,
@@ -71,7 +71,7 @@ export const isChandalComplete = (name: string) => {
   return n.includes('complet') && (n.includes('xandall') || n.includes('chandal'));
 };
 
-export function calculateChandalStock<T extends { id: string; name: string; variants?: any[] }>(products: T[]): T[] {
+export function calculateChandalStock<T extends { id: string; name: string; variants?: Partial<ShopVariant>[] }>(products: T[]): T[] {
   const pantsProduct = products.find(p => isChandalPants(p.name));
   const sweatshirtProduct = products.find(p => isChandalSweatshirt(p.name));
   const completeProduct = products.find(p => isChandalComplete(p.name));
@@ -89,14 +89,14 @@ export function calculateChandalStock<T extends { id: string; name: string; vari
       const matchingPants = pantsProduct.variants?.find(pv => pv.size === v.size);
       const matchingSweatshirt = sweatshirtProduct.variants?.find(sv => sv.size === v.size);
 
-      if (matchingPants && matchingSweatshirt) {
+      if (matchingPants && matchingSweatshirt && matchingPants.stock !== undefined && matchingSweatshirt.stock !== undefined) {
         // Full tracksuit stock is the minimum of both
         const calculatedStock = Math.min(matchingPants.stock, matchingSweatshirt.stock);
-        return { ...v, stock: calculatedStock, isCalculated: true };
+        return { ...v, stock: calculatedStock, isCalculated: true } as Partial<ShopVariant>;
       }
       return v;
     });
 
-    return { ...p, variants: updatedVariants, isCalculated: true };
+    return { ...p, variants: updatedVariants, isCalculated: true } as T;
   });
 }

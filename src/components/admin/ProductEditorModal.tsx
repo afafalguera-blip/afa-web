@@ -53,7 +53,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
 
   if (!isOpen) return null;
 
-  const handleChange = (field: keyof ShopProduct, value: any) => {
+  const handleChange = <K extends keyof ShopProduct>(field: K, value: ShopProduct[K]) => {
     const translatableFields = ['name', 'description'];
 
     if (translatableFields.includes(field)) {
@@ -68,7 +68,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
     }
   };
 
-  const handleVariantChange = (index: number, field: keyof ShopVariant, value: any) => {
+  const handleVariantChange = <K extends keyof ShopVariant>(index: number, field: K, value: ShopVariant[K]) => {
     setVariants(prev => {
       const newVariants = [...prev];
       newVariants[index] = { ...newVariants[index], [field]: value };
@@ -86,8 +86,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
 
   const getValue = (field: keyof ShopProduct): string => {
     const langKey = `${field}_${currentLang}` as keyof ShopProduct;
-    // @ts-ignore
-    const val = formData[langKey];
+    const val = formData[langKey as keyof typeof formData];
     if (val !== undefined && val !== null) return String(val);
 
     return currentLang === 'es' && formData[field] ? String(formData[field]) : '';
@@ -142,7 +141,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
 
   const handleDeleteProduct = async () => {
     if (!product?.id) return;
-    if (!window.confirm(t('common.confirm_delete' as any) || 'Estàs segur que vols eliminar aquest producte?')) return;
+    if (!window.confirm(t('common.confirm') || 'Estàs segur que vols eliminar aquest producte?')) return;
 
     setLoading(true);
     try {
@@ -151,7 +150,8 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
       onClose();
     } catch (error) {
       console.error("Failed to delete product", error);
-      alert(t('common.error_delete' as any) || 'Error al eliminar el producte');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      alert(t('common.error' as any) || 'Error al eliminar el producte');
     } finally {
       setLoading(false);
     }
@@ -195,7 +195,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Categoria</label>
                 <select
                   value={formData.category}
-                  onChange={e => handleChange('category', e.target.value)}
+                  onChange={e => handleChange('category', e.target.value as 'uniforme' | 'accessoris')}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                 >
                   {shopConfig?.categories.map(cat => (

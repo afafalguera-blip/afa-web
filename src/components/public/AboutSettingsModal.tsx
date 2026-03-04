@@ -13,7 +13,7 @@ type LangCode = 'ca' | 'es' | 'en';
 
 export function AboutSettingsModal({ isOpen, onClose, currentConfig, onUpdate }: AboutSettingsModalProps) {
     const [activeLang, setActiveLang] = useState<LangCode>('ca');
-    const [translations, setTranslations] = useState<AboutConfig['translations']>({
+    const [translations, setTranslations] = useState<Required<AboutConfig>['translations']>({
         ca: { text: '', functions: [] },
         es: { text: '', functions: [] },
         en: { text: '', functions: [] }
@@ -28,7 +28,7 @@ export function AboutSettingsModal({ isOpen, onClose, currentConfig, onUpdate }:
             setTranslations(currentConfig.translations);
         } else if (currentConfig) {
             // Migration for old structure if it exists
-            const oldConfig = currentConfig as any;
+            const oldConfig = currentConfig as AboutConfig & { text?: string; functions?: string[] };
             setTranslations({
                 ca: { text: oldConfig.text || '', functions: oldConfig.functions || [] },
                 es: { text: oldConfig.text || '', functions: oldConfig.functions || [] },
@@ -40,39 +40,51 @@ export function AboutSettingsModal({ isOpen, onClose, currentConfig, onUpdate }:
     if (!isOpen) return null;
 
     const handleTextChange = (value: string) => {
-        setTranslations(prev => ({
-            ...prev,
-            [activeLang]: { ...prev[activeLang], text: value }
-        }));
+        setTranslations(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                [activeLang]: { ...prev[activeLang], text: value }
+            };
+        });
     };
 
     const handleFunctionChange = (index: number, value: string) => {
-        const newFunctions = [...translations[activeLang].functions];
-        newFunctions[index] = value;
-        setTranslations(prev => ({
-            ...prev,
-            [activeLang]: { ...prev[activeLang], functions: newFunctions }
-        }));
+        setTranslations(prev => {
+            if (!prev) return prev;
+            const newFunctions = [...prev[activeLang].functions];
+            newFunctions[index] = value;
+            return {
+                ...prev,
+                [activeLang]: { ...prev[activeLang], functions: newFunctions }
+            };
+        });
     };
 
     const addFunction = () => {
-        setTranslations(prev => ({
-            ...prev,
-            [activeLang]: {
-                ...prev[activeLang],
-                functions: [...prev[activeLang].functions, '']
-            }
-        }));
+        setTranslations(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                [activeLang]: {
+                    ...prev[activeLang],
+                    functions: [...prev[activeLang].functions, '']
+                }
+            };
+        });
     };
 
     const removeFunction = (index: number) => {
-        setTranslations(prev => ({
-            ...prev,
-            [activeLang]: {
-                ...prev[activeLang],
-                functions: prev[activeLang].functions.filter((_, i) => i !== index)
-            }
-        }));
+        setTranslations(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                [activeLang]: {
+                    ...prev[activeLang],
+                    functions: prev[activeLang].functions.filter((_, i) => i !== index)
+                }
+            };
+        });
     };
 
     const handleSave = async (e: React.FormEvent) => {
@@ -90,9 +102,10 @@ export function AboutSettingsModal({ isOpen, onClose, currentConfig, onUpdate }:
                 onClose();
                 setSuccess(false);
             }, 2000);
-        } catch (err: any) {
-            console.error(err);
-            setError(err.message || "Error al guardar la configuració");
+        } catch (err) {
+            const error = err as Error;
+            console.error(error);
+            setError(error.message || "Error al guardar la configuració");
         } finally {
             setSaving(false);
         }

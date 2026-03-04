@@ -19,7 +19,7 @@ interface ProjectDetailModalProps {
     participants?: string;
     budget?: number;
     status: 'completed' | 'in_progress' | 'voting' | 'active' | 'archived';
-    translations?: any;
+    translations?: Record<string, unknown>;
   } | null;
 }
 
@@ -103,6 +103,7 @@ export const ProjectDetailModal = ({ isOpen, onClose, project }: ProjectDetailMo
                       'active': 'admin.projects.status_active',
                       'archived': 'admin.projects.status_archived'
                     };
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */ }
                     return t(statusMap[project.status] as any || 'admin.projects.status_active');
                   })()}
                 </span>

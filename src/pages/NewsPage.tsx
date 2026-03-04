@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Newspaper } from 'lucide-react';
 import { PublicNewsService, type NewsArticle } from '../services/PublicNewsService';
@@ -10,12 +10,7 @@ export function NewsPage() {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchNews();
-    window.scrollTo(0, 0);
-  }, [i18n.language]);
-
-  const fetchNews = async () => {
+  const fetchNews = useMemo(() => async () => {
     setLoading(true);
     try {
       const data = await PublicNewsService.getAllNews(i18n.language);
@@ -25,7 +20,12 @@ export function NewsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [i18n.language]);
+
+  useEffect(() => {
+    fetchNews();
+    window.scrollTo(0, 0);
+  }, [fetchNews]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-24 pb-12">

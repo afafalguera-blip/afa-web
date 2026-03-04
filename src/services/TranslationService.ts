@@ -24,8 +24,8 @@ export const TranslationService = {
 
     const translatedResult: TranslationResult = { ...source };
 
-    for (const key of Object.keys(source)) {
-      const text = (source as any)[key];
+    for (const key of Object.keys(source) as (keyof TranslationResult)[]) {
+      const text = source[key];
       if (!text || typeof text !== 'string' || text.trim() === '') continue;
 
       try {
@@ -45,7 +45,7 @@ export const TranslationService = {
         const data = await response.json();
         
         if (data && data[0]) {
-          let translatedText = data[0].map((part: any) => part[0]).join('');
+          let translatedText = (data[0] as string[][]).map((part) => part[0]).join('');
 
           // --- RESTAURAR HTML ---
           // Volvemos a poner las etiquetas originales en su sitio
@@ -57,7 +57,7 @@ export const TranslationService = {
           // Limpieza final de guiones manuales que a veces mete la IA
           translatedText = translatedText.replace(/(\w)-\s+(\w)/g, '$1$2'); // quita sumar- vos -> sumarvos
           
-          (translatedResult as any)[key] = translatedText;
+          translatedResult[key] = translatedText;
         }
       } catch (error) {
         console.error(`Error en campo ${key}:`, error);

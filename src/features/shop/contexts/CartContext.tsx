@@ -10,6 +10,8 @@ interface CartContextType {
     clearCart: () => void;
     total: number;
     itemCount: number;
+    isMember: boolean;
+    setIsMember: (isMember: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -21,7 +23,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (savedCart) {
             try {
                 const parsed = JSON.parse(savedCart);
-                // Basic validation: ensure it's an array and has required fields
                 if (Array.isArray(parsed)) {
                     return parsed.filter(item => item.id && item.variant && item.product);
                 }
@@ -32,10 +33,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return [];
     });
 
+    const [isMember, setIsMember] = useState<boolean>(() => {
+        const saved = sessionStorage.getItem('afa_shop_is_member');
+        if (saved !== null) return saved === 'true';
+        return user !== null; // Default to true if logged in
+    });
+
     // Save cart to session storage
     useEffect(() => {
         sessionStorage.setItem('afa_shop_cart', JSON.stringify(items));
     }, [items]);
+
+    // Save member status
+    useEffect(() => {
+        sessionStorage.setItem('afa_shop_is_member', String(isMember));
+    }, [isMember]);
+
+    // Update isMember when user logs in/out if they haven't manually changed it?
+    // Actually, usually it's better to respect their choice if they manually toggled it.
+    useEffect(() => {
+        if (user) setIsMember(true);
+    }, [user]);
 
     const addItem = (product: ShopProduct, variant: ShopVariant, quantity: number) => {
         setItems(prev => {
@@ -60,14 +78,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Dynamic price calculation based on user membership
     const total = items.reduce((acc, item) => {
-        const price = user ? Number(item.variant.price_member) : Number(item.variant.price_non_member);
+        const price = isMember ? Number(item.variant.price_member) : Number(item.variant.price_non_member);
         return acc + (price * item.quantity);
     }, 0);
 
     const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
     return (
-        <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total, itemCount }}>
+        <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total, itemCount, isMember, setIsMember }}>
             {children}
         </CartContext.Provider>
     );

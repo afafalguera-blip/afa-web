@@ -1,0 +1,110 @@
+
+> afa-web@0.0.0 lint
+> eslint .
+
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\admin\ActivityEditorModal.tsx
+  253:125  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  262:129  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\admin\EditInscriptionModal.tsx
+  36:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:87  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\admin\ProductEditorModal.tsx
+  144:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\admin\calendar\EventFormModal.tsx
+  82:71  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\common\GoogleAnalytics.tsx
+  6:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\layout\BottomNav.tsx
+  33:92  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\layout\DesktopNav.tsx
+  51:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\layout\SchoolSuppliesBackground.tsx
+  7:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\AboutSettingsModal.tsx
+  31:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  93:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\HeroSettingsModal.tsx
+  59:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\ProjectDetailModal.tsx
+   22:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  106:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\calendar\CalendarAgendaView.tsx
+  12:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\calendar\EventDetailModal.tsx
+  9:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\components\public\documents\DocumentFilters.tsx
+  4:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\events\components\EventsSection.tsx
+  43:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\news\components\NewsSection.tsx
+  46:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\features\shop\pages\ShopLanding.tsx
+  109:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\hooks\useContentTranslation.ts
+  20:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\Extraescolars.tsx
+  17:11  error  'i18n' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  24:60  error  Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  62:42  error  Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\InscriptionPage.tsx
+  126:5  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\NewsPage.tsx
+  16:6  warning  React Hook useEffect has a missing dependency: 'fetchNews'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\AcollidaManager.tsx
+  36:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  92:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\ActivitiesManager.tsx
+  26:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:16  error  'err' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\AnnouncementManager.tsx
+  197:108  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\NewsEditorPage.tsx
+  119:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\NotificationManager.tsx
+  358:93  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\dashboard\Dashboard.tsx
+  26:32  error  'InscriptionStatus' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\payments\PaymentsPage.tsx
+  82:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\pages\admin\shop\OrdersPage.tsx
+   46:18  error  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  255:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\types\inscription.ts
+  63:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Administrator\Desktop\Proyectos\AFA\afa-web\src\utils\CategoryUtils.ts
+  12:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 41 problems (40 errors, 1 warning)
+

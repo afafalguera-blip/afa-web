@@ -75,8 +75,13 @@ export function AboutSettings({ about, setAbout, activeLang, setActiveLang }: Ab
                         required
                         value={about.translations?.[activeLang]?.text || ""}
                         onChange={(e) => {
-                            const newTranslations = { ...about.translations };
-                            newTranslations[activeLang] = { ...newTranslations[activeLang], text: e.target.value };
+                            const newTranslations = about.translations ? { ...about.translations } : {
+                                ca: { text: '', functions: [] },
+                                es: { text: '', functions: [] },
+                                en: { text: '', functions: [] }
+                            };
+                            const currentLangData = newTranslations[activeLang] || { text: '', functions: [] };
+                            newTranslations[activeLang] = { ...currentLangData, text: e.target.value };
                             setAbout({ ...about, translations: newTranslations });
                         }}
                         rows={8}

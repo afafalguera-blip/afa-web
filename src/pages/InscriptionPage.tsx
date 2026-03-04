@@ -123,7 +123,7 @@ export default function InscriptionPage() {
   const getAvailableActivities = (courseCode: string) => {
     const course = COURSES.find(c => c.value === courseCode);
     if (!course) return [];
-    // @ts-ignore
+    // @ts-expect-error Dynamic activity key
     return ALL_ACTIVITIES[course.type] || [];
   };
 

@@ -16,8 +16,7 @@ export function useContentTranslation() {
   function tContent<T>(item: T, field: string): string {
     if (!item) return '';
 
-    // 1. Try JSONB 'translations' field first (News, Projects)
-    const translations = (item as any).translations;
+    const translations = (item as { translations?: Record<string, Record<string, string>> }).translations;
     if (translations && translations[lang] && translations[lang][field]) {
       return translations[lang][field];
     }

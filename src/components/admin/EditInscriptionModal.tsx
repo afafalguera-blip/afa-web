@@ -33,11 +33,11 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
 
   if (!isOpen) return null;
 
-  const handleParentChange = (field: keyof Inscription, value: any) => {
+  const handleParentChange = <K extends keyof Inscription>(field: K, value: Inscription[K]) => {
     setFormData((prev: Inscription) => ({ ...prev, [field]: value }));
   };
 
-  const handleStudentChange = (index: number, field: keyof InscriptionStudent, value: any) => {
+  const handleStudentChange = <K extends keyof InscriptionStudent>(index: number, field: K, value: InscriptionStudent[K]) => {
     const newStudents = [...(formData.students || [])];
     if (!newStudents[index]) return;
     newStudents[index] = { ...newStudents[index], [field]: value };
@@ -63,9 +63,6 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
     e.preventDefault();
     setLoading(true);
     try {
-      // @ts-ignore - ID comes as string but service expects number or string depending on version. 
-      // Supabase IDs are usually UUID or Int. AdminService signatures earlier showed number, but interface here strings.
-      // We'll pass as is, assuming service handles it or we cast.
       await onSave(formData.id, formData);
       onClose();
     } catch (error) {

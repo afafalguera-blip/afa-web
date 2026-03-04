@@ -12,7 +12,7 @@ interface CheckoutModalProps {
 
 export function CheckoutModal({ onClose }: CheckoutModalProps) {
     const { i18n, t } = useTranslation();
-    const { items, total, removeItem, clearCart } = useCart();
+    const { items, total, removeItem, clearCart, isMember } = useCart();
     const { user, profile } = useAuth();
 
     const [customerName, setCustomerName] = useState('');
@@ -54,7 +54,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                 items: items.map(item => ({
                     variant_id: item.variant.id,
                     quantity: item.quantity,
-                    price_at_time: user ? item.variant.price_member : item.variant.price_non_member
+                    price_at_time: isMember ? item.variant.price_member : item.variant.price_non_member
                 })),
                 userId: user?.id,
                 language: currentLang
@@ -125,7 +125,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-bold text-slate-900 dark:text-white truncate uppercase tracking-tight">{item.product.name}</h4>
                                             <p className="text-slate-500 text-xs mt-0.5">Talla: {item.variant.size} • Qt: {item.quantity}</p>
-                                            <p className="text-primary font-black mt-1 text-[15px]">{(Number(user ? item.variant.price_member : item.variant.price_non_member) * item.quantity).toFixed(2)}€</p>
+                                            <p className="text-primary font-black mt-1 text-[15px]">{(Number(isMember ? item.variant.price_member : item.variant.price_non_member) * item.quantity).toFixed(2)}€</p>
                                         </div>
                                         <button
                                             onClick={() => removeItem(item.id)}

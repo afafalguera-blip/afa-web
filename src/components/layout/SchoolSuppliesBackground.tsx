@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { Pencil, Square as Ruler, BookOpen, GraduationCap, School, Eraser, Calculator, Backpack, PenTool } from 'lucide-react';
+import { Pencil, Square as Ruler, BookOpen, GraduationCap, School, Eraser, Calculator, Backpack, PenTool, type LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface SupplyItem {
     id: number;
-    Icon: any;
+    Icon: LucideIcon;
     size: number;
     initialX: number;
     initialY: number;

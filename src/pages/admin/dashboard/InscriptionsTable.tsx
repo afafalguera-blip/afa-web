@@ -68,7 +68,7 @@ export function InscriptionsTable({
               <td className="px-6 py-4 text-slate-600">{row.course}</td>
               <td className="px-6 py-4 text-slate-600">
                 <div className="flex flex-wrap gap-1">
-                  {Array.isArray(row.activities) ? row.activities.map((act, i) => (
+                  {Array.isArray(row.activities) ? (row.activities as string[]).map((act, i) => (
                     <span key={i} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
                       {act}
                     </span>

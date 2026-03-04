@@ -1,0 +1,154 @@
+[
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\admin\\ActivityEditorModal.tsx",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\admin\\EditInscriptionModal.tsx",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\admin\\EditPaymentModal.tsx",
+    "errors": 4
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\admin\\ProductEditorModal.tsx",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\admin\\calendar\\EventFormModal.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\common\\GoogleAnalytics.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\layout\\BottomNav.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\layout\\DesktopNav.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\layout\\SchoolSuppliesBackground.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\public\\AboutSection.tsx",
+    "errors": 7
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\public\\AboutSettingsModal.tsx",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\public\\HeroSettingsModal.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\public\\ProjectDetailModal.tsx",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\public\\calendar\\CalendarAgendaView.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\public\\calendar\\EventDetailModal.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\components\\public\\documents\\DocumentFilters.tsx",
+    "errors": 0
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\features\\events\\components\\EventsSection.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\features\\news\\components\\NewsSection.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\features\\shop\\pages\\ShopLanding.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\hooks\\useContentTranslation.ts",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\Extraescolars.tsx",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\InscriptionPage.tsx",
+    "errors": 0
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\NewsPage.tsx",
+    "errors": 0
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\AcollidaManager.tsx",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\ActivitiesManager.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\AnnouncementManager.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\NewsEditorPage.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\NotificationManager.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\dashboard\\Dashboard.tsx",
+    "errors": 0
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\payments\\PaymentsPage.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\shop\\InventoryPage.tsx",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\pages\\admin\\shop\\OrdersPage.tsx",
+    "errors": 4
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\services\\ExportService.ts",
+    "errors": 15
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\services\\TranslationService.ts",
+    "errors": 3
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\services\\admin\\AdminObservabilityService.ts",
+    "errors": 2
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\types\\inscription.ts",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\utils\\CategoryUtils.ts",
+    "errors": 1
+  },
+  {
+    "file": "C:\\Users\\Administrator\\Desktop\\Proyectos\\AFA\\afa-web\\src\\utils\\productUtils.ts",
+    "errors": 1
+  }
+]

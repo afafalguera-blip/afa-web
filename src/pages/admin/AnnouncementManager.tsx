@@ -194,7 +194,7 @@ export default function AnnouncementManager() {
                                     <button
                                         key={t.value}
                                         type="button"
-                                        onClick={() => setAnnouncement({ ...announcement, type: t.value as any })}
+                                        onClick={() => setAnnouncement({ ...announcement, type: t.value as Announcement['type'] })}
                                         className={`px-3 py-3 rounded-xl font-bold text-sm border-2 transition-all flex items-center justify-center gap-2 ${announcement.type === t.value
                                             ? 'border-primary bg-primary/5 text-primary'
                                             : 'border-transparent bg-slate-50 dark:bg-slate-900 text-slate-500'

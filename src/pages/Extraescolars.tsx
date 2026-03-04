@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useMemo } from 'react';
 import { ActivityDetailModal } from '../components/public/ActivityDetailModal';
 import { ActivitiesCalendar } from '../components/public/ActivitiesCalendar';
@@ -14,14 +13,13 @@ import { ActivityCard } from '../components/public/extraescolars/ActivityCard';
 import { EnrollmentBanner } from '../components/public/extraescolars/EnrollmentBanner';
 
 export function Extraescolars() {
-  const { i18n } = useTranslation();
   const { tContent } = useContentTranslation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -59,10 +57,9 @@ export function Extraescolars() {
     });
   }, [activities, searchQuery, selectedCategory, tContent]);
 
-  const handleActivityClick = (activity: any) => {
+  const handleActivityClick = (activity: Activity) => {
     setSelectedActivity({
       ...activity,
-      image: activity.image_url
     });
     setIsModalOpen(true);
   };

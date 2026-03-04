@@ -106,6 +106,7 @@ export function ShopLanding() {
           {shopConfig?.categories.map(cat => (
             <button
               key={cat.id}
+              /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               onClick={() => setCategory(cat.id as any)}
               className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
             >

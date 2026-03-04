@@ -11,6 +11,7 @@ export interface ShopProduct {
   category: 'uniforme' | 'accessoris';
   image_url?: string;
   variants?: ShopVariant[];
+  isCalculated?: boolean;
 }
 
 export interface ShopVariant {
@@ -40,6 +41,7 @@ export interface ShopOrderItem {
   price_at_time: number;
   variant?: {
     size: string;
+    stock: number;
     product: {
       name: string;
     };

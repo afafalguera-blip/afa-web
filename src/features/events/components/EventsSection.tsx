@@ -40,6 +40,7 @@ export const EventsSection: React.FC = () => {
                     </div>
                 ) : events.length === 0 ? (
                     <div className="text-center py-8 text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 uppercase text-[10px] tracking-widest font-bold">
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {t('common.no_events' as any)}
                     </div>
                 ) : (

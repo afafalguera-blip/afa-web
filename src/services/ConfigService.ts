@@ -20,11 +20,14 @@ export interface SocialConfig {
 }
 
 export interface AboutConfig {
-  translations: {
-    ca: { text: string; functions: string[] };
-    es: { text: string; functions: string[] };
-    en: { text: string; functions: string[] };
+  translations?: {
+    ca: { text: string, functions: string[] },
+    es: { text: string, functions: string[] },
+    en: { text: string, functions: string[] }
   };
+  // Legacy fields
+  text?: string;
+  functions?: string[];
 }
 
 export interface LegalConfig {

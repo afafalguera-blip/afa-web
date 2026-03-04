@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
   EyeOff,
   Bell,
   AlertCircle,
@@ -33,7 +33,7 @@ export default function NotificationManager() {
   const [searchText, setSearchText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState<{
     title: string;
     message: string;
@@ -51,7 +51,7 @@ export default function NotificationManager() {
     end_at: '',
     active: true
   });
-  
+
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function NotificationManager() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar esta notificación?')) return;
-    
+
     try {
       const { error } = await supabase.from('notifications').delete().eq('id', id);
       if (error) throw error;
@@ -126,8 +126,8 @@ export default function NotificationManager() {
         .eq('id', notification.id);
 
       if (error) throw error;
-      
-      setNotifications(prev => prev.map(n => 
+
+      setNotifications(prev => prev.map(n =>
         n.id === notification.id ? { ...n, active: newActive } : n
       ));
     } catch (error) {
@@ -203,7 +203,7 @@ export default function NotificationManager() {
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <button 
+          <button
             onClick={handleCreate}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
           >
@@ -238,11 +238,10 @@ export default function NotificationManager() {
       ) : (
         <div className="grid gap-4">
           {filteredNotifications.map(notification => (
-            <div 
+            <div
               key={notification.id}
-              className={`bg-white rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow ${
-                notification.active ? 'border-slate-200' : 'border-slate-100 bg-slate-50 opacity-75'
-              }`}
+              className={`bg-white rounded-xl border p-5 shadow-sm hover:shadow-md transition-shadow ${notification.active ? 'border-slate-200' : 'border-slate-100 bg-slate-50 opacity-75'
+                }`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
@@ -252,38 +251,37 @@ export default function NotificationManager() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold text-slate-900">{notification.title}</h3>
-                      <span className={`px-2 py-0.5 text-xs font-bold uppercase rounded-full ${
-                        notification.type === 'alert' ? 'bg-red-100 text-red-700' :
-                        notification.type === 'news' ? 'bg-blue-100 text-blue-700' :
-                        'bg-slate-100 text-slate-700'
-                      }`}>
+                      <span className={`px-2 py-0.5 text-xs font-bold uppercase rounded-full ${notification.type === 'alert' ? 'bg-red-100 text-red-700' :
+                          notification.type === 'news' ? 'bg-blue-100 text-blue-700' :
+                            'bg-slate-100 text-slate-700'
+                        }`}>
                         {notification.type}
                       </span>
                       {!notification.active && (
-                         <span className="px-2 py-0.5 text-xs font-bold uppercase rounded-full bg-slate-200 text-slate-500">
-                           Inactiva
-                         </span>
+                        <span className="px-2 py-0.5 text-xs font-bold uppercase rounded-full bg-slate-200 text-slate-500">
+                          Inactiva
+                        </span>
                       )}
                     </div>
                     {notification.message && (
                       <p className="text-sm text-slate-500 mb-2">{notification.message}</p>
                     )}
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <span className="font-medium">Inicio:</span>
+                        {format(new Date(notification.start_at), 'dd/MM/yyyy HH:mm')}
+                      </span>
+                      {notification.end_at && (
                         <span className="flex items-center gap-1">
-                            <span className="font-medium">Inicio:</span>
-                            {format(new Date(notification.start_at), 'dd/MM/yyyy HH:mm')}
+                          <span className="font-medium">Fin:</span>
+                          {format(new Date(notification.end_at), 'dd/MM/yyyy HH:mm')}
                         </span>
-                        {notification.end_at && (
-                             <span className="flex items-center gap-1">
-                                <span className="font-medium">Fin:</span>
-                                {format(new Date(notification.end_at), 'dd/MM/yyyy HH:mm')}
-                            </span>
-                        )}
-                        {notification.link && (
-                            <span className="truncate max-w-[200px]" title={notification.link}>
-                                🔗 {notification.link}
-                            </span>
-                        )}
+                      )}
+                      {notification.link && (
+                        <span className="truncate max-w-[200px]" title={notification.link}>
+                          🔗 {notification.link}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -291,11 +289,10 @@ export default function NotificationManager() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleToggleActive(notification)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      notification.active
+                    className={`p-2 rounded-lg transition-colors ${notification.active
                         ? 'text-green-600 hover:bg-green-50'
                         : 'text-slate-400 hover:bg-slate-100'
-                    }`}
+                      }`}
                     title={notification.active ? 'Desactivar' : 'Activar'}
                   >
                     {notification.active ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
@@ -352,60 +349,60 @@ export default function NotificationManager() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                   <label className="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
-                   <select
-                     value={formData.type}
-                     onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
-                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                   >
-                     <option value="info">Información</option>
-                     <option value="alert">Alerta</option>
-                     <option value="news">Noticia</option>
-                   </select>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Tipo</label>
+                  <select
+                    value={formData.type}
+                    onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as Notification['type'] }))}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    <option value="info">Información</option>
+                    <option value="alert">Alerta</option>
+                    <option value="news">Noticia</option>
+                  </select>
                 </div>
                 <div>
-                   <label className="block text-sm font-medium text-slate-700 mb-1">Enlace (Opcional)</label>
-                   <input
-                     type="text"
-                     value={formData.link}
-                     onChange={e => setFormData(prev => ({ ...prev, link: e.target.value }))}
-                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                     placeholder="https://..."
-                   />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Enlace (Opcional)</label>
+                  <input
+                    type="text"
+                    value={formData.link}
+                    onChange={e => setFormData(prev => ({ ...prev, link: e.target.value }))}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="https://..."
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                   <label className="block text-sm font-medium text-slate-700 mb-1">Mostrar desde *</label>
-                   <input
-                     type="datetime-local"
-                     value={formData.start_at}
-                     onChange={e => setFormData(prev => ({ ...prev, start_at: e.target.value }))}
-                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                   />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Mostrar desde *</label>
+                  <input
+                    type="datetime-local"
+                    value={formData.start_at}
+                    onChange={e => setFormData(prev => ({ ...prev, start_at: e.target.value }))}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
                 </div>
                 <div>
-                   <label className="block text-sm font-medium text-slate-700 mb-1">Mostrar hasta</label>
-                   <input
-                     type="datetime-local"
-                     value={formData.end_at}
-                     onChange={e => setFormData(prev => ({ ...prev, end_at: e.target.value }))}
-                     className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                   />
-                   <p className="text-xs text-slate-400 mt-1">Dejar vacío para indefinido</p>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Mostrar hasta</label>
+                  <input
+                    type="datetime-local"
+                    value={formData.end_at}
+                    onChange={e => setFormData(prev => ({ ...prev, end_at: e.target.value }))}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Dejar vacío para indefinido</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                 <input
-                   type="checkbox"
-                   id="active"
-                   checked={formData.active}
-                   onChange={e => setFormData(prev => ({ ...prev, active: e.target.checked }))}
-                   className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                 />
-                 <label htmlFor="active" className="text-sm font-medium text-slate-700">Activo visible</label>
+                <input
+                  type="checkbox"
+                  id="active"
+                  checked={formData.active}
+                  onChange={e => setFormData(prev => ({ ...prev, active: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="active" className="text-sm font-medium text-slate-700">Activo visible</label>
               </div>
 
             </div>

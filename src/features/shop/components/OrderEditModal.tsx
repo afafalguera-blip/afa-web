@@ -2,26 +2,11 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Save, ShoppingBag, User } from 'lucide-react';
 import { ShopService } from '../services/ShopService';
 import { supabase } from '../../../lib/supabase';
-import type { ShopProduct } from '../types/shop';
+import type { ShopProduct, ShopOrder, ShopOrderItem, ShopVariant } from '../types/shop';
 import { sortSizes } from '../../../utils/productUtils';
 
-interface OrderItemData {
-  id: string;
-  variant_id: string;
-  quantity: number;
-  price_at_time: number;
-  variant?: { product?: { name: string }, size: string, stock: number };
-}
-
-interface OrderData {
-  id: string;
-  customer_name: string;
-  total_amount?: number;
-  items?: OrderItemData[];
-}
-
 interface OrderEditModalProps {
-  order: OrderData;
+  order: ShopOrder;
   onClose: () => void;
   onUpdate: () => void;
 }
@@ -176,7 +161,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
             </div>
 
             <div className="space-y-3">
-              {order.items?.map((item: OrderItemData) => (
+              {order.items?.map((item: ShopOrderItem) => (
                 <div key={item.id} className="group bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-primary/30 transition-all">
                   <div className="flex-1">
                     <p className="font-bold text-slate-800 dark:text-white leading-tight">{item.variant?.product?.name}</p>
@@ -186,7 +171,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                         onChange={(e) => handleUpdateItem(item.id, e.target.value, item.quantity, item.price_at_time)}
                         className="text-xs bg-slate-100 dark:bg-slate-800 border-none rounded py-0.5 px-2 outline-none focus:ring-1 focus:ring-primary cursor-pointer"
                       >
-                        {sortSizes(products.find(p => p.name === item.variant?.product?.name)?.variants || []).map(v => (
+                        {sortSizes(products.find(p => p.name === item.variant?.product?.name)?.variants || []).map((v: ShopVariant) => (
                           <option key={v.id} value={v.id}>Talla {v.size} ({v.stock} disp.)</option>
                         ))}
                       </select>
@@ -268,7 +253,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                 <div>
                   <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Talla</label>
                   <div className="flex flex-wrap gap-2">
-                    {sortSizes(selectedProduct.variants || []).map(v => (
+                    {sortSizes(selectedProduct.variants || []).map((v: ShopVariant) => (
                       <button
                         key={v.id}
                         onClick={() => setSelectedVariantId(v.id)}

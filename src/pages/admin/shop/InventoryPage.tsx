@@ -138,7 +138,7 @@ export function InventoryPage() {
       <div className="space-y-6">
         <AnimatePresence mode="popLayout">
           {filteredProducts.map((product) => {
-            const isCalculated = (product as any).isCalculated;
+            const isCalculated = product.isCalculated;
             return (
               <motion.div
                 key={product.id}

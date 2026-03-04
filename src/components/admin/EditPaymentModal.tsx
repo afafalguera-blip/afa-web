@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import type { InscriptionStudent } from '../../types/inscription';
 
 interface Payment {
   id?: string;
@@ -37,7 +38,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
     status: 'pending'
   });
   const [loading, setLoading] = useState(false);
-  const [students, setStudents] = useState<any[]>([]); // For search
+  const [students, setStudents] = useState<InscriptionStudent[]>([]); // For search
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -51,8 +52,8 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
 
       if (data) {
         // Flatten students
-        const allStudents = data.flatMap((ins: any) => {
-          return (ins.students || []).map((s: any) => ({
+        const allStudents = (data as { students: InscriptionStudent[] }[]).flatMap((ins) => {
+          return (ins.students || []).map((s) => ({
             name: s.name,
             surname: s.surname,
             course: s.course,
@@ -215,9 +216,9 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
               <label className="block text-sm font-medium text-gray-700 mb-1">Estat</label>
               <select
                 value={formData.status}
-                onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+                onChange={e => setFormData({ ...formData, status: e.target.value as Payment['status'] })}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-blue-500 outline-none font-medium ${formData.status === 'paid' ? 'text-green-600 bg-green-50' :
-                    formData.status === 'overdue' ? 'text-red-600 bg-red-50' : 'text-amber-600 bg-amber-50'
+                  formData.status === 'overdue' ? 'text-red-600 bg-red-50' : 'text-amber-600 bg-amber-50'
                   }`}
               >
                 <option value="pending">Pendent</option>

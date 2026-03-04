@@ -23,7 +23,7 @@ import { InscriptionDetailsModal } from './InscriptionDetailsModal';
 import { InscriptionEditModal } from './InscriptionEditModal';
 
 // Types
-import type { InscriptionFlat, InscriptionStatus } from '../../../types/inscription';
+import type { InscriptionFlat } from '../../../types/inscription';
 
 export function Dashboard() {
   const { t } = useTranslation();

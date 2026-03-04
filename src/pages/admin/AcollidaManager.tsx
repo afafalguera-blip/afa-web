@@ -33,7 +33,7 @@ export default function AcollidaManager() {
 
             if (error) throw error;
             setRates(data || []);
-        } catch (err: any) {
+        } catch (err) {
             console.error(err);
             setError('Error al cargar las tarifas');
         } finally {
@@ -89,8 +89,9 @@ export default function AcollidaManager() {
 
             if (insError) throw insError;
             alert('Cambios guardados correctamente');
-        } catch (err: any) {
-            console.error(err);
+        } catch (err) {
+            const error = err as Error;
+            console.error(error);
             setError('Error al guardar. Verifica los permisos de la tabla.');
         } finally {
             setSaving(false);

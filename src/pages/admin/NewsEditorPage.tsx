@@ -116,7 +116,7 @@ export default function NewsEditorPage() {
             };
 
             if (lang === 'es') {
-                (updatedData as any)[field] = value;
+                (updatedData as Record<string, unknown>)[field] = value;
             }
 
             return updatedData;

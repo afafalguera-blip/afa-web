@@ -1,0 +1,125 @@
+node_modules/@types/react-router-dom/index.d.ts(13,10): error TS2724: '"react-router"' has no exported member named 'match'. Did you mean 'UIMatch'?
+node_modules/@types/react-router-dom/index.d.ts(19,5): error TS2305: Module '"react-router"' has no exported member 'PromptProps'.
+node_modules/@types/react-router-dom/index.d.ts(20,5): error TS2305: Module '"react-router"' has no exported member 'Prompt'.
+node_modules/@types/react-router-dom/index.d.ts(23,5): error TS2305: Module '"react-router"' has no exported member 'RedirectProps'.
+node_modules/@types/react-router-dom/index.d.ts(24,5): error TS2724: '"react-router"' has no exported member named 'Redirect'. Did you mean 'redirect'?
+node_modules/@types/react-router-dom/index.d.ts(25,5): error TS2305: Module '"react-router"' has no exported member 'RouteChildrenProps'.
+node_modules/@types/react-router-dom/index.d.ts(26,5): error TS2305: Module '"react-router"' has no exported member 'RouteComponentProps'.
+node_modules/@types/react-router-dom/index.d.ts(33,5): error TS2305: Module '"react-router"' has no exported member 'SwitchProps'.
+node_modules/@types/react-router-dom/index.d.ts(34,5): error TS2305: Module '"react-router"' has no exported member 'Switch'.
+node_modules/@types/react-router-dom/index.d.ts(35,5): error TS2724: '"react-router"' has no exported member named 'match'. Did you mean 'UIMatch'?
+node_modules/@types/react-router-dom/index.d.ts(37,5): error TS2305: Module '"react-router"' has no exported member 'withRouter'.
+node_modules/@types/react-router-dom/index.d.ts(38,5): error TS2724: '"react-router"' has no exported member named 'RouterChildContext'. Did you mean 'RouterContext'?
+node_modules/@types/react-router-dom/index.d.ts(39,5): error TS2305: Module '"react-router"' has no exported member 'useHistory'.
+node_modules/@types/react-router-dom/index.d.ts(42,5): error TS2724: '"react-router"' has no exported member named 'useRouteMatch'. Did you mean 'RouteMatch'?
+node_modules/react-router/dist/development/index.d.ts(4,8): error TS1259: Module '"C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/node_modules/@types/react/index"' can only be default-imported using the 'esModuleInterop' flag
+node_modules/react-router/dist/development/instrumentation-DvHY1sgY.d.ts(408,5): error TS18028: Private identifiers are only available when targeting ECMAScript 2015 and higher.
+src/lib/supabase.ts(3,22): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', or 'nodenext'.
+src/lib/supabase.ts(3,34): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/lib/supabase.ts(4,22): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', 'node20', or 'nodenext'.
+src/lib/supabase.ts(4,34): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/pages/admin/dashboard/Dashboard.tsx(18,28): error TS6142: Module './StatsCards' was resolved to 'C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/pages/admin/dashboard/StatsCards.tsx', but '--jsx' is not set.
+src/pages/admin/dashboard/Dashboard.tsx(19,37): error TS6142: Module './FinancialStatsCards' was resolved to 'C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/pages/admin/dashboard/FinancialStatsCards.tsx', but '--jsx' is not set.
+src/pages/admin/dashboard/Dashboard.tsx(20,25): error TS6142: Module './Filters' was resolved to 'C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/pages/admin/dashboard/Filters.tsx', but '--jsx' is not set.
+src/pages/admin/dashboard/Dashboard.tsx(21,35): error TS6142: Module './InscriptionsTable' was resolved to 'C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/pages/admin/dashboard/InscriptionsTable.tsx', but '--jsx' is not set.
+src/pages/admin/dashboard/Dashboard.tsx(22,41): error TS6142: Module './InscriptionDetailsModal' was resolved to 'C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/pages/admin/dashboard/InscriptionDetailsModal.tsx', but '--jsx' is not set.
+src/pages/admin/dashboard/Dashboard.tsx(23,38): error TS6142: Module './InscriptionEditModal' was resolved to 'C:/Users/Administrator/Desktop/Proyectos/AFA/afa-web/src/pages/admin/dashboard/InscriptionEditModal.tsx', but '--jsx' is not set.
+src/pages/admin/dashboard/Dashboard.tsx(67,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(69,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(70,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(71,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(72,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(75,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(76,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(81,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(82,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(85,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(90,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(91,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(94,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(98,26): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(104,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(105,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(108,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(109,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(120,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(131,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Dashboard.tsx(136,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(28,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(29,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(30,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(31,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(32,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(42,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(47,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(51,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(56,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(57,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(58,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(59,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(60,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(61,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(62,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(63,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(64,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(65,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(68,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(73,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(74,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(75,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/Filters.tsx(76,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(48,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(50,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(51,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(52,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(54,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(55,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(56,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/FinancialStatsCards.tsx(57,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(21,23): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(24,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(25,7): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(26,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(27,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(28,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(29,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(30,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(31,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(32,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(33,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(36,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(38,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(39,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(40,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(41,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(43,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(51,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(59,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(68,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(69,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(70,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(72,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(76,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(82,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(83,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(84,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(86,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(88,19): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(90,19): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(93,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(94,17): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(95,19): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(100,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(102,19): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(107,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(109,19): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(114,21): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(121,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/InscriptionsTable.tsx(122,15): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/StatsCards.tsx(60,5): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/StatsCards.tsx(62,9): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/StatsCards.tsx(63,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/StatsCards.tsx(64,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/StatsCards.tsx(66,11): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/StatsCards.tsx(67,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.
+src/pages/admin/dashboard/StatsCards.tsx(68,13): error TS17004: Cannot use JSX unless the '--jsx' flag is provided.

@@ -6,20 +6,12 @@ import { ca } from 'date-fns/locale';
 import { OrderEditModal } from '../../../features/shop/components/OrderEditModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface Order {
-    id: string;
-    created_at: string;
-    total_amount: number;
-    customer_name: string;
-    payment_status: 'paid' | 'pending';
-    delivery_status: 'pending' | 'delivered' | 'not_picked_up';
-    items?: any[];
-}
+import type { ShopOrder } from '../../../features/shop/types/shop';
 
 export function OrdersPage() {
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [orders, setOrders] = useState<ShopOrder[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<ShopOrder | null>(null);
     const [view, setView] = useState<'active' | 'archived'>('active');
     const [searchTerm, setSearchTerm] = useState('');
     const [isCreating, setIsCreating] = useState(false);
@@ -27,7 +19,7 @@ export function OrdersPage() {
 
     const fetchOrders = async () => {
         try {
-            const data = await ShopService.getOrders() as any[];
+            const data = await ShopService.getOrders();
             setOrders(data);
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -51,7 +43,7 @@ export function OrdersPage() {
             fetchOrders();
             // Automatically open editor for the new order to add items
             setSelectedOrder({ ...newOrder, items: [] });
-        } catch (err) {
+        } catch {
             alert("Error creant la comanda");
         }
     };
@@ -66,7 +58,7 @@ export function OrdersPage() {
         }
     };
 
-    const handleDeliveryUpdate = async (id: string, status: Order['delivery_status']) => {
+    const handleDeliveryUpdate = async (id: string, status: ShopOrder['delivery_status']) => {
         try {
             await ShopService.updateDeliveryStatus(id, status);
             fetchOrders();
@@ -230,7 +222,7 @@ export function OrdersPage() {
             {/* Orders List */}
             <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
-                    {filteredOrders.map((order: any) => (
+                    {filteredOrders.map((order) => (
                         <motion.div
                             key={order.id}
                             layout
@@ -260,7 +252,7 @@ export function OrdersPage() {
                                     </div>
 
                                     <div className="flex flex-wrap gap-2">
-                                        {order.items?.map((item: any) => (
+                                        {order.items?.map((item) => (
                                             <div key={item.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800 text-[11px]">
                                                 <span className="font-black text-primary">{item.quantity}x</span>
                                                 <span className="text-slate-600 dark:text-slate-300 font-bold">{item.variant?.product?.name}</span>
