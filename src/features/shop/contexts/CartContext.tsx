@@ -49,11 +49,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sessionStorage.setItem('afa_shop_is_member', String(isMember));
     }, [isMember]);
 
-    // Update isMember when user logs in/out if they haven't manually changed it?
-    // Actually, usually it's better to respect their choice if they manually toggled it.
-    useEffect(() => {
+    // Adjust state during render when user changes (Syncing isMember with Auth)
+    const [prevUserId, setPrevUserId] = useState(user?.id);
+    if (user?.id !== prevUserId) {
+        setPrevUserId(user?.id);
         if (user) setIsMember(true);
-    }, [user]);
+    }
 
     const addItem = (product: ShopProduct, variant: ShopVariant, quantity: number) => {
         setItems(prev => {

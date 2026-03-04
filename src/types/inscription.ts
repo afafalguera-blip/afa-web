@@ -33,8 +33,6 @@ export interface Inscription {
   form_language?: string;
 }
 
-// Payload for creating via public form
-export type CreateInscriptionPayload = Omit<Inscription, 'id' | 'created_at'>;
 
 // Hook and dashboard specific legacy types
 export interface InscriptionRaw {
