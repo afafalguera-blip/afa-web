@@ -3,7 +3,7 @@ import { Landmark, Users, CheckCircle, Clock, Vote, Edit, ArrowRight } from 'luc
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { ProjectDetailModal } from './ProjectDetailModal';
 import { LazyImage } from '../common/LazyImage';
@@ -61,44 +61,44 @@ export const FeaturedProjects = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
-    fetchProjects();
-  }, [i18n.language]);
+    const fetchProjects = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .order('display_order', { ascending: true })
+          .limit(3);
 
-  const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('display_order', { ascending: true })
-        .limit(3);
+        if (error) throw error;
 
-      if (error) throw error;
+        if (data && data.length > 0) {
+          setProjects(data.map(p => {
+            const lang = i18n.language;
+            const translation = p.translations?.[lang];
 
-      if (data && data.length > 0) {
-        setProjects(data.map(p => {
-          const lang = i18n.language;
-          const translation = p.translations?.[lang];
-
-          return {
-            id: p.id,
-            title: translation?.title || p.title,
-            description: translation?.description || p.description,
-            details: translation?.details || '',
-            impact: translation?.impact || '',
-            participants: translation?.participants || '',
-            imageAfter: p.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop',
-            status: p.status,
-            budget: 0
-          };
-        }));
-      } else {
+            return {
+              id: p.id,
+              title: translation?.title || p.title,
+              description: translation?.description || p.description,
+              details: translation?.details || '',
+              impact: translation?.impact || '',
+              participants: translation?.participants || '',
+              imageAfter: p.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop',
+              status: p.status,
+              budget: 0
+            };
+          }));
+        } else {
+          setProjects([]);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
         setProjects([]);
       }
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      setProjects([]);
-    }
-  };
+    };
+
+    fetchProjects();
+  }, [i18n.language]);
 
   if (projects.length === 0) return null;
 

@@ -6,29 +6,7 @@ import { RefreshCw, Search, Edit, Trash2, FileSpreadsheet } from 'lucide-react';
 import { EditInscriptionModal } from '../../../components/admin/EditInscriptionModal';
 import { ExportOptionsModal } from '../../../components/admin/ExportOptionsModal';
 
-// Interface matching the Supabase table 'inscripcions'
-interface Inscription {
-  id: string;
-  created_at: string;
-  parent_name: string;
-  parent_dni: string;
-  parent_phone_1: string;
-  parent_email_1: string;
-  parent_phone_2?: string;
-  
-  status: string;
-  
-  // students is a JSONB array. 
-  // Each item should have { name, surname, course, activities: [] }
-  students: any[];
-
-  // Extras
-  afa_member: boolean;
-  image_auth_consent?: string;
-  can_leave_alone?: boolean;
-  authorized_pickup?: string;
-  health_info?: string;
-}
+import type { Inscription, InscriptionStudent } from '../../../types/inscription';
 
 export default function InscriptionsPage() {
   const { t } = useTranslation();
@@ -36,7 +14,7 @@ export default function InscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  
+
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingInscription, setEditingInscription] = useState<Inscription | null>(null);
@@ -61,7 +39,7 @@ export default function InscriptionsPage() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm(t('admin.inscriptions.delete_confirm'))) return;
-    
+
     try {
       // @ts-ignore - ID type mismatch handling
       await AdminService.deleteInscription(id);
@@ -81,7 +59,7 @@ export default function InscriptionsPage() {
     try {
       // @ts-ignore
       await AdminService.updateInscription(id, updates);
-      
+
       // Update local state without refetching if possible, but deep nested updates suggest refetch is safer or careful merge
       setInscriptions(prev => prev.map(ins => ins.id === id ? { ...ins, ...updates } as Inscription : ins));
       alert(t('admin.inscriptions.update_success'));
@@ -92,13 +70,13 @@ export default function InscriptionsPage() {
     }
   };
 
-  const filteredInscriptions = inscriptions.filter(ins => {
+  const filteredInscriptions = inscriptions.filter((ins: Inscription) => {
     const searchString = searchTerm.toLowerCase();
-    const studentsStr = Array.isArray(ins.students) 
-        ? JSON.stringify(ins.students).toLowerCase() 
-        : '';
+    const studentsStr = Array.isArray(ins.students)
+      ? JSON.stringify(ins.students).toLowerCase()
+      : '';
 
-    const matchesSearch = 
+    const matchesSearch =
       ins.parent_name?.toLowerCase().includes(searchString) ||
       ins.parent_dni?.toLowerCase().includes(searchString) ||
       ins.parent_email_1?.toLowerCase().includes(searchString) ||
@@ -117,20 +95,20 @@ export default function InscriptionsPage() {
           <p className="text-sm text-gray-500">{t('admin.inscriptions.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-            <button 
-                onClick={fetchInscriptions}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-white hover:bg-slate-50 h-9 px-4 py-2 text-slate-700"
-                title={t('admin.inscriptions.reload_tooltip')}
-            >
-                <RefreshCw className="h-4 w-4" />
-            </button>
-            
-            <button 
-                onClick={() => setIsExportModalOpen(true)}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 h-9 px-4 py-2 gap-2 shadow-sm"
-            >
-                <FileSpreadsheet className="h-4 w-4" /> {t('admin.inscriptions.export_button')}
-            </button>
+          <button
+            onClick={fetchInscriptions}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-white hover:bg-slate-50 h-9 px-4 py-2 text-slate-700"
+            title={t('admin.inscriptions.reload_tooltip')}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
+
+          <button
+            onClick={() => setIsExportModalOpen(true)}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 h-9 px-4 py-2 gap-2 shadow-sm"
+          >
+            <FileSpreadsheet className="h-4 w-4" /> {t('admin.inscriptions.export_button')}
+          </button>
         </div>
       </div>
 
@@ -146,9 +124,9 @@ export default function InscriptionsPage() {
           />
         </div>
         <select
-            className="flex h-9 w-[180px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+          className="flex h-9 w-[180px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
         >
           <option value="all">{t('admin.inscriptions.status_all')}</option>
           <option value="alta">{t('admin.inscriptions.status.alta')}</option>
@@ -159,106 +137,106 @@ export default function InscriptionsPage() {
 
       <div className="rounded-md border bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 border-b text-gray-700 font-medium">
-                <tr>
+              <tr>
                 <th className="px-4 py-3">{t('admin.inscriptions.table.parent')}</th>
                 <th className="px-4 py-3">{t('admin.inscriptions.table.contact')}</th>
                 <th className="px-4 py-3">{t('admin.inscriptions.table.students')}</th>
                 <th className="px-4 py-3">{t('admin.inscriptions.table.status')}</th>
                 <th className="px-4 py-3">{t('admin.inscriptions.table.date')}</th>
                 <th className="px-4 py-3 text-right">{t('admin.inscriptions.table.actions')}</th>
-                </tr>
+              </tr>
             </thead>
             <tbody className="divide-y">
-                {loading ? (
-                    <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('admin.inscriptions.table.loading')}</td>
-                    </tr>
-                ) : filteredInscriptions.length === 0 ? (
-                    <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('admin.inscriptions.table.no_results')}</td>
-                    </tr>
-                ) : (
-                    filteredInscriptions.map((inscription) => (
-                    <tr key={inscription.id} className="hover:bg-gray-50/50">
-                        <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900">{inscription.parent_name}</div>
-                        <div className="text-gray-500 text-xs">{inscription.parent_dni}</div>
-                        {inscription.afa_member && (
-                            <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-blue-100 text-blue-800 mt-1">
-                                {t('admin.inscriptions.member_badge')}
-                            </span>
-                        )}
-                        </td>
-                        <td className="px-4 py-3 text-gray-600">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-xs">{inscription.parent_email_1}</span>
-                            <span className="text-xs">{inscription.parent_phone_1}</span>
-                        </div>
-                        </td>
-                        <td className="px-4 py-3">
-                        <div className="space-y-2">
-                            {Array.isArray(inscription.students) && inscription.students.map((student: any, idx: number) => (
-                            <div key={idx} className={`p-2 rounded border ${student.suspended ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
-                                <p className="font-medium text-xs text-slate-700 flex justify-between">
-                                  <span>{student.name} {student.surname} <span className="text-slate-400">({student.course})</span></span>
-                                  {student.suspended && <span className="text-[10px] text-red-600 font-bold uppercase">{t('admin.inscriptions.suspended_badge')}</span>}
-                                </p>
-                                <div className="mt-1 flex flex-wrap gap-1">
-                                {student.activities && student.activities.map((act: string, k: number) => (
-                                    <span key={k} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-white border border-slate-200 text-slate-600">
-                                    {act}
-                                    </span>
-                                ))}
-                                </div>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('admin.inscriptions.table.loading')}</td>
+                </tr>
+              ) : filteredInscriptions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('admin.inscriptions.table.no_results')}</td>
+                </tr>
+              ) : (
+                filteredInscriptions.map((inscription) => (
+                  <tr key={inscription.id} className="hover:bg-gray-50/50">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{inscription.parent_name}</div>
+                      <div className="text-gray-500 text-xs">{inscription.parent_dni}</div>
+                      {inscription.afa_member && (
+                        <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-blue-100 text-blue-800 mt-1">
+                          {t('admin.inscriptions.member_badge')}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs">{inscription.parent_email_1}</span>
+                        <span className="text-xs">{inscription.parent_phone_1}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-2">
+                        {Array.isArray(inscription.students) && inscription.students.map((student: InscriptionStudent, idx: number) => (
+                          <div key={idx} className={`p-2 rounded border ${student.suspended ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
+                            <p className="font-medium text-xs text-slate-700 flex justify-between">
+                              <span>{student.name} {student.surname} <span className="text-slate-400">({student.course})</span></span>
+                              {student.suspended && <span className="text-[10px] text-red-600 font-bold uppercase">{t('admin.inscriptions.suspended_badge')}</span>}
+                            </p>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {student.activities && student.activities.map((act: string, k: number) => (
+                                <span key={k} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-white border border-slate-200 text-slate-600">
+                                  {act}
+                                </span>
+                              ))}
                             </div>
-                            ))}
-                        </div>
-                        </td>
-                        <td className="px-4 py-3">
-                            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent 
-                                ${inscription.status === 'alta' ? 'bg-green-100 text-green-800' : 
-                                inscription.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                'bg-red-100 text-red-800'}`}>
-                                {inscription.status === 'alta' ? t('admin.inscriptions.status.alta') : 
-                                inscription.status === 'pending' ? t('admin.inscriptions.status.pending') : 
-                                inscription.status === 'baja' ? t('admin.inscriptions.status.baja') : inscription.status}
-                            </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
-                        {new Date(inscription.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                           <div className="flex justify-end gap-2">
-                               <button 
-                                  onClick={() => handleEditClick(inscription)}
-                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                                  title="Editar"
-                               >
-                                   <Edit className="w-4 h-4" />
-                               </button>
-                               <button 
-                                  onClick={() => handleDelete(inscription.id)}
-                                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                  title="Eliminar"
-                               >
-                                   <Trash2 className="w-4 h-4" />
-                               </button>
-                           </div>
-                        </td>
-                    </tr>
-                    ))
-                )}
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent 
+                                ${inscription.status === 'alta' ? 'bg-green-100 text-green-800' :
+                          inscription.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'}`}>
+                        {inscription.status === 'alta' ? t('admin.inscriptions.status.alta') :
+                          inscription.status === 'pending' ? t('admin.inscriptions.status.pending') :
+                            inscription.status === 'baja' ? t('admin.inscriptions.status.baja') : inscription.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
+                      {new Date(inscription.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleEditClick(inscription)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                          title="Editar"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(inscription.id)}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
-            </table>
+          </table>
         </div>
       </div>
 
       {editingInscription && (
-        <EditInscriptionModal 
-          inscription={editingInscription} 
-          isOpen={isEditModalOpen} 
+        <EditInscriptionModal
+          inscription={editingInscription}
+          isOpen={isEditModalOpen}
           onClose={() => { setIsEditModalOpen(false); setEditingInscription(null); }}
           onSave={handleSaveEdit}
         />
@@ -269,12 +247,12 @@ export default function InscriptionsPage() {
         onClose={() => setIsExportModalOpen(false)}
         count={filteredInscriptions.length}
         onExport={(format, type) => {
-            if (format === 'excel') {
-                ExportService.exportInscriptionsExcel(filteredInscriptions, type === 'full' ? 'full' : 'compact');
-            } else {
-                ExportService.exportInscriptionsPDF(filteredInscriptions, type === 'full' ? 'full' : 'list');
-            }
-            setIsExportModalOpen(false);
+          if (format === 'excel') {
+            ExportService.exportInscriptionsExcel(filteredInscriptions, type === 'full' ? 'full' : 'basic');
+          } else {
+            ExportService.exportInscriptionsPDF(filteredInscriptions, type === 'full' ? 'full' : 'basic');
+          }
+          setIsExportModalOpen(false);
         }}
       />
     </div>

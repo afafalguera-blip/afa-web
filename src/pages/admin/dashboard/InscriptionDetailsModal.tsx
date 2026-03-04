@@ -139,9 +139,9 @@ export function InscriptionDetailsModal({ inscription, onClose }: InscriptionDet
               <span className="text-slate-500 block mb-1 flex items-center gap-1">
                 <Calendar className="w-3 h-3" /> Data Inscripció
               </span>
-              <span className="font-medium text-slate-700">
-                {formatDate(inscription.created_at)}
-              </span>
+              <p className="font-medium text-slate-900">
+                {inscription.created_at ? formatDate(inscription.created_at) : 'N/A'}
+              </p>
             </div>
             <div>
               <span className="text-slate-500 block mb-1 flex items-center gap-1">

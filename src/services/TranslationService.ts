@@ -25,7 +25,7 @@ export const TranslationService = {
     const translatedResult: TranslationResult = { ...source };
 
     for (const key of Object.keys(source)) {
-      let text = (source as any)[key];
+      const text = (source as any)[key];
       if (!text || typeof text !== 'string' || text.trim() === '') continue;
 
       try {

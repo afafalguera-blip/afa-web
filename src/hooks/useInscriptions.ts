@@ -8,11 +8,11 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AdminService } from '../services/AdminService';
 import { flattenInscriptions, filterInscriptions } from '../logic/inscriptionFilters';
 import { STATUS_FILTER } from '../constants/status';
-import type { InscriptionRaw, InscriptionFlat, InscriptionFilters } from '../types/inscription';
+import type { Inscription, InscriptionFlat, InscriptionFilters, InscriptionStatus } from '../types/inscription';
 
 interface UseInscriptionsReturn {
   /** Raw inscriptions from API */
-  inscriptions: InscriptionRaw[];
+  inscriptions: Inscription[];
   /** Filtered and flattened inscriptions for display */
   filteredData: InscriptionFlat[];
   /** Loading state */
@@ -26,9 +26,9 @@ interface UseInscriptionsReturn {
   /** Reload inscriptions from API */
   reload: () => Promise<void>;
   /** Delete an inscription by ID */
-  handleDelete: (id: number) => Promise<boolean>;
+  handleDelete: (id: string | number) => Promise<boolean>;
   /** Update inscription status */
-  handleStatusChange: (id: number, newStatus: string) => Promise<boolean>;
+  handleStatusChange: (id: string | number, newStatus: InscriptionStatus) => Promise<boolean>;
 }
 
 /**
@@ -37,7 +37,7 @@ interface UseInscriptionsReturn {
  */
 export function useInscriptions(): UseInscriptionsReturn {
   // Data state
-  const [inscriptions, setInscriptions] = useState<InscriptionRaw[]>([]);
+  const [inscriptions, setInscriptions] = useState<Inscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,7 +97,7 @@ export function useInscriptions(): UseInscriptionsReturn {
    * Delete an inscription
    * @returns true if successful, false otherwise
    */
-  const handleDelete = useCallback(async (id: number): Promise<boolean> => {
+  const handleDelete = useCallback(async (id: string | number): Promise<boolean> => {
     if (!window.confirm('Estàs segur que vols eliminar aquesta inscripció?')) {
       return false;
     }
@@ -118,11 +118,11 @@ export function useInscriptions(): UseInscriptionsReturn {
    * @returns true if successful, false otherwise
    */
   const handleStatusChange = useCallback(async (
-    id: number,
-    newStatus: string
+    id: string | number,
+    newStatus: InscriptionStatus
   ): Promise<boolean> => {
     try {
-      await AdminService.updateStatus(id, newStatus as any);
+      await AdminService.updateStatus(id, newStatus);
       await loadInscriptions();
       return true;
     } catch (err) {

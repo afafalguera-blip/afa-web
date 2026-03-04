@@ -1,13 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
-
-interface Profile {
-  id: string;
-  full_name: string;
-  avatar_url?: string;
-  role: 'admin' | 'monitor' | 'familia';
-}
+import { supabase } from '../../lib/supabase';
+import type { Profile } from '../../types/auth';
 
 interface AuthContextType {
   session: Session | null;
@@ -15,7 +9,10 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   isAdmin: boolean;
+  isMonitor: boolean;
+  isFamilia: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,10 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-             fetchProfile(session.user.id);
+          fetchProfile(session.user.id);
         } else {
-             setProfile(null);
-             setLoading(false);
+          setProfile(null);
+          setLoading(false);
         }
       }
     );
@@ -59,19 +56,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select('*')
         .eq('id', userId)
         .single();
-      
+
       if (error) throw error;
-      setProfile(data);
+      setProfile(data as Profile);
     } catch (err) {
       console.error('Error fetching profile:', err);
-      // If profile missing, maybe create default? Or wait for trigger.
     } finally {
       setLoading(false);
     }
   }
 
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id);
+    }
+  };
+
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const value = {
@@ -80,16 +86,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     loading,
     isAdmin: profile?.role === 'admin',
+    isMonitor: profile?.role === 'monitor',
+    isFamilia: profile?.role === 'familia',
     signOut,
+    refreshProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+// useAuth export moved to src/hooks/useAuth.ts
+export { AuthContext };

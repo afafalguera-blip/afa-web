@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { NotificationBell } from '../common/NotificationBell';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { Shield } from 'lucide-react';
 
 export function MobileTopNav() {

@@ -36,7 +36,7 @@ import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
 import CookiesPolicy from './pages/Legal/CookiesPolicy';
 
 
-import { ShopLanding } from './pages/shop/ShopLanding';
+import { ShopLanding } from './features/shop/pages/ShopLanding';
 
 // Placeholder components
 // const Placeholder = ({ title }: { title: string }) => (
@@ -47,8 +47,8 @@ import { ShopLanding } from './pages/shop/ShopLanding';
 // );
 
 // ... imports
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
+import { AuthProvider } from './core/contexts/AuthContext';
+import { CartProvider } from './features/shop/contexts/CartContext';
 import { LoginPage } from './pages/auth/LoginPage';
 
 import { GoogleAnalytics } from './components/common/GoogleAnalytics';

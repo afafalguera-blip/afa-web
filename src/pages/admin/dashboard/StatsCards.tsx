@@ -1,32 +1,59 @@
 import { UserPlus, UserMinus, Users, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { Inscription } from '../../../types/inscription';
 
-export function StatsCards({ inscriptions }: any) {
+interface StatsCardsProps {
+  inscriptions: Inscription[];
+}
+
+export function StatsCards({ inscriptions }: StatsCardsProps) {
   const { t } = useTranslation();
-  // Logic from admin.html to calculate stats
+
+  // Logic to calculate stats
   let totalActive = 0;
   let totalBaja = 0;
   let afaMembers = 0;
 
-  inscriptions.forEach((ins: any) => {
-    let count = 1;
-    if (ins.students && Array.isArray(ins.students)) {
-      count = ins.students.length;
-    }
-    
+  inscriptions.forEach((ins) => {
+    const studentCount = ins.students?.length || 0;
+
     if (ins.status === 'baja') {
-      totalBaja += count;
+      totalBaja += studentCount;
     } else {
-      totalActive += count;
-      if (ins.afa_member) afaMembers += count;
+      totalActive += studentCount;
+      if (ins.afa_member) afaMembers += studentCount;
     }
   });
 
   const cards = [
-    { title: t('admin.dashboard.stats.active'), value: totalActive, icon: UserPlus, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { title: t('admin.dashboard.stats.bajas'), value: totalBaja, icon: UserMinus, color: 'text-amber-600', bg: 'bg-amber-100' },
-    { title: t('admin.dashboard.stats.afa_members'), value: `${afaMembers}/${totalActive > afaMembers ? totalActive - afaMembers : 0}`, icon: Users, color: 'text-green-600', bg: 'bg-green-100' },
-    { title: t('admin.dashboard.stats.popular'), value: '...', icon: Star, color: 'text-purple-600', bg: 'bg-purple-100' },
+    {
+      title: t('admin.dashboard.stats.active'),
+      value: totalActive,
+      icon: UserPlus,
+      color: 'text-blue-600',
+      bg: 'bg-blue-100'
+    },
+    {
+      title: t('admin.dashboard.stats.bajas'),
+      value: totalBaja,
+      icon: UserMinus,
+      color: 'text-amber-600',
+      bg: 'bg-amber-100'
+    },
+    {
+      title: t('admin.dashboard.stats.afa_members'),
+      value: `${afaMembers}/${totalActive}`,
+      icon: Users,
+      color: 'text-green-600',
+      bg: 'bg-green-100'
+    },
+    {
+      title: t('admin.dashboard.stats.popular'),
+      value: '...',
+      icon: Star,
+      color: 'text-purple-600',
+      bg: 'bg-purple-100'
+    },
   ];
 
   return (

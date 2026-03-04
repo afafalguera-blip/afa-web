@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { ShopService } from "../../services/ShopService";
-import type { ShopProduct, ShopVariant } from "../../types/shop";
+import { ShopService } from '../../features/shop/services/ShopService';
+import type { ShopProduct, ShopVariant } from '../../features/shop/types/shop';
 import { useTranslation } from "react-i18next";
 import { X, Save, Loader2, Plus, Trash2, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sortSizes } from "../../utils/productUtils";
+import { ConfigService, type ShopConfig } from "../../services/ConfigService";
 
 interface ProductEditorModalProps {
   isOpen: boolean;
@@ -24,6 +25,15 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
   const [variants, setVariants] = useState<Partial<ShopVariant>[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentLang, setCurrentLang] = useState<'es' | 'ca' | 'en'>('es');
+  const [shopConfig, setShopConfig] = useState<ShopConfig | null>(null);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      const config = await ConfigService.getShopConfig();
+      if (config) setShopConfig(config);
+    };
+    fetchConfig();
+  }, []);
 
   useEffect(() => {
     if (product) {
@@ -188,8 +198,17 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
                   onChange={e => handleChange('category', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                 >
-                  <option value="uniforme">Uniforme</option>
-                  <option value="accessoris">Accessoris</option>
+                  {shopConfig?.categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.translations[currentLang] || cat.translations['ca']}
+                    </option>
+                  ))}
+                  {!shopConfig && (
+                    <>
+                      <option value="uniforme">Uniforme</option>
+                      <option value="accessoris">Accessoris</option>
+                    </>
+                  )}
                 </select>
               </div>
               <div className="space-y-2">

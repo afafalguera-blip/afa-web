@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import type { ShopProduct } from '../../types/shop';
-import { Search, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { supabase } from '../../../lib/supabase';
+import type { ShopProduct } from '../types/shop';
+import { Search, ShoppingBag, ShoppingCart } from 'lucide-react'; // Retaining Search and ShoppingBag as they are used in the original code
 import { useTranslation } from 'react-i18next';
-import { useContentTranslation } from '../../hooks/useContentTranslation';
-import { ProductModal } from '../../components/shop/ProductModal';
-import { CheckoutModal } from '../../components/shop/CheckoutModal';
-import { LazyImage } from '../../components/common/LazyImage';
-import { SEO } from '../../components/common/SEO';
-import { calculateChandalStock } from '../../utils/productUtils';
-import { useCart } from '../../contexts/CartContext';
+import { useContentTranslation } from '../../../hooks/useContentTranslation';
+import { ProductModal } from '../components/ProductModal';
+import { CheckoutModal } from '../components/CheckoutModal';
+import { LazyImage } from '../../../components/common/LazyImage';
+import { SEO } from '../../../components/common/SEO';
+import { calculateChandalStock } from '../../../utils/productUtils';
+import { useCart } from '../contexts/CartContext';
+import { ConfigService, type ShopConfig } from '../../../services/ConfigService';
 
 export function ShopLanding() {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { tContent } = useContentTranslation();
   const { itemCount } = useCart();
   const [products, setProducts] = useState<ShopProduct[]>([]);
@@ -20,18 +21,27 @@ export function ShopLanding() {
   const [category, setCategory] = useState<'all' | 'uniforme' | 'accessoris'>('all');
   const [selectedProduct, setSelectedProduct] = useState<ShopProduct | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [shopConfig, setShopConfig] = useState<ShopConfig | null>(null);
+
+  const currentLang = (i18n.language || 'ca') as 'ca' | 'es' | 'en';
 
   useEffect(() => {
     fetchProducts();
+    fetchConfig();
   }, []);
+
+  async function fetchConfig() {
+    const config = await ConfigService.getShopConfig();
+    if (config) setShopConfig(config);
+  }
 
   async function fetchProducts() {
     try {
       const { data, error } = await supabase
         .from('shop_products')
         .select(`
-          *,
-          variants:shop_variants(*)
+  *,
+  variants: shop_variants(*)
         `);
 
       if (error) throw error;
@@ -88,22 +98,37 @@ export function ShopLanding() {
         <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
           <button
             onClick={() => setCategory('all')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
+            className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
           >
             {t('shop_page.filter_all')}
           </button>
-          <button
-            onClick={() => setCategory('uniforme')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'uniforme' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
-          >
-            {t('shop_page.filter_uniform')}
-          </button>
-          <button
-            onClick={() => setCategory('accessoris')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'accessoris' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'}`}
-          >
-            {t('shop_page.filter_accessories')}
-          </button>
+
+          {shopConfig?.categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setCategory(cat.id as any)}
+              className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
+            >
+              {cat.translations[currentLang] || cat.translations['ca']}
+            </button>
+          ))}
+
+          {!shopConfig && (
+            <>
+              <button
+                onClick={() => setCategory('uniforme')}
+                className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'uniforme' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
+              >
+                {t('shop_page.filter_uniform')}
+              </button>
+              <button
+                onClick={() => setCategory('accessoris')}
+                className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'accessoris' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
+              >
+                {t('shop_page.filter_accessories')}
+              </button>
+            </>
+          )}
         </div>
       </div>
 

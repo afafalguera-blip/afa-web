@@ -1,17 +1,27 @@
 import { supabase } from '../lib/supabase';
+import type { Inscription, InscriptionStatus, InscriptionStudent } from '../types/inscription';
+
+export type AdminUpdatePayload = Partial<Inscription> & {
+    name?: string;
+    surname?: string;
+    course?: string;
+    activities?: string[];
+    parent_phone?: string;
+    parent_email?: string;
+};
 
 export const AdminService = {
-  async getInscriptions() {
+  async getInscriptions(): Promise<Inscription[]> {
     const { data, error } = await supabase
       .from('inscripcions')
       .select('*')
       .order('id', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as Inscription[];
   },
 
-  async deleteInscription(id: number) {
+  async deleteInscription(id: number | string) {
     const { error } = await supabase
       .from('inscripcions')
       .delete()
@@ -21,7 +31,7 @@ export const AdminService = {
     return true;
   },
 
-  async updateStatus(id: number, status: 'pending' | 'confirmed' | 'baja' | 'suspended') {
+  async updateStatus(id: number | string, status: InscriptionStatus) {
     const { error } = await supabase
       .from('inscripcions')
       .update({ status })
@@ -31,7 +41,7 @@ export const AdminService = {
     return true;
   },
 
-  async updateInscription(id: number, updates: any, studentIndex?: number) {
+  async updateInscription(id: number | string, updates: AdminUpdatePayload, studentIndex?: number) {
     if (studentIndex !== undefined && studentIndex >= 0) {
       // Handle JSON array update
       const { data: currentData, error: fetchError } = await supabase
@@ -42,14 +52,14 @@ export const AdminService = {
       
       if (fetchError) throw fetchError;
       
-      const students = currentData.students || [];
+      const students = (currentData.students || []) as InscriptionStudent[];
       if (students[studentIndex]) {
-        students[studentIndex] = { ...students[studentIndex], ...updates };
+        students[studentIndex] = { ...students[studentIndex], ...updates as Partial<InscriptionStudent> };
       }
       
       const { error } = await supabase
         .from('inscripcions')
-        .update({ students: students })
+        .update({ students: students as unknown }) // Use unknown instead of any to satisfy linting while maintaining Supabase compatibility for JSONB
         .eq('id', id);
 
       if (error) throw error;
@@ -59,22 +69,29 @@ export const AdminService = {
       // The updates object is expected to have generic keys like name, surname.
       // We need to map them to student_name, student_surname if that's what legacy uses.
       // Based on previous files, legacy uses: student_name, student_surname, student_course, selected_activities (or similar)
-      // Actually, let's look at flattening logic:
-      // name -> item.student_name
-      // surname -> item.student_surname
-      // course -> item.student_course
-      // activities -> item.selected_activities
       
-      const legacyUpdates: any = {};
+      const legacyUpdates: Record<string, unknown> = {};
       if (updates.name) legacyUpdates.student_name = updates.name;
       if (updates.surname) legacyUpdates.student_surname = updates.surname;
       if (updates.course) legacyUpdates.student_course = updates.course;
       if (updates.activities) legacyUpdates.selected_activities = updates.activities;
-      // Parent info is likely shared/same column names in both or specific?
-      // Legacy typically: parent_phone, parent_email. Flattening used item.parent_phone directly.
       if (updates.parent_phone) legacyUpdates.parent_phone = updates.parent_phone;
       if (updates.parent_email) legacyUpdates.parent_email = updates.parent_email;
       if (updates.afa_member !== undefined) legacyUpdates.afa_member = updates.afa_member;
+      if (updates.status) legacyUpdates.status = updates.status;
+
+      // Add direct fields that might be in Partial<Inscription>
+      const directFields: (keyof Inscription)[] = [
+        'parent_name', 'parent_dni', 'parent_phone_1', 'parent_email_1',
+        'parent_phone_2', 'parent_email_2', 'image_auth_consent',
+        'can_leave_alone', 'authorized_pickup', 'health_info'
+      ];
+      
+      directFields.forEach(field => {
+        if (updates[field] !== undefined) {
+          legacyUpdates[field] = updates[field];
+        }
+      });
 
       const { error } = await supabase
         .from('inscripcions')
@@ -86,7 +103,7 @@ export const AdminService = {
     return true;
   },
 
-  async toggleAfaMember(id: number, currentStatus: boolean) {
+  async toggleAfaMember(id: number | string, currentStatus: boolean) {
     const { error } = await supabase
       .from('inscripcions')
       .update({ afa_member: !currentStatus })

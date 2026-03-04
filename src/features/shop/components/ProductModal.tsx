@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, ShoppingCart } from 'lucide-react';
-import type { ShopProduct } from '../../types/shop';
-import { useAuth } from '../../contexts/AuthContext';
-import { useCart } from '../../contexts/CartContext';
+import type { ShopProduct } from '../types/shop';
+import { useAuth } from '../../../hooks/useAuth';
+import { useCart } from '../contexts/CartContext';
 
 interface ProductModalProps {
   product: ShopProduct;

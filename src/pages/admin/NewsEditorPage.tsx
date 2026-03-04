@@ -43,47 +43,47 @@ export default function NewsEditorPage() {
     });
 
     useEffect(() => {
+        const fetchArticle = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('news')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+                if (data) {
+                    setFormData({
+                        title: data.title,
+                        slug: data.slug || '',
+                        content: data.content || '',
+                        excerpt: data.excerpt || '',
+                        image_url: data.image_url || '',
+                        news_url: data.news_url || '',
+                        sources: data.sources || '',
+                        published: data.published,
+                        event_date: data.event_date ? new Date(data.event_date).toISOString().slice(0, 16) : '',
+                        translations: {
+                            ca: { title: '', excerpt: '', content: '' },
+                            es: { title: data.title, excerpt: data.excerpt || '', content: data.content || '' },
+                            en: { title: '', excerpt: '', content: '' },
+                            ...(data.translations || {})
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching article:', error);
+                alert('Error cargando la noticia');
+                navigate('/admin/news');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (id && id !== 'new') {
             fetchArticle();
         }
-    }, [id]);
-
-    const fetchArticle = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('news')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (error) throw error;
-            if (data) {
-                setFormData({
-                    title: data.title,
-                    slug: data.slug || '',
-                    content: data.content || '',
-                    excerpt: data.excerpt || '',
-                    image_url: data.image_url || '',
-                    news_url: data.news_url || '',
-                    sources: data.sources || '',
-                    published: data.published,
-                    event_date: data.event_date ? new Date(data.event_date).toISOString().slice(0, 16) : '',
-                    translations: {
-                        ca: { title: '', excerpt: '', content: '' },
-                        es: { title: data.title, excerpt: data.excerpt || '', content: data.content || '' },
-                        en: { title: '', excerpt: '', content: '' },
-                        ...(data.translations || {})
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Error fetching article:', error);
-            alert('Error cargando la noticia');
-            navigate('/admin/news');
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [id, navigate]);
 
     const generateSlug = (text: string) => {
         return text

@@ -1,12 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ShopProduct, ShopVariant } from '../types/shop';
-
-export interface CartItem {
-    id: string; // Internal cart ID
-    variant: ShopVariant;
-    product: ShopProduct;
-    quantity: number;
-}
+import type { ShopProduct, ShopVariant, CartItem } from '../types/shop';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface CartContextType {
     items: CartItem[];
@@ -20,11 +15,16 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { user } = useAuth();
     const [items, setItems] = useState<CartItem[]>(() => {
         const savedCart = sessionStorage.getItem('afa_shop_cart');
         if (savedCart) {
             try {
-                return JSON.parse(savedCart);
+                const parsed = JSON.parse(savedCart);
+                // Basic validation: ensure it's an array and has required fields
+                if (Array.isArray(parsed)) {
+                    return parsed.filter(item => item.id && item.variant && item.product);
+                }
             } catch (e) {
                 console.error('Error loading cart:', e);
             }
@@ -58,7 +58,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setItems([]);
     };
 
-    const total = items.reduce((acc, item) => acc + (Number(item.variant.price_member) * item.quantity), 0);
+    // Dynamic price calculation based on user membership
+    const total = items.reduce((acc, item) => {
+        const price = user ? Number(item.variant.price_member) : Number(item.variant.price_non_member);
+        return acc + (price * item.quantity);
+    }, 0);
+
     const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
     return (

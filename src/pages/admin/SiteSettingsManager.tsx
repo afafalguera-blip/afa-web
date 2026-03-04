@@ -2,24 +2,22 @@ import { useEffect, useState } from "react";
 import { ConfigService, type ContactConfig, type SocialConfig, type AboutConfig, type LegalConfig, type ShopConfig } from "../../services/ConfigService";
 import {
     Save,
-    Mail,
-    Phone,
-    MapPin,
-    Clock,
-    Instagram,
-    Twitter,
-    Facebook,
-    Info,
-    AlertCircle,
-    CheckCircle2,
     Settings,
     HelpCircle,
-    X,
+    AlertCircle,
+    CheckCircle2,
+    Mail,
+    Instagram,
+    Info,
     FileLock2,
     Cookie,
-    Globe,
     ShoppingBag
 } from "lucide-react";
+import { ContactSettings } from "./settings/ContactSettings";
+import { SocialSettings } from "./settings/SocialSettings";
+import { AboutSettings } from "./settings/AboutSettings";
+import { LegalSettings } from "./settings/LegalSettings";
+import { ShopSettings } from "./settings/ShopSettings";
 
 type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop';
 type LangType = 'ca' | 'es' | 'en';
@@ -62,12 +60,12 @@ export default function SiteSettingsManager() {
             if (aboutData) {
                 // Ensure translations exists for the About section
                 if (!aboutData.translations) {
-                    const oldAbout = aboutData as any;
+                    const legacy = aboutData as unknown as { text?: string; functions?: string[] };
                     setAbout({
                         translations: {
-                            ca: { text: oldAbout.text || '', functions: oldAbout.functions || [] },
-                            es: { text: oldAbout.text || '', functions: oldAbout.functions || [] },
-                            en: { text: oldAbout.text || '', functions: oldAbout.functions || [] }
+                            ca: { text: legacy.text || '', functions: legacy.functions || [] },
+                            es: { text: legacy.text || '', functions: legacy.functions || [] },
+                            en: { text: legacy.text || '', functions: legacy.functions || [] }
                         }
                     });
                 } else {
@@ -116,35 +114,6 @@ export default function SiteSettingsManager() {
         } finally {
             setSaving(false);
         }
-    };
-
-    const handleAboutFunctionChange = (index: number, value: string) => {
-        if (!about || !about.translations?.[activeLang]) return;
-        const newTranslations = { ...about.translations };
-        const langData = { ...newTranslations[activeLang] };
-        const newFunctions = [...langData.functions];
-        newFunctions[index] = value;
-        langData.functions = newFunctions;
-        newTranslations[activeLang] = langData;
-        setAbout({ ...about, translations: newTranslations });
-    };
-
-    const addAboutFunction = () => {
-        if (!about || !about.translations?.[activeLang]) return;
-        const newTranslations = { ...about.translations };
-        const langData = { ...newTranslations[activeLang] };
-        langData.functions = [...langData.functions, ""];
-        newTranslations[activeLang] = langData;
-        setAbout({ ...about, translations: newTranslations });
-    };
-
-    const removeAboutFunction = (index: number) => {
-        if (!about || !about.translations?.[activeLang]) return;
-        const newTranslations = { ...about.translations };
-        const langData = { ...newTranslations[activeLang] };
-        langData.functions = langData.functions.filter((_, i) => i !== index);
-        newTranslations[activeLang] = langData;
-        setAbout({ ...about, translations: newTranslations });
     };
 
     if (loading) {
@@ -228,322 +197,49 @@ export default function SiteSettingsManager() {
 
             <form onSubmit={handleSave} className="space-y-6">
                 {activeTab === 'contact' && contact && (
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6 border-b border-slate-50 dark:border-slate-700 pb-4">
-                            Dades de Contacte Principal
-                        </h3>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Email Oficial</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                    <input
-                                        type="email"
-                                        value={contact.email}
-                                        onChange={(e) => setContact({ ...contact, email: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Telèfon (Opcional)</label>
-                                <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                    <input
-                                        type="text"
-                                        value={contact.phone}
-                                        onChange={(e) => setContact({ ...contact, phone: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                        placeholder="Ex: 933 00 00 00"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Direcció Física</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                    <input
-                                        type="text"
-                                        value={contact.address}
-                                        onChange={(e) => setContact({ ...contact, address: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Horari d'Atenció</label>
-                                <div className="relative">
-                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                    <input
-                                        type="text"
-                                        value={contact.schedule}
-                                        onChange={(e) => setContact({ ...contact, schedule: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Informació adicional horari / localització</label>
-                                <textarea
-                                    value={contact.schedule_info}
-                                    onChange={(e) => setContact({ ...contact, schedule_info: e.target.value })}
-                                    rows={2}
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    <ContactSettings contact={contact} setContact={setContact} />
                 )}
 
                 {activeTab === 'social' && social && (
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6 border-b border-slate-50 dark:border-slate-700 pb-4">
-                            Xarxes Socials
-                        </h3>
-
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Instagram</label>
-                                <div className="relative">
-                                    <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-500" size={18} />
-                                    <input
-                                        type="url"
-                                        value={social.instagram}
-                                        onChange={(e) => setSocial({ ...social, instagram: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                        placeholder="https://instagram.com/..."
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Twitter / X (Opcional)</label>
-                                <div className="relative">
-                                    <Twitter className="absolute left-4 top-1/2 -translate-y-1/2 text-sky-500" size={18} />
-                                    <input
-                                        type="url"
-                                        value={social.twitter}
-                                        onChange={(e) => setSocial({ ...social, twitter: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                        placeholder="https://twitter.com/..."
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Facebook (Opcional)</label>
-                                <div className="relative">
-                                    <Facebook className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-600" size={18} />
-                                    <input
-                                        type="url"
-                                        value={social.facebook}
-                                        onChange={(e) => setSocial({ ...social, facebook: e.target.value })}
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
-                                        placeholder="https://facebook.com/..."
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <SocialSettings social={social} setSocial={setSocial} />
                 )}
 
                 {activeTab === 'about' && about && (
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-50 dark:border-slate-700 pb-4 mb-6">
-                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                                Informació Corporativa (Sobre l'AFA)
-                            </h3>
-
-                            {/* Language Switcher for About */}
-                            <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
-                                {(['ca', 'es', 'en'] as LangType[]).map((lang) => (
-                                    <button
-                                        key={lang}
-                                        type="button"
-                                        onClick={() => setActiveLang(lang)}
-                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
-                                            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-                                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                                            }`}
-                                    >
-                                        {lang.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4">
-                                <Globe size={18} />
-                                <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Descripció Principal (Qui som)</label>
-                                <textarea
-                                    required
-                                    value={about.translations?.[activeLang]?.text || ""}
-                                    onChange={(e) => {
-                                        const newTranslations = { ...about.translations };
-                                        newTranslations[activeLang] = { ...newTranslations[activeLang], text: e.target.value };
-                                        setAbout({ ...about, translations: newTranslations });
-                                    }}
-                                    rows={8}
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed"
-                                    placeholder="Explica la missió i valors de l'AFA..."
-                                />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Funcions de l'AFA (Llista)</label>
-                                    <button
-                                        type="button"
-                                        onClick={addAboutFunction}
-                                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-                                    >
-                                        + Afegir funció
-                                    </button>
-                                </div>
-
-                                <div className="space-y-3">
-                                    {(about.translations?.[activeLang]?.functions || []).map((func, index) => (
-                                        <div key={index} className="flex gap-2">
-                                            <div className="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-lg text-xs font-bold shrink-0 mt-2">
-                                                {index + 1}
-                                            </div>
-                                            <input
-                                                type="text"
-                                                value={func}
-                                                onChange={(e) => handleAboutFunctionChange(index, e.target.value)}
-                                                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm"
-                                                placeholder="Ex: Representar les famílies davant l'escola"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => removeAboutFunction(index)}
-                                                className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                                            >
-                                                <X size={18} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                    {(about.translations?.[activeLang]?.functions || []).length === 0 && (
-                                        <p className="text-xs text-slate-400 italic text-center py-4">No hi ha funcions definides.</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <AboutSettings
+                        about={about}
+                        setAbout={setAbout}
+                        activeLang={activeLang}
+                        setActiveLang={setActiveLang}
+                    />
                 )}
 
-                {(activeTab === 'privacy' || activeTab === 'cookies') && (
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-50 dark:border-slate-700 pb-4 mb-6">
-                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                                {activeTab === 'privacy' ? 'Política de Privacitat' : 'Política de Cookies'}
-                            </h3>
+                {activeTab === 'privacy' && privacy && (
+                    <LegalSettings
+                        title="Política de Privacitat"
+                        config={privacy}
+                        setConfig={setPrivacy}
+                        activeLang={activeLang}
+                        setActiveLang={setActiveLang}
+                    />
+                )}
 
-                            {/* Language Switcher */}
-                            <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
-                                {(['ca', 'es', 'en'] as LangType[]).map((lang) => (
-                                    <button
-                                        key={lang}
-                                        type="button"
-                                        onClick={() => setActiveLang(lang)}
-                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
-                                            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-                                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                                            }`}
-                                    >
-                                        {lang.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4">
-                                <Globe size={18} />
-                                <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
-                            </div>
-
-                            <textarea
-                                required
-                                value={activeTab === 'privacy' ? (privacy?.[activeLang] || '') : (cookies?.[activeLang] || '')}
-                                onChange={(e) => {
-                                    if (activeTab === 'privacy' && privacy) {
-                                        setPrivacy({ ...privacy, [activeLang]: e.target.value });
-                                    } else if (activeTab === 'cookies' && cookies) {
-                                        setCookies({ ...cookies, [activeLang]: e.target.value });
-                                    }
-                                }}
-                                rows={15}
-                                className="w-full px-4 py-4 rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed font-mono"
-                                placeholder={`Escriu aquí el text de la política en ${activeLang === 'ca' ? 'català' : activeLang === 'es' ? 'castellà' : 'anglès'}...`}
-                            />
-
-                            <p className="text-[10px] text-slate-400 italic">
-                                * Pots fer servir salts de línia per separar paràgrafs. El contingut s'actualitzarà a la web quan l'usuari canviï d'idioma.
-                            </p>
-                        </div>
-                    </div>
+                {activeTab === 'cookies' && cookies && (
+                    <LegalSettings
+                        title="Política de Cookies"
+                        config={cookies}
+                        setConfig={setCookies}
+                        activeLang={activeLang}
+                        setActiveLang={setActiveLang}
+                    />
                 )}
 
                 {activeTab === 'shop' && shop && (
-                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-50 dark:border-slate-700 pb-4 mb-6">
-                            <h3 className="text-xl font-bold text-slate-800 dark:text-white">
-                                Configuració de la Botiga (Reserves)
-                            </h3>
-
-                            {/* Language Switcher */}
-                            <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
-                                {(['ca', 'es', 'en'] as LangType[]).map((lang) => (
-                                    <button
-                                        key={lang}
-                                        type="button"
-                                        onClick={() => setActiveLang(lang)}
-                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
-                                            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-                                            : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                                            }`}
-                                    >
-                                        {lang.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4">
-                                <Globe size={18} />
-                                <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Missatge de Confirmació de Reserva</label>
-                                <p className="text-xs text-slate-500 mb-2 italic">Aquest missatge apareixerà a la web un cop l'usuari finalitzi la seva reserva.</p>
-                                <textarea
-                                    required
-                                    value={shop.translations?.[activeLang] || ""}
-                                    onChange={(e) => {
-                                        const newTranslations = { ...shop.translations };
-                                        newTranslations[activeLang] = e.target.value;
-                                        setShop({ ...shop, translations: newTranslations });
-                                    }}
-                                    rows={4}
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed"
-                                    placeholder="Ex: Pots passar a recollir la teva comanda..."
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    <ShopSettings
+                        shop={shop}
+                        setShop={setShop}
+                        activeLang={activeLang}
+                        setActiveLang={setActiveLang}
+                    />
                 )}
 
                 {/* Feedback Messages */}

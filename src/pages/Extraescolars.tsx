@@ -1,21 +1,24 @@
 import { useNavigate } from 'react-router-dom';
-import { Search, Calendar as CalendarIcon, User, Loader2, LayoutGrid, Rocket, Edit } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ActivityDetailModal } from '../components/public/ActivityDetailModal';
 import { ActivitiesCalendar } from '../components/public/ActivitiesCalendar';
 import { useContentTranslation } from '../hooks/useContentTranslation';
-import { ActivityService } from '../services/ActivityService';
-import type { Activity } from '../services/ActivityService';
-import { useAuth } from '../contexts/AuthContext';
-import { LazyImage } from '../components/common/LazyImage';
+import { ActivityService, type Activity } from '../services/ActivityService';
+import { useAuth } from '../hooks/useAuth';
 import { SEO } from '../components/common/SEO';
+import { ExtraescolarsHeader } from '../components/public/extraescolars/ExtraescolarsHeader';
+import { ExtraescolarsFilters } from '../components/public/extraescolars/ExtraescolarsFilters';
+import { ActivityCard } from '../components/public/extraescolars/ActivityCard';
+import { EnrollmentBanner } from '../components/public/extraescolars/EnrollmentBanner';
 
 export function Extraescolars() {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
   const { tContent } = useContentTranslation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
@@ -33,43 +36,36 @@ export function Extraescolars() {
       const data = await ActivityService.getAll();
       setActivities(data);
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching activities:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper to translate categories
-  const tCategory = (cat: string) => {
-    if (cat === 'all') return t('common.all');
-    // Try to find translation in admin.editor.categories
-    const key = `admin.editor.categories.${cat.toLowerCase()}`;
-    const translated = t(key as any);
-    // If translation returns the key itself (miss), check common mappings or return capitalized
-    if (translated === key) {
-      // Fallback for known hardcoded categories if they differ from keys
-      if (cat === 'sport' || cat === 'sports') return t('admin.editor.categories.sports');
-      if (cat === 'music') return t('admin.editor.categories.music');
-      if (cat === 'language' || cat === 'languages') return t('admin.editor.categories.languages');
-      if (cat === 'art' || cat === 'artistic') return t('admin.editor.categories.artistic');
-      if (cat === 'education' || cat === 'educational') return t('admin.editor.categories.educational');
+  const categories = useMemo(() =>
+    ['all', ...Array.from(new Set(activities.map(a => a.category)))],
+    [activities]
+  );
 
-      return cat.charAt(0).toUpperCase() + cat.slice(1);
-    }
-    return translated as string;
+  const filteredActivities = useMemo(() => {
+    return activities.filter(activity => {
+      const title = tContent(activity, 'title');
+      const description = tContent(activity, 'description');
+
+      const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [activities, searchQuery, selectedCategory, tContent]);
+
+  const handleActivityClick = (activity: any) => {
+    setSelectedActivity({
+      ...activity,
+      image: activity.image_url
+    });
+    setIsModalOpen(true);
   };
-
-  const categories = ['all', ...Array.from(new Set(activities.map(a => a.category)))];
-
-  const filteredActivities = activities.filter(activity => {
-    const title = tContent(activity, 'title');
-    const description = tContent(activity, 'description');
-
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
 
   if (loading) {
     return (
@@ -86,161 +82,44 @@ export function Extraescolars() {
         description="Explora las actividades extraescolares disponibles en el AFA Escuela Falguera: deportes, música, idiomas y más. Consulta horarios y precios para el curso actual."
       />
 
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            {t('home.extraescolars')}
-          </h1>
-          <p className="text-slate-400 dark:text-slate-500 text-sm lg:text-lg font-medium">
-            {t('home.course_current')}
-          </p>
-        </div>
-
-        <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl shadow-inner inline-flex self-start">
-          <button
-            onClick={() => setViewMode('list')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${viewMode === 'list'
-              ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-          >
-            <LayoutGrid className="w-4 h-4" /> {t('common.list')}
-          </button>
-          <button
-            onClick={() => setViewMode('calendar')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm ${viewMode === 'calendar'
-              ? 'bg-white dark:bg-slate-700 text-primary shadow-md'
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
-          >
-            <CalendarIcon className="w-4 h-4" /> {t('home.calendar')}
-          </button>
-        </div>
-      </div>
+      <ExtraescolarsHeader
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
 
       {viewMode === 'list' && (
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1 hidden md:block">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="text"
-              placeholder={t('common.search')}
-              className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none shadow-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 lg:px-5 lg:py-2 rounded-full text-xs lg:text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat
-                  ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/50'
-                  }`}
-              >
-                {tCategory(cat)}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+        <>
+          <ExtraescolarsFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            categories={categories}
+          />
 
-      {/* Special Offer Banner - Only signup button */}
-      {viewMode === 'list' && (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 md:p-6 border border-slate-100 dark:border-white/5 shadow-sm hover:shadow-md transition-all mb-6 lg:mb-10 group relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
-            <button
-              onClick={() => navigate('/extraescolars/inscripcio')}
-              className="w-full md:w-auto px-12 py-3 bg-primary text-white rounded-xl font-bold text-sm lg:text-base hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap flex items-center justify-center gap-2"
-            >
-              <Rocket className="w-5 h-5" />
-              {t('inscription.activity_modal.signup_btn')}
-            </button>
-          </div>
-        </div>
+          <EnrollmentBanner
+            onSignup={() => navigate('/extraescolars/inscripcio')}
+          />
+        </>
       )}
 
       <div className="transition-all duration-300">
         {viewMode === 'list' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredActivities.map((activity) => (
-              <div
+              <ActivityCard
                 key={activity.id}
-                onClick={() => {
-                  setSelectedActivity({
-                    ...activity,
-                    image: activity.image_url
-                  });
-                  setIsModalOpen(true);
-                }}
-                className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-white/5 group transition-all active:scale-[0.98] hover:shadow-md hover:scale-[1.01] flex flex-col cursor-pointer relative z-10"
-              >
-                {isAdmin && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate('/admin/activities');
-                    }}
-                    className="absolute top-4 right-4 z-30 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 scale-0 group-hover:scale-100 transition-transform flex items-center gap-1 text-xs px-3"
-                  >
-                    <Edit size={14} />
-                    {t('common.edit')}
-                  </button>
-                )}
-                <div className="relative h-44 overflow-hidden shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-                  <LazyImage src={activity.image_url} alt={tContent(activity, 'title')} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <span className={`absolute top-4 right-4 ${activity.color || 'bg-blue-500'}/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider z-20`}>
-                    {tCategory(activity.category)}
-                  </span>
-                </div>
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white leading-tight">{tContent(activity, 'title')}</h3>
-                    <div className="text-right shrink-0 ml-2">
-                      <div className="flex flex-col items-end">
-                        <p className="text-lg font-bold text-primary">
-                          {activity.price_member || activity.price}€
-                          <span className="text-[10px] font-medium text-slate-400 ml-1">({t('inscription.pricing.price_member')})</span>
-                        </p>
-                        {activity.price_non_member && (
-                          <p className="text-sm font-bold text-slate-400 -mt-1">
-                            {activity.price_non_member}€
-                            <span className="text-[9px] font-medium text-slate-400/70 ml-1">({t('inscription.pricing.price_non_member')})</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2 mb-6 flex-1">
-                    <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
-                      <CalendarIcon className="text-primary w-4 h-4 mr-2 shrink-0" />
-                      <span className="truncate">{tContent(activity, 'schedule_summary')}</span>
-                    </div>
-                    <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
-                      <User className="text-primary w-4 h-4 mr-2 shrink-0" />
-                      <span className="truncate">{tContent(activity, 'grades')}</span>
-                    </div>
-                  </div>
-                  <button className="w-full py-3.5 bg-primary hover:bg-opacity-90 text-white font-semibold rounded-2xl shadow-lg shadow-primary/20 transition-all">
-                    {t('home.view_details')}
-                  </button>
-                </div>
-              </div>
+                activity={activity}
+                isAdmin={isAdmin}
+                onEdit={() => navigate('/admin/activities')}
+                onClick={() => handleActivityClick(activity)}
+              />
             ))}
           </div>
         ) : (
           <ActivitiesCalendar
             activities={activities}
-            onActivityClick={(activity) => {
-              setSelectedActivity({
-                ...activity,
-                image: activity.image_url
-              });
-              setIsModalOpen(true);
-            }}
+            onActivityClick={handleActivityClick}
           />
         )}
       </div>

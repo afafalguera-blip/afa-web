@@ -2,7 +2,7 @@ import { Home, LayoutGrid, ShoppingBag, LogOut, MessageSquare, FileText } from '
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../common/NotificationBell';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { Shield } from 'lucide-react';
 
 const NAV_ITEMS = [

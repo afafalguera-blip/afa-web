@@ -12,6 +12,16 @@ export interface ShopStats {
   revenue: number;
 }
 
+interface RawPayment {
+  amount: number | string;
+  status: string;
+}
+
+interface RawOrder {
+  total_amount: number | string;
+  status: string;
+}
+
 export const StatsService = {
   async getFinancialStats(): Promise<FinancialStats> {
     const { data: payments, error } = await supabase
@@ -19,9 +29,10 @@ export const StatsService = {
       .select('amount, status');
 
     if (error) throw error;
-
-    const totalAmount = payments?.reduce((acc, p) => acc + (Number(p.amount) || 0), 0) || 0;
-    const paidAmount = payments?.filter((p: any) => p.status === 'paid').reduce((acc, p) => acc + (Number(p.amount) || 0), 0) || 0;
+    
+    const rawPayments = (payments || []) as RawPayment[];
+    const totalAmount = rawPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0) || 0;
+    const paidAmount = rawPayments.filter(p => p.status === 'paid').reduce((acc, p) => acc + (Number(p.amount) || 0), 0) || 0;
     
     return {
       totalAmount,
@@ -37,9 +48,10 @@ export const StatsService = {
       
     if (error) throw error;
 
-    const totalOrders = orders?.length || 0;
-    const pendingOrders = orders?.filter((o: any) => o.status === 'pending').length || 0;
-    const revenue = orders?.filter((o: any) => o.status !== 'cancelled').reduce((acc, o) => acc + (Number(o.total_amount) || 0), 0) || 0;
+    const rawOrders = (orders || []) as RawOrder[];
+    const totalOrders = rawOrders.length || 0;
+    const pendingOrders = rawOrders.filter(o => o.status === 'pending').length || 0;
+    const revenue = rawOrders.filter(o => o.status !== 'cancelled').reduce((acc, o) => acc + (Number(o.total_amount) || 0), 0) || 0;
 
     return {
       totalOrders,

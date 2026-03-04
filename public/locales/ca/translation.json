@@ -724,7 +724,14 @@
     "read_more_external": "Llegir notícia original",
     "read_more": "Llegir més",
     "loading": "Carregant...",
-    "no_activities": "Sense activitats"
+    "no_activities": "Sense activitats",
+    "share": "Compartir",
+    "quote": "Citeu"
+  },
+  "news_detail": {
+    "not_found": "Notícia no trobada",
+    "back_to_news": "Tornar a Notícies",
+    "read_original": "Llegir notícia original"
   },
   "footer": {
     "all_rights_reserved": "Tots els drets reservats."

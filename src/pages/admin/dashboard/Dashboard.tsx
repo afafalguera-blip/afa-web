@@ -23,7 +23,7 @@ import { InscriptionDetailsModal } from './InscriptionDetailsModal';
 import { InscriptionEditModal } from './InscriptionEditModal';
 
 // Types
-import type { InscriptionFlat } from '../../../types/inscription';
+import type { InscriptionFlat, InscriptionStatus } from '../../../types/inscription';
 
 export function Dashboard() {
   const { t } = useTranslation();
@@ -112,20 +112,14 @@ export function Dashboard() {
           activity={filters.activity}
           setActivity={(value: string) => setFilter('activity', value)}
           status={filters.status}
-          setStatus={(value: string) => setFilter('status', value as 'all' | 'active' | 'baja')}
+          setStatus={(value: string) => setFilter('status', value)}
           search={filters.search}
           setSearch={(value: string) => setFilter('search', value)}
         />
 
         <InscriptionsTable
-          inscriptions={inscriptions}
+          rows={filteredData}
           loading={isLoading}
-          filters={{
-            course: filters.course,
-            activity: filters.activity,
-            status: filters.status,
-            search: filters.search,
-          }}
           onDelete={handleDelete}
           onStatusChange={handleStatusChange}
           onViewDetails={setSelectedInscription}

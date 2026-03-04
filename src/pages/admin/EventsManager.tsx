@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   Calendar,
   Clock,
   MapPin,
@@ -69,15 +69,11 @@ export default function EventsManager() {
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [currentMonth]);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-    
+
     try {
       const { data, error } = await supabase
         .from('events')
@@ -93,7 +89,11 @@ export default function EventsManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMonth]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const handleCreate = (date?: string) => {
     setEditingEvent(null);
@@ -129,7 +129,7 @@ export default function EventsManager() {
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('admin.calendar.delete_confirm'))) return;
-    
+
     try {
       const { error } = await supabase.from('events').delete().eq('id', id);
       if (error) throw error;
@@ -201,19 +201,19 @@ export default function EventsManager() {
     const lastDay = new Date(year, month + 1, 0);
     const startingDay = firstDay.getDay();
     const totalDays = lastDay.getDate();
-    
+
     const days: (number | null)[] = [];
-    
+
     // Add empty cells for days before the first of the month
     for (let i = 0; i < startingDay; i++) {
       days.push(null);
     }
-    
+
     // Add the days of the month
     for (let i = 1; i <= totalDays; i++) {
       days.push(i);
     }
-    
+
     return days;
   };
 
@@ -244,7 +244,7 @@ export default function EventsManager() {
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <button 
+          <button
             onClick={() => handleCreate()}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
           >
@@ -283,17 +283,16 @@ export default function EventsManager() {
           ))}
           {calendarDays.map((day, index) => {
             const dayEvents = day ? getEventsForDay(day) : [];
-            const isToday = day && 
-              new Date().getDate() === day && 
+            const isToday = day &&
+              new Date().getDate() === day &&
               new Date().getMonth() === currentMonth.getMonth() &&
               new Date().getFullYear() === currentMonth.getFullYear();
-            
+
             return (
               <div
                 key={index}
-                className={`min-h-[80px] p-1 border border-slate-100 rounded-lg ${
-                  day ? 'bg-white hover:bg-slate-50 cursor-pointer' : 'bg-slate-50'
-                } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+                className={`min-h-[80px] p-1 border border-slate-100 rounded-lg ${day ? 'bg-white hover:bg-slate-50 cursor-pointer' : 'bg-slate-50'
+                  } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
                 onClick={() => day && handleCreate(`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`)}
               >
                 {day && (
@@ -359,7 +358,7 @@ export default function EventsManager() {
               <div key={event.id} className="p-4 hover:bg-slate-50 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div 
+                    <div
                       className="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
                       style={{ backgroundColor: event.color }}
                     />
@@ -368,10 +367,10 @@ export default function EventsManager() {
                       <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-slate-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5" />
-                          {new Date(event.event_date + 'T00:00:00').toLocaleDateString('es-ES', { 
-                            weekday: 'short', 
-                            day: 'numeric', 
-                            month: 'short' 
+                          {new Date(event.event_date + 'T00:00:00').toLocaleDateString('es-ES', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short'
                           })}
                         </span>
                         {!event.all_day && event.start_time && (
@@ -452,8 +451,8 @@ export default function EventsManager() {
                     value={formData.event_type}
                     onChange={e => {
                       const type = EVENT_TYPES.find(t => t.value === e.target.value);
-                      setFormData(prev => ({ 
-                        ...prev, 
+                      setFormData(prev => ({
+                        ...prev,
                         event_type: e.target.value,
                         color: type?.color || prev.color
                       }));

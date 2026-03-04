@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { SchoolSuppliesBackground } from '../../components/layout/SchoolSuppliesBackground';
 
 export function LoginPage() {
@@ -38,16 +38,19 @@ export function LoginPage() {
                 });
                 if (error) throw error;
                 alert('Revisa el teu correu per confirmar el registre!');
-            } else {
-                const { error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-                if (error) throw error;
-                // Navigation will be handled by useEffect
+                setLoading(false);
+                return;
             }
-        } catch (error: any) {
-            setErrorMsg(error.message || 'Error autenticant');
+
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            if (error) throw error;
+            // Navigation will be handled by useEffect
+        } catch (error: unknown) {
+            const err = error as Error;
+            setErrorMsg(err.message || 'Error autenticant');
         } finally {
             setLoading(false);
         }
@@ -62,8 +65,9 @@ export function LoginPage() {
                 }
             });
             if (error) throw error;
-        } catch (error: any) {
-            setErrorMsg(error.message);
+        } catch (error: unknown) {
+            const err = error as Error;
+            setErrorMsg(err.message);
         }
     };
 

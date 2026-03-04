@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Trash2, Mail, User, Loader2 } from 'lucide-react';
-import { useCart } from '../../contexts/CartContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
-import { ConfigService, type ShopConfig } from '../../services/ConfigService';
+import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../../../hooks/useAuth';
+import { ConfigService, type ShopConfig } from '../../../services/ConfigService';
+import { ShopService } from '../services/ShopService';
 
 interface CheckoutModalProps {
     onClose: () => void;
@@ -47,24 +47,22 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
         setErrorMsg('');
 
         try {
-            const { error: rpcError } = await supabase.rpc('create_shop_complex_order_v1', {
-                p_customer_name: customerName,
-                p_customer_email: customerEmail,
-                p_total_amount: total,
-                p_items: items.map(item => ({
+            await ShopService.createComplexOrder({
+                customerName,
+                customerEmail,
+                totalAmount: total,
+                items: items.map(item => ({
                     variant_id: item.variant.id,
                     quantity: item.quantity,
                     price_at_time: user ? item.variant.price_member : item.variant.price_non_member
                 })),
-                p_user_id: user?.id || null,
-                p_language: currentLang
+                userId: user?.id,
+                language: currentLang
             });
-
-            if (rpcError) throw rpcError;
 
             setSuccess(true);
             clearCart();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Checkout error:', error);
             setErrorMsg('Error al processar la comanda. Torna-ho a provar.');
         } finally {

@@ -3,80 +3,85 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { sortSizes } from '../utils/productUtils';
-
-// Helper to flatten inscription data
-const getFlattenedData = (inscriptions: any[], shouldSort: boolean = false) => {
-  let rows: any[] = [];
-  
-  inscriptions.forEach(ins => {
-    // Handle both legacy flat structure and new nested students array
-    const students = ins.students && Array.isArray(ins.students) ? 
-      ins.students : 
-      [{
-        name: ins.student_name,
-        surname: ins.student_surname,
-        course: ins.student_course,
-        activities: ins.activities || [],
-        suspended: ins.student_suspended
-      }];
-
-    students.forEach((student: any) => {
-      // If student is suspended, we might want to filter or mark them. 
-      // For now we include them but can access student.suspended status.
-      
-      const activities = Array.isArray(student.activities) ? student.activities : [];
-      
-      if (shouldSort && activities.length > 0) {
-        // Create a row per activity for "Listado por Actividad" mode
-        activities.forEach((activity: string) => {
-          rows.push({
-            ...student,
-            single_activity: activity,
-            parent: ins
-          });
-        });
-      } else {
-        // One row per student
-        rows.push({
-          ...student,
-          single_activity: activities.join(', '),
-          parent: ins
-        });
-      }
-    });
-  });
-
-  if (shouldSort) {
-    rows.sort((a, b) => {
-      // 1. Activity
-      const actA = String(a.single_activity || '');
-      const actB = String(b.single_activity || '');
-      if (actA !== actB) return actA.localeCompare(actB);
-      
-      // 2. Course (custom sort logic could be added here)
-      const courseA = String(a.course || '');
-      const courseB = String(b.course || '');
-      if (courseA !== courseB) return courseA.localeCompare(courseB);
-      
-      // 3. Name
-      const nameA = `${a.name} ${a.surname}`;
-      const nameB = `${b.name} ${b.surname}`;
-      return nameA.localeCompare(nameB);
-    });
-  }
-
-  return rows;
-};
+import type { Inscription, InscriptionFlat } from '../types/inscription';
 
 export const ExportService = {
-  exportInscriptionsExcel(data: any[], type: 'compact' | 'full' = 'full', filename: string = 'inscripcions') {
-    // Sort determines if we explode by activity
-    const shouldSort = type === 'compact'; // Usually compact is for lists, but legacy had explicit sort checkbox. Let's assume we want flat rows.
-    const rows = getFlattenedData(data, shouldSort); // Keep simple for Excel unless requested otherwise
+  // Helper to flatten inscription data
+  getFlattenedData(inscriptions: (Inscription | InscriptionFlat)[], fields: 'basic' | 'full') {
+    const rows: any[] = [];
+    const shouldSort = fields === 'basic'; // 'basic' implies compact/list view, which usually needs sorting and exploding by activity
+
+    inscriptions.forEach(ins => {
+      // Handle both legacy flat structure and new nested students array
+      const record = ins as (Inscription & Record<string, any>);
+      const students = record.students && Array.isArray(record.students) ?
+        record.students :
+        [{
+          name: record.student_name,
+          surname: record.student_surname,
+          course: record.student_course,
+          activities: record.selected_activities || [],
+          suspended: record.suspended
+        }];
+
+      students.forEach((student: any) => {
+        // If student is suspended, we might want to filter or mark them.
+        // For now we include them but can access student.suspended status.
+
+        const activities = Array.isArray(student.activities) ? student.activities : [];
+
+        if (shouldSort && activities.length > 0) {
+          // Create a row per activity for "Listado por Actividad" mode
+          activities.forEach((activity: string) => {
+            rows.push({
+              ...student,
+              single_activity: activity,
+              parent: ins
+            });
+          });
+        } else {
+          // One row per student
+          rows.push({
+            ...student,
+            single_activity: activities.join(', '),
+            parent: ins
+          });
+        }
+      });
+    });
+
+    if (shouldSort) {
+      rows.sort((a, b) => {
+        // 1. Activity
+        const actA = String(a.single_activity || '');
+        const actB = String(b.single_activity || '');
+        if (actA !== actB) return actA.localeCompare(actB);
+
+        // 2. Course (custom sort logic could be added here)
+        const courseA = String(a.course || '');
+        const courseB = String(b.course || '');
+        if (courseA !== courseB) return courseA.localeCompare(courseB);
+
+        // 3. Name
+        const nameA = `${a.name} ${a.surname}`;
+        const nameB = `${b.name} ${b.surname}`;
+        return nameA.localeCompare(nameB);
+      });
+    }
+
+    return rows;
+  },
+
+  exportInscriptionsExcel(
+    inscriptions: (Inscription | InscriptionFlat)[],
+    fields: 'basic' | 'full' = 'full',
+    filename: string = 'inscripcions'
+  ) {
+    const rows = this.getFlattenedData(inscriptions, fields);
 
     let exportData: any[] = [];
 
-    if (type === 'compact') {
+    if (fields === 'basic') {
       exportData = rows.map(r => ({
         'Actividad': r.single_activity,
         'Curso': r.course,
@@ -101,7 +106,7 @@ export const ExportService = {
         'Email 2': r.parent.parent_email_2 || '',
         'Socio AFA': r.parent.afa_member ? 'Sí' : 'No',
         'Salud/Alergias': r.parent.health_info || '',
-        'Autorización Imagen': r.parent.image_auth_consent || '',
+        'Autorización Imagen': r.parent.image_auth_consent ? 'Sí' : 'No',
         'Sale Solo': r.parent.can_leave_alone ? 'Sí' : 'No',
         'Autorizados Recogida': r.parent.authorized_pickup || ''
       }));
@@ -110,19 +115,19 @@ export const ExportService = {
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Inscripcions');
-    XLSX.writeFile(workbook, `${filename}_${type}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    XLSX.writeFile(workbook, `${filename}_${fields}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
   },
 
-  exportInscriptionsPDF(data: any[], type: 'list' | 'full' = 'full', filename: string = 'inscripcions') {
+  exportInscriptionsPDF(inscriptions: (Inscription | InscriptionFlat)[], fields: 'basic' | 'full' = 'full', filename: string = 'inscripcions') {
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
-    const rows = getFlattenedData(data, type === 'list'); // Explode by activity if list mode
+    const rows = this.getFlattenedData(inscriptions, fields); // Explode by activity if list mode
 
     const pageWidth = doc.internal.pageSize.getWidth();
 
     // Header
     doc.setFontSize(22);
     doc.setTextColor(41, 128, 185); // Blue
-    doc.text(type === 'full' ? 'Informe Completo de Inscripciones' : 'Listado de Grupos - Extraescolares', 14, 20);
+    doc.text(fields === 'full' ? 'Informe Completo de Inscripciones' : 'Listado de Grupos - Extraescolares', 14, 20);
 
     doc.setFontSize(10);
     doc.setTextColor(100);
@@ -131,12 +136,12 @@ export const ExportService = {
 
     let yPos = 35;
 
-    if (type === 'full') {
-      const tableData = rows.map((r, i) => [
-        i + 1,
-        r.single_activity,
-        r.course,
-        `${r.name} ${r.surname}`,
+    if (fields === 'full') {
+      doc.text("Resum d'Inscripcions", 14, 15); // This line was added
+      const tableData = rows.map(r => [ // This tableData definition was changed
+        r.single_activity || '',
+        r.course || '',
+        `${r.name || ''} ${r.surname || ''}`,
         r.parent.parent_name || '',
         r.parent.parent_dni || '',
         r.parent.parent_phone_1 || '',
@@ -229,7 +234,7 @@ export const ExportService = {
       });
     }
 
-    doc.save(`${filename}_${type}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    doc.save(`${filename}_${fields}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
   },
   
   exportInventoryPDF(products: any[], filename: string = 'inventari') {

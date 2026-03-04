@@ -2,24 +2,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-interface Student {
-  name: string;
-  surname: string;
-  course: string;
-  activities: string[];
-  suspended?: boolean;
-}
-
-interface Inscription {
-  id: string;
-  parent_name: string;
-  parent_dni: string;
-  parent_email_1: string;
-  parent_phone_1: string;
-  parent_phone_2?: string;
-  afa_member: boolean;
-  students: Student[];
-}
+import type { Inscription, InscriptionStudent } from '../../types/inscription';
 
 interface EditInscriptionModalProps {
   inscription: Inscription;
@@ -51,14 +34,14 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
   if (!isOpen) return null;
 
   const handleParentChange = (field: keyof Inscription, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: Inscription) => ({ ...prev, [field]: value }));
   };
 
-  const handleStudentChange = (index: number, field: keyof Student, value: any) => {
+  const handleStudentChange = (index: number, field: keyof InscriptionStudent, value: any) => {
     const newStudents = [...(formData.students || [])];
     if (!newStudents[index]) return;
     newStudents[index] = { ...newStudents[index], [field]: value };
-    setFormData(prev => ({ ...prev, students: newStudents }));
+    setFormData((prev: Inscription) => ({ ...prev, students: newStudents }));
   };
 
   const toggleActivity = (studentIndex: number, activity: string) => {
@@ -68,11 +51,11 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
 
     const currentActivities = student.activities || [];
     if (currentActivities.includes(activity)) {
-      student.activities = currentActivities.filter(a => a !== activity);
+      student.activities = currentActivities.filter((a: string) => a !== activity);
     } else {
       student.activities = [...currentActivities, activity];
     }
-    
+
     setFormData(prev => ({ ...prev, students: newStudents }));
   };
 
@@ -165,7 +148,7 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
           <section>
             <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">Alumnes</h3>
             <div className="space-y-6">
-              {(formData.students || []).map((student, idx) => (
+              {(formData.students || []).map((student: InscriptionStudent, idx: number) => (
                 <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
@@ -210,11 +193,10 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
                             key={activity}
                             type="button"
                             onClick={() => toggleActivity(idx, activity)}
-                            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                              isSelected
-                                ? 'bg-blue-100 text-blue-700 border-blue-200'
-                                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                            }`}
+                            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${isSelected
+                              ? 'bg-blue-100 text-blue-700 border-blue-200'
+                              : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                              }`}
                           >
                             {activity}
                           </button>
@@ -222,18 +204,18 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
                       })}
                     </div>
                   </div>
-                  
+
                   {/* Status Toggle for Student */}
                   <div className="mt-4 pt-4 border-t border-slate-200 flex justify-end">
-                     <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600 hover:text-slate-800">
-                        <input 
-                            type="checkbox" 
-                            checked={student.suspended || false} 
-                            onChange={e => handleStudentChange(idx, 'suspended', e.target.checked)}
-                            className="rounded text-red-500 focus:ring-red-500"
-                        />
-                        <span>Suspès temporalment</span>
-                     </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600 hover:text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={student.suspended || false}
+                        onChange={e => handleStudentChange(idx, 'suspended', e.target.checked)}
+                        className="rounded text-red-500 focus:ring-red-500"
+                      />
+                      <span>Suspès temporalment</span>
+                    </label>
                   </div>
                 </div>
               ))}

@@ -1,10 +1,9 @@
-import { useEffect, useState, useMemo } from 'react';
-import { ShopService } from '../../../services/ShopService';
-import { CheckCircle, XCircle, Euro, Truck, Trash2, Plus, Archive, Search, LayoutDashboard } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { ShopService } from '../../../features/shop/services/ShopService';
+import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
-import { OrderEditModal } from '../../../components/shop/OrderEditModal';
-import { Settings } from 'lucide-react';
+import { OrderEditModal } from '../../../features/shop/components/OrderEditModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Order {
@@ -28,7 +27,7 @@ export function OrdersPage() {
 
     const fetchOrders = async () => {
         try {
-            const data = await ShopService.getOrders();
+            const data = await ShopService.getOrders() as any[];
             setOrders(data);
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -142,13 +141,13 @@ export function OrdersPage() {
                     <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
                         <button
                             onClick={() => setView('active')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${view === 'active' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-500'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${view === 'active' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-500'} `}
                         >
                             Actives ({orders.filter(o => o.delivery_status === 'pending').length})
                         </button>
                         <button
                             onClick={() => setView('archived')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${view === 'archived' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-500'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${view === 'archived' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-500'} `}
                         >
                             Arxiu ({orders.filter(o => o.delivery_status !== 'pending').length})
                         </button>
@@ -231,7 +230,7 @@ export function OrdersPage() {
             {/* Orders List */}
             <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
-                    {filteredOrders.map(order => (
+                    {filteredOrders.map((order: any) => (
                         <motion.div
                             key={order.id}
                             layout
@@ -285,7 +284,7 @@ export function OrdersPage() {
                                         className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all min-w-[90px] ${order.payment_status === 'paid'
                                             ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-900/30'
                                             : 'bg-white border-amber-100 text-amber-600 dark:bg-slate-800 dark:border-amber-900/30'
-                                            }`}
+                                            } `}
                                     >
                                         <Euro className="w-4 h-4 mb-1" />
                                         <span className="text-[10px] font-black uppercase tracking-widest">
@@ -297,21 +296,21 @@ export function OrdersPage() {
                                     <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl grow sm:grow-0">
                                         <button
                                             onClick={() => handleDeliveryUpdate(order.id, 'pending')}
-                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'pending' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'pending' ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'} `}
                                             title="Pendent"
                                         >
                                             <Truck className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => handleDeliveryUpdate(order.id, 'delivered')}
-                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'delivered' ? 'bg-green-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'delivered' ? 'bg-green-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'} `}
                                             title="Entregat i Arxivar"
                                         >
                                             <CheckCircle className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => handleDeliveryUpdate(order.id, 'not_picked_up')}
-                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'not_picked_up' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'not_picked_up' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'} `}
                                             title="No recollit"
                                         >
                                             <XCircle className="w-4 h-4" />

@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../../lib/supabase';
-import type { ShopProduct } from '../../../types/shop';
-import { Search, Edit, Plus, Package, Info, AlertTriangle, Download, Calculator } from 'lucide-react';
+import type { ShopProduct } from '../../../features/shop/types/shop';
+import { Package, Search, Plus, Download, Calculator, AlertTriangle, Edit, Info } from 'lucide-react';
 import { ProductEditorModal } from '../../../components/admin/ProductEditorModal';
 import { useContentTranslation } from '../../../hooks/useContentTranslation';
 import { motion, AnimatePresence } from 'framer-motion';

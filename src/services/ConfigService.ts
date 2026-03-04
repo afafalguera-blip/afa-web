@@ -39,6 +39,15 @@ export interface ShopConfig {
     es: string;
     en: string;
   };
+  categories: {
+    id: string;
+    translations: {
+      ca: string;
+      es: string;
+      en: string;
+    };
+  }[];
+  admin_emails: string[];
 }
 
 export const ConfigService = {

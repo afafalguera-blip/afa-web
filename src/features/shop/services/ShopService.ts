@@ -1,14 +1,19 @@
-import type { ShopProduct, ShopVariant } from '../types/shop';
-import { supabase } from '../lib/supabase';
-import { FinanceService } from './FinanceService';
+import type { ShopProduct, ShopVariant, ShopOrder, ShopOrderItem, OrderPaymentStatus, OrderDeliveryStatus } from '../types/shop';
+import { supabase } from '../../../lib/supabase';
+import { FinanceService } from '../../../services/FinanceService';
 
-function transformOrder(order: any) {
-    // Map new columns or legacy status to new fields if missing
+function transformOrder(order: unknown): ShopOrder {
+    const o = order as Record<string, unknown>;
     return {
-        ...order,
-        customer_name: order.customer_name || 'Usuari Registrat',
-        payment_status: order.payment_status || (order.status === 'completed' ? 'paid' : 'pending'),
-        delivery_status: order.delivery_status || (order.status === 'completed' ? 'delivered' : 'pending')
+        id: o.id as string,
+        created_at: o.created_at as string,
+        customer_name: (o.customer_name as string) || 'Usuari Registrat',
+        customer_email: (o.customer_email as string) || '',
+        total_amount: o.total_amount as number,
+        payment_status: (o.payment_status as OrderPaymentStatus) || (o.status === 'completed' ? 'paid' : 'pending'),
+        delivery_status: (o.delivery_status as OrderDeliveryStatus) || (o.status === 'completed' ? 'delivered' : 'pending'),
+        user_id: o.user_id as string | undefined,
+        items: o.items as ShopOrderItem[]
     };
 }
 
@@ -42,10 +47,10 @@ export const ShopService = {
       'category', 'image_url'
     ];
 
-    const cleanUpdates: any = {};
+    const cleanUpdates: Record<string, unknown> = {};
     Object.keys(updates).forEach(key => {
       if (allowedColumns.includes(key)) {
-        cleanUpdates[key] = (updates as any)[key];
+        cleanUpdates[key] = (updates as Record<string, unknown>)[key];
       }
     });
 
@@ -104,7 +109,7 @@ export const ShopService = {
     if (error) throw error;
   },
 
-  async getOrders() {
+  async getOrders(): Promise<ShopOrder[]> {
     const { data, error } = await supabase
       .from('shop_orders')
       .select(`
@@ -123,7 +128,27 @@ export const ShopService = {
     return (data || []).map(transformOrder);
   },
 
-  async updatePaymentStatus(orderId: string, status: 'paid' | 'pending') {
+  async createComplexOrder(payload: {
+    customerName: string;
+    customerEmail: string;
+    totalAmount: number;
+    items: Array<{ variant_id: string; quantity: number; price_at_time: number }>;
+    userId?: string | null;
+    language: 'ca' | 'es' | 'en';
+  }): Promise<void> {
+    const { error } = await supabase.rpc('create_shop_complex_order_v1', {
+        p_customer_name: payload.customerName,
+        p_customer_email: payload.customerEmail,
+        p_total_amount: payload.totalAmount,
+        p_items: payload.items,
+        p_user_id: payload.userId || null,
+        p_language: payload.language
+    });
+
+    if (error) throw error;
+  },
+
+  async updatePaymentStatus(orderId: string, status: OrderPaymentStatus) {
     const { data, error } = await supabase
       .from('shop_orders')
       .update({ payment_status: status })
@@ -151,7 +176,7 @@ export const ShopService = {
     return data;
   },
 
-  async updateDeliveryStatus(orderId: string, status: 'delivered' | 'pending' | 'not_picked_up') {
+  async updateDeliveryStatus(orderId: string, status: OrderDeliveryStatus) {
       const { data, error } = await supabase
         .from('shop_orders')
         .update({ delivery_status: status })

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import {
   LayoutDashboard,
   Users,
@@ -44,7 +44,7 @@ export function AdminLayout() {
         navigate('/botiga');
       }
     }
-  }, [user, profile, loading, navigate]);
+  }, [user, profile, loading, navigate, t]);
 
   const handleLogout = async () => {
     await signOut();

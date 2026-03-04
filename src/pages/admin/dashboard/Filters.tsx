@@ -1,7 +1,27 @@
 import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export function Filters({ course, setCourse, activity, setActivity, status, setStatus, search, setSearch }: any) {
+interface FiltersProps {
+  course: string;
+  setCourse: (value: string) => void;
+  activity: string;
+  setActivity: (value: string) => void;
+  status: string;
+  setStatus: (value: string) => void;
+  search: string;
+  setSearch: (value: string) => void;
+}
+
+export function Filters({
+  course,
+  setCourse,
+  activity,
+  setActivity,
+  status,
+  setStatus,
+  search,
+  setSearch
+}: FiltersProps) {
   const { t } = useTranslation();
 
   return (
@@ -9,7 +29,7 @@ export function Filters({ course, setCourse, activity, setActivity, status, setS
       <div className="flex-1 min-w-[200px]">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <input 
+          <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -19,7 +39,7 @@ export function Filters({ course, setCourse, activity, setActivity, status, setS
         </div>
       </div>
 
-      <select 
+      <select
         value={activity}
         onChange={(e) => setActivity(e.target.value)}
         className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -27,8 +47,8 @@ export function Filters({ course, setCourse, activity, setActivity, status, setS
         <option value="">{t('admin.dashboard.filters.all_activities')}</option>
         {/* Placeholder for activities, should be populated dynamically */}
       </select>
-      
-      <select 
+
+      <select
         value={course}
         onChange={(e) => setCourse(e.target.value)}
         className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -45,7 +65,7 @@ export function Filters({ course, setCourse, activity, setActivity, status, setS
         <option value="6PRI">6è Primària</option>
       </select>
 
-      <select 
+      <select
         value={status}
         onChange={(e) => setStatus(e.target.value)}
         className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"

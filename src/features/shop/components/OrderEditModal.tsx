@@ -1,12 +1,27 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Save, ShoppingBag, User } from 'lucide-react';
-import { ShopService } from '../../services/ShopService';
-import { supabase } from '../../lib/supabase';
-import type { ShopProduct } from '../../types/shop';
-import { sortSizes } from '../../utils/productUtils';
+import { ShopService } from '../services/ShopService';
+import { supabase } from '../../../lib/supabase';
+import type { ShopProduct } from '../types/shop';
+import { sortSizes } from '../../../utils/productUtils';
+
+interface OrderItemData {
+  id: string;
+  variant_id: string;
+  quantity: number;
+  price_at_time: number;
+  variant?: { product?: { name: string }, size: string, stock: number };
+}
+
+interface OrderData {
+  id: string;
+  customer_name: string;
+  total_amount?: number;
+  items?: OrderItemData[];
+}
 
 interface OrderEditModalProps {
-  order: any;
+  order: OrderData;
   onClose: () => void;
   onUpdate: () => void;
 }
@@ -39,7 +54,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
       await supabase.from('shop_orders').update({ customer_name: customerName }).eq('id', order.id);
       setEditingName(false);
       onUpdate();
-    } catch (error) {
+    } catch {
       alert('Error actualitzant el nom');
     }
   };
@@ -49,7 +64,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
     try {
       await ShopService.updateOrderItem(itemId, variantId, quantity, price);
       refreshOrder();
-    } catch (error) {
+    } catch {
       alert('Error actualitzant l\'article');
     } finally {
       setLoading(false);
@@ -62,7 +77,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
     try {
       await ShopService.deleteOrderItem(itemId);
       refreshOrder();
-    } catch (error) {
+    } catch {
       alert('Error eliminant l\'article');
     } finally {
       setLoading(false);
@@ -81,7 +96,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
       setSelectedProductId('');
       setSelectedVariantId('');
       refreshOrder();
-    } catch (error) {
+    } catch {
       alert('Error afegint l\'article');
     } finally {
       setLoading(false);
@@ -161,7 +176,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
             </div>
 
             <div className="space-y-3">
-              {order.items?.map((item: any) => (
+              {order.items?.map((item: OrderItemData) => (
                 <div key={item.id} className="group bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-primary/30 transition-all">
                   <div className="flex-1">
                     <p className="font-bold text-slate-800 dark:text-white leading-tight">{item.variant?.product?.name}</p>
@@ -257,7 +272,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                       <button
                         key={v.id}
                         onClick={() => setSelectedVariantId(v.id)}
-                        className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${selectedVariantId === v.id ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10'}`}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${selectedVariantId === v.id ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10'} `}
                       >
                         {v.size} ({v.stock} disp.)
                       </button>

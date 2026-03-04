@@ -3,7 +3,7 @@
  * These functions are framework-agnostic and can be easily tested
  */
 
-import type { InscriptionRaw, InscriptionFlat, InscriptionFilters } from '../types/inscription';
+import type { Inscription, InscriptionRaw, InscriptionFlat, InscriptionFilters } from '../types/inscription';
 import { INSCRIPTION_STATUS, STATUS_FILTER } from '../constants/status';
 
 /**
@@ -13,16 +13,20 @@ import { INSCRIPTION_STATUS, STATUS_FILTER } from '../constants/status';
  * @param inscriptions - Raw inscription data from Supabase
  * @returns Flattened array with one row per student
  */
-export function flattenInscriptions(inscriptions: InscriptionRaw[]): InscriptionFlat[] {
+export function flattenInscriptions(inscriptions: (Inscription | InscriptionRaw)[]): InscriptionFlat[] {
   return inscriptions.flatMap((item) => {
+    // Normalize parent info (handle _1 suffix in Inscription vs optional in InscriptionRaw)
+    const phone = 'parent_phone_1' in item ? item.parent_phone_1 : (item.parent_phone || '');
+    const email = 'parent_email_1' in item ? item.parent_email_1 : (item.parent_email || '');
+
     // New format: inscription has students array
     if (item.students && item.students.length > 0) {
       return item.students.map((student) => ({
         inscription_id: item.id,
-        created_at: item.created_at,
-        parent_phone: item.parent_phone,
-        parent_email: item.parent_email,
-        afa_member: item.afa_member,
+        created_at: item.created_at || '',
+        parent_phone: phone,
+        parent_email: email,
+        afa_member: item.afa_member ?? false,
         name: student.name,
         surname: student.surname,
         course: student.course,
@@ -32,19 +36,20 @@ export function flattenInscriptions(inscriptions: InscriptionRaw[]): Inscription
       }));
     }
 
-    // Legacy format: single student fields directly on inscription
+    // Legacy format: single student fields directly on inscription (mostly from InscriptionRaw)
+    const legacy = item as InscriptionRaw;
     return [{
       inscription_id: item.id,
-      created_at: item.created_at,
-      parent_phone: item.parent_phone,
-      parent_email: item.parent_email,
-      afa_member: item.afa_member,
-      name: item.student_name ?? '',
-      surname: item.student_surname ?? '',
-      course: item.student_course ?? '',
-      activities: item.selected_activities ?? [],
-      status: (item.status ?? INSCRIPTION_STATUS.ACTIVE) as InscriptionFlat['status'],
-      suspended: item.suspended ?? false,
+      created_at: item.created_at || '',
+      parent_phone: phone,
+      parent_email: email,
+      afa_member: item.afa_member ?? false,
+      name: legacy.student_name ?? '',
+      surname: legacy.student_surname ?? '',
+      course: legacy.student_course ?? '',
+      activities: legacy.selected_activities ?? [],
+      status: (legacy.status ?? INSCRIPTION_STATUS.ACTIVE) as InscriptionFlat['status'],
+      suspended: legacy.suspended ?? false,
     }];
   });
 }
