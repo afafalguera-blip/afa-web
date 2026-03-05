@@ -34,47 +34,7 @@ export interface Inscription {
 }
 
 
-// Hook and dashboard specific legacy types
-export interface InscriptionRaw {
-  id: string | number;
-  created_at?: string;
-  parent_phone?: string;
-  parent_email?: string;
-  parent_name?: string;
-  parent_dni?: string;
-  parent_phone_1?: string;
-  parent_email_1?: string;
-  student_name?: string;
-  student_surname?: string;
-  student_course?: string;
-  selected_activities?: string[];
-  status?: string;
-  suspended?: boolean;
-  afa_member?: boolean;
-  students?: {
-    name: string;
-    surname: string;
-    course: string;
-    activities: string[];
-  }[];
-  // Internal properties that are sometimes unpacked
-  [key: string]: string | number | boolean | string[] | undefined | null | object;
-}
-
-export interface InscriptionFlat {
-  inscription_id: string | number;
-  created_at?: string;
-  parent_phone?: string;
-  parent_email?: string;
-  afa_member: boolean;
-  name: string;
-  surname: string;
-  course: string;
-  activities: string[];
-  status: string;
-  suspended: boolean;
-}
-
+// Filters for dashboard
 export interface InscriptionFilters {
   course: string;
   activity: string;

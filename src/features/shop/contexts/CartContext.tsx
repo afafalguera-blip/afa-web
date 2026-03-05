@@ -56,7 +56,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (user) setIsMember(true);
     }
 
-    const addItem = (product: ShopProduct, variant: ShopVariant, quantity: number) => {
+    const addItem = React.useCallback((product: ShopProduct, variant: ShopVariant, quantity: number) => {
         setItems(prev => {
             // Check if item already exists
             const existingItemIndex = prev.findIndex(i => i.variant.id === variant.id);
@@ -67,26 +67,37 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             return [...prev, { id: crypto.randomUUID(), product, variant, quantity }];
         });
-    };
+    }, []);
 
-    const removeItem = (cartItemId: string) => {
+    const removeItem = React.useCallback((cartItemId: string) => {
         setItems(prev => prev.filter(i => i.id !== cartItemId));
-    };
+    }, []);
 
-    const clearCart = () => {
+    const clearCart = React.useCallback(() => {
         setItems([]);
-    };
+    }, []);
 
     // Dynamic price calculation based on user membership
-    const total = items.reduce((acc, item) => {
+    const total = React.useMemo(() => items.reduce((acc, item) => {
         const price = isMember ? Number(item.variant.price_member) : Number(item.variant.price_non_member);
         return acc + (price * item.quantity);
-    }, 0);
+    }, 0), [items, isMember]);
 
-    const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+    const itemCount = React.useMemo(() => items.reduce((acc, item) => acc + item.quantity, 0), [items]);
+
+    const contextValue = React.useMemo(() => ({
+        items,
+        addItem,
+        removeItem,
+        clearCart,
+        total,
+        itemCount,
+        isMember,
+        setIsMember
+    }), [items, addItem, removeItem, clearCart, total, itemCount, isMember]);
 
     return (
-        <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total, itemCount, isMember, setIsMember }}>
+        <CartContext.Provider value={contextValue}>
             {children}
         </CartContext.Provider>
     );

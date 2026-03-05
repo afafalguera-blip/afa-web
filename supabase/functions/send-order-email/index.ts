@@ -196,7 +196,7 @@ Deno.serve(async (req: Request) => {
             <tfoot>
               <tr>
                 <td colspan="3" style="padding: 24px 8px 8px 8px; text-align: right; font-size: 16px; color: #64748b;">${t.totalMsg}</td>
-                <td style="padding: 24px 8px 8px 8px; text-align: right; font-weight: 800; color: #2563eb; font-size: 24px;">${record.total_amount}€</td>
+                <td style="padding: 24px 8px 8px 8px; text-align: right; font-weight: 800; color: #2563eb; font-size: 24px;">${order.total_amount}€</td>
               </tr>
             </tfoot>
           </table>
