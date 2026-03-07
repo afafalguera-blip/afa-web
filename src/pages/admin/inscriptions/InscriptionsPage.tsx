@@ -37,7 +37,7 @@ export default function InscriptionsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string | number) => {
     if (!window.confirm(t('admin.inscriptions.delete_confirm'))) return;
 
     try {
@@ -54,7 +54,7 @@ export default function InscriptionsPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = async (id: string, updates: Partial<Inscription>) => {
+  const handleSaveEdit = async (id: string | number, updates: Partial<Inscription>) => {
     try {
       await AdminInscriptionsService.updateInscription(id, updates);
 

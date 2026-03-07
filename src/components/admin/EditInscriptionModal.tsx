@@ -8,7 +8,7 @@ interface EditInscriptionModalProps {
   inscription: Inscription;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (id: string, updates: Partial<Inscription>) => Promise<void>;
+  onSave: (id: string | number, updates: Partial<Inscription>) => Promise<void>;
 }
 
 const COURSES = [
