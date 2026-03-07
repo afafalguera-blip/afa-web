@@ -495,9 +495,12 @@
     "read_more_external": "Read original news",
     "read_more": "Read more",
     "loading": "Loading...",
-    "no_activities": "No activities"
+    "no_activities": "No activities",
+    "share": "Share",
+    "quote": "Quote"
   },
   "footer": {
     "all_rights_reserved": "All rights reserved."
   }
 }
+

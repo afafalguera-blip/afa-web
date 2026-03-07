@@ -22,6 +22,7 @@ export const NewsService = {
       .from('news')
       .select('*')
       .eq('published', true)
+      .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false })
       .limit(limit);
 

@@ -27,7 +27,7 @@ export function NewsCard({ article }: NewsCardProps) {
             <div className="p-6 flex flex-col flex-1">
                 <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest mb-3">
                     <Calendar className="w-3.5 h-3.5" />
-                    {new Date(article.created_at).toLocaleDateString(i18n.language, {
+                    {new Date(article.published_at || article.created_at).toLocaleDateString(i18n.language, {
                         day: 'numeric',
                         month: 'short',
                         year: 'numeric'

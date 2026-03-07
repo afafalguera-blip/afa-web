@@ -35,7 +35,7 @@ export function NewsAdminCard({ article, onTogglePublish, onEdit, onDelete }: Ne
             <div className="p-6">
                 <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     <Calendar className="w-3 h-3" />
-                    {new Date(article.created_at).toLocaleDateString()}
+                    {new Date(article.published_at || article.created_at).toLocaleDateString()}
                 </div>
 
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-2 mb-2 min-h-[3.5rem]">

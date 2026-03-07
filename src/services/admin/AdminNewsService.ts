@@ -6,6 +6,7 @@ export const AdminNewsService = {
     const { data, error } = await supabase
       .from('news')
       .select('*')
+      .order('published_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false });
 
     if (error) throw error;

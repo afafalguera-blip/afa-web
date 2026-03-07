@@ -726,9 +726,12 @@
     "read_more_external": "Leer noticia original",
     "read_more": "Leer más",
     "loading": "Cargando...",
-    "no_activities": "No hay actividades"
+    "no_activities": "No hay actividades",
+    "share": "Compartir",
+    "quote": "Citar"
   },
   "footer": {
     "all_rights_reserved": "Todos los derechos reservados."
   }
 }
+
