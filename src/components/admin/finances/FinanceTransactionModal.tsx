@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { X, Loader2, Upload, Save, Calendar, Tag, CreditCard, Type } from 'lucide-react';
 import type { FinanceTransaction } from '../../../services/FinanceService';
+import { getRegionalLanguageTag } from '../../../utils/locale';
 
 interface FinanceTransactionModalProps {
     isOpen: boolean;
@@ -23,7 +24,8 @@ export function FinanceTransactionModal({
     setUploadFile,
     isSubmitting,
 }: FinanceTransactionModalProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const nativeDateLocale = getRegionalLanguageTag(i18n.resolvedLanguage || i18n.language);
 
     if (!isOpen) return null;
 
@@ -78,6 +80,7 @@ export function FinanceTransactionModal({
                             </label>
                             <input
                                 type="date"
+                                lang={nativeDateLocale}
                                 required
                                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                                 value={transaction.date}

@@ -25,6 +25,7 @@ import AcollidaManager from './pages/admin/AcollidaManager';
 import AnnouncementManager from './pages/admin/AnnouncementManager';
 import ContactManager from './pages/admin/ContactManager';
 import SiteSettingsManager from './pages/admin/SiteSettingsManager';
+import TasksManager from './pages/admin/TasksManager';
 
 
 import { NewsPage } from './pages/NewsPage';
@@ -96,6 +97,7 @@ function App() {
               <Route path="news/:id" element={<NewsEditorPage />} />
               <Route path="projects" element={<ProjectsManager />} />
               <Route path="calendar" element={<EventsManager />} />
+              <Route path="tasks" element={<TasksManager />} />
               <Route path="documents" element={<DocumentsManager />} />
               <Route path="notifications" element={<NotificationManager />} />
               <Route path="acollida" element={<AcollidaManager />} />

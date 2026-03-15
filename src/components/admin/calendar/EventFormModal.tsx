@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Trash2, X } from 'lucide-react';
 import { EVENT_TYPES } from '../../../services/admin/AdminCalendarService';
 import type { EventFormData, CalendarEvent } from '../../../services/admin/AdminCalendarService';
+import { getRegionalLanguageTag } from '../../../utils/locale';
 
 interface EventFormModalProps {
     isOpen: boolean;
@@ -24,7 +25,8 @@ export function EventFormModal({
     editingEvent,
     saving
 }: EventFormModalProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const nativeDateLocale = getRegionalLanguageTag(i18n.resolvedLanguage || i18n.language);
 
     if (!isOpen) return null;
 
@@ -64,6 +66,7 @@ export function EventFormModal({
                             </label>
                             <input
                                 type="date"
+                                lang={nativeDateLocale}
                                 value={formData.event_date}
                                 onChange={e => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
                                 className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-2xl outline-none transition-all text-slate-900 dark:text-white font-medium shadow-inner"

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { InscriptionStudent } from '../../types/inscription';
+import { getRegionalLanguageTag } from '../../utils/locale';
 
 interface Payment {
   id?: string;
@@ -28,6 +29,9 @@ interface EditPaymentModalProps {
 }
 
 export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPaymentModalProps) {
+  const nativeDateLocale = getRegionalLanguageTag(
+    typeof document !== 'undefined' ? document.documentElement.lang : undefined
+  );
   const [formData, setFormData] = useState<Payment>({
     student_name: '',
     student_surname: '',
@@ -206,6 +210,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
               <label className="block text-sm font-medium text-gray-700 mb-1">Data Venciment</label>
               <input
                 type="date"
+                lang={nativeDateLocale}
                 required
                 value={formData.due_date}
                 onChange={e => setFormData({ ...formData, due_date: e.target.value })}
@@ -231,6 +236,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
                 <label className="block text-sm font-medium text-gray-700 mb-1">Data Pagament</label>
                 <input
                   type="date"
+                  lang={nativeDateLocale}
                   value={formData.payment_date || ''}
                   onChange={e => setFormData({ ...formData, payment_date: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-blue-500 outline-none"
