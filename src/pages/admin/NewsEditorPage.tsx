@@ -39,6 +39,7 @@ import { TranslationService } from '../../services/TranslationService';
 import { sanitizeRichTextHtml } from '../../utils/htmlSanitizer';
 import { getReadabilityMetrics } from '../../utils/readability';
 import { fromDateTimeLocalInputValue, toDateTimeLocalInputValue } from '../../utils/dateTime';
+import { getRegionalLanguageTag } from '../../utils/locale';
 
 type Lang = 'ca' | 'es' | 'en';
 
@@ -186,7 +187,7 @@ function addImage(editor: Editor) {
 export default function NewsEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [loading, setLoading] = useState(id !== 'new');
   const [saving, setSaving] = useState(false);
@@ -200,6 +201,7 @@ export default function NewsEditorPage() {
 
   const draftKey = useMemo(() => buildDraftKey(id), [id]);
   const activeContent = formData.translations[activeLang]?.content || '';
+  const nativeDateLocale = getRegionalLanguageTag(i18n.resolvedLanguage || i18n.language);
 
   const editor = useEditor({
     extensions: [
@@ -727,6 +729,7 @@ export default function NewsEditorPage() {
             </div>
             <input
               type="datetime-local"
+              lang={nativeDateLocale}
               value={formData.event_date}
               onChange={(event) => setFormData((prev) => ({ ...prev, event_date: event.target.value }))}
               className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-blue-200 outline-none transition-all"

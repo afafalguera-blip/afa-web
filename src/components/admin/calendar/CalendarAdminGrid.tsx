@@ -1,4 +1,5 @@
 import type { CalendarEvent } from '../../../services/admin/AdminCalendarService';
+import { useTranslation } from 'react-i18next';
 
 interface CalendarAdminGridProps {
     currentMonth: Date;
@@ -13,13 +14,14 @@ export function CalendarAdminGrid({
     onDayClick,
     onEventClick
 }: CalendarAdminGridProps) {
+    const { t } = useTranslation();
 
     const generateCalendarDays = () => {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
-        const startingDay = firstDay.getDay();
+        const startingDay = (firstDay.getDay() + 6) % 7;
         const totalDays = lastDay.getDate();
 
         const days: (number | null)[] = [];
@@ -38,7 +40,15 @@ export function CalendarAdminGrid({
     };
 
     const days = generateCalendarDays();
-    const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const weekDays = [
+        t('admin.editor.days.mon'),
+        t('admin.editor.days.tue'),
+        t('admin.editor.days.wed'),
+        t('admin.editor.days.thu'),
+        t('admin.editor.days.fri'),
+        t('admin.editor.days.sat'),
+        t('admin.editor.days.sun')
+    ];
 
     return (
         <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
