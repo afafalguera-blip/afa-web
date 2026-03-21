@@ -638,6 +638,8 @@
       "new_article": "Nova Notícia",
       "edit_article": "Editar Notícia",
       "search_placeholder": "Cercar notícia...",
+      "date_from": "Des de",
+      "date_to": "Fins a",
       "no_articles": "No hi ha notícies. Crea la primera.",
       "no_results": "No s'han trobat notícies.",
       "delete_confirm": "Estàs segur que vols eliminar aquesta notícia?",
@@ -784,7 +786,8 @@
   "news_detail": {
     "not_found": "Notícia no trobada",
     "back_to_news": "Tornar a Notícies",
-    "read_original": "Llegir notícia original"
+    "read_original": "Llegir notícia original",
+    "download_pdf": "Descarregar PDF"
   },
   "footer": {
     "all_rights_reserved": "Tots els drets reservats."

@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Share2, Quote } from 'lucide-react';
+import { Share2, Quote, Paperclip } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface NewsActionsProps {
   title: string;
   newsUrl?: string | null;
+  attachmentUrl?: string | null;
+  attachmentName?: string | null;
 }
 
-export function NewsActions({ title, newsUrl }: NewsActionsProps) {
+export function NewsActions({ title, newsUrl, attachmentUrl, attachmentName }: NewsActionsProps) {
   const { t } = useTranslation();
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -70,16 +72,31 @@ export function NewsActions({ title, newsUrl }: NewsActionsProps) {
         {feedback && <span className="text-xs text-slate-400">{feedback}</span>}
       </div>
 
-      {newsUrl && (
-        <a
-          href={newsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-3 px-10 py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/20 transition-all active:scale-95"
-        >
-          {t('news_detail.read_original', 'Llegir notícia original')}
-        </a>
-      )}
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        {attachmentUrl && (
+          <a
+            href={attachmentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-black text-[10px] uppercase tracking-[0.16em] hover:translate-y-[-3px] hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95"
+            download={attachmentName || undefined}
+          >
+            <Paperclip className="w-4 h-4" />
+            {t('news_detail.download_pdf', 'Descarregar PDF')}
+          </a>
+        )}
+
+        {newsUrl && (
+          <a
+            href={newsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/20 transition-all active:scale-95"
+          >
+            {t('news_detail.read_original', 'Llegir notícia original')}
+          </a>
+        )}
+      </div>
     </div>
   );
 }

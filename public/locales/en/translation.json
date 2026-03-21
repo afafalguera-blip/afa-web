@@ -552,6 +552,12 @@
     "share": "Share",
     "quote": "Quote"
   },
+  "news_detail": {
+    "not_found": "News not found",
+    "back_to_news": "Back to news",
+    "read_original": "Read original news",
+    "download_pdf": "Download PDF"
+  },
   "footer": {
     "all_rights_reserved": "All rights reserved."
   }

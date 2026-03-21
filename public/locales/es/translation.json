@@ -639,6 +639,8 @@
       "new_article": "Nueva Noticia",
       "edit_article": "Editar Noticia",
       "search_placeholder": "Buscar noticia...",
+      "date_from": "Desde",
+      "date_to": "Hasta",
       "no_articles": "No hay noticias. Crea la primera.",
       "no_results": "No se han encontrado noticias.",
       "delete_confirm": "¿Estás seguro de que quieres eliminar esta noticia?",
@@ -782,6 +784,12 @@
     "no_activities": "No hay actividades",
     "share": "Compartir",
     "quote": "Citar"
+  },
+  "news_detail": {
+    "not_found": "Noticia no encontrada",
+    "back_to_news": "Volver a noticias",
+    "read_original": "Leer noticia original",
+    "download_pdf": "Descargar PDF"
   },
   "footer": {
     "all_rights_reserved": "Todos los derechos reservados."

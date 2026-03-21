@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
@@ -26,7 +26,11 @@ import {
   Eye,
   EyeOff,
   Clock3,
-  FileText
+  FileText,
+  Upload,
+  Trash2,
+  Loader2,
+  Paperclip
 } from 'lucide-react';
 import { EditorContent, useEditor, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -36,6 +40,7 @@ import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import { ImageUpload } from '../../components/admin/ImageUpload';
 import { TranslationService } from '../../services/TranslationService';
+import { StorageService } from '../../services/StorageService';
 import { sanitizeRichTextHtml } from '../../utils/htmlSanitizer';
 import { getReadabilityMetrics } from '../../utils/readability';
 import { fromDateTimeLocalInputValue, toDateTimeLocalInputValue } from '../../utils/dateTime';
@@ -53,6 +58,8 @@ interface NewsFormData {
   slug: string;
   image_url: string;
   news_url: string;
+  attachment_url: string;
+  attachment_name: string;
   sources: string;
   published: boolean;
   published_at: string | null;
@@ -81,6 +88,8 @@ const createDefaultFormData = (): NewsFormData => ({
   slug: '',
   image_url: '',
   news_url: '',
+  attachment_url: '',
+  attachment_name: '',
   sources: '',
   published: false,
   published_at: null,
@@ -97,6 +106,17 @@ const generateSlug = (text: string) =>
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '');
+
+const getFileNameFromUrl = (url: string): string => {
+  if (!url) return '';
+  try {
+    const pathname = new URL(url).pathname;
+    const fileName = pathname.split('/').pop() || '';
+    return decodeURIComponent(fileName);
+  } catch {
+    return '';
+  }
+};
 
 const sanitizeTranslations = (translations: Record<Lang, TranslationFields>): Record<Lang, TranslationFields> =>
   AVAILABLE_LANGS.reduce(
@@ -191,6 +211,7 @@ export default function NewsEditorPage() {
 
   const [loading, setLoading] = useState(id !== 'new');
   const [saving, setSaving] = useState(false);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [activeLang, setActiveLang] = useState<Lang>('es');
   const [isTranslating, setIsTranslating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -198,6 +219,7 @@ export default function NewsEditorPage() {
   const [lastAutosaveAt, setLastAutosaveAt] = useState<string | null>(null);
   const [initialSnapshot, setInitialSnapshot] = useState('');
   const [formData, setFormData] = useState<NewsFormData>(() => createDefaultFormData());
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
 
   const draftKey = useMemo(() => buildDraftKey(id), [id]);
   const activeContent = formData.translations[activeLang]?.content || '';
@@ -247,10 +269,17 @@ export default function NewsEditorPage() {
 
         if (draft) {
           try {
-            const parsed = JSON.parse(draft) as NewsFormData;
-            setFormData(parsed);
-            setSlugManuallyEdited(Boolean(parsed.slug));
-            setInitialSnapshot(JSON.stringify(parsed));
+            const parsed = JSON.parse(draft) as Partial<NewsFormData>;
+            const fallbackEs = parsed.translations?.es || createEmptyTranslations().es;
+            const merged: NewsFormData = {
+              ...createDefaultFormData(),
+              ...parsed,
+              translations: normalizeTranslations(parsed.translations, fallbackEs)
+            };
+
+            setFormData(merged);
+            setSlugManuallyEdited(Boolean(merged.slug));
+            setInitialSnapshot(JSON.stringify(merged));
           } catch {
             const fallback = createDefaultFormData();
             setFormData(fallback);
@@ -280,6 +309,8 @@ export default function NewsEditorPage() {
           slug: data.slug || '',
           image_url: data.image_url || '',
           news_url: data.news_url || '',
+          attachment_url: data.attachment_url || '',
+          attachment_name: data.attachment_name || getFileNameFromUrl(data.attachment_url || ''),
           sources: data.sources || '',
           published: Boolean(data.published),
           published_at: data.published_at || null,
@@ -350,6 +381,50 @@ export default function NewsEditorPage() {
 
       return nextData;
     });
+  };
+
+  const handleAttachmentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    const isPdf = file.type === 'application/pdf' || fileName.endsWith('.pdf');
+    if (!isPdf) {
+      alert('Solo se permiten archivos PDF');
+      if (attachmentInputRef.current) attachmentInputRef.current.value = '';
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('El PDF supera el tamaño máximo (10MB)');
+      if (attachmentInputRef.current) attachmentInputRef.current.value = '';
+      return;
+    }
+
+    setUploadingAttachment(true);
+
+    try {
+      const uploadedUrl = await StorageService.uploadFile('activity-images', file, 'news/pdfs');
+      setFormData((prev) => ({
+        ...prev,
+        attachment_url: uploadedUrl,
+        attachment_name: file.name
+      }));
+    } catch (error) {
+      console.error('Error uploading PDF attachment:', error);
+      alert(t('common.error_save'));
+    } finally {
+      setUploadingAttachment(false);
+      if (attachmentInputRef.current) attachmentInputRef.current.value = '';
+    }
+  };
+
+  const handleAttachmentRemove = () => {
+    setFormData((prev) => ({
+      ...prev,
+      attachment_url: '',
+      attachment_name: ''
+    }));
   };
 
   const handleAutoTranslate = async () => {
@@ -436,6 +511,8 @@ export default function NewsEditorPage() {
         excerpt: primaryContent.excerpt,
         image_url: formData.image_url || null,
         news_url: formData.news_url.trim() || null,
+        attachment_url: formData.attachment_url.trim() || null,
+        attachment_name: formData.attachment_name.trim() || null,
         sources: formData.sources.trim() || null,
         published: formData.published,
         published_at: formData.published ? formData.published_at || now : null,
@@ -719,6 +796,64 @@ export default function NewsEditorPage() {
                 className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-blue-200 outline-none transition-all"
                 placeholder="https://..."
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Adjunt PDF</label>
+
+              <input
+                ref={attachmentInputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                onChange={handleAttachmentUpload}
+                className="hidden"
+              />
+
+              {formData.attachment_url ? (
+                <div className="rounded-2xl bg-slate-50 border-2 border-slate-100 p-3 flex items-center justify-between gap-3">
+                  <a
+                    href={formData.attachment_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm font-semibold text-blue-700 min-w-0"
+                  >
+                    <Paperclip className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{formData.attachment_name || 'document.pdf'}</span>
+                  </a>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      disabled={uploadingAttachment}
+                      onClick={() => attachmentInputRef.current?.click()}
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors disabled:opacity-50"
+                    >
+                      {uploadingAttachment ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                      Reemplaçar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAttachmentRemove}
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Treure
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={uploadingAttachment}
+                  onClick={() => attachmentInputRef.current?.click()}
+                  className="w-full px-4 py-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors text-sm font-bold inline-flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {uploadingAttachment ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {uploadingAttachment ? 'Pujant PDF...' : 'Pujar PDF'}
+                </button>
+              )}
+
+              <p className="text-[10px] text-slate-400 ml-1">Format PDF. Mida màxima: 10MB.</p>
             </div>
           </div>
 

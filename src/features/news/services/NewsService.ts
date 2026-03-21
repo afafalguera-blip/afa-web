@@ -12,6 +12,8 @@ export interface NewsArticle {
   created_at: string;
   news_url?: string | null;
   sources?: string | null;
+  attachment_url?: string | null;
+  attachment_name?: string | null;
   event_date?: string | null;
   translations?: Record<string, { title: string; excerpt: string; content: string }>;
 }
