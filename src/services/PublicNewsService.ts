@@ -9,6 +9,8 @@ export interface NewsArticle {
   image_url: string | null;
   sources?: string | null;
   news_url?: string | null;
+  attachment_url?: string | null;
+  attachment_name?: string | null;
   event_date?: string | null;
   published: boolean;
   published_at: string | null;

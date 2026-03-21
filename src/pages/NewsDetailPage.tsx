@@ -94,7 +94,12 @@ export default function NewsDetailPage() {
             <div className="break-words overflow-hidden" dangerouslySetInnerHTML={{ __html: safeHtml }} />
           </div>
 
-          <NewsActions title={article.title} newsUrl={article.news_url} />
+          <NewsActions
+            title={article.title}
+            newsUrl={article.news_url}
+            attachmentUrl={article.attachment_url}
+            attachmentName={article.attachment_name}
+          />
         </div>
       </div>
     </>

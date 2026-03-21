@@ -13,6 +13,8 @@ export default function NewsManager() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);
@@ -62,11 +64,38 @@ export default function NewsManager() {
     }
   };
 
+  const getReferenceDate = (article: NewsArticle) => article.published_at || article.created_at;
+
+  const toLocalDateKey = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const filteredArticles = useMemo(() => {
-    return articles.filter(article =>
-      article.title.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [articles, searchText]);
+    const normalizedSearch = searchText.trim().toLowerCase();
+
+    return articles
+      .filter((article) => {
+        const referenceDate = getReferenceDate(article);
+        const articleDateKey = toLocalDateKey(referenceDate);
+        const matchesSearch = article.title.toLowerCase().includes(normalizedSearch);
+        const matchesFrom = !dateFrom || (articleDateKey !== '' && articleDateKey >= dateFrom);
+        const matchesTo = !dateTo || (articleDateKey !== '' && articleDateKey <= dateTo);
+
+        return matchesSearch && matchesFrom && matchesTo;
+      })
+      .sort((a, b) => {
+        const aTime = new Date(getReferenceDate(a)).getTime();
+        const bTime = new Date(getReferenceDate(b)).getTime();
+        return bTime - aTime;
+      });
+  }, [articles, searchText, dateFrom, dateTo]);
+
+  const hasActiveFilters = searchText.trim() !== '' || dateFrom !== '' || dateTo !== '';
 
   return (
     <div className="space-y-6">
@@ -79,6 +108,10 @@ export default function NewsManager() {
       <NewsAdminFilters
         value={searchText}
         onChange={setSearchText}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        onDateFromChange={setDateFrom}
+        onDateToChange={setDateTo}
       />
 
       {loading ? (
@@ -87,7 +120,7 @@ export default function NewsManager() {
         </div>
       ) : filteredArticles.length === 0 ? (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center text-slate-500">
-          {searchText ? t('admin.news.no_results') : t('admin.news.no_articles')}
+          {hasActiveFilters ? t('admin.news.no_results') : t('admin.news.no_articles')}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

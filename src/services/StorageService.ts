@@ -8,7 +8,7 @@ export const StorageService = {
    * @param folder Optional folder path within the bucket.
    * @returns The public URL of the uploaded file.
    */
-  async uploadImage(bucket: string, file: File, folder: string = 'uploads') {
+  async uploadFile(bucket: string, file: File, folder: string = 'uploads') {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
     const filePath = folder ? `${folder}/${fileName}` : fileName;
@@ -24,6 +24,13 @@ export const StorageService = {
       .getPublicUrl(filePath);
 
     return data.publicUrl;
+  },
+
+  /**
+   * Backwards-compatible alias for image uploads.
+   */
+  async uploadImage(bucket: string, file: File, folder: string = 'uploads') {
+    return this.uploadFile(bucket, file, folder);
   },
 
   /**
