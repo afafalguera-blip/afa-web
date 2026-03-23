@@ -1,41 +1,31 @@
-# Admin News Manager Mapping & Audit
+# Admin News Module
 
-## 📋 Module Overview
+## Architecture (Current)
 
-`NewsManager.tsx` permite gestionar el ciclo de vida de las noticias (listar,
-buscar, publicar/despublicar, eliminar y navegar a edición).
+### News List Manager (`NewsManager.tsx`)
+- **Service**: `AdminNewsService` — getAll, delete, togglePublish.
+- **Components**: `NewsAdminHeader`, `NewsAdminFilters` (search + date range), `NewsAdminCard`.
+- **Types**: Uses unified `NewsArticle` from `PublicNewsService`.
 
-## ⚠️ Technical Debt & Identified Issues
+### News Editor (`NewsEditorPage.tsx` — 309 lines)
+- **Service**: `AdminNewsEditorService` — loadArticle, saveArticle, slug validation.
+- **Components**:
+  - `EditorToolbar` — TipTap formatting toolbar (bold, italic, headings, lists, links, images).
+  - `NewsEditorSidebar` — Publish toggle, metrics, featured image, slug, sources, PDF attachment, event date.
+  - `NewsPreview` — Rendered HTML preview of the article.
+- **Features**: Multi-language editor (CA/ES/EN), auto-translation, draft autosave to localStorage, readability metrics, slug auto-generation.
 
-### 1. Direct Infrastructure Dependency
+## File Map
 
-- El componente importa `supabase` y realiza consultas directas
-  (`.from('news').select('*')`).
-- Las acciones de mutación (`delete`, `update`) también están inline.
-
-### 2. Monolithic Component
-
-- El renderizado de la cabecera, búsqueda y tarjetas de noticias está acoplado.
-- La lógica de filtrado por texto está inline (`articles.filter(...)`).
-
-### 3. Redundant Types
-
-- Define su propia interfaz `NewsArticle`, que es casi idéntica a la que usamos
-  en el servicio público.
-
-### 4. Logic Duplication
-
-- La lógica de publicación (`handleTogglePublish`) debería estar centralizada en
-  un servicio para asegurar que los campos como `published_at` se gestionen de
-  forma consistente.
-
-## 🎯 Target Architecture
-
-1. **AdminNewsService**: Crear un servicio para las operaciones de
-   administración (obtener todas, eliminar, cambiar estado).
-2. **Modular UI**:
-   - `NewsAdminHeader.tsx`: Título y acciones globales (refrescar, crear).
-   - `NewsAdminFilters.tsx`: Barra de búsqueda.
-   - `NewsAdminCard.tsx`: Tarjeta con acciones de gestión (publicar, editar,
-     borrar).
-3. **Consistency**: Usar el tipo `NewsArticle` unificado.
+```
+services/admin/AdminNewsService.ts        — List CRUD operations
+services/admin/AdminNewsEditorService.ts   — Editor load/save + form types
+components/admin/news/NewsAdminHeader.tsx   — List page header
+components/admin/news/NewsAdminFilters.tsx  — Search + date range filters
+components/admin/news/NewsAdminCard.tsx     — Article card with actions
+components/admin/news/EditorToolbar.tsx     — TipTap toolbar
+components/admin/news/NewsEditorSidebar.tsx — Editor sidebar panels
+components/admin/news/NewsPreview.tsx       — Article preview
+pages/admin/NewsManager.tsx                — List orchestrator
+pages/admin/NewsEditorPage.tsx             — Editor orchestrator
+```
