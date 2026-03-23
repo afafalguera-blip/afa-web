@@ -12,6 +12,7 @@ export default function InscriptionsPage() {
   const { t } = useTranslation();
   const [inscriptions, setInscriptions] = useState<Inscription[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -27,11 +28,14 @@ export default function InscriptionsPage() {
   const fetchInscriptions = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const data = await AdminInscriptionsService.getInscriptions();
       console.log('Inscriptions loaded:', data.length);
       setInscriptions(data);
     } catch (error) {
       console.error('Error fetching inscriptions:', error);
+      const message = error instanceof Error ? error.message : String(error);
+      setLoadError(message);
     } finally {
       setLoading(false);
     }
@@ -150,6 +154,12 @@ export default function InscriptionsPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('admin.inscriptions.table.loading')}</td>
+                </tr>
+              ) : loadError ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-red-600">
+                    Error cargando inscripciones: {loadError}
+                  </td>
                 </tr>
               ) : filteredInscriptions.length === 0 ? (
                 <tr>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Save, ShoppingBag, User } from 'lucide-react';
+import { X, Plus, Trash2, Save, ShoppingBag, User, Mail, Phone } from 'lucide-react';
 import { ShopService } from '../services/ShopService';
 import { supabase } from '../../../lib/supabase';
 import type { ShopProduct, ShopOrder, ShopOrderItem, ShopVariant } from '../types/shop';
@@ -144,7 +144,19 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                 </button>
               </div>
             ) : (
-              <p className="text-lg font-bold text-slate-800 dark:text-white">{order.customer_name}</p>
+              <div className="space-y-1">
+                <p className="text-lg font-bold text-slate-800 dark:text-white">{order.customer_name}</p>
+                {order.customer_email && (
+                  <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5" /> {order.customer_email}
+                  </p>
+                )}
+                {order.customer_phone && (
+                  <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5" /> {order.customer_phone}
+                  </p>
+                )}
+              </div>
             )}
           </section>
 

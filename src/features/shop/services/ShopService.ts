@@ -9,6 +9,7 @@ function transformOrder(order: unknown): ShopOrder {
         created_at: o.created_at as string,
         customer_name: (o.customer_name as string) || 'Usuari Registrat',
         customer_email: (o.customer_email as string) || '',
+        customer_phone: (o.customer_phone as string) || '',
         total_amount: o.total_amount as number,
         payment_status: (o.payment_status as OrderPaymentStatus) || (o.status === 'completed' ? 'paid' : 'pending'),
         delivery_status: (o.delivery_status as OrderDeliveryStatus) || (o.status === 'completed' ? 'delivered' : 'pending'),
@@ -131,6 +132,7 @@ export const ShopService = {
   async createComplexOrder(payload: {
     customerName: string;
     customerEmail: string;
+    customerPhone?: string;
     totalAmount: number;
     items: Array<{ variant_id: string; quantity: number; price_at_time: number }>;
     userId?: string | null;
@@ -139,6 +141,7 @@ export const ShopService = {
     const { error } = await supabase.rpc('create_shop_complex_order_v1', {
         p_customer_name: payload.customerName,
         p_customer_email: payload.customerEmail,
+        p_customer_phone: payload.customerPhone || null,
         p_total_amount: payload.totalAmount,
         p_items: payload.items,
         p_user_id: payload.userId || null,

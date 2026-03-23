@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ShopService } from '../../../features/shop/services/ShopService';
-import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle } from 'lucide-react';
+import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle, Mail, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
 import { OrderEditModal } from '../../../features/shop/components/OrderEditModal';
@@ -85,7 +85,9 @@ export function OrdersPage() {
     const filteredOrders = useMemo(() => {
         return orders.filter(order => {
             const matchesSearch = order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                order.id.toLowerCase().includes(searchTerm.toLowerCase());
+                order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (order.customer_email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (order.customer_phone || '').toLowerCase().includes(searchTerm.toLowerCase());
 
             const isArchived = order.delivery_status === 'delivered' || order.delivery_status === 'not_picked_up';
 
@@ -161,7 +163,7 @@ export function OrdersPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
                         type="text"
-                        placeholder="Buscar per nom de client o ID..."
+                        placeholder="Buscar per nom, email, telèfon o ID..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
@@ -250,6 +252,23 @@ export function OrdersPage() {
                                         <h3 className="font-bold text-xl text-slate-900 dark:text-white truncate max-w-xs">{order.customer_name}</h3>
                                         <span className="text-2xl font-black text-primary">{order.total_amount.toFixed(2)}€</span>
                                     </div>
+
+                                    {(order.customer_email || order.customer_phone) && (
+                                        <div className="flex flex-wrap gap-3 mb-3 text-xs text-slate-500">
+                                            {order.customer_email && (
+                                                <span className="inline-flex items-center gap-1.5">
+                                                    <Mail className="w-3.5 h-3.5" />
+                                                    {order.customer_email}
+                                                </span>
+                                            )}
+                                            {order.customer_phone && (
+                                                <span className="inline-flex items-center gap-1.5">
+                                                    <Phone className="w-3.5 h-3.5" />
+                                                    {order.customer_phone}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="flex flex-wrap gap-2">
                                         {order.items?.map((item) => (

@@ -139,6 +139,8 @@ Deno.serve(async (req: Request) => {
 
     const pickupBodyText = shopConfig?.translations?.[record.language || 'ca'] || shopConfig?.translations?.['ca'] || t.pickupBody;
     const adminEmails = shopConfig?.admin_emails || ADMIN_EMAILS_DEFAULT;
+    const contactEmail = record.customer_email || order.customer_email || "";
+    const contactPhone = record.customer_phone || order.customer_phone || "";
 
     const itemsHtml = order.items && order.items.length > 0 
       ? order.items.map((item: { variant: { product: { name: string }, size: string }, quantity: number, price_at_time: number }) => `
@@ -178,6 +180,8 @@ Deno.serve(async (req: Request) => {
           <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #f1f5f9;">
             <h3 style="margin: 0 0 12px 0; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">${t.customerContext}</h3>
             <p style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 600;">${record.customer_name}</p>
+            ${contactEmail ? `<p style="margin: 6px 0 0 0; color: #334155; font-size: 14px;">Email: ${contactEmail}</p>` : ""}
+            ${contactPhone ? `<p style="margin: 4px 0 0 0; color: #334155; font-size: 14px;">Tel: ${contactPhone}</p>` : ""}
             <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">ID: <code style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${record.id.slice(0, 8)}</code></p>
           </div>
 
