@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Trash2, Mail, User, Loader2 } from 'lucide-react';
+import { X, Check, Trash2, Mail, User, Loader2, Phone } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../../../hooks/useAuth';
 import { ConfigService, type ShopConfig } from '../../../services/ConfigService';
@@ -17,6 +17,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
 
     const [customerName, setCustomerName] = useState('');
     const [customerEmail, setCustomerEmail] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
@@ -27,6 +28,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
     useEffect(() => {
         if (profile?.full_name) setCustomerName(profile.full_name);
         if (user?.email) setCustomerEmail(user.email);
+        if (user?.phone) setCustomerPhone(user.phone);
 
         const fetchConfig = async () => {
             const config = await ConfigService.getShopConfig();
@@ -38,8 +40,12 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
     const handleCheckout = async (e: React.FormEvent) => {
         e.preventDefault();
         if (items.length === 0) return;
-        if (!customerName.trim() || !customerEmail.trim()) {
-            setErrorMsg('Cal introduir el nom i l\'email per reservar.');
+
+        const hasEmail = customerEmail.trim().length > 0;
+        const hasPhone = customerPhone.trim().length > 0;
+
+        if (!customerName.trim() || (!hasEmail && !hasPhone)) {
+            setErrorMsg(t('shop_page.contact_required'));
             return;
         }
 
@@ -48,8 +54,9 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
 
         try {
             await ShopService.createComplexOrder({
-                customerName,
-                customerEmail,
+                customerName: customerName.trim(),
+                customerEmail: customerEmail.trim(),
+                customerPhone: customerPhone.trim(),
                 totalAmount: total,
                 items: items.map(item => ({
                     variant_id: item.variant.id,
@@ -156,10 +163,10 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                     <div className="h-4 w-1 bg-primary rounded-full"></div>
                                     {t('shop_page.contact_details')}
                                 </h3>
-                                <div className="grid sm:grid-cols-2 gap-4">
+                                <div className="grid sm:grid-cols-3 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                                            <User className="w-3 h-3" /> Nom i Cognoms
+                                            <User className="w-3 h-3" /> {t('shop_page.customer_name_label')}
                                         </label>
                                         <input
                                             required
@@ -172,14 +179,25 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
-                                            <Mail className="w-3 h-3" /> Correu electrònic
+                                            <Mail className="w-3 h-3" /> {t('shop_page.customer_email_label')}
                                         </label>
                                         <input
-                                            required
                                             type="email"
                                             value={customerEmail}
                                             onChange={e => setCustomerEmail(e.target.value)}
-                                            placeholder="joan@exemple.com"
+                                            placeholder={t('shop_page.customer_email_placeholder')}
+                                            className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                                            <Phone className="w-3 h-3" /> {t('shop_page.customer_phone_label')}
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            value={customerPhone}
+                                            onChange={e => setCustomerPhone(e.target.value)}
+                                            placeholder={t('shop_page.customer_phone_placeholder')}
                                             className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
                                         />
                                     </div>

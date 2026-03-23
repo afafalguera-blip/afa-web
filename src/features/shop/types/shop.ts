@@ -53,6 +53,7 @@ export interface ShopOrder {
   created_at: string;
   customer_name: string;
   customer_email: string;
+  customer_phone?: string;
   total_amount: number;
   payment_status: OrderPaymentStatus;
   delivery_status: OrderDeliveryStatus;
