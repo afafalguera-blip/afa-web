@@ -68,41 +68,8 @@ export const AdminInscriptionsService = {
       detectedTable = null;
     }
 
-    const first = await fetchTable('inscripcions');
-    if (!first.error && first.data.length > 0) {
-      detectedTable = 'inscripcions';
-      return first.data;
-    }
-
-    const second = await fetchTable('inscriptions');
-    if (!second.error && second.data.length > 0) {
-      detectedTable = 'inscriptions';
-      return second.data;
-    }
-
-    if (!first.error && first.data.length === 0) {
-      detectedTable = 'inscripcions';
-      return first.data;
-    }
-
-    if (!second.error && second.data.length === 0) {
-      detectedTable = 'inscriptions';
-      return second.data;
-    }
-
-    if (first.error && !isMissingRelationError(first.error)) throw first.error;
-    if (second.error && !isMissingRelationError(second.error)) throw second.error;
-
-    const data = await runWithTableFallback<Inscription[] | null>(async (table) => {
-      const result = await supabase
-        .from(table)
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      return { data: result.data as Inscription[] | null, error: result.error };
-    });
-
-    return (data || []) as Inscription[];
+    const data = await runWithTableFallback<Inscription[]>(fetchTable);
+    return data;
   },
 
   async deleteInscription(id: number | string) {
