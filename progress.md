@@ -1,6 +1,6 @@
 # Progress Report - AFA Web
 
-## 🏗️ Diagnóstico Arquitectónico
+## Diagnóstico Arquitectónico
 
 - **Framework Principal:** React 19 + Vite 7 (TypeScript).
 - **Estilos:** Tailwind CSS v3.
@@ -9,32 +9,59 @@
   Infraestructura de Servicios).
 - **Documentación Central:** Ver [Guía de Arquitectura](docs/architecture.md).
 
-## 🧩 Módulos Documentados (`docs/modules/`)
+## Estado de Módulos
 
-Hemos completado el mapeo y auditoría de todos los módulos del sistema:
+| Módulo | Service Layer | UI Modular | i18n | Estado |
+|--------|:---:|:---:|:---:|--------|
+| Shop (Tienda) | ✅ ShopService | ✅ | ✅ | **Completado** |
+| Inscriptions | ✅ AdminInscriptionsService | ✅ | ✅ | **Completado** |
+| Finance | ✅ FinanceService | ✅ | ✅ | **Completado** |
+| Calendar/Events (Admin) | ✅ AdminCalendarService | ✅ | ✅ | **Completado** |
+| Calendar (Público) | ✅ CalendarService | ✅ | ✅ | **Completado** |
+| Documents (Admin) | ✅ AdminDocumentsService | ✅ | ✅ | **Completado** |
+| Documents (Público) | ✅ DocumentsService | ✅ | ✅ | **Completado** |
+| News (Admin List) | ✅ AdminNewsService | ✅ | ✅ | **Completado** |
+| News (Editor) | ✅ AdminNewsEditorService | ✅ EditorToolbar + Sidebar + Preview | ✅ | **Completado** |
+| Activities (Admin) | ✅ ActivityService | ✅ | ✅ | **Completado** |
+| Observability | ✅ AdminObservabilityService | ✅ | ✅ | **Completado** |
+| Auth | ✅ AuthContext | ✅ | ✅ | **Completado** |
+| Contact | ✅ | ✅ | ✅ | **Completado** |
+| Dashboard Admin | ✅ useInscriptions | ✅ | ✅ | **Completado** |
+| Cuotas | — | ✅ | ✅ | **Completado** |
+| Tasks Manager | ✅ AdminTasksService | ✅ TaskCard + Filters + Modal + Stats | ✅ | **Completado** |
+| Projects Manager | ❌ | ❌ 520 líneas | ❌ | **Pendiente** |
 
-1. **Shop (Tienda):** Gestión de existencias y pedidos.
-2. **Inscriptions (Inscripciones):** Flujos públicos y gestión admin de alumnos.
-3. **Finance (Administración):** Balance, transacciones y facturación.
-4. **Calendar/Events:** Agenda escolar pública y administrativa.
-5. **Documents:** Gestor de actas y recursos con integración a Storage.
-6. **News:** Sistema de noticias y publicaciones.
-7. **Auth:** Control de acceso y perfiles.
-8. **Observability:** Logs de auditoría de base de datos.
-9. **Otros:** Contacto, Dashboard Admin, Home, Cuotas.
+## Archivos con Deuda Técnica (>300 líneas)
 
-## 🩺 Technical Health (Clean Code Status)
+| Archivo | Líneas | Problema |
+|---------|--------|----------|
+| `pages/admin/NewsEditorPage.tsx` | ~~883~~ → 309 | ✅ Refactorizado: EditorToolbar, NewsEditorSidebar, NewsPreview, AdminNewsEditorService |
+| `pages/admin/TasksManager.tsx` | ~~871~~ → 254 | ✅ Refactorizado: TaskCard, TaskFilters, TaskFormModal, TaskStatsBar |
+| `pages/InscriptionPage.tsx` | 568 | Formulario público largo |
+| `pages/admin/ProjectsManager.tsx` | 520 | Manager sin service layer |
+| `services/ExportService.ts` | 459 | Service grande (aceptable) |
+| `components/admin/ActivityEditorModal.tsx` | 441 | Modal editor extenso |
+| `pages/admin/NotificationManager.tsx` | 436 | Manager sin modularizar |
+| `components/layout/AdminLayout.tsx` | 400 | Layout complejo |
+| `components/admin/ProductEditorModal.tsx` | 394 | Modal editor extenso |
+
+## Technical Health
 
 - **Build Status:** ✅ PASSED (0 errors).
 - **Lint Status:** ✅ PASSED (0 errors).
-- **Hitos de Calidad:**
-  - Migración a **Servicios Especializados** (Sustitución del antiguo
-    `AdminService`).
+- **Hitos Completados:**
+  - Migración a Servicios Especializados (eliminación del antiguo `AdminService`).
   - Eliminación masiva de tipos `any` en componentes críticos.
   - Saneamiento de directivas `@ts-ignore` mediante tipado fuerte.
-  - Modularización de componentes monolíticos (>200 líneas).
+  - Modularización de 15/17 módulos principales.
 
-## 🗺️ Mapa de Módulos
+## Próximos Pasos (por prioridad)
 
-Todos los mapas detallados de infraestructura y deuda técnica se encuentran
-disponibles en la carpeta [docs/modules/](docs/modules/).
+1. ~~**Refactorizar NewsEditorPage.tsx**~~ — ✅ Completado (883 → 309 líneas).
+2. ~~**Refactorizar TasksManager.tsx**~~ — ✅ Completado (871 → 254 líneas).
+3. **Refactorizar ProjectsManager.tsx** — Crear service layer y modularizar UI.
+4. **Revisar modals grandes** — ActivityEditorModal, ProductEditorModal, NotificationManager.
+
+## Mapa de Módulos
+
+Mapas detallados en [docs/modules/](docs/modules/).
