@@ -35,6 +35,7 @@ import { DocumentsPage } from './pages/DocumentsPage';
 import { ContactPage } from './pages/ContactPage';
 import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
 import CookiesPolicy from './pages/Legal/CookiesPolicy';
+import SantJordiIdeasPage from './pages/SantJordiIdeasPage';
 
 
 import { ShopLanding } from './features/shop/pages/ShopLanding';
@@ -78,6 +79,7 @@ function App() {
               <Route path="contacte" element={<ContactPage />} />
               <Route path="privacitat" element={<PrivacyPolicy />} />
               <Route path="cookies" element={<CookiesPolicy />} />
+              <Route path="especial/sant-jordi" element={<SantJordiIdeasPage />} />
 
               {/* <Route path="perfil" element={<Placeholder title="Perfil" />} /> */}
             </Route>
