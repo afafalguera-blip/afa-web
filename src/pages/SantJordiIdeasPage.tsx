@@ -2,10 +2,8 @@ import { Helmet } from 'react-helmet-async';
 import type { ComponentType } from 'react';
 import {
   Bookmark,
-  CheckCircle2,
   ExternalLink,
   Flower2,
-  Gift,
   Shield,
 } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
@@ -101,45 +99,6 @@ const ideaSections: IdeaSection[] = [
       },
     ],
   },
-  {
-    id: 'detalles',
-    title: 'Detalles con Encanto',
-    icon: Gift,
-    ideas: [
-      {
-        title: 'Velas Aromáticas (Aroma a Rosa)',
-        description:
-          'Con cera de soja y tarritos de cristal obtienes un regalo elegante para familias y personal del centro.',
-        tutorialUrl:
-          'https://www.youtube.com/results?search_query=como+hacer+velas+de+soja+aromaticas+en+vaso',
-      },
-      {
-        title: 'Jabones de Glicerina',
-        description:
-          'Actividad fácil para hacer con niños: base de glicerina, colorante, esencia y moldes de silicona.',
-        tutorialUrl:
-          'https://www.youtube.com/results?search_query=como+hacer+jabones+de+glicerina+faciles',
-      },
-    ],
-  },
-];
-
-const salesTips = [
-  {
-    title: 'El packaging lo es todo',
-    description:
-      'Una presentación cuidada en celofán o bolsita transparente, con cinta o pegatina, multiplica el valor percibido.',
-  },
-  {
-    title: 'Escalera de precios',
-    description:
-      'Combina productos económicos (1€-2€), medios (3€-5€) y premium (10€-15€) para facilitar más ventas.',
-  },
-  {
-    title: 'Crea packs de Sant Jordi',
-    description:
-      'Ofrece packs cerrados con descuento para subir el ticket medio: tote bag + rosa + marcapáginas.',
-  },
 ];
 
 export default function SantJordiIdeasPage() {
@@ -225,23 +184,6 @@ export default function SantJordiIdeasPage() {
             </section>
           );
         })}
-
-        <section className="rounded-3xl border border-yellow-300 bg-yellow-50 p-6 lg:p-8">
-          <h2 className="text-2xl font-bold text-slate-900">
-            Consejos de venta para tu paradeta
-          </h2>
-          <div className="mt-4 space-y-3">
-            {salesTips.map((tip) => (
-              <div key={tip.title} className="flex items-start gap-3">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-                <p className="text-sm text-slate-700">
-                  <span className="font-bold text-slate-900">{tip.title}:</span>{' '}
-                  {tip.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
     </>
   );
