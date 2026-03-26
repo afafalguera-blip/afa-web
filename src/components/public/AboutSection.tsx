@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
 import type { AboutConfig, ContactConfig } from '../../services/ConfigService';
+import { sanitizeRichTextHtml } from '../../utils/htmlSanitizer';
 
 interface AboutSectionProps {
     isAdmin: boolean;
@@ -57,12 +58,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                         {aboutConfig?.translations?.[currentLang]?.text ? (
                             <div
                                 className="whitespace-pre-wrap"
-                                dangerouslySetInnerHTML={{ __html: aboutConfig.translations[currentLang].text.replace(/\n/g, '<br/>') }}
+                                dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(aboutConfig.translations[currentLang].text.replace(/\n/g, '<br/>')) }}
                             />
                         ) : aboutConfig?.text ? (
                             <div
                                 className="whitespace-pre-wrap"
-                                dangerouslySetInnerHTML={{ __html: aboutConfig.text.replace(/\n/g, '<br/>') }}
+                                dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(aboutConfig.text.replace(/\n/g, '<br/>')) }}
                             />
                         ) : (
                             <>

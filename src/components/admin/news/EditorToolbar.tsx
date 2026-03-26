@@ -32,6 +32,15 @@ function ToolbarButton({ title, active = false, disabled = false, onClick, icon 
   );
 }
 
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url, window.location.origin);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 function setLink(editor: Editor) {
   const previous = editor.getAttributes('link').href as string | undefined;
   const url = window.prompt('URL del enlace', previous || 'https://');
@@ -42,12 +51,23 @@ function setLink(editor: Editor) {
     return;
   }
 
+  if (!isSafeUrl(url.trim())) {
+    alert('URL no vàlida. Només es permeten enllaços http/https.');
+    return;
+  }
+
   editor.chain().focus().setLink({ href: url.trim(), target: '_blank', rel: 'noopener noreferrer' }).run();
 }
 
 function addImage(editor: Editor) {
   const imageUrl = window.prompt('URL de la imagen');
   if (!imageUrl || !imageUrl.trim()) return;
+
+  if (!isSafeUrl(imageUrl.trim())) {
+    alert('URL no vàlida. Només es permeten imatges http/https.');
+    return;
+  }
+
   editor.chain().focus().setImage({ src: imageUrl.trim(), alt: '' }).run();
 }
 

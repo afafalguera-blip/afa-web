@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Lock } from 'lucide-react';
 import { ConfigService, type LegalConfig } from '../../services/ConfigService';
+import { sanitizeRichTextHtml } from '../../utils/htmlSanitizer';
 
 export default function PrivacyPolicy() {
     const { i18n, t } = useTranslation();
@@ -45,7 +46,7 @@ export default function PrivacyPolicy() {
                     {content ? (
                         <div
                             className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed space-y-4"
-                            dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(content.replace(/\n/g, '<br/>')) }}
                         />
                     ) : (
                         <div className="text-center py-12 text-slate-400 italic">

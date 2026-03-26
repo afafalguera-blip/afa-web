@@ -34,8 +34,27 @@ export const AdminDocumentsService = {
     return data || [];
   },
 
+  ALLOWED_MIMES: new Set([
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'image/jpeg',
+    'image/png'
+  ]),
+  MAX_SIZE: 20 * 1024 * 1024, // 20MB
+
   async upload(data: DocumentUploadData): Promise<void> {
     const file = data.file;
+
+    if (!this.ALLOWED_MIMES.has(file.type)) {
+      throw new Error(`Tipo de archivo no permitido: ${file.type}`);
+    }
+    if (file.size > this.MAX_SIZE) {
+      throw new Error('El archivo supera el tamaño máximo de 20MB');
+    }
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${data.category}/${fileName}`;

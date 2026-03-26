@@ -1,49 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../../lib/supabase';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Archive,
-  RefreshCw,
-  FolderHeart,
-  Wand2
-} from 'lucide-react';
-import { ImageUpload } from '../../components/admin/ImageUpload';
+import { FolderHeart } from 'lucide-react';
+import { AdminProjectsService } from '../../services/admin/AdminProjectsService';
+import type { Project, ProjectFormData } from '../../services/admin/AdminProjectsService';
 import { TranslationService } from '../../services/TranslationService';
+import { ProjectsHeader } from '../../components/admin/projects/ProjectsHeader';
+import { ProjectsFilterBar } from '../../components/admin/projects/ProjectsFilterBar';
+import { ProjectCard } from '../../components/admin/projects/ProjectCard';
+import { ProjectFormModal } from '../../components/admin/projects/ProjectFormModal';
 
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  image_url: string | null;
-  status: 'active' | 'archived';
-  display_order: number;
-  created_at: string;
-  updated_at: string;
-  translations?: Record<string, { 
-    title: string; 
-    description: string;
-    details?: string;
-    impact?: string;
-    participants?: string;
-  }>;
-}
+const EMPTY_TRANSLATIONS = {
+  ca: { title: '', description: '', details: '', impact: '', participants: '' },
+  es: { title: '', description: '', details: '', impact: '', participants: '' },
+  en: { title: '', description: '', details: '', impact: '', participants: '' }
+};
 
-interface ProjectFormData {
-  title: string;
-  description: string;
-  image_url: string;
-  translations: Record<string, { 
-    title: string; 
-    description: string;
-    details: string;
-    impact: string;
-    participants: string;
-  }>;
-}
+const EMPTY_FORM: ProjectFormData = {
+  title: '',
+  description: '',
+  image_url: '',
+  translations: { ...EMPTY_TRANSLATIONS }
+};
 
 export default function ProjectsManager() {
   const { t } = useTranslation();
@@ -53,16 +30,7 @@ export default function ProjectsManager() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [formData, setFormData] = useState<ProjectFormData>({
-    title: '',
-    description: '',
-    image_url: '',
-    translations: {
-      ca: { title: '', description: '', details: '', impact: '', participants: '' },
-      es: { title: '', description: '', details: '', impact: '', participants: '' },
-      en: { title: '', description: '', details: '', impact: '', participants: '' }
-    }
-  });
+  const [formData, setFormData] = useState<ProjectFormData>(EMPTY_FORM);
   const [activeLang, setActiveLang] = useState<'ca' | 'es' | 'en'>('es');
   const [isTranslating, setIsTranslating] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -74,13 +42,8 @@ export default function ProjectsManager() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('display_order', { ascending: true });
-
-      if (error) throw error;
-      setProjects(data || []);
+      const data = await AdminProjectsService.getProjects();
+      setProjects(data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -90,9 +53,9 @@ export default function ProjectsManager() {
 
   const handleCreate = () => {
     setEditingProject(null);
-    setFormData({ 
-      title: '', 
-      description: '', 
+    setFormData({
+      title: '',
+      description: '',
       image_url: '',
       translations: {
         ca: { title: '', description: '', details: '', impact: '', participants: '' },
@@ -123,10 +86,9 @@ export default function ProjectsManager() {
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('admin.projects.delete_confirm'))) return;
-    
+
     try {
-      const { error } = await supabase.from('projects').delete().eq('id', id);
-      if (error) throw error;
+      await AdminProjectsService.deleteProject(id);
       setProjects(prev => prev.filter(p => p.id !== id));
     } catch (error) {
       console.error('Error deleting project:', error);
@@ -138,14 +100,8 @@ export default function ProjectsManager() {
     const newStatus = project.status === 'active' ? 'archived' : 'active';
 
     try {
-      const { error } = await supabase
-        .from('projects')
-        .update({ status: newStatus })
-        .eq('id', project.id);
-
-      if (error) throw error;
-      
-      setProjects(prev => prev.map(p => 
+      await AdminProjectsService.toggleArchive(project.id, newStatus);
+      setProjects(prev => prev.map(p =>
         p.id === project.id ? { ...p, status: newStatus } : p
       ));
     } catch (error) {
@@ -156,9 +112,9 @@ export default function ProjectsManager() {
 
   const handleAutoTranslate = async () => {
     const sourceContent = formData.translations[activeLang];
-    
+
     if (!sourceContent.title) {
-      alert(t('admin.news.fill_source_first')); // Reusing news translation key for consistency
+      alert(t('admin.news.fill_source_first'));
       return;
     }
 
@@ -166,7 +122,7 @@ export default function ProjectsManager() {
     try {
       const targetLangs = (['ca', 'es', 'en'] as const).filter(l => l !== activeLang);
       const updatedTranslations = { ...formData.translations };
-      
+
       for (const lang of targetLangs) {
         const translated = await TranslationService.translateContent(
           sourceContent,
@@ -196,20 +152,6 @@ export default function ProjectsManager() {
     }
   };
 
-  const updateTranslationField = (lang: string, field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      translations: {
-        ...prev.translations,
-        [lang]: {
-          ...prev.translations[lang],
-          [field]: value
-        }
-      },
-      ...(lang === 'es' ? { [field]: value } : {})
-    }));
-  };
-
   const handleSave = async () => {
     if (!formData.translations.es.title.trim() && !formData.title.trim()) {
       alert(t('admin.projects.title_required'));
@@ -218,33 +160,8 @@ export default function ProjectsManager() {
 
     setSaving(true);
     try {
-      const payload = {
-        title: formData.translations.es.title || formData.title,
-        description: formData.translations.es.description || formData.description,
-        image_url: formData.image_url || null,
-        translations: formData.translations
-      };
-
-      if (editingProject) {
-        const { error } = await supabase
-          .from('projects')
-          .update(payload)
-          .eq('id', editingProject.id);
-
-        if (error) throw error;
-      } else {
-        const maxOrder = projects.reduce((max, p) => Math.max(max, p.display_order), 0);
-        const { error } = await supabase
-          .from('projects')
-          .insert([{
-            ...payload,
-            status: 'active',
-            display_order: maxOrder + 1
-          }]);
-
-        if (error) throw error;
-      }
-
+      const maxOrder = projects.reduce((max, p) => Math.max(max, p.display_order), 0);
+      await AdminProjectsService.saveProject(formData, maxOrder, editingProject?.id);
       setIsModalOpen(false);
       fetchProjects();
     } catch (error) {
@@ -263,54 +180,19 @@ export default function ProjectsManager() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.projects.title')}</h1>
-          <p className="text-slate-500">{t('admin.projects.subtitle')}</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={fetchProjects}
-            className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            title={t('common.refresh')}
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button 
-            onClick={handleCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            {t('admin.projects.new_project')}
-          </button>
-        </div>
-      </div>
+      <ProjectsHeader
+        loading={loading}
+        onRefresh={fetchProjects}
+        onCreate={handleCreate}
+      />
 
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder={t('admin.projects.search_placeholder')}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            value={searchText}
-            onChange={e => setSearchText(e.target.value)}
-          />
-        </div>
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value as 'all' | 'active' | 'archived')}
-          className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-        >
-          <option value="all">{t('admin.projects.status_all')}</option>
-          <option value="active">{t('admin.projects.status_active')}</option>
-          <option value="archived">{t('admin.projects.status_archived')}</option>
-        </select>
-      </div>
+      <ProjectsFilterBar
+        searchText={searchText}
+        setSearchText={setSearchText}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+      />
 
-      {/* Projects Grid */}
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -323,197 +205,30 @@ export default function ProjectsManager() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map(project => (
-            <div 
+            <ProjectCard
               key={project.id}
-              className={`bg-white rounded-xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${
-                project.status === 'archived' ? 'border-slate-300 opacity-70' : 'border-slate-200'
-              }`}
-            >
-              <div className="aspect-video bg-slate-100 relative">
-                <img 
-                  src={project.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop'} 
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-semibold text-slate-900">{project.title}</h3>
-                  {project.status === 'archived' && (
-                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
-                      {t('admin.projects.status_archived')}
-                    </span>
-                  )}
-                </div>
-                {project.description && (
-                  <p className="text-sm text-slate-500 line-clamp-3 mb-4">{project.description}</p>
-                )}
-                <div className="flex items-center gap-1 pt-4 border-t border-slate-100">
-                  <button
-                    onClick={() => handleToggleArchive(project)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      project.status === 'active' 
-                        ? 'text-amber-600 hover:bg-amber-50' 
-                        : 'text-green-600 hover:bg-green-50'
-                    }`}
-                    title={project.status === 'active' ? t('admin.projects.archive') : t('admin.projects.unarchive')}
-                  >
-                    <Archive className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleEdit(project)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title={t('common.edit')}
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(project.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title={t('common.delete')}
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
+              project={project}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleArchive={handleToggleArchive}
+            />
           ))}
         </div>
       )}
 
-      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900">
-                {editingProject ? t('admin.projects.edit_project') : t('admin.projects.new_project')}
-              </h2>
-            </div>
-            <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              {/* Language Tabs */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div className="flex gap-2">
-                  {(['ca', 'es', 'en'] as const).map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => setActiveLang(lang)}
-                      className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                        activeLang === lang
-                          ? 'bg-blue-600 text-white shadow-md'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      {lang.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={handleAutoTranslate}
-                  disabled={isTranslating}
-                  className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-bold hover:bg-amber-600 transition-all disabled:opacity-50"
-                  title="Traducir automáticamente al resto de idiomas"
-                >
-                  <Wand2 className={`w-4 h-4 ${isTranslating ? 'animate-pulse' : ''}`} />
-                  {isTranslating ? 'Traduciendo...' : 'Auto-traducir'}
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    {t('admin.projects.field_title')} ({activeLang.toUpperCase()}) *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.translations[activeLang]?.title || ''}
-                    onChange={e => updateTranslationField(activeLang, 'title', e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder={t('admin.projects.title_placeholder')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    {t('admin.projects.field_description')} ({activeLang.toUpperCase()})
-                  </label>
-                  <textarea
-                    value={formData.translations[activeLang]?.description || ''}
-                    onChange={e => updateTranslationField(activeLang, 'description', e.target.value)}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                    placeholder={t('admin.projects.description_placeholder')}
-                  />
-                </div>
-                <div>
-                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                      {t('admin.projects.field_details')} ({activeLang.toUpperCase()}) - Markdown Supported
-                   </label>
-                   <textarea
-                      value={formData.translations[activeLang]?.details || ''}
-                      onChange={e => updateTranslationField(activeLang, 'details', e.target.value)}
-                      rows={6}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
-                      placeholder={t('admin.projects.details_placeholder')}
-                   />
-                   <p className="text-xs text-slate-500 mt-1">Use **bold**, - lists, ### headers for formatting.</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                            {t('admin.projects.field_impact')} ({activeLang.toUpperCase()})
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.translations[activeLang]?.impact || ''}
-                            onChange={e => updateTranslationField(activeLang, 'impact', e.target.value)}
-                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder={t('admin.projects.impact_placeholder')}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                            {t('admin.projects.field_participants')} ({activeLang.toUpperCase()})
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.translations[activeLang]?.participants || ''}
-                            onChange={e => updateTranslationField(activeLang, 'participants', e.target.value)}
-                            className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder={t('admin.projects.participants_placeholder')}
-                        />
-                    </div>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {t('admin.projects.field_image_url')}
-                </label>
-                <ImageUpload
-                  value={formData.image_url}
-                  onUpload={(url) => setFormData(prev => ({ ...prev, image_url: url || '' }))}
-                  folder="projects"
-                />
-              </div>
-            </div>
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                {saving ? t('common.saving') : t('common.save')}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ProjectFormModal
+          isEditing={!!editingProject}
+          formData={formData}
+          setFormData={setFormData}
+          activeLang={activeLang}
+          setActiveLang={setActiveLang}
+          isTranslating={isTranslating}
+          saving={saving}
+          onAutoTranslate={handleAutoTranslate}
+          onSave={handleSave}
+          onClose={() => setIsModalOpen(false)}
+        />
       )}
     </div>
   );

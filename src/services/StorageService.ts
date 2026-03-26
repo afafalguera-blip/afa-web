@@ -8,7 +8,27 @@ export const StorageService = {
    * @param folder Optional folder path within the bucket.
    * @returns The public URL of the uploaded file.
    */
+  ALLOWED_IMAGE_MIMES: new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
+  ALLOWED_DOC_MIMES: new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif']),
+  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+
+  validateFile(file: File, allowedMimes?: Set<string>) {
+    const mimes = allowedMimes || this.ALLOWED_DOC_MIMES;
+    if (!mimes.has(file.type)) {
+      throw new Error(`Tipo de archivo no permitido: ${file.type}`);
+    }
+    if (file.size > this.MAX_FILE_SIZE) {
+      throw new Error(`El archivo supera el tamaño máximo de 10MB`);
+    }
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!ext) {
+      throw new Error('El archivo no tiene extensión');
+    }
+  },
+
   async uploadFile(bucket: string, file: File, folder: string = 'uploads') {
+    this.validateFile(file);
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
     const filePath = folder ? `${folder}/${fileName}` : fileName;

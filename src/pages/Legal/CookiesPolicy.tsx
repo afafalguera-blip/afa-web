@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Cookie, Check, ShieldCheck, PieChart, Target } from 'lucide-react';
 import { ConfigService, type LegalConfig } from '../../services/ConfigService';
 import { CookieService, type CookieConsent } from '../../services/CookieService';
+import { sanitizeRichTextHtml } from '../../utils/htmlSanitizer';
 
 export default function CookiesPolicy() {
     const { i18n, t } = useTranslation();
@@ -158,7 +159,7 @@ export default function CookiesPolicy() {
                     {content ? (
                         <div
                             className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed space-y-4 prose dark:prose-invert max-w-none"
-                            dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br/>') }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(content.replace(/\n/g, '<br/>')) }}
                         />
                     ) : (
                         <div className="text-center py-12 text-slate-400 italic">
