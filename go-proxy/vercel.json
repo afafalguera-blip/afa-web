@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    {
+      "source": "/:slug",
+      "destination": "https://zaxbtnjkidqwzqsehvld.functions.supabase.co/go/:slug"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://afafalguera.com",
+      "permanent": false
+    }
+  ]
+}
