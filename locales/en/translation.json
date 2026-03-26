@@ -1,0 +1,571 @@
+{
+  "header": {
+    "greeting": "Good morning, Family 👋"
+  },
+  "nav": {
+    "home": "Home",
+    "extraescolars": "Activities",
+    "shop": "Shop",
+    "documents": "Documents",
+    "contact": "Contact",
+    "suggestions": "Suggestions",
+    "profile": "Profile"
+  },
+  "legal": {
+    "privacy_title": "Privacy Policy",
+    "cookies_title": "Cookies Policy",
+    "no_content": "No content available.",
+    "cookies_prefs": "Configure your preferences",
+    "cookies_technical": "Technical",
+    "cookies_technical_desc": "Necessary for operation.",
+    "cookies_analytics": "Analytics",
+    "cookies_analytics_desc": "To measure performance and usage.",
+    "cookies_personalization": "Personalization",
+    "cookies_personalization_desc": "To remember your preferences and settings.",
+    "cookies_save": "Save preferences",
+    "cookies_saved": "Saved Successfully!"
+  },
+  "home": {
+    "welcome_title": "Welcome to AFA Falguera",
+    "extraescolars": "Activities",
+    "fees": "Fees",
+    "calendar": "Calendar",
+    "acollida": "Childcare",
+    "contact": "Contact",
+    "course_current": "Year 2025 - 2026",
+    "view_details": "View Details",
+    "news_title": "Latest News",
+    "see_all": "See all",
+    "events_title": "Upcoming Events",
+
+    "about_title": "What does the AFA do?",
+    "about_text_1": "The AFA is the association formed by the majority of the school's families. The board of directors is responsible for coordinating various activities. Joining the board is voluntary. Therefore, any help from you, no matter how small, will be very welcome.",
+    "about_text_2": "The board organizes and manages extracurricular activities intended to complement the children's education, and collaborates in many other activities throughout the school year.",
+    "about_text_3": "It also participates in organizing popular festivals: Castanyada, Tió, Sant Jordi, End of Year...",
+    "about_contact": "For any information, you can find us at the AFA office on Mondays from 9:00 to 9:30.",
+    "about_functions_title": "Its main functions are:",
+    "about_functions": [
+      "Raise awareness and guide parents regarding their responsibility for their children's education.",
+      "Channel initiatives and suggestions from parents.",
+      "Manage the acquisition and distribution of common materials and books.",
+      "Promote permanent family-school dialogue.",
+      "Organize and manage extracurricular or complementary activities.",
+      "Participate in social and cultural activities organized at the municipal level that may be of interest to schools.",
+      "Collaborate in the school's festivals and cultural acts."
+    ],
+    "news_archive": {
+      "subtitle": "Keep up to date with everything happening in our school and AFA projects."
+    },
+    "assemblea_banner": {
+       "tag": "Documentation",
+       "title": "General Assembly",
+       "description": "Summary of agreements, financial status, and new AFA projects."
+    },
+    "contact_banner": {
+      "tag": "Prior Appointment",
+      "title": "Want to talk to us?",
+      "description": "In-person assistance at the office on Mondays (9:00-9:30), always on demand by prior email.",
+      "button": "Contact Form"
+    }
+  },
+  "contact_page": {
+    "title": "Contact",
+    "subtitle": "We are here to help. Send us your questions or suggestions.",
+    "form_name": "Name",
+    "form_name_placeholder": "Your name",
+    "form_email": "Email",
+    "form_subject": "Subject",
+    "form_subject_placeholder": "Message subject",
+    "form_message": "Message",
+    "form_message_placeholder": "How can we help you?",
+    "form_submit": "Send Message",
+    "form_success": "Message sent successfully! We will get back to you as soon as possible.",
+    "schedule_title": "In-Person Assistance",
+    "schedule_description": "For any in-person management, you will find us at the AFA office during the following hours (always with prior appointment via email):",
+    "schedule_mon": "Mondays from 9:00 to 9:30 AM",
+    "email_demand": "Remember that you must send an email beforehand to schedule the appointment.",
+    "schedule_appointment_mobile": "For any other day, an appointment must be requested through the form.",
+    "other_ways": "Other ways"
+  },
+  "calendar": {
+    "title": "Activities Calendar",
+    "subtitle": "Important events and dates for our community",
+    "view_month": "Month",
+    "view_week": "Week",
+    "view_day": "Day",
+    "today": "Today",
+    "no_events": "No events for this day",
+    "no_events_month": "No events scheduled for this month",
+    "close": "Close",
+    "location": "Location",
+    "time": "Time",
+    "description": "Description"
+  },
+  "assemblea": {
+    "title": "General Assembly",
+    "course": "Year 2025-2026",
+    "subtitle": "Summary of points discussed, financial status, and new AFA School Falguera projects.",
+    "sections": {
+      "agenda": {
+        "title": "Agenda",
+        "items": [
+          "Financial Status",
+          "Completed Projects",
+          "AFA Board Change",
+          "Open Question Time"
+        ]
+      },
+      "economics": {
+        "title": "Economic Situation",
+        "items": [
+           "Positive balance and safety savings.",
+           "No debts or pending payments.",
+           "Increased revenue thanks to high participation.",
+           "Reserve fund destined for future investments.",
+           "Transparent and audited management."
+        ]
+      },
+      "investments": {
+        "title": "Investments and Forecasts",
+        "items": [
+          "Improvements to the infant and primary playground.",
+          "Purchase of digital material (e-readers and tablets).",
+          "Renovation of sports equipment.",
+          "Subsidy for colonies and excursions.",
+          "Solidarity fund for families."
+        ]
+      },
+      "functions": {
+         "title": "AFA Functions",
+         "items": [
+           "Management of extracurriculars",
+           "Organization of festivals",
+           "Fundraising",
+           "Family-school intermediation",
+           "Improvement of facilities",
+           "Book socialization",
+           "Support for families"
+         ]
+      },
+      "quota": {
+         "title": "What is the fee used for?",
+         "items": [
+           "Collective school material",
+           "Traditional festivals (Castanyada, etc.)",
+           "Educational talks",
+           "School digitalization",
+           "School aid fund"
+         ]
+      },
+      "projects": {
+        "title": "Projects and Improvements",
+        "commissions": {
+           "title": "Family Commissions",
+           "desc": "Active groups of families working to improve the school and energize the educational community."
+        },
+        "done": {
+           "title": "Done (24-25)",
+           "items": [
+             "Track painting",
+             "School garden",
+             "Infant shade",
+             "Book bench"
+           ]
+        },
+        "future": {
+           "title": "Next (25-26)",
+           "items": [
+             "Library renovation",
+             "Inclusive patio",
+             "Own kitchen",
+             "Multipurpose room"
+           ]
+        }
+      },
+      "board_change": {
+        "title": "AFA Board Change",
+        "desc": "Renewal of positions and new additions.",
+        "important_title": "IMPORTANT",
+        "important_desc": "It is vital to work together to keep moving forward.",
+        "call_to_action_title": "WE NEED YOU!",
+        "call_to_action_desc": "The AFA needs family involvement to continue improving our children's school."
+      },
+      "contact": {
+        "contact_us": "Contact Us",
+        "instagram": "Instagram"
+      }
+    }
+  },
+  "fees_page": {
+    "title": "AFA Fees",
+    "subtitle": "Your collaboration allows us to continue improving the educational experience for all children in the school.",
+    "purpose_title": "What is it for?",
+    "purpose_text": "The AFA is a non-profit association formed by parents. The annual fee is our main source of funding to carry out projects and activities.",
+    "purpose_list": [
+      "Purchase of educational and play material for the school.",
+      "Organization of traditional festivals (Castanyada, Carnival, End of Year).",
+      "Subsidizing talks and workshops for families.",
+      "Management of extracurricular activities and childcare."
+    ],
+    "annual_quota": "Annual Fee per Family",
+    "single_payment": "A single payment per school year that benefits all your children.",
+    "payment_ref_label": "Payment Reference",
+    "payment_ref_value": "COURSE 2025-2026",
+    "transfer_info_title": "Transfer Information",
+    "iban_label": "AFA IBAN",
+    "copy_iban": "Copy IBAN",
+    "important_label": "Very Important!",
+    "important_text": "In the transfer concept, please: STATE THE NAME OF YOUR SON OR DAUGHTER AND THE GRADE.",
+    "entity_label": "Entity",
+    "holder_label": "Holder",
+    "footer_note": "Once the transfer is made, remember to keep the receipt in case it is necessary."
+  },
+  "shop_page": {
+    "subtitle": "Reserve school clothing and pick it up at the AFA.",
+    "search_placeholder": "Search products...",
+    "filter_all": "All",
+    "filter_uniform": "Uniform",
+    "filter_accessories": "Accessories",
+    "view_options": "View Options",
+    "member_price": "Member",
+    "non_member_price": "Non-Member",
+    "add_to_cart": "Add to cart",
+    "cart_title": "My Cart",
+    "empty_cart": "The cart is empty",
+    "back_to_shop": "Back to shop",
+    "checkout_btn": "Finalize Reservation",
+    "subtotal": "Subtotal",
+    "total": "Total due",
+    "contact_details": "Contact information",
+    "customer_name_label": "Full name",
+    "customer_email_label": "Email",
+    "customer_email_placeholder": "joan@example.com",
+    "customer_phone_label": "Phone",
+    "customer_phone_placeholder": "+34 600 123 456",
+    "contact_required": "To reserve, provide either an email or a phone number.",
+    "payment_note": "Cash payment upon pickup",
+    "success_title": "Reservation Confirmed!",
+    "success_message": "Thanks for your reservation. You can pick up your order at the AFA.",
+    "added_success": "Added to cart!",
+    "go_to_cart": "Go to cart",
+    "continue_shopping": "Continue shopping"
+  },
+  "featured_projects": {
+    "title": "Your support transforms the school",
+    "subtitle_prefix": "We don’t just manage, we create",
+    "subtitle_highlight": "motivating environments",
+    "subtitle_suffix": "See what we are achieving thanks to families like yours.",
+    "investment_label": "Investment",
+    "status": {
+      "completed": "Completed",
+      "in_progress": "In progress",
+      "voting": "Voting"
+    },
+    "details_title": "Project Details",
+    "projects": {
+      "1": {
+        "title": "Smart Classroom & Living Spaces",
+        "description": "We transform traditional classrooms into motivating environments that foster creativity and collaborative work.",
+        "impact": "+450 students benefited",
+        "participants": "Space Commission & Alumni"
+      },
+      "2": {
+        "title": "Playground Renaturalization",
+        "description": "More green, less concrete. A project to bring life to recess with shaded areas, a school garden, and inclusive play structures.",
+        "impact": "Improves coexistence & temperature",
+        "participants": "Volunteer families (weekends)"
+      },
+      "3": {
+        "title": "Digitalization & Open Library",
+        "description": "We want a library that is the cultural heart of the center. Vote to approve the purchase of new furniture and e-readers.",
+        "impact": "Promotes reading & study",
+        "participants": "Member Assembly"
+      }
+    }
+  },
+  "inscription": {
+    "title_prefix": "More than Activities:",
+    "title_highlight": "Experiences for Growth",
+    "subtitle_prefix": "Registration Year 2025-26.",
+    "subtitle_highlight": "Everything in one place.",
+    "subtitle_suffix": "We simplify management so you can enjoy watching them learn and have fun.",
+    "info_box": {
+      "title": "How does the process work?",
+      "text": "We have designed this unique form to make your life easier. You can register all your children at once. If any activity has excess demand, we guarantee a fair process respecting the order of entry."
+    },
+    "important_info": {
+      "title": "Important Information",
+      "text": "Activities will only take place if there are enough students. If there is an excess of students, registration order will be respected."
+    },
+    "pricing": {
+      "title": "Pricing & Payment Method",
+      "general_title": "General Activities",
+      "timbals_title": "Drums",
+      "english_title": "English",
+      "hours_general": "4:30 PM to 6:00 PM",
+      "hours_timbals": "5:30 PM to 7:00 PM (Friday)",
+      "socis": "/month members",
+      "no_socis": "/month non-members",
+      "price_member": "Members",
+      "price_non_member": "Non-members",
+      "offer_banner_title": "Special Multi-Activity Offer",
+      "offer_banner_body": "If you take two identical extracurricular activities in the same week, enjoy a reduced price: 36€/month (members) and 40€/month (non-members).",
+      "discount_title": "Discount:",
+      "discount_body": "If taking two identical activities per week: 36€/month (members) and 40€/month (non-members).",
+      "english_material": "+ 60€ material (October)",
+      "english_warning_title": "IMPORTANT NOTICE - English (Primary):",
+      "english_warning_body": "English classes on Tuesdays and Wednesdays are NOT paid through AFA. It is managed directly with the company.",
+      "payment_method_title": "Payment Information",
+      "payment_method_body": "Monthly payment via bank transfer before the 10th.",
+      "copy_iban": "Copy IBAN",
+      "iban_hint": "Important! Include student name and activity in the reference."
+    },
+    "form": {
+      "student_section": "Student Details",
+      "student_label": "Student",
+      "remove_student": "Remove",
+      "add_student": "+ Add another student",
+      "name": "First Name",
+      "surname": "Last Name",
+      "course": "Grade/Year",
+      "select_course": "Select grade",
+      "available_activities": "Activities available for",
+      "no_activities": "No activities available for this grade.",
+      "must_select_activity": "* You must select at least one activity.",
+      "parent_section": "Parent/Guardian Details",
+      "dni": "ID/Passport",
+      "phone_1": "Phone 1",
+      "phone_2": "Phone 2 (Optional)",
+      "email_1": "Email 1",
+      "email_2": "Email 2 (Optional)",
+      "is_member": "Are you AFA members?",
+      "yes": "Yes",
+      "no": "No",
+      "additional_section": "Additional Information",
+      "health_info": "Medical conditions, allergies or medication",
+      "health_placeholder": "Leave blank if none",
+      "image_rights": "Image rights authorization",
+      "image_text": "I authorize the use of images in photographs and/or videos taken by the AFA for the website and social media.",
+      "image_yes": "Yes, I authorize image processing.",
+      "image_no": "No, I do not authorize image processing.",
+      "leave_alone": "Authorization to leave alone",
+      "leave_alone_text": "Can the student leave alone after the activity?",
+      "authorized_pickup": "Authorized persons to pick up the student (if not leaving alone)",
+      "authorized_pickup_placeholder": "Full name of father, mother, grandparents, etc.",
+      "terms_accept": "I have read and accept the",
+      "terms_link": "terms and conditions of extracurriculars",
+      "submit_btn": "Submit Registration",
+      "privacy_note": "By submitting the form, you accept the center's privacy policy.",
+      "success_title": "Registration Received!",
+      "success_message": "We have successfully registered the pre-registration.",
+      "back_home": "Back to Home",
+      "error_terms": "You must accept the conditions to continue.",
+      "error_activities": "All students must have at least one activity selected.",
+      "error_generic": "There was an error submitting the form."
+    },
+    "activity_modal": {
+      "grades": "Grades",
+      "location": "Location",
+      "spots": "Spots",
+      "spots_available": "Spots available",
+      "about": "About the activity",
+      "default_description": "No description available.",
+      "schedule_title": "Schedule and Groups",
+      "note_label": "Important note:",
+      "signup_btn": "Sign up now",
+      "per_month": "per month",
+      "stem_approved": "STEM Approved"
+    },
+    "days": {
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday"
+    },
+    "courses": {
+      "i3": "I3",
+      "i4": "I4",
+      "i5": "I5",
+      "1pri": "1st Grade",
+      "2pri": "2nd Grade",
+      "3pri": "3rd Grade",
+      "4pri": "4th Grade",
+      "5pri": "5th Grade",
+      "6pri": "6th Grade"
+    },
+    "activity_names": {
+      "musical_theater_eng": "Musical Theatre in English",
+      "marxa_marxa_eng": "Marxa-Marxa in English",
+      "drums_init": "Drums Initiation",
+      "football": "Football",
+      "english": "English",
+      "skating": "Skating",
+      "drums": "Drums"
+    },
+    "acollida_modal": {
+      "title": "CHILDCARE SERVICE",
+      "subtitle": "Schedules and rates for the current school year",
+      "horari": "Schedule",
+      "price_member": "Member Price",
+      "price_non_member": "Non-Member Price",
+      "per_month": "month",
+      "occasional": "occasional",
+      "footer_note": "Occasional prices apply to single days. For more information or permanent registrations, contact the AFA."
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "management": "Management",
+      "inscriptions": "Inscriptions",
+      "payments": "Payments",
+      "activities": "Activities",
+      "finances": "Finances",
+      "shop": "Shop",
+      "orders": "Orders",
+      "inventory": "Inventory",
+      "content": "Content",
+      "news": "News",
+      "projects": "Projects",
+      "calendar": "Main Calendar",
+      "tasks": "Tasks",
+      "acollida": "Childcare Management",
+      "observability": "Auditing",
+      "logout": "Logout"
+    },
+    "acollidaManager": {
+      "addRate": "Add New Rate",
+      "adminNote": {
+        "title": "Note for Administrator",
+        "description": "Changes made here will be reflected immediately in the public modal on the home page. Make sure to include the Euro symbol (€) for visual consistency."
+      }
+    },
+    "editor": {
+      "edit_title": "Edit Activity",
+      "new_title": "New Activity",
+      "title": "Title",
+      "category": "Category",
+      "description": "Description",
+      "price_member": "Member Price (€)",
+      "price_non_member": "Non-Member Price (€)",
+      "price_unit": "Price Unit",
+      "spots": "Spots",
+      "image": "Cover Image",
+      "upload_image": "Upload Image",
+      "image_hint": "Recommended: 1000x600px, Max 2MB.",
+      "schedule_title": "Schedules and Sessions",
+      "schedule_subtitle": "Define groups and weekly sessions for the calendar.",
+      "add_group": "Add Group",
+      "group_placeholder": "Group Name (e.g. Group A, 1st-3rd...)",
+      "add_session": "Add Session",
+      "no_schedule": "No schedules defined. Click \"Add Group\" to start.",
+      "grades": "Grades",
+      "place": "Place",
+      "color": "Color (Tailwind)",
+      "icon": "Icon (Material Symbols)",
+      "stem": "STEM Approved",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "categories": {
+        "educational": "Educational",
+        "artistic": "Artistic",
+        "languages": "Languages",
+        "music": "Music",
+        "sports": "Sports"
+      },
+      "days": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    },
+    "tasks": {
+      "title": "AFA Tasks",
+      "subtitle": "Track pending work, owners, and team priorities.",
+      "new_task": "New task",
+      "edit_task": "Edit task",
+      "search_placeholder": "Search by title or description...",
+      "all_statuses": "All statuses",
+      "all_priorities": "All priorities",
+      "all_assignees": "All assignees",
+      "no_tasks": "There are no tasks yet.",
+      "no_results": "No tasks match the current filters.",
+      "delete_confirm": "Are you sure you want to delete this task?",
+      "title_required": "Title is required",
+      "field_title": "Title",
+      "field_description": "Description",
+      "field_status": "Status",
+      "field_priority": "Priority",
+      "field_due_date": "Due date",
+      "field_assignee": "Assignee",
+      "field_tags": "Tags",
+      "field_subtasks": "Subtasks",
+      "field_completed_at": "Completed",
+      "created_by": "Created by",
+      "unassigned": "Unassigned",
+      "empty_title": "Ex: Confirm Sant Jordi suppliers",
+      "empty_description": "Add context, steps, or internal notes...",
+      "empty_assignee": "Ex: Marta (Events team)",
+      "empty_tag": "Ex: event",
+      "empty_subtask": "Add a subtask...",
+      "remove_tag": "Remove tag",
+      "status_pending": "Pending",
+      "status_in_progress": "In progress",
+      "status_blocked": "Blocked",
+      "status_done": "Done",
+      "priority_low": "Low",
+      "priority_medium": "Medium",
+      "priority_high": "High",
+      "priority_urgent": "Urgent",
+      "open_tasks": "Open tasks",
+      "in_progress_count": "In progress",
+      "overdue_count": "Overdue",
+      "completed_count": "Completed",
+      "no_due_date": "No due date",
+      "no_subtasks": "No subtasks yet.",
+      "subtasks_progress": "subtasks completed",
+      "view_subtasks": "View subtasks",
+      "hide_subtasks": "Hide subtasks",
+      "mark_done": "Mark done",
+      "reopen": "Reopen",
+      "overdue_badge": "Overdue"
+    }
+  },
+  "common": {
+    "all_day": "All Day",
+    "list": "List",
+    "search": "Search...",
+    "all": "All",
+    "error_delete": "Error deleting",
+    "error_save": "Error saving",
+    "error_generic": "An error occurred",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "saving": "Saving...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "refresh": "Refresh",
+    "read_more_external": "Read original news",
+    "read_more": "Read more",
+    "loading": "Loading...",
+    "no_activities": "No activities",
+    "share": "Share",
+    "quote": "Quote"
+  },
+  "news_detail": {
+    "not_found": "News not found",
+    "back_to_news": "Back to news",
+    "read_original": "Read original news",
+    "download_pdf": "Download PDF"
+  },
+  "footer": {
+    "all_rights_reserved": "All rights reserved."
+  }
+}
+
