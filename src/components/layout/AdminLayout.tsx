@@ -19,7 +19,8 @@ import {
   Megaphone,
   MessageSquare,
   Settings,
-  ListTodo
+  ListTodo,
+  Link2
 } from 'lucide-react';
 
 export function AdminLayout() {
@@ -294,6 +295,19 @@ export function AdminLayout() {
             >
               <ListTodo className="w-5 h-5" />
               {t('admin.sidebar.tasks')}
+            </NavLink>
+            <NavLink
+              to="/admin/short-links"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <Link2 className="w-5 h-5" />
+              Enlaces cortos
             </NavLink>
             <NavLink
               to="/admin/acollida"
