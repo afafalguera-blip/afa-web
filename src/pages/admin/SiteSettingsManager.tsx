@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ConfigService, type ContactConfig, type SocialConfig, type AboutConfig, type LegalConfig, type ShopConfig } from "../../services/ConfigService";
+import { ConfigService, type ContactConfig, type SocialConfig, type AboutConfig, type LegalConfig, type ShopConfig, type FeesConfig, type PricingConfig, type BrandingConfig, type AnalyticsConfig, type HomepageConfig } from "../../services/ConfigService";
 import {
     Save,
     Settings,
@@ -11,15 +11,23 @@ import {
     Info,
     FileLock2,
     Cookie,
-    ShoppingBag
+    ShoppingBag,
+    CreditCard,
+    Palette,
+    LayoutDashboard,
+    BarChart3
 } from "lucide-react";
 import { ContactSettings } from "./settings/ContactSettings";
 import { SocialSettings } from "./settings/SocialSettings";
 import { AboutSettings } from "./settings/AboutSettings";
 import { LegalSettings } from "./settings/LegalSettings";
 import { ShopSettings } from "./settings/ShopSettings";
+import { FeesSettings } from "./settings/FeesSettings";
+import { BrandingSettings } from "./settings/BrandingSettings";
+import { HomepageSettings } from "./settings/HomepageSettings";
+import { AnalyticsSettings } from "./settings/AnalyticsSettings";
 
-type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop';
+type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics';
 type LangType = 'ca' | 'es' | 'en';
 
 export default function SiteSettingsManager() {
@@ -30,6 +38,11 @@ export default function SiteSettingsManager() {
     const [privacy, setPrivacy] = useState<LegalConfig | null>(null);
     const [cookies, setCookies] = useState<LegalConfig | null>(null);
     const [shop, setShop] = useState<ShopConfig | null>(null);
+    const [fees, setFees] = useState<FeesConfig | null>(null);
+    const [pricing, setPricing] = useState<PricingConfig | null>(null);
+    const [branding, setBranding] = useState<BrandingConfig | null>(null);
+    const [analytics, setAnalytics] = useState<AnalyticsConfig | null>(null);
+    const [homepage, setHomepage] = useState<HomepageConfig | null>(null);
 
 
     const [activeLang, setActiveLang] = useState<LangType>('ca');
@@ -46,13 +59,18 @@ export default function SiteSettingsManager() {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const [contactData, socialData, aboutData, privacyData, cookiesData, shopData] = await Promise.all([
+            const [contactData, socialData, aboutData, privacyData, cookiesData, shopData, feesData, pricingData, brandingData, analyticsData, homepageData] = await Promise.all([
                 ConfigService.getContactConfig(),
                 ConfigService.getSocialConfig(),
                 ConfigService.getAboutConfig(),
                 ConfigService.getPrivacyConfig(),
                 ConfigService.getCookiesConfig(),
-                ConfigService.getShopConfig()
+                ConfigService.getShopConfig(),
+                ConfigService.getFeesConfig(),
+                ConfigService.getPricingConfig(),
+                ConfigService.getBrandingConfig(),
+                ConfigService.getAnalyticsConfig(),
+                ConfigService.getHomepageConfig()
             ]);
 
             if (contactData) setContact(contactData);
@@ -75,6 +93,11 @@ export default function SiteSettingsManager() {
             if (privacyData) setPrivacy(privacyData);
             if (cookiesData) setCookies(cookiesData);
             if (shopData) setShop(shopData);
+            if (feesData) setFees(feesData);
+            if (pricingData) setPricing(pricingData);
+            if (brandingData) setBranding(brandingData);
+            if (analyticsData) setAnalytics(analyticsData);
+            if (homepageData) setHomepage(homepageData);
 
         } catch (err) {
             console.error(err);
@@ -103,6 +126,17 @@ export default function SiteSettingsManager() {
                 await ConfigService.updateCookiesConfig(cookies);
             } else if (activeTab === 'shop' && shop) {
                 await ConfigService.updateShopConfig(shop);
+            } else if (activeTab === 'fees' && fees && pricing) {
+                await Promise.all([
+                    ConfigService.updateFeesConfig(fees),
+                    ConfigService.updatePricingConfig(pricing)
+                ]);
+            } else if (activeTab === 'branding' && branding) {
+                await ConfigService.updateBrandingConfig(branding);
+            } else if (activeTab === 'homepage' && homepage) {
+                await ConfigService.updateHomepageConfig(homepage);
+            } else if (activeTab === 'analytics' && analytics) {
+                await ConfigService.updateAnalyticsConfig(analytics);
             }
 
 
@@ -137,61 +171,30 @@ export default function SiteSettingsManager() {
             </div>
 
             {/* Tabs */}
-            <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl mb-8 w-fit">
-                <button
-                    onClick={() => setActiveTab('contact')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === 'contact'
-                        ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                        }`}
-                >
-                    <Mail size={16} /> Contacte
-                </button>
-                <button
-                    onClick={() => setActiveTab('social')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === 'social'
-                        ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                        }`}
-                >
-                    <Instagram size={16} /> Xarxes Socials
-                </button>
-                <button
-                    onClick={() => setActiveTab('about')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === 'about'
-                        ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                        }`}
-                >
-                    <Info size={16} /> Sobre l'AFA
-                </button>
-                <button
-                    onClick={() => setActiveTab('privacy')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === 'privacy'
-                        ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                        }`}
-                >
-                    <FileLock2 size={16} /> Privacitat
-                </button>
-                <button
-                    onClick={() => setActiveTab('cookies')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === 'cookies'
-                        ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                        }`}
-                >
-                    <Cookie size={16} /> Cookies
-                </button>
-                <button
-                    onClick={() => setActiveTab('shop')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === 'shop'
-                        ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
-                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                        }`}
-                >
-                    <ShoppingBag size={16} /> Botiga
-                </button>
+            <div className="flex flex-wrap p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl mb-8 gap-1">
+                {([
+                    { id: 'contact' as TabType, icon: Mail, label: 'Contacte' },
+                    { id: 'social' as TabType, icon: Instagram, label: 'Xarxes' },
+                    { id: 'about' as TabType, icon: Info, label: "Sobre l'AFA" },
+                    { id: 'fees' as TabType, icon: CreditCard, label: 'Quotes' },
+                    { id: 'branding' as TabType, icon: Palette, label: 'Marca' },
+                    { id: 'homepage' as TabType, icon: LayoutDashboard, label: 'Home' },
+                    { id: 'analytics' as TabType, icon: BarChart3, label: 'Analytics' },
+                    { id: 'privacy' as TabType, icon: FileLock2, label: 'Privacitat' },
+                    { id: 'cookies' as TabType, icon: Cookie, label: 'Cookies' },
+                    { id: 'shop' as TabType, icon: ShoppingBag, label: 'Botiga' },
+                ]).map(({ id, icon: Icon, label }) => (
+                    <button
+                        key={id}
+                        onClick={() => setActiveTab(id)}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === id
+                            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
+                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                            }`}
+                    >
+                        <Icon size={16} /> {label}
+                    </button>
+                ))}
             </div>
 
 
@@ -242,6 +245,40 @@ export default function SiteSettingsManager() {
                     />
                 )}
 
+                {activeTab === 'fees' && fees && pricing && (
+                    <FeesSettings
+                        fees={fees}
+                        setFees={setFees}
+                        pricing={pricing}
+                        setPricing={setPricing}
+                        activeLang={activeLang}
+                        setActiveLang={setActiveLang}
+                    />
+                )}
+
+                {activeTab === 'branding' && branding && (
+                    <BrandingSettings
+                        branding={branding}
+                        setBranding={setBranding}
+                        activeLang={activeLang}
+                        setActiveLang={setActiveLang}
+                    />
+                )}
+
+                {activeTab === 'homepage' && homepage && (
+                    <HomepageSettings
+                        homepage={homepage}
+                        setHomepage={setHomepage}
+                    />
+                )}
+
+                {activeTab === 'analytics' && analytics && (
+                    <AnalyticsSettings
+                        analytics={analytics}
+                        setAnalytics={setAnalytics}
+                    />
+                )}
+
                 {/* Feedback Messages */}
                 {error && (
                     <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-xl animate-shake">
@@ -269,7 +306,7 @@ export default function SiteSettingsManager() {
                         ) : (
                             <>
                                 <Save size={20} />
-                                Guardar Canvis de {activeTab === 'contact' ? 'Contacte' : activeTab === 'social' ? 'Xarxes' : activeTab === 'about' ? 'Sobre l\'AFA' : activeTab === 'privacy' ? 'Privacitat' : activeTab === 'cookies' ? 'Cookies' : 'Botiga'}
+                                Guardar Canvis de {{ contact: 'Contacte', social: 'Xarxes', about: "Sobre l'AFA", privacy: 'Privacitat', cookies: 'Cookies', shop: 'Botiga', fees: 'Quotes', branding: 'Marca', homepage: 'Home', analytics: 'Analytics' }[activeTab]}
                             </>
                         )}
                     </button>

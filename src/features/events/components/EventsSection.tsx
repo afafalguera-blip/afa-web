@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { EventsService, type CalendarEvent } from '../services/EventsService';
+import { useHomepageConfig } from '../../../hooks/useHomepageConfig';
 
 export const EventsSection: React.FC = () => {
     const { t, i18n } = useTranslation();
+    const homepageConfig = useHomepageConfig();
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const data = await EventsService.getUpcomingEvents(4);
+                const data = await EventsService.getUpcomingEvents(homepageConfig.featured_events_count);
                 setEvents(data);
             } catch (error) {
                 console.error('Error fetching events:', error);

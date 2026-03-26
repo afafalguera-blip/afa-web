@@ -1,7 +1,17 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ConfigService, type FeesConfig } from '../../../services/ConfigService';
 
 export function FeeHighlightCard() {
     const { t } = useTranslation();
+    const [fees, setFees] = useState<FeesConfig | null>(null);
+
+    useEffect(() => {
+        ConfigService.getFeesConfig().then(setFees);
+    }, []);
+
+    const amount = fees?.annual_fee_amount ?? 26;
+    const referenceTemplate = fees?.payment_reference_template || 'ALTA [NOM ALUMNE]';
 
     return (
         <div className="bg-gradient-to-br from-secondary to-green-600 rounded-3xl p-8 text-white shadow-xl flex flex-col justify-center items-center text-center">
@@ -9,7 +19,7 @@ export function FeeHighlightCard() {
                 {t('fees_page.annual_quota', 'Quota Anual')}
             </span>
             <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-6xl font-black">26</span>
+                <span className="text-6xl font-black">{amount}</span>
                 <span className="text-2xl font-bold">€</span>
             </div>
             <p className="text-white/80 text-sm leading-relaxed max-w-[240px]">
@@ -20,7 +30,7 @@ export function FeeHighlightCard() {
                     {t('fees_page.payment_ref_label', 'Concepte de transferència:')}
                 </p>
                 <p className="text-sm font-bold">
-                    {t('fees_page.payment_ref_value', 'ALTA [NOM ALUMNE]')}
+                    {referenceTemplate}
                 </p>
             </div>
         </div>

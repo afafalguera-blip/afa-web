@@ -53,8 +53,52 @@ export interface ShopConfig {
   admin_emails: string[];
 }
 
+export interface FeesConfig {
+  annual_fee_amount: number;
+  iban: string;
+  bank_name: string;
+  account_holder: string;
+  payment_reference_template: string;
+}
+
+export interface PricingTier {
+  id: string;
+  label: { ca: string; es: string; en: string };
+  schedule: string;
+  member_price: number;
+  non_member_price: number;
+  note?: { ca: string; es: string; en: string };
+}
+
+export interface PricingConfig {
+  tiers: PricingTier[];
+  discount_text: { ca: string; es: string; en: string };
+}
+
+export interface BrandingConfig {
+  site_name: string;
+  logo_url: string;
+  default_hero_url: string;
+  default_placeholder_url: string;
+  default_seo_description: { ca: string; es: string; en: string };
+}
+
+export interface AnalyticsConfig {
+  google_analytics_id: string;
+  enabled: boolean;
+}
+
+export interface HomepageConfig {
+  featured_news_count: number;
+  featured_events_count: number;
+  featured_projects_count: number;
+  max_students_per_inscription: number;
+  calendar_events_per_day: number;
+  assemblea_pdf_url: string;
+}
+
 export const ConfigService = {
-  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop'): Promise<T | null> {
+  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage'): Promise<T | null> {
     const { data, error } = await supabase
       .from('site_config')
       .select('value')
@@ -68,7 +112,7 @@ export const ConfigService = {
     return data.value as T;
   },
 
-  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop', config: T): Promise<void> {
+  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage', config: T): Promise<void> {
     const { error } = await supabase
       .from('site_config')
       .update({ value: config, updated_at: new Date().toISOString() })
@@ -131,6 +175,46 @@ export const ConfigService = {
 
   async updateShopConfig(config: ShopConfig): Promise<void> {
     return this.updateConfig('shop', config);
+  },
+
+  async getFeesConfig(): Promise<FeesConfig | null> {
+    return this.getConfig<FeesConfig>('fees');
+  },
+
+  async updateFeesConfig(config: FeesConfig): Promise<void> {
+    return this.updateConfig('fees', config);
+  },
+
+  async getPricingConfig(): Promise<PricingConfig | null> {
+    return this.getConfig<PricingConfig>('pricing');
+  },
+
+  async updatePricingConfig(config: PricingConfig): Promise<void> {
+    return this.updateConfig('pricing', config);
+  },
+
+  async getBrandingConfig(): Promise<BrandingConfig | null> {
+    return this.getConfig<BrandingConfig>('branding');
+  },
+
+  async updateBrandingConfig(config: BrandingConfig): Promise<void> {
+    return this.updateConfig('branding', config);
+  },
+
+  async getAnalyticsConfig(): Promise<AnalyticsConfig | null> {
+    return this.getConfig<AnalyticsConfig>('analytics');
+  },
+
+  async updateAnalyticsConfig(config: AnalyticsConfig): Promise<void> {
+    return this.updateConfig('analytics', config);
+  },
+
+  async getHomepageConfig(): Promise<HomepageConfig | null> {
+    return this.getConfig<HomepageConfig>('homepage');
+  },
+
+  async updateHomepageConfig(config: HomepageConfig): Promise<void> {
+    return this.updateConfig('homepage', config);
   },
 
   async uploadHeroImage(file: File): Promise<string> {

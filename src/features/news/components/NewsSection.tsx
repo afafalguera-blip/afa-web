@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Edit } from 'lucide-react';
 import { NewsService, type NewsArticle } from '../services/NewsService';
 import { LazyImage } from '../../../components/common/LazyImage';
+import { useHomepageConfig } from '../../../hooks/useHomepageConfig';
 
 interface NewsSectionProps {
     isAdmin: boolean;
@@ -12,13 +13,14 @@ interface NewsSectionProps {
 export const NewsSection: React.FC<NewsSectionProps> = ({ isAdmin }) => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
+    const homepageConfig = useHomepageConfig();
     const [news, setNews] = useState<NewsArticle[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchNews = async () => {
             try {
-                const data = await NewsService.getLatestNews(3);
+                const data = await NewsService.getLatestNews(homepageConfig.featured_news_count);
                 setNews(data);
             } catch (error) {
                 console.error('Error fetching news:', error);

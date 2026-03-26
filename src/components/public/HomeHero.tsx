@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Edit } from 'lucide-react';
 import { LazyImage } from '../common/LazyImage';
 import type { HeroConfig } from '../../services/ConfigService';
+import { useBranding } from '../../hooks/useBranding';
 
 interface HomeHeroProps {
     isAdmin: boolean;
@@ -12,11 +13,12 @@ interface HomeHeroProps {
 
 export const HomeHero: React.FC<HomeHeroProps> = ({ isAdmin, heroConfig, onOpenModal }) => {
     const { t } = useTranslation();
+    const branding = useBranding();
 
     return (
         <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none group">
             <LazyImage
-                src={heroConfig?.image_url || "https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/Imagenes/hero_escuela.png"}
+                src={heroConfig?.image_url || branding.default_hero_url}
                 alt="Escola Hero"
                 className="w-full h-full object-cover bg-slate-200"
             />

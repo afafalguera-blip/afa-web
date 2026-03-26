@@ -13,10 +13,12 @@ import { NewsSection } from '../features/news/components/NewsSection';
 import { EventsSection } from '../features/events/components/EventsSection';
 import { AboutSection } from '../components/public/AboutSection';
 import { Link } from 'react-router-dom';
+import { useHomepageConfig } from '../hooks/useHomepageConfig';
 
 export function Home() {
   const { t } = useTranslation();
   const { isAdmin } = useAuth();
+  const homepageConfig = useHomepageConfig();
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [isAcollidaModalOpen, setIsAcollidaModalOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<HeroConfig | null>(null);
@@ -97,8 +99,8 @@ export function Home() {
 
       <section className="px-6 mt-8 mb-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <a
-            href="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/documents/actes/1770072824500-8l989f.pdf"
+          {homepageConfig.assemblea_pdf_url && <a
+            href={homepageConfig.assemblea_pdf_url}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
@@ -118,7 +120,7 @@ export function Home() {
                 {t('home.assemblea_banner.description')}
               </p>
             </div>
-          </a>
+          </a>}
 
           <Link
             to="/contacte"

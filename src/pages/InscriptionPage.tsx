@@ -1,9 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Loader2, CheckCircle2, AlertCircle, Rocket, Info, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { ConfigService, type FeesConfig, type PricingConfig } from '../services/ConfigService';
+import { useHomepageConfig } from '../hooks/useHomepageConfig';
+import { ActivityService, type Activity } from '../services/ActivityService';
 
 
 
@@ -35,6 +38,24 @@ interface AdditionalInfo {
 export default function InscriptionPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const homepageConfig = useHomepageConfig();
+  const [fees, setFees] = useState<FeesConfig | null>(null);
+  const [pricing, setPricing] = useState<PricingConfig | null>(null);
+  const [dbActivities, setDbActivities] = useState<Activity[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      ConfigService.getFeesConfig(),
+      ConfigService.getPricingConfig(),
+      ActivityService.getForInscription(),
+    ]).then(([f, p, acts]) => {
+      setFees(f);
+      setPricing(p);
+      setDbActivities(acts);
+    });
+  }, []);
+
+  const iban = fees?.iban || 'ES22 0081 1604 7400 0103 8208';
 
   const COURSES = useMemo(() => [
     { value: 'I3', label: t('inscription.courses.i3'), type: 'infantil' },
@@ -48,27 +69,42 @@ export default function InscriptionPage() {
     { value: '6PRI', label: t('inscription.courses.6pri'), type: 'primaria2' },
   ], [t]);
 
-  const ALL_ACTIVITIES = useMemo(() => ({
-    infantil: [
-      { value: "Teatre Musical en Anglès (Dimarts)", label: `${t('inscription.activity_names.musical_theater_eng')} - ${t('inscription.days.tue')} 16:30-18:00` },
-      { value: "Marxa-Marxa en Anglès (Dijous)", label: `${t('inscription.activity_names.marxa_marxa_eng')} - ${t('inscription.days.thu')} 16:30-18:00` },
-    ],
+  // Build activity options from DB: each schedule_details group becomes a separate selectable option
+  const ALL_ACTIVITIES = useMemo(() => {
+    const grouped: Record<string, { value: string; label: string }[]> = {};
+    for (const act of dbActivities) {
+      const courseTypes = act.inscription_course_types || [];
+      const lang = i18n.language as 'ca' | 'es' | 'en';
+      const title = (act as Record<string, unknown>)[`title_${lang}`] as string || act.title;
+      const scheduleDetails = act.schedule_details || [];
 
-    primaria1: [
-      { value: "Futbol (Dimarts)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.tue')} 16:30-18:00` },
-      { value: "Anglès (Dimecres)", label: `${t('inscription.activity_names.english')} - ${t('inscription.days.wed')} 16:30-18:00` },
-      { value: "Patinatge (Dimecres)", label: `${t('inscription.activity_names.skating')} - ${t('inscription.days.wed')} 16:30-18:00` },
-      { value: "Futbol (Dijous)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.thu')} 16:30-18:00` },
-    ],
+      for (const courseType of courseTypes) {
+        if (!grouped[courseType]) grouped[courseType] = [];
 
-    primaria2: [
-      { value: "Anglès (Dimarts)", label: `${t('inscription.activity_names.english')} - ${t('inscription.days.tue')} 16:30-18:00` },
-      { value: "Futbol (Dimarts)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.tue')} 16:30-18:00` },
-      { value: "Patinatge (Dimecres)", label: `${t('inscription.activity_names.skating')} - ${t('inscription.days.wed')} 16:30-18:00` },
-      { value: "Futbol (Dijous)", label: `${t('inscription.activity_names.football')} - ${t('inscription.days.thu')} 16:30-18:00` },
-    ]
-
-  }), [t]);
+        if (scheduleDetails.length > 0) {
+          // Create one option per schedule group that matches this course type
+          for (const detail of scheduleDetails) {
+            const dayLabel = detail.days || detail.group || '';
+            const timeLabel = detail.time || '';
+            const value = `${act.title} (${dayLabel})`;
+            const label = `${title} - ${dayLabel} ${timeLabel}`;
+            // Avoid duplicates
+            if (!grouped[courseType].some(a => a.value === value)) {
+              grouped[courseType].push({ value, label });
+            }
+          }
+        } else {
+          // Fallback: single option with schedule_summary
+          const summary = (act as Record<string, unknown>)[`schedule_summary_${lang}`] as string || act.schedule_summary || '';
+          grouped[courseType].push({
+            value: act.title,
+            label: `${title} - ${summary}`,
+          });
+        }
+      }
+    }
+    return grouped;
+  }, [dbActivities, i18n.language]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +124,7 @@ export default function InscriptionPage() {
 
   // Handlers
   const addStudent = () => {
-    if (students.length < 3) {
+    if (students.length < homepageConfig.max_students_per_inscription) {
       setStudents([...students, { name: '', surname: '', course: '', activities: [] }]);
     }
   };
@@ -123,7 +159,6 @@ export default function InscriptionPage() {
   const getAvailableActivities = (courseCode: string) => {
     const course = COURSES.find(c => c.value === courseCode);
     if (!course) return [];
-    // @ts-expect-error Dynamic activity key
     return ALL_ACTIVITIES[course.type] || [];
   };
 
@@ -248,28 +283,27 @@ export default function InscriptionPage() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-            <h4 className="font-bold text-slate-900 mb-1">{t('inscription.pricing.general_title')}</h4>
-            <p className="text-xs text-slate-500 mb-3">{t('inscription.pricing.hours_general')}</p>
-            <div className="space-y-1">
-              <p><span className="font-bold text-blue-600">20€</span> <span className="text-sm text-slate-600">{t('inscription.pricing.socis')}</span></p>
-              <p><span className="font-bold text-slate-400">25€</span> <span className="text-sm text-slate-600">{t('inscription.pricing.no_socis')}</span></p>
-            </div>
-          </div>
-
-          <div className="bg-indigo-50 border border-indigo-100 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-
-            <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold">INFO</div>
-            <h4 className="font-bold text-indigo-900 mb-1">{t('inscription.pricing.english_title')}</h4>
-            <p className="text-xs text-indigo-500 mb-3">{t('inscription.pricing.hours_general')}</p>
-            <div className="space-y-1">
-              <p><span className="font-bold text-indigo-600">39€</span> <span className="text-sm text-indigo-700">{t('inscription.pricing.socis')}</span></p>
-              <p><span className="font-bold text-indigo-400">44€</span> <span className="text-sm text-indigo-700">{t('inscription.pricing.no_socis')}</span></p>
-            </div>
-            <div className="mt-3 text-[10px] bg-indigo-100/50 p-2 rounded border border-indigo-200 text-indigo-700">
-              {t('inscription.pricing.english_material')}
-            </div>
-          </div>
+          {(pricing?.tiers || []).map((tier, idx) => {
+            const label = tier.label[i18n.language as keyof typeof tier.label] || tier.label.ca;
+            const note = tier.note?.[i18n.language as keyof typeof tier.note] || tier.note?.ca;
+            const isHighlighted = idx > 0;
+            return (
+              <div key={tier.id} className={`${isHighlighted ? 'bg-indigo-50 border-indigo-100' : 'bg-white border-slate-200'} border p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden`}>
+                {isHighlighted && <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold">INFO</div>}
+                <h4 className={`font-bold mb-1 ${isHighlighted ? 'text-indigo-900' : 'text-slate-900'}`}>{label}</h4>
+                <p className={`text-xs mb-3 ${isHighlighted ? 'text-indigo-500' : 'text-slate-500'}`}>{tier.schedule}</p>
+                <div className="space-y-1">
+                  <p><span className={`font-bold ${isHighlighted ? 'text-indigo-600' : 'text-blue-600'}`}>{tier.member_price}€</span> <span className={`text-sm ${isHighlighted ? 'text-indigo-700' : 'text-slate-600'}`}>{t('inscription.pricing.socis')}</span></p>
+                  <p><span className={`font-bold ${isHighlighted ? 'text-indigo-400' : 'text-slate-400'}`}>{tier.non_member_price}€</span> <span className={`text-sm ${isHighlighted ? 'text-indigo-700' : 'text-slate-600'}`}>{t('inscription.pricing.no_socis')}</span></p>
+                </div>
+                {note && (
+                  <div className="mt-3 text-[10px] bg-indigo-100/50 p-2 rounded border border-indigo-200 text-indigo-700">
+                    {note}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-600">
@@ -294,12 +328,12 @@ export default function InscriptionPage() {
 
           <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-emerald-200/50">
             <code className="text-sm font-mono text-slate-700 bg-slate-50 px-3 py-1.5 rounded-lg flex-grow block w-full text-center sm:text-left">
-              ES22 0081 1604 7400 0103 8208
+              {iban}
             </code>
             <button
               onClick={(e) => {
                 e.preventDefault();
-                navigator.clipboard.writeText('ES22 0081 1604 7400 0103 8208');
+                navigator.clipboard.writeText(iban);
                 // Could add a toast here
               }}
               className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition-colors shadow-sm shrink-0 w-full sm:w-auto"
@@ -417,7 +451,7 @@ export default function InscriptionPage() {
             );
           })}
 
-          {students.length < 3 && (
+          {students.length < homepageConfig.max_students_per_inscription && (
             <button
               type="button"
               onClick={addStudent}

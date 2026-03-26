@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../common/NotificationBell';
 import { useAuth } from '../../hooks/useAuth';
+import { useBranding } from '../../hooks/useBranding';
 import { Shield } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
 export function DesktopNav() {
   const { t, i18n } = useTranslation();
   const { isAdmin } = useAuth();
+  const branding = useBranding();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -28,10 +30,10 @@ export function DesktopNav() {
           <img
             alt="AFA Escola Logo"
             className="w-full h-full object-cover p-0.5"
-            src="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/sign/Imagenes/logo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84NjM3Yjc4My1lYzY4LTRjMjMtYmMyNS04MTA2ODk5ZjhjMGIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZW5lcy9sb2dvLnBuZyIsImlhdCI6MTc2OTU1NDU3MiwiZXhwIjozMzMwNTU1NDU3Mn0.aZV-8wmEyaHeDITRf_SsMh4vj1um_jHjwD1-izQqEnc"
+            src={branding.logo_url}
           />
         </div>
-        <span className="font-bold text-lg text-slate-800 dark:text-white">AFA Escola Falguera</span>
+        <span className="font-bold text-lg text-slate-800 dark:text-white">{branding.site_name}</span>
       </NavLink>
 
       <div className="flex items-center gap-8">

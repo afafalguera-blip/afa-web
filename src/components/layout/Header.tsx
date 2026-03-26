@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
+import { useBranding } from '../../hooks/useBranding';
 
 export function Header() {
   const { t, i18n } = useTranslation();
+  const branding = useBranding();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -14,12 +16,12 @@ export function Header() {
           <img 
             alt="AFA Escola Logo" 
             className="w-full h-full object-cover" 
-            src="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/sign/Imagenes/logo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84NjM3Yjc4My1lYzY4LTRjMjMtYmMyNS04MTA2ODk5ZjhjMGIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZW5lcy9sb2dvLnBuZyIsImlhdCI6MTc2OTU1NDU3MiwiZXhwIjozMzMwNTU1NDU3Mn0.aZV-8wmEyaHeDITRf_SsMh4vj1um_jHjwD1-izQqEnc"
+            src={branding.logo_url}
           />
         </div>
         <div>
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{t('header.greeting')}</p>
-          <h1 className="text-xl font-bold text-secondary dark:text-primary">AFA Escola Falguera</h1>
+          <h1 className="text-xl font-bold text-secondary dark:text-primary">{branding.site_name}</h1>
         </div>
       </div>
       

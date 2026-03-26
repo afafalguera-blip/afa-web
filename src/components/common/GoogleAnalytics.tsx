@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ConfigService, type AnalyticsConfig } from '../../services/ConfigService';
 
 declare global {
     interface Window {
@@ -9,14 +10,20 @@ declare global {
 
 export function GoogleAnalytics() {
     const location = useLocation();
+    const [config, setConfig] = useState<AnalyticsConfig | null>(null);
 
     useEffect(() => {
+        ConfigService.getAnalyticsConfig().then(setConfig);
+    }, []);
+
+    useEffect(() => {
+        if (!config?.enabled || !config.google_analytics_id) return;
         if (typeof window.gtag === 'function') {
-            window.gtag('config', 'G-2DMTERT1FH', {
+            window.gtag('config', config.google_analytics_id, {
                 page_path: location.pathname + location.search,
             });
         }
-    }, [location]);
+    }, [location, config]);
 
     return null;
 }

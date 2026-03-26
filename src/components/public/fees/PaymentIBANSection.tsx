@@ -1,14 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Landmark, CheckCircle, Copy, HelpCircle } from 'lucide-react';
+import { ConfigService, type FeesConfig } from '../../../services/ConfigService';
 
 export function PaymentIBANSection() {
     const { t } = useTranslation();
     const [copied, setCopied] = useState(false);
-    const IBAN = "ES22 0081 1604 7400 0103 8208";
+    const [fees, setFees] = useState<FeesConfig | null>(null);
+
+    useEffect(() => {
+        ConfigService.getFeesConfig().then(setFees);
+    }, []);
+
+    const iban = fees?.iban || "ES22 0081 1604 7400 0103 8208";
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(IBAN);
+        navigator.clipboard.writeText(iban);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -28,7 +35,7 @@ export function PaymentIBANSection() {
                         </label>
                         <div className="flex bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 items-center justify-between group">
                             <code className="text-lg md:text-xl font-mono font-bold text-slate-700 dark:text-slate-200 break-all">
-                                {IBAN}
+                                {iban}
                             </code>
                             <button
                                 onClick={copyToClipboard}
@@ -61,13 +68,13 @@ export function PaymentIBANSection() {
                         <p className="text-xs text-slate-400 font-bold uppercase mb-2">
                             {t('fees_page.entity_label', 'Entitat')}
                         </p>
-                        <p className="font-bold text-slate-700 dark:text-slate-200">Banco Sabadell</p>
+                        <p className="font-bold text-slate-700 dark:text-slate-200">{fees?.bank_name || "Banco Sabadell"}</p>
                     </div>
                     <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
                         <p className="text-xs text-slate-400 font-bold uppercase mb-2">
                             {t('fees_page.holder_label', 'Titular')}
                         </p>
-                        <p className="font-bold text-slate-700 dark:text-slate-200">AFA Escola Falguera</p>
+                        <p className="font-bold text-slate-700 dark:text-slate-200">{fees?.account_holder || "AFA Escola Falguera"}</p>
                     </div>
                 </div>
             </div>

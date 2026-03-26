@@ -29,7 +29,9 @@ const DEFAULT_ACTIVITY: Partial<Activity> = {
   category_icon: "school",
   is_stem_approved: false,
   schedule_details: [],
-  important_note: ""
+  important_note: "",
+  inscription_course_types: [],
+  inscription_enabled: false,
 };
 
 export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: ActivityEditorModalProps) {
@@ -417,6 +419,49 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
             <div className="flex items-center gap-2">
               <input type="checkbox" id="stem" checked={formData.is_stem_approved} onChange={e => handleChange('is_stem_approved', e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
               <label htmlFor="stem" className="text-sm text-slate-700 dark:text-slate-300">{t('admin.editor.stem')}</label>
+            </div>
+
+            {/* Inscription Form Config */}
+            <div className="col-span-2 border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
+              <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-3">Formulari d'Inscripció</h4>
+              <div className="flex items-center gap-2 mb-4">
+                <input
+                  type="checkbox"
+                  id="inscription_enabled"
+                  checked={formData.inscription_enabled || false}
+                  onChange={e => handleChange('inscription_enabled', e.target.checked)}
+                  className="w-4 h-4 text-blue-600 rounded"
+                />
+                <label htmlFor="inscription_enabled" className="text-sm text-slate-700 dark:text-slate-300">
+                  Disponible al formulari d'inscripció
+                </label>
+              </div>
+              {formData.inscription_enabled && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">Grups de cursos assignats</label>
+                  <div className="flex flex-wrap gap-3">
+                    {['infantil', 'primaria1', 'primaria2'].map(ct => (
+                      <label key={ct} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(formData.inscription_course_types || []).includes(ct)}
+                          onChange={e => {
+                            const current = formData.inscription_course_types || [];
+                            const next = e.target.checked
+                              ? [...current, ct]
+                              : current.filter(c => c !== ct);
+                            handleChange('inscription_course_types', next);
+                          }}
+                          className="w-4 h-4 text-blue-600 rounded"
+                        />
+                        <span className="text-sm text-slate-600 dark:text-slate-400 capitalize">
+                          {ct === 'infantil' ? 'Infantil (I3-I5)' : ct === 'primaria1' ? 'Primària 1r-3r' : 'Primària 4t-6è'}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
           </form>

@@ -46,6 +46,8 @@ export interface Activity {
   important_note_es?: string;
   important_note_ca?: string;
   important_note_en?: string;
+  inscription_course_types?: string[];
+  inscription_enabled?: boolean;
 }
 
 export const ActivityService = {
@@ -89,6 +91,17 @@ export const ActivityService = {
       .eq('id', id);
     
     if (error) throw error;
+  },
+
+  async getForInscription(): Promise<Activity[]> {
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .eq('inscription_enabled', true)
+      .order('title', { ascending: true });
+
+    if (error) throw error;
+    return data as Activity[];
   },
 
   async uploadImage(file: File) {

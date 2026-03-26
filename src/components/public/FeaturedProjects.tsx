@@ -7,6 +7,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { ProjectDetailModal } from './ProjectDetailModal';
 import { LazyImage } from '../common/LazyImage';
+import { useBranding } from '../../hooks/useBranding';
+import { useHomepageConfig } from '../../hooks/useHomepageConfig';
 
 interface Project {
   id: string;
@@ -57,6 +59,8 @@ export const FeaturedProjects = () => {
   const { t, i18n } = useTranslation();
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
+  const branding = useBranding();
+  const homepageConfig = useHomepageConfig();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -67,7 +71,7 @@ export const FeaturedProjects = () => {
           .from('projects')
           .select('*')
           .order('display_order', { ascending: true })
-          .limit(3);
+          .limit(homepageConfig.featured_projects_count);
 
         if (error) throw error;
 
@@ -83,7 +87,7 @@ export const FeaturedProjects = () => {
               details: translation?.details || '',
               impact: translation?.impact || '',
               participants: translation?.participants || '',
-              imageAfter: p.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop',
+              imageAfter: p.image_url || branding.default_placeholder_url,
               status: p.status,
               budget: 0
             };
