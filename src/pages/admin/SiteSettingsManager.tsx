@@ -26,6 +26,8 @@ import { FeesSettings } from "./settings/FeesSettings";
 import { BrandingSettings } from "./settings/BrandingSettings";
 import { HomepageSettings } from "./settings/HomepageSettings";
 import { AnalyticsSettings } from "./settings/AnalyticsSettings";
+import { invalidateBrandingCache } from "../../hooks/useBranding";
+import { invalidateHomepageCache } from "../../hooks/useHomepageConfig";
 
 type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics';
 type LangType = 'ca' | 'es' | 'en';
@@ -133,12 +135,13 @@ export default function SiteSettingsManager() {
                 ]);
             } else if (activeTab === 'branding' && branding) {
                 await ConfigService.updateBrandingConfig(branding);
+                invalidateBrandingCache();
             } else if (activeTab === 'homepage' && homepage) {
                 await ConfigService.updateHomepageConfig(homepage);
+                invalidateHomepageCache();
             } else if (activeTab === 'analytics' && analytics) {
                 await ConfigService.updateAnalyticsConfig(analytics);
             }
-
 
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);

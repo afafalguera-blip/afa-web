@@ -1,11 +1,76 @@
-import { Globe, Palette } from "lucide-react";
+import { useRef, useState } from "react";
+import { Globe, Palette, Upload, Loader2 } from "lucide-react";
 import type { BrandingConfig } from "../../../services/ConfigService";
+import { ConfigService } from "../../../services/ConfigService";
 
 interface BrandingSettingsProps {
     branding: BrandingConfig;
     setBranding: (branding: BrandingConfig) => void;
     activeLang: 'ca' | 'es' | 'en';
     setActiveLang: (lang: 'ca' | 'es' | 'en') => void;
+}
+
+function ImageUploadField({ label, value, onChange, prefix }: {
+    label: string;
+    value: string;
+    onChange: (url: string) => void;
+    prefix: string;
+}) {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleUpload = async (file: File) => {
+        setUploading(true);
+        try {
+            const url = await ConfigService.uploadBrandingImage(file, prefix);
+            onChange(url);
+        } catch (err) {
+            console.error('Upload error:', err);
+            alert('Error al pujar la imatge');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-500">{label}</label>
+            <div className="flex gap-2">
+                <input
+                    type="url"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono text-xs"
+                    placeholder="https://..."
+                />
+                <input
+                    ref={inputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUpload(file);
+                        e.target.value = '';
+                    }}
+                />
+                <button
+                    type="button"
+                    onClick={() => inputRef.current?.click()}
+                    disabled={uploading}
+                    className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-1.5 disabled:opacity-50 shrink-0"
+                >
+                    {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                    Pujar
+                </button>
+            </div>
+            {value && (
+                <div className="mt-1 w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-white">
+                    <img src={value} alt="Preview" className="w-full h-full object-contain p-1" />
+                </div>
+            )}
+        </div>
+    );
 }
 
 export function BrandingSettings({ branding, setBranding, activeLang, setActiveLang }: BrandingSettingsProps) {
@@ -48,40 +113,26 @@ export function BrandingSettings({ branding, setBranding, activeLang, setActiveL
                     />
                 </div>
 
-                <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500">URL del Logo</label>
-                    <input
-                        type="url"
-                        value={branding.logo_url}
-                        onChange={(e) => setBranding({ ...branding, logo_url: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono text-xs"
-                    />
-                    {branding.logo_url && (
-                        <div className="mt-2 w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-white">
-                            <img src={branding.logo_url} alt="Logo preview" className="w-full h-full object-contain p-1" />
-                        </div>
-                    )}
-                </div>
+                <ImageUploadField
+                    label="Logo"
+                    value={branding.logo_url}
+                    onChange={(url) => setBranding({ ...branding, logo_url: url })}
+                    prefix="logo"
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500">Imatge Hero per Defecte</label>
-                        <input
-                            type="url"
-                            value={branding.default_hero_url}
-                            onChange={(e) => setBranding({ ...branding, default_hero_url: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono text-xs"
-                        />
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500">Imatge Placeholder per Defecte</label>
-                        <input
-                            type="url"
-                            value={branding.default_placeholder_url}
-                            onChange={(e) => setBranding({ ...branding, default_placeholder_url: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono text-xs"
-                        />
-                    </div>
+                    <ImageUploadField
+                        label="Imatge Hero per Defecte"
+                        value={branding.default_hero_url}
+                        onChange={(url) => setBranding({ ...branding, default_hero_url: url })}
+                        prefix="hero"
+                    />
+                    <ImageUploadField
+                        label="Imatge Placeholder per Defecte"
+                        value={branding.default_placeholder_url}
+                        onChange={(url) => setBranding({ ...branding, default_placeholder_url: url })}
+                        prefix="placeholder"
+                    />
                 </div>
 
                 <hr className="border-slate-100 dark:border-slate-700" />

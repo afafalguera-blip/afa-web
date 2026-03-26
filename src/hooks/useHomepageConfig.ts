@@ -13,6 +13,11 @@ const DEFAULT_HOMEPAGE: HomepageConfig = {
 let cachedHomepage: HomepageConfig | null = null;
 let fetchPromise: Promise<HomepageConfig | null> | null = null;
 
+export function invalidateHomepageCache() {
+    cachedHomepage = null;
+    fetchPromise = null;
+}
+
 export function useHomepageConfig(): HomepageConfig {
     const [config, setConfig] = useState<HomepageConfig>(cachedHomepage || DEFAULT_HOMEPAGE);
 

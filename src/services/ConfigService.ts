@@ -217,6 +217,24 @@ export const ConfigService = {
     return this.updateConfig('homepage', config);
   },
 
+  async uploadBrandingImage(file: File, prefix: string): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${prefix}_${Date.now()}.${fileExt}`;
+    const filePath = `branding/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('site-assets')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('site-assets')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  },
+
   async uploadHeroImage(file: File): Promise<string> {
     const fileExt = file.name.split('.').pop();
     const fileName = `hero_${Date.now()}.${fileExt}`;

@@ -16,6 +16,11 @@ const DEFAULT_BRANDING: BrandingConfig = {
 let cachedBranding: BrandingConfig | null = null;
 let fetchPromise: Promise<BrandingConfig | null> | null = null;
 
+export function invalidateBrandingCache() {
+    cachedBranding = null;
+    fetchPromise = null;
+}
+
 export function useBranding(): BrandingConfig {
     const [branding, setBranding] = useState<BrandingConfig>(cachedBranding || DEFAULT_BRANDING);
 
