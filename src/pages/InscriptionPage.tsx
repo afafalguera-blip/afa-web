@@ -75,7 +75,8 @@ export default function InscriptionPage() {
     for (const act of dbActivities) {
       const courseTypes = act.inscription_course_types || [];
       const lang = i18n.language as 'ca' | 'es' | 'en';
-      const title = (act as Record<string, unknown>)[`title_${lang}`] as string || act.title;
+      const titleKey = `title_${lang}` as keyof Activity;
+      const title = (act[titleKey] as string) || act.title;
       const scheduleDetails = act.schedule_details || [];
 
       for (const courseType of courseTypes) {
@@ -95,7 +96,8 @@ export default function InscriptionPage() {
           }
         } else {
           // Fallback: single option with schedule_summary
-          const summary = (act as Record<string, unknown>)[`schedule_summary_${lang}`] as string || act.schedule_summary || '';
+          const summaryKey = `schedule_summary_${lang}` as keyof Activity;
+          const summary = (act[summaryKey] as string) || act.schedule_summary || '';
           grouped[courseType].push({
             value: act.title,
             label: `${title} - ${summary}`,

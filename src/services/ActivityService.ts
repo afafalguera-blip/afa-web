@@ -9,6 +9,9 @@ export interface ScheduleSession {
 export interface ScheduleDetail {
   group: string;
   sessions: ScheduleSession[];
+  // Legacy flat format from seed data
+  days?: string;
+  time?: string;
 }
 
 export interface Activity {
