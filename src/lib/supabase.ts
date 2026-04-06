@@ -7,4 +7,11 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   throw new Error('Missing Supabase environment variables. Check your .env.local file.');
 }
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  global: {
+    headers: {
+      // Tell Supabase CDN to cache responses and allow browser caching
+      'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+    },
+  },
+});

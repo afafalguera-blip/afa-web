@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { compressImage } from "../utils/imageCompression";
 
 export interface HeroConfig {
   image_url: string;
@@ -97,8 +98,33 @@ export interface HomepageConfig {
   assemblea_pdf_url: string;
 }
 
+const CONFIG_CACHE_PREFIX = 'afa_config_';
+const CONFIG_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+function getCachedConfig<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(CONFIG_CACHE_PREFIX + key);
+    if (!raw) return null;
+    const { value, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CONFIG_CACHE_TTL) return null;
+    return value as T;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedConfig<T>(key: string, value: T): void {
+  try {
+    localStorage.setItem(CONFIG_CACHE_PREFIX + key, JSON.stringify({ value, ts: Date.now() }));
+  } catch { /* localStorage full — ignore */ }
+}
+
 export const ConfigService = {
   async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage'): Promise<T | null> {
+    // Return cached value if fresh
+    const cached = getCachedConfig<T>(key);
+    if (cached !== null) return cached;
+
     const { data, error } = await supabase
       .from('site_config')
       .select('value')
@@ -109,6 +135,8 @@ export const ConfigService = {
       console.error(`Error fetching ${key} config:`, error);
       return null;
     }
+
+    setCachedConfig(key, data.value);
     return data.value as T;
   },
 
@@ -119,6 +147,9 @@ export const ConfigService = {
       .eq('key', key);
 
     if (error) throw error;
+
+    // Invalidate cache so next read fetches fresh data
+    try { localStorage.removeItem(CONFIG_CACHE_PREFIX + key); } catch { /* ignore */ }
   },
 
   async getHeroConfig(): Promise<HeroConfig | null> {
@@ -218,13 +249,15 @@ export const ConfigService = {
   },
 
   async uploadBrandingImage(file: File, prefix: string): Promise<string> {
-    const fileExt = file.name.split('.').pop();
+    // Compress logo/branding images (max 400px for logos)
+    const compressed = await compressImage(file, { maxWidth: 400, maxHeight: 400, quality: 0.85 });
+    const fileExt = compressed.name.split('.').pop();
     const fileName = `${prefix}_${Date.now()}.${fileExt}`;
     const filePath = `branding/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('site-assets')
-      .upload(filePath, file);
+      .upload(filePath, compressed);
 
     if (uploadError) throw uploadError;
 
@@ -236,13 +269,15 @@ export const ConfigService = {
   },
 
   async uploadHeroImage(file: File): Promise<string> {
-    const fileExt = file.name.split('.').pop();
+    // Compress hero images (max 1600px wide for hero banners)
+    const compressed = await compressImage(file, { maxWidth: 1600, maxHeight: 900, quality: 0.80 });
+    const fileExt = compressed.name.split('.').pop();
     const fileName = `hero_${Date.now()}.${fileExt}`;
     const filePath = `hero/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('site-assets')
-      .upload(filePath, file);
+      .upload(filePath, compressed);
 
     if (uploadError) throw uploadError;
 

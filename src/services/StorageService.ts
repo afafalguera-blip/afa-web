@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { compressImage } from '../utils/imageCompression';
 
 export const StorageService = {
   /**
@@ -29,13 +30,18 @@ export const StorageService = {
   async uploadFile(bucket: string, file: File, folder: string = 'uploads') {
     this.validateFile(file);
 
-    const fileExt = file.name.split('.').pop();
+    // Compress images before upload to reduce storage bandwidth
+    const processedFile = file.type.startsWith('image/')
+      ? await compressImage(file)
+      : file;
+
+    const fileExt = processedFile.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
     const filePath = folder ? `${folder}/${fileName}` : fileName;
 
     const { error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(filePath, file);
+      .upload(filePath, processedFile);
 
     if (uploadError) throw uploadError;
 

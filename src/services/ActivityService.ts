@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { compressImage } from '../utils/imageCompression';
 
 export interface ScheduleSession {
   day: number; // 1 (Mon) - 5 (Fri)
@@ -108,10 +109,11 @@ export const ActivityService = {
   },
 
   async uploadImage(file: File) {
-    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+    const compressed = await compressImage(file);
+    const fileName = `${Date.now()}-${compressed.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
     const { error: uploadError } = await supabase.storage
       .from('activity-images')
-      .upload(fileName, file);
+      .upload(fileName, compressed);
 
     if (uploadError) throw uploadError;
 

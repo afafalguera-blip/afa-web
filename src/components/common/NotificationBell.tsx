@@ -84,9 +84,26 @@ export function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications();
-    // Refresh every minute
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
+
+    // Refresh every 5 minutes instead of every minute to save bandwidth
+    const POLL_INTERVAL = 5 * 60 * 1000;
+    let interval = setInterval(fetchNotifications, POLL_INTERVAL);
+
+    // Pause polling when tab is hidden, resume when visible
+    const handleVisibility = () => {
+      if (document.hidden) {
+        clearInterval(interval);
+      } else {
+        fetchNotifications();
+        interval = setInterval(fetchNotifications, POLL_INTERVAL);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   // Better: use state for dismissed to trigger re-render

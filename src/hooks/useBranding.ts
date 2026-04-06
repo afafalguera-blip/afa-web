@@ -13,12 +13,21 @@ const DEFAULT_BRANDING: BrandingConfig = {
     }
 };
 
+const BRANDING_LS_KEY = 'afa_branding';
+
 let cachedBranding: BrandingConfig | null = null;
 let fetchPromise: Promise<BrandingConfig | null> | null = null;
+
+// Hydrate in-memory cache from localStorage on module load
+try {
+    const stored = localStorage.getItem(BRANDING_LS_KEY);
+    if (stored) cachedBranding = JSON.parse(stored);
+} catch { /* ignore */ }
 
 export function invalidateBrandingCache() {
     cachedBranding = null;
     fetchPromise = null;
+    try { localStorage.removeItem(BRANDING_LS_KEY); } catch { /* ignore */ }
 }
 
 export function useBranding(): BrandingConfig {
@@ -36,6 +45,7 @@ export function useBranding(): BrandingConfig {
             if (data) {
                 cachedBranding = data;
                 setBranding(data);
+                try { localStorage.setItem(BRANDING_LS_KEY, JSON.stringify(data)); } catch { /* ignore */ }
             }
         });
     }, []);
