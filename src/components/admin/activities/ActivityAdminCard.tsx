@@ -2,6 +2,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Activity } from '../../../services/ActivityService';
 import { CategoryUtils } from '../../../utils/CategoryUtils';
+import { proxyStorageUrl } from '../../../utils/storageUrl';
 
 interface ActivityAdminCardProps {
     activity: Activity;
@@ -15,7 +16,7 @@ export function ActivityAdminCard({ activity, onEdit, onDelete }: ActivityAdminC
     return (
         <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
             <div className="h-40 relative">
-                <img src={activity.image_url} alt={activity.title} className="w-full h-full object-cover" />
+                <img src={proxyStorageUrl(activity.image_url)} alt={activity.title} className="w-full h-full object-cover" />
                 <div className={`absolute top-4 right-4 ${activity.color} text-white text-xs font-bold px-3 py-1 rounded-full uppercase`}>
                     {CategoryUtils.translate(t, activity.category)}
                 </div>

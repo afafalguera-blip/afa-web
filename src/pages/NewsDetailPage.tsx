@@ -8,6 +8,7 @@ import { NewsDetailHeader } from '../components/public/news/NewsDetailHeader';
 import { NewsHeroImage } from '../components/public/news/NewsHeroImage';
 import { NewsEventCard } from '../components/public/news/NewsEventCard';
 import { NewsActions } from '../components/public/news/NewsActions';
+import { proxyStorageUrl } from '../utils/storageUrl';
 import { sanitizeRichTextHtml } from '../utils/htmlSanitizer';
 import { getReadabilityMetrics } from '../utils/readability';
 
@@ -65,7 +66,7 @@ export default function NewsDetailPage() {
       <SEO
         title={article.title}
         description={article.excerpt}
-        ogImage={article.image_url || undefined}
+        ogImage={proxyStorageUrl(article.image_url) || undefined}
         ogType="article"
       />
 

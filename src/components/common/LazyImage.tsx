@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { proxyStorageUrl } from '../../utils/storageUrl';
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
     src: string;
@@ -8,17 +9,18 @@ interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 export function LazyImage({ src, alt, className, placeholder, ...props }: LazyImageProps) {
+    const proxiedSrc = proxyStorageUrl(src);
     const [loaded, setLoaded] = useState(false);
     const [currentSrc, setCurrentSrc] = useState(placeholder || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
 
     useEffect(() => {
         const img = new Image();
-        img.src = src;
+        img.src = proxiedSrc;
         img.onload = () => {
-            setCurrentSrc(src);
+            setCurrentSrc(proxiedSrc);
             setLoaded(true);
         };
-    }, [src]);
+    }, [proxiedSrc]);
 
     return (
         <img

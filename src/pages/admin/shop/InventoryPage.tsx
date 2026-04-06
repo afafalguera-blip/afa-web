@@ -7,6 +7,7 @@ import { useContentTranslation } from '../../../hooks/useContentTranslation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sortSizes, calculateChandalStock } from '../../../utils/productUtils';
 import { ExportService } from '../../../services/ExportService';
+import { proxyStorageUrl } from '../../../utils/storageUrl';
 
 export function InventoryPage() {
   const { tContent } = useContentTranslation();
@@ -153,7 +154,7 @@ export function InventoryPage() {
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden">
                       {product.image_url ? (
-                        <img src={product.image_url} alt="" className="w-full h-full object-cover" />
+                        <img src={proxyStorageUrl(product.image_url)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <Package className="w-6 h-6 text-slate-300" />
                       )}

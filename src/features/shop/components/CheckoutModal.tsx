@@ -5,6 +5,7 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../../../hooks/useAuth';
 import { ConfigService, type ShopConfig } from '../../../services/ConfigService';
 import { ShopService } from '../services/ShopService';
+import { proxyStorageUrl } from '../../../utils/storageUrl';
 
 interface CheckoutModalProps {
     onClose: () => void;
@@ -126,7 +127,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                     <div key={item.id} className="flex gap-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl group text-sm">
                                         <div className="w-16 h-16 bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden flex-shrink-0">
                                             {item.product.image_url && (
-                                                <img src={item.product.image_url} alt={item.product.name} className="w-full h-full object-cover" />
+                                                <img src={proxyStorageUrl(item.product.image_url)} alt={item.product.name} className="w-full h-full object-cover" />
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">

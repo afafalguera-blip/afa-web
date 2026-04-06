@@ -14,6 +14,7 @@ import { EventsSection } from '../features/events/components/EventsSection';
 import { AboutSection } from '../components/public/AboutSection';
 import { Link } from 'react-router-dom';
 import { useHomepageConfig } from '../hooks/useHomepageConfig';
+import { proxyStorageUrl } from '../utils/storageUrl';
 
 export function Home() {
   const { t } = useTranslation();
@@ -51,7 +52,7 @@ export function Home() {
           "@type": "Organization",
           "name": "AFA Escola Falguera",
           "url": "https://afafalguera.com",
-          "logo": "https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/Imagenes/logo.png",
+          "logo": "https://afafalguera.com/storage/object/public/Imagenes/logo.png",
           "contactPoint": {
             "@type": "ContactPoint",
             "email": "hola@afafalguera.com",
@@ -100,7 +101,7 @@ export function Home() {
       <section className="px-6 mt-8 mb-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {homepageConfig.assemblea_pdf_url && <a
-            href={homepageConfig.assemblea_pdf_url}
+            href={proxyStorageUrl(homepageConfig.assemblea_pdf_url)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Edit, Trash2, Archive } from 'lucide-react';
 import type { Project } from '../../../services/admin/AdminProjectsService';
+import { proxyStorageUrl } from '../../../utils/storageUrl';
 
 interface ProjectCardProps {
   project: Project;
@@ -20,7 +21,7 @@ export function ProjectCard({ project, onEdit, onDelete, onToggleArchive }: Proj
     >
       <div className="aspect-video bg-slate-100 relative">
         <img
-          src={project.image_url || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop'}
+          src={proxyStorageUrl(project.image_url) || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop'}
           alt={project.title}
           className="w-full h-full object-cover"
         />

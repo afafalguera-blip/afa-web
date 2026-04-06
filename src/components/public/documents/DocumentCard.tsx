@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { es, ca } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import type { PublicDocument } from '../../../services/DocumentsService';
+import { proxyStorageUrl } from '../../../utils/storageUrl';
 
 interface DocumentCardProps {
     document: PublicDocument;
@@ -46,7 +47,7 @@ export function DocumentCard({ document }: DocumentCardProps) {
                 </span>
 
                 <a
-                    href={document.file_url}
+                    href={proxyStorageUrl(document.file_url)}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded-lg transition-colors"

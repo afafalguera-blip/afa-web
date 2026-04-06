@@ -1,3 +1,5 @@
+import { proxyStorageUrl } from '../../../utils/storageUrl';
+
 interface NewsHeroImageProps {
     imageUrl: string | null;
     title: string;
@@ -11,7 +13,7 @@ export function NewsHeroImage({ imageUrl, title, sources }: NewsHeroImageProps) 
         <div className="max-w-5xl mx-auto px-0 sm:px-8 mb-16 overflow-hidden">
             <div className="relative aspect-[21/9] sm:aspect-[16/7] sm:rounded-[3rem] overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img
-                    src={imageUrl || fallbackImage}
+                    src={proxyStorageUrl(imageUrl) || fallbackImage}
                     alt={title}
                     className="w-full h-full object-cover"
                 />

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Check, ShoppingCart } from 'lucide-react';
 import type { ShopProduct } from '../types/shop';
 import { useCart } from '../contexts/CartContext';
+import { proxyStorageUrl } from '../../../utils/storageUrl';
 
 interface ProductModalProps {
   product: ShopProduct;
@@ -42,7 +43,7 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
             <div className="aspect-square sm:aspect-[4/3] shrink-0 bg-slate-50 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
               {product.image_url ? (
                 <img
-                  src={product.image_url}
+                  src={proxyStorageUrl(product.image_url)}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />

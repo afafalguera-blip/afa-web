@@ -2,6 +2,7 @@ import { Calendar, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { NewsArticle } from '../../../services/PublicNewsService';
+import { proxyStorageUrl } from '../../../utils/storageUrl';
 
 interface NewsCardProps {
     article: NewsArticle;
@@ -17,7 +18,7 @@ export function NewsCard({ article }: NewsCardProps) {
         >
             <div className="relative h-56 overflow-hidden">
                 <img
-                    src={article.image_url || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}
+                    src={proxyStorageUrl(article.image_url) || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}
                     alt={article.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
