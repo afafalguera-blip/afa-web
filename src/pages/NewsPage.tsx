@@ -4,6 +4,8 @@ import { Newspaper } from 'lucide-react';
 import { PublicNewsService, type NewsArticle } from '../services/PublicNewsService';
 import { NewsListHeader } from '../components/public/news/NewsListHeader';
 import { NewsCard } from '../components/public/news/NewsCard';
+import { MAINTENANCE_MODE } from '../utils/maintenance';
+import { MaintenancePlaceholder } from '../components/public/MaintenancePlaceholder';
 
 export function NewsPage() {
   const { t, i18n } = useTranslation();
@@ -11,6 +13,7 @@ export function NewsPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchNews = useMemo(() => async () => {
+    if (MAINTENANCE_MODE) { setLoading(false); return; }
     setLoading(true);
     try {
       const data = await PublicNewsService.getAllNews(i18n.language);
@@ -33,7 +36,9 @@ export function NewsPage() {
         <NewsListHeader />
 
         {/* Loading State */}
-        {loading ? (
+        {MAINTENANCE_MODE ? (
+          <MaintenancePlaceholder />
+        ) : loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-slate-500 font-medium">{t('common.loading')}</p>

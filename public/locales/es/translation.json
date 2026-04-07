@@ -1,4 +1,10 @@
 {
+  "maintenance": {
+    "banner": "Estamos actualizando la web. Volveremos el 16 de abril! Para cualquier consulta:",
+    "section_unavailable": "Esta sección no está disponible temporalmente.",
+    "page_title": "Página en mantenimiento",
+    "page_description": "Estamos trabajando para mejorar la web. Estaremos de vuelta el 16 de abril con todas las funcionalidades. Para cualquier consulta o necesidad, escríbenos!"
+  },
   "header": {
     "greeting": "Buenos días, Familia 👋"
   },

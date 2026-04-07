@@ -1,4 +1,10 @@
 {
+  "maintenance": {
+    "banner": "We're updating the website. We'll be back on April 16! For any questions:",
+    "section_unavailable": "This section is temporarily unavailable.",
+    "page_title": "Page under maintenance",
+    "page_description": "We're working to improve the website. We'll be back on April 16 with all features. For any questions or needs, write to us!"
+  },
   "header": {
     "greeting": "Good morning, Family 👋"
   },

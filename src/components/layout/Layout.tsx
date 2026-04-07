@@ -5,6 +5,7 @@ import { DesktopNav } from './DesktopNav';
 import { MobileTopNav } from './MobileTopNav';
 import { SchoolSuppliesBackground } from './SchoolSuppliesBackground';
 import { AnnouncementBanner } from '../public/AnnouncementBanner';
+import { MaintenanceBanner } from '../public/MaintenanceBanner';
 import { CookieBanner } from '../public/CookieBanner';
 import { Link } from 'react-router-dom';
 
@@ -22,6 +23,7 @@ export function Layout() {
       {/* Status bar spacer - Mobile only (adjusted for new TopNav) */}
       <div className="h-16 w-full lg:hidden"></div>
 
+      <MaintenanceBanner />
       <AnnouncementBanner />
 
       <main className="pb-24 lg:pb-12 max-w-7xl mx-auto w-full">

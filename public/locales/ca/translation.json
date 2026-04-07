@@ -1,4 +1,10 @@
 {
+  "maintenance": {
+    "banner": "Estem actualitzant la web. Tornarem el 16 d'abril! Per qualsevol consulta:",
+    "section_unavailable": "Aquesta secció no està disponible temporalment.",
+    "page_title": "Pàgina en manteniment",
+    "page_description": "Estem treballant per millorar la web. Estarem de tornada el 16 d'abril amb totes les funcionalitats. Per qualsevol consulta o necessitat, escriu-nos!"
+  },
   "header": {
     "greeting": "Bon dia, Família 👋"
   },

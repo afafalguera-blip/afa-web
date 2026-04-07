@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { EventsService, type CalendarEvent } from '../services/EventsService';
 import { useHomepageConfig } from '../../../hooks/useHomepageConfig';
+import { MAINTENANCE_MODE } from '../../../utils/maintenance';
+import { MaintenancePlaceholder } from '../../../components/public/MaintenancePlaceholder';
 
 export const EventsSection: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -11,6 +13,10 @@ export const EventsSection: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (MAINTENANCE_MODE) {
+            setLoading(false);
+            return;
+        }
         const fetchEvents = async () => {
             try {
                 const data = await EventsService.getUpcomingEvents(homepageConfig.featured_events_count);
@@ -40,11 +46,15 @@ export const EventsSection: React.FC = () => {
                             <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2"></div>
                         </div>
                     </div>
-                ) : events.length === 0 ? (
-                    <div className="text-center py-8 text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 uppercase text-[10px] tracking-widest font-bold">
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {t('common.no_events' as any)}
-                    </div>
+                ) : MAINTENANCE_MODE || events.length === 0 ? (
+                    MAINTENANCE_MODE ? (
+                        <MaintenancePlaceholder compact />
+                    ) : (
+                        <div className="text-center py-8 text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 uppercase text-[10px] tracking-widest font-bold">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {t('common.no_events' as any)}
+                        </div>
+                    )
                 ) : (
                     events.map((event) => {
                         const date = new Date(event.event_date);

@@ -15,6 +15,7 @@ import { AboutSection } from '../components/public/AboutSection';
 import { Link } from 'react-router-dom';
 import { useHomepageConfig } from '../hooks/useHomepageConfig';
 import { proxyStorageUrl } from '../utils/storageUrl';
+import { MAINTENANCE_MODE } from '../utils/maintenance';
 
 export function Home() {
   const { t } = useTranslation();
@@ -29,6 +30,7 @@ export function Home() {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
   useEffect(() => {
+    if (MAINTENANCE_MODE) return;
     const fetchConfigs = async () => {
       const [hero, about, contact] = await Promise.all([
         ConfigService.getHeroConfig(),

@@ -24,6 +24,8 @@ import { CalendarService, type CalendarEvent } from '../services/CalendarService
 import { CalendarMonthView } from '../components/public/calendar/CalendarMonthView';
 import { CalendarAgendaView } from '../components/public/calendar/CalendarAgendaView';
 import { EventDetailModal } from '../components/public/calendar/EventDetailModal';
+import { MAINTENANCE_MODE } from '../utils/maintenance';
+import { MaintenancePlaceholder } from '../components/public/MaintenancePlaceholder';
 
 type ViewMode = 'month' | 'agenda';
 
@@ -39,6 +41,10 @@ export default function GeneralCalendarPage() {
   const locale = locales[i18n.language as keyof typeof locales] || ca;
 
   useEffect(() => {
+    if (MAINTENANCE_MODE) {
+      setLoading(false);
+      return;
+    }
     const fetchEvents = async () => {
       try {
         setLoading(true);
@@ -161,7 +167,9 @@ export default function GeneralCalendarPage() {
 
       {/* Main Content Area */}
       <div className="bg-white dark:bg-slate-900 md:border md:border-slate-200 md:dark:border-slate-800 md:rounded-[2.5rem] overflow-hidden md:shadow-xl min-h-[600px] transition-all duration-300">
-        {loading ? (
+        {MAINTENANCE_MODE ? (
+          <MaintenancePlaceholder />
+        ) : loading ? (
           <div className="flex flex-col items-center justify-center h-[600px] gap-4">
             <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
             <p className="text-slate-400 text-sm font-bold animate-pulse">{t('common.loading', 'Carregant...')}</p>

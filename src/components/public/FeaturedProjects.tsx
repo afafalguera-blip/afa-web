@@ -9,6 +9,7 @@ import { ProjectDetailModal } from './ProjectDetailModal';
 import { LazyImage } from '../common/LazyImage';
 import { useBranding } from '../../hooks/useBranding';
 import { useHomepageConfig } from '../../hooks/useHomepageConfig';
+import { MAINTENANCE_MODE } from '../../utils/maintenance';
 
 interface Project {
   id: string;
@@ -65,6 +66,7 @@ export const FeaturedProjects = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
+    if (MAINTENANCE_MODE) return;
     const fetchProjects = async () => {
       try {
         const { data, error } = await supabase

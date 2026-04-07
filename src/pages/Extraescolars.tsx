@@ -11,6 +11,8 @@ import { ExtraescolarsHeader } from '../components/public/extraescolars/Extraesc
 import { ExtraescolarsFilters } from '../components/public/extraescolars/ExtraescolarsFilters';
 import { ActivityCard } from '../components/public/extraescolars/ActivityCard';
 import { EnrollmentBanner } from '../components/public/extraescolars/EnrollmentBanner';
+import { MAINTENANCE_MODE } from '../utils/maintenance';
+import { MaintenancePlaceholder } from '../components/public/MaintenancePlaceholder';
 
 export function Extraescolars() {
   const { tContent } = useContentTranslation();
@@ -26,6 +28,10 @@ export function Extraescolars() {
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   useEffect(() => {
+    if (MAINTENANCE_MODE) {
+      setLoading(false);
+      return;
+    }
     fetchActivities();
   }, []);
 
@@ -101,7 +107,9 @@ export function Extraescolars() {
       )}
 
       <div className="transition-all duration-300">
-        {viewMode === 'list' ? (
+        {MAINTENANCE_MODE ? (
+          <MaintenancePlaceholder />
+        ) : viewMode === 'list' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredActivities.map((activity) => (
               <ActivityCard

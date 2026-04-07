@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Mail } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { ContactService } from '../services/ContactService';
 import { ConfigService, type ContactConfig, type SocialConfig } from '../services/ConfigService';
 import { ContactInfo } from '../components/public/contact/ContactInfo';
 import { ContactForm } from '../components/public/contact/ContactForm';
 import { ContactSuccess } from '../components/public/contact/ContactSuccess';
+import { MAINTENANCE_MODE, MAINTENANCE_EMAIL } from '../utils/maintenance';
 
 export function ContactPage() {
     const { t } = useTranslation();
@@ -31,6 +32,7 @@ export function ContactPage() {
     }, [searchParams]);
 
     useEffect(() => {
+        if (MAINTENANCE_MODE) return;
         const fetchConfig = async () => {
             try {
                 const [contactData, socialData] = await Promise.all([
@@ -84,28 +86,48 @@ export function ContactPage() {
 
             <div className="flex flex-col gap-8 md:gap-12">
                 {/* Info Section */}
-                <ContactInfo contact={contact} social={social} />
+                {MAINTENANCE_MODE ? (
+                    <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-3xl p-8 text-center">
+                        <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <Mail className="w-8 h-8 text-amber-600" />
+                        </div>
+                        <p className="text-lg font-bold text-amber-800 dark:text-amber-200 mb-4">
+                            {t('maintenance.page_description')}
+                        </p>
+                        <a
+                            href={`mailto:${MAINTENANCE_EMAIL}`}
+                            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-8 py-4 rounded-2xl transition-colors shadow-lg shadow-amber-500/20 text-lg"
+                        >
+                            <Mail size={20} />
+                            {MAINTENANCE_EMAIL}
+                        </a>
+                    </div>
+                ) : (
+                    <ContactInfo contact={contact} social={social} />
+                )}
 
                 {/* Form Section */}
-                <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-700">
-                    {error && (
-                        <div className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 p-4 rounded-xl mb-6 flex items-center gap-3 border border-red-100 dark:border-red-900/20">
-                            <AlertCircle size={20} />
-                            <p className="text-sm font-medium">{error}</p>
-                        </div>
-                    )}
+                {!MAINTENANCE_MODE && (
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 dark:border-slate-700">
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 p-4 rounded-xl mb-6 flex items-center gap-3 border border-red-100 dark:border-red-900/20">
+                                <AlertCircle size={20} />
+                                <p className="text-sm font-medium">{error}</p>
+                            </div>
+                        )}
 
-                    {isSubmitted ? (
-                        <ContactSuccess onReset={() => setIsSubmitted(false)} />
-                    ) : (
-                        <ContactForm
-                            formData={formData}
-                            isSubmitting={isSubmitting}
-                            onChange={handleChange}
-                            onSubmit={handleSubmit}
-                        />
-                    )}
-                </div>
+                        {isSubmitted ? (
+                            <ContactSuccess onReset={() => setIsSubmitted(false)} />
+                        ) : (
+                            <ContactForm
+                                formData={formData}
+                                isSubmitting={isSubmitting}
+                                onChange={handleChange}
+                                onSubmit={handleSubmit}
+                            />
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

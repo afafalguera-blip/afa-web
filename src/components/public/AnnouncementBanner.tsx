@@ -3,12 +3,14 @@ import { AnnouncementService, type Announcement } from '../../services/Announcem
 import { Megaphone, ExternalLink } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { MAINTENANCE_MODE } from '../../utils/maintenance';
 
 export function AnnouncementBanner() {
     const { i18n } = useTranslation();
     const [announcement, setAnnouncement] = useState<Announcement | null>(null);
 
     useEffect(() => {
+        if (MAINTENANCE_MODE) return;
         const fetchAnnouncement = async () => {
             const data = await AnnouncementService.getLatest();
             if (data && data.is_active) {

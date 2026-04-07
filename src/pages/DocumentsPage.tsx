@@ -5,6 +5,8 @@ import { SEO } from '../components/common/SEO';
 import { DocumentsService, type PublicDocument } from '../services/DocumentsService';
 import { DocumentCard } from '../components/public/documents/DocumentCard';
 import { DocumentFilters } from '../components/public/documents/DocumentFilters';
+import { MAINTENANCE_MODE } from '../utils/maintenance';
+import { MaintenancePlaceholder } from '../components/public/MaintenancePlaceholder';
 
 export function DocumentsPage() {
   const { t } = useTranslation();
@@ -14,6 +16,10 @@ export function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    if (MAINTENANCE_MODE) {
+      setLoading(false);
+      return;
+    }
     const fetchDocuments = async () => {
       try {
         setLoading(true);
@@ -63,7 +69,9 @@ export function DocumentsPage() {
         />
 
         {/* Documents Grid */}
-        {loading ? (
+        {MAINTENANCE_MODE ? (
+          <MaintenancePlaceholder />
+        ) : loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
           </div>

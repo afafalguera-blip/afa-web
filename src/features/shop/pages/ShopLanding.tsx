@@ -11,6 +11,8 @@ import { SEO } from '../../../components/common/SEO';
 import { calculateChandalStock } from '../../../utils/productUtils';
 import { useCart } from '../contexts/CartContext';
 import { ConfigService, type ShopConfig } from '../../../services/ConfigService';
+import { MAINTENANCE_MODE } from '../../../utils/maintenance';
+import { MaintenancePlaceholder } from '../../../components/public/MaintenancePlaceholder';
 
 export function ShopLanding() {
   const { i18n, t } = useTranslation();
@@ -26,6 +28,10 @@ export function ShopLanding() {
   const currentLang = (i18n.language || 'ca') as 'ca' | 'es' | 'en';
 
   useEffect(() => {
+    if (MAINTENANCE_MODE) {
+      setLoading(false);
+      return;
+    }
     fetchProducts();
     fetchConfig();
   }, []);
@@ -133,7 +139,9 @@ export function ShopLanding() {
         </div>
       </div>
 
-      {loading ? (
+      {MAINTENANCE_MODE ? (
+        <MaintenancePlaceholder />
+      ) : loading ? (
         <div className="flex justify-center py-24">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>

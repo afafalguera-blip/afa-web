@@ -5,6 +5,8 @@ import { Edit } from 'lucide-react';
 import { NewsService, type NewsArticle } from '../services/NewsService';
 import { LazyImage } from '../../../components/common/LazyImage';
 import { useHomepageConfig } from '../../../hooks/useHomepageConfig';
+import { MAINTENANCE_MODE } from '../../../utils/maintenance';
+import { MaintenancePlaceholder } from '../../../components/public/MaintenancePlaceholder';
 
 interface NewsSectionProps {
     isAdmin: boolean;
@@ -18,6 +20,10 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ isAdmin }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (MAINTENANCE_MODE) {
+            setLoading(false);
+            return;
+        }
         const fetchNews = async () => {
             try {
                 const data = await NewsService.getLatestNews(homepageConfig.featured_news_count);
@@ -43,11 +49,15 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ isAdmin }) => {
                     Array.from({ length: 3 }).map((_, i) => (
                         <div key={i} className="min-w-[85%] lg:min-w-0 bg-slate-100 dark:bg-slate-800 rounded-3xl h-64 animate-pulse"></div>
                     ))
-                ) : news.length === 0 ? (
-                    <div className="col-span-3 py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {t('common.no_news' as any)}
-                    </div>
+                ) : MAINTENANCE_MODE || news.length === 0 ? (
+                    MAINTENANCE_MODE ? (
+                        <MaintenancePlaceholder compact />
+                    ) : (
+                        <div className="col-span-3 py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {t('common.no_news' as any)}
+                        </div>
+                    )
                 ) : (
                     news.map((item) => (
                         <Link
