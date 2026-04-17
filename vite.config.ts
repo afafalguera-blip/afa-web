@@ -5,6 +5,18 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/',
   plugins: [react()],
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rolldownOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('@supabase/supabase-js')) return 'vendor-supabase';
+          if (id.includes('recharts') || id.includes('d3-')) return 'vendor-recharts';
+          if (id.includes('xlsx') || id.includes('exceljs') || id.includes('html2canvas') || id.includes('jspdf')) return 'vendor-export';
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
