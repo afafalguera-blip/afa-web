@@ -30,17 +30,9 @@ Deno.serve(async (req: Request) => {
   const { data: dbData } = await supabase.rpc("get_db_size_bytes");
   const dbBytes: number = isTest ? 420 * 1024 * 1024 : (dbData ?? 0); // fake 420 MB in test
 
-  // 2. Check Storage size (sum of all objects)
-  const { data: storData } = await supabase
-    .from("storage.objects")
-    .select("metadata->size")
-    .limit(10000);
-  const storageBytes: number = isTest
-    ? 820 * 1024 * 1024  // fake 820 MB in test
-    : (storData ?? []).reduce(
-        (acc: number, row: { size?: number }) => acc + (row.size ?? 0),
-        0
-      );
+  // 2. Check Storage size via SQL helper (REST can't access storage schema)
+  const { data: storData } = await supabase.rpc("get_storage_size_bytes");
+  const storageBytes: number = isTest ? 820 * 1024 * 1024 : (storData ?? 0);
 
   const alerts: string[] = [];
 
