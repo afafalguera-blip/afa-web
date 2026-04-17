@@ -12,6 +12,41 @@ const TRANSLATION_PROXY_URL = import.meta.env.VITE_TRANSLATION_PROXY_URL as stri
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 const ALLOW_PUBLIC_TRANSLATION_FALLBACK = import.meta.env.VITE_ALLOW_PUBLIC_TRANSLATION_FALLBACK === 'true';
 const TRANSLATION_TIMEOUT_MS = 12000;
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const CACHE_PREFIX = 'tx_';
+
+function hashString(s: string): number {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+  return h >>> 0;
+}
+
+function getCacheKey(text: string, sl: string, tl: string): string {
+  return `${CACHE_PREFIX}${hashString(text)}_${sl}_${tl}`;
+}
+
+function readCache(key: string): string | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const { value, expiry } = JSON.parse(raw) as { value: string; expiry: number };
+    if (Date.now() > expiry) { localStorage.removeItem(key); return null; }
+    return value;
+  } catch { return null; }
+}
+
+function writeCache(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, JSON.stringify({ value, expiry: Date.now() + CACHE_TTL_MS }));
+  } catch {
+    // localStorage full — evict oldest translation entries
+    try {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith(CACHE_PREFIX));
+      if (keys.length > 0) localStorage.removeItem(keys[0]);
+      localStorage.setItem(key, JSON.stringify({ value, expiry: Date.now() + CACHE_TTL_MS }));
+    } catch { /* silently skip cache write */ }
+  }
+}
 
 async function fetchWithTimeout(input: string, init?: RequestInit) {
   const controller = new AbortController();
@@ -81,15 +116,21 @@ async function translateViaPublicGoogle(text: string, sourceLang: string, target
 }
 
 async function translateText(text: string, sourceLang: string, targetLang: string): Promise<string> {
+  const cacheKey = getCacheKey(text, sourceLang, targetLang);
+  const cached = readCache(cacheKey);
+  if (cached !== null) return cached;
+
+  let result: string;
   if (TRANSLATION_PROXY_URL) {
-    return translateViaProxy(text, sourceLang, targetLang);
+    result = await translateViaProxy(text, sourceLang, targetLang);
+  } else if (ALLOW_PUBLIC_TRANSLATION_FALLBACK || import.meta.env.DEV) {
+    result = await translateViaPublicGoogle(text, sourceLang, targetLang);
+  } else {
+    throw new Error('Translation service not configured. Set VITE_TRANSLATION_PROXY_URL or enable fallback.');
   }
 
-  if (ALLOW_PUBLIC_TRANSLATION_FALLBACK || import.meta.env.DEV) {
-    return translateViaPublicGoogle(text, sourceLang, targetLang);
-  }
-
-  throw new Error('Translation service not configured. Set VITE_TRANSLATION_PROXY_URL or enable fallback.');
+  writeCache(cacheKey, result);
+  return result;
 }
 
 export const TranslationService = {
