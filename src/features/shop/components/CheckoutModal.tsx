@@ -19,6 +19,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
     const [customerName, setCustomerName] = useState('');
     const [customerEmail, setCustomerEmail] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
+    const [isMemberLocal, setIsMemberLocal] = useState(isMember);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
@@ -62,10 +63,11 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                 items: items.map(item => ({
                     variant_id: item.variant.id,
                     quantity: item.quantity,
-                    price_at_time: isMember ? item.variant.price_member : item.variant.price_non_member
+                    price_at_time: isMemberLocal ? item.variant.price_member : item.variant.price_non_member
                 })),
                 userId: user?.id,
-                language: currentLang
+                language: currentLang,
+                isMember: isMemberLocal
             });
 
             setSuccess(true);
@@ -133,7 +135,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-bold text-slate-900 dark:text-white truncate uppercase tracking-tight">{item.product.name}</h4>
                                             <p className="text-slate-500 text-xs mt-0.5">Talla: {item.variant.size} • Qt: {item.quantity}</p>
-                                            <p className="text-primary font-black mt-1 text-[15px]">{(Number(isMember ? item.variant.price_member : item.variant.price_non_member) * item.quantity).toFixed(2)}€</p>
+                                            <p className="text-primary font-black mt-1 text-[15px]">{(Number(isMemberLocal ? item.variant.price_member : item.variant.price_non_member) * item.quantity).toFixed(2)}€</p>
                                         </div>
                                         <button
                                             onClick={() => removeItem(item.id)}
@@ -203,6 +205,24 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                         />
                                     </div>
                                 </div>
+
+                                {/* Member toggle */}
+                                <label className="flex items-center gap-3 cursor-pointer select-none p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-primary/40 transition-all">
+                                    <div className="relative flex-shrink-0">
+                                        <input
+                                            type="checkbox"
+                                            checked={isMemberLocal}
+                                            onChange={e => setIsMemberLocal(e.target.checked)}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-10 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer-checked:bg-primary transition-colors"></div>
+                                        <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-slate-800 dark:text-white">Soc soci/a de l'AFA</p>
+                                        <p className="text-[11px] text-slate-400 mt-0.5">Aplica el preu de soci</p>
+                                    </div>
+                                </label>
 
                                 {errorMsg && (
                                     <p className="text-red-500 text-xs font-bold bg-red-50 dark:bg-red-500/10 p-4 rounded-xl border border-red-100 dark:border-red-500/20">{errorMsg}</p>

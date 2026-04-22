@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ShopService } from '../../../features/shop/services/ShopService';
-import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle, Mail, Phone } from 'lucide-react';
+import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle, Mail, Phone, BadgeCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
 import { OrderEditModal } from '../../../features/shop/components/OrderEditModal';
@@ -241,6 +241,11 @@ export function OrdersPage() {
                                         <span className="text-xs font-semibold text-slate-400">
                                             {format(new Date(order.created_at), "d MMM yyyy · HH:mm", { locale: ca })}
                                         </span>
+                                        {order.is_member && (
+                                            <span className="flex items-center gap-1 text-[10px] font-black uppercase bg-primary/10 text-primary px-2 py-1 rounded-lg">
+                                                <BadgeCheck className="w-3 h-3" /> Soci
+                                            </span>
+                                        )}
                                         {order.delivery_status === 'delivered' && (
                                             <span className="flex items-center gap-1 text-[10px] font-black uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-1 rounded-lg">
                                                 <Archive className="w-3 h-3" /> Arxivat

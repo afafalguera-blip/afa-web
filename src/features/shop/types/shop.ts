@@ -42,6 +42,8 @@ export interface ShopOrderItem {
   variant?: {
     size: string;
     stock: number;
+    price_member: number;
+    price_non_member: number;
     product: {
       name: string;
     };
@@ -58,6 +60,7 @@ export interface ShopOrder {
   payment_status: OrderPaymentStatus;
   delivery_status: OrderDeliveryStatus;
   user_id?: string | null;
+  is_member: boolean;
   items?: ShopOrderItem[];
 }
 

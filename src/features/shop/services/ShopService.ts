@@ -14,6 +14,7 @@ function transformOrder(order: unknown): ShopOrder {
         payment_status: (o.payment_status as OrderPaymentStatus) || (o.status === 'completed' ? 'paid' : 'pending'),
         delivery_status: (o.delivery_status as OrderDeliveryStatus) || (o.status === 'completed' ? 'delivered' : 'pending'),
         user_id: o.user_id as string | undefined,
+        is_member: (o.is_member as boolean) ?? false,
         items: o.items as ShopOrderItem[]
     };
 }
@@ -137,6 +138,7 @@ export const ShopService = {
     items: Array<{ variant_id: string; quantity: number; price_at_time: number }>;
     userId?: string | null;
     language: 'ca' | 'es' | 'en';
+    isMember?: boolean;
   }): Promise<void> {
     const { error } = await supabase.rpc('create_shop_complex_order_v1', {
         p_customer_name: payload.customerName,
@@ -145,7 +147,8 @@ export const ShopService = {
         p_total_amount: payload.totalAmount,
         p_items: payload.items,
         p_user_id: payload.userId || null,
-        p_language: payload.language
+        p_language: payload.language,
+        p_is_member: payload.isMember ?? false
     });
 
     if (error) throw error;

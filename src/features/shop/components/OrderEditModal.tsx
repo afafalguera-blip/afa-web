@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Save, ShoppingBag, User, Mail, Phone } from 'lucide-react';
+import { X, Plus, Trash2, Save, ShoppingBag, User, Mail, Phone, BadgeCheck } from 'lucide-react';
 import { ShopService } from '../services/ShopService';
 import { supabase } from '../../../lib/supabase';
 import type { ShopProduct, ShopOrder, ShopOrderItem, ShopVariant } from '../types/shop';
@@ -41,6 +41,29 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
       onUpdate();
     } catch {
       alert('Error actualitzant el nom');
+    }
+  };
+
+  const handleToggleMember = async (value: boolean) => {
+    try {
+      const items = order.items ?? [];
+      let newTotal = 0;
+
+      for (const item of items) {
+        if (!item.variant) continue;
+        const newPrice = value ? item.variant.price_member : item.variant.price_non_member;
+        await supabase.from('shop_order_items').update({ price_at_time: newPrice }).eq('id', item.id);
+        newTotal += newPrice * item.quantity;
+      }
+
+      await supabase.from('shop_orders')
+        .update({ is_member: value, ...(items.length > 0 ? { total_amount: newTotal } : {}) })
+        .eq('id', order.id);
+
+      refreshOrder();
+      onUpdate();
+    } catch {
+      alert('Error actualitzant l\'estat de soci');
     }
   };
 
@@ -158,6 +181,29 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                 )}
               </div>
             )}
+
+            {/* Member toggle */}
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <div className="relative flex-shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={order.is_member ?? false}
+                    onChange={e => handleToggleMember(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer-checked:bg-primary transition-colors"></div>
+                  <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <BadgeCheck className={`w-4 h-4 ${order.is_member ? 'text-primary' : 'text-slate-300'}`} />
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Soci</span>
+                  {order.is_member && (
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full">Preu soci aplicat</span>
+                  )}
+                </div>
+              </label>
+            </div>
           </section>
 
           {/* Items Table */}
