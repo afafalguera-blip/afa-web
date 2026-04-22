@@ -5,7 +5,7 @@ import { proxyStorageUrl } from '../utils/storageUrl';
 const DEFAULT_BRANDING: BrandingConfig = {
     site_name: "AFA Escola Falguera",
     logo_url: "/storage/object/public/Imagenes/logo.png",
-    default_hero_url: "/storage/object/public/Imagenes/hero_escuela.png",
+    default_hero_url: "/storage/object/public/Imagenes/hero.png",
     default_placeholder_url: "https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop",
     default_seo_description: {
         ca: "Web oficial de l'AFA de l'Escola Falguera.",
