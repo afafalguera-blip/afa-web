@@ -73,18 +73,28 @@ export function NewsActions({ title, newsUrl, attachmentUrl, attachmentName }: N
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3">
-        {attachmentUrl && (
-          <a
-            href={attachmentUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-black text-[10px] uppercase tracking-[0.16em] hover:translate-y-[-3px] hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95"
-            download={attachmentName || undefined}
-          >
-            <Paperclip className="w-4 h-4" />
-            {t('news_detail.download_pdf', 'Descarregar PDF')}
-          </a>
-        )}
+        {attachmentUrl && (() => {
+          const ref = (attachmentName || attachmentUrl).toLowerCase();
+          const isImage = /\.(jpe?g|png|gif|webp|avif|svg)(\?|$)/.test(ref);
+          const isPdf = /\.pdf(\?|$)/.test(ref);
+          const label = isPdf
+            ? t('news_detail.download_pdf', 'Descarregar PDF')
+            : isImage
+              ? t('news_detail.download_image', 'Descarregar imatge')
+              : t('news_detail.download_attachment', 'Descarregar adjunt');
+          return (
+            <a
+              href={attachmentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-black text-[10px] uppercase tracking-[0.16em] hover:translate-y-[-3px] hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95"
+              download={attachmentName || undefined}
+            >
+              <Paperclip className="w-4 h-4" />
+              {label}
+            </a>
+          );
+        })()}
 
         {newsUrl && (
           <a

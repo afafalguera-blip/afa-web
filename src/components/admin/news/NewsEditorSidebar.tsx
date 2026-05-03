@@ -25,25 +25,28 @@ export function NewsEditorSidebar({ formData, setFormData, metrics, lastAutosave
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-    if (!isPdf) {
-      alert('Solo se permiten archivos PDF');
+    const lowerName = file.name.toLowerCase();
+    const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
+    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|gif|webp|avif|svg)$/i.test(lowerName);
+    if (!isPdf && !isImage) {
+      alert('Sols s\'admeten arxius PDF o imatges');
       if (attachmentInputRef.current) attachmentInputRef.current.value = '';
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      alert('El PDF supera el tamaño máximo (10MB)');
+      alert('L\'arxiu supera la mida màxima (10MB)');
       if (attachmentInputRef.current) attachmentInputRef.current.value = '';
       return;
     }
 
     setUploadingAttachment(true);
     try {
-      const uploadedUrl = await StorageService.uploadFile('activity-images', file, 'news/pdfs');
+      const folder = isPdf ? 'news/pdfs' : 'news/attachments';
+      const uploadedUrl = await StorageService.uploadFile('activity-images', file, folder);
       setFormData((prev) => ({ ...prev, attachment_url: uploadedUrl, attachment_name: file.name }));
     } catch (error) {
-      console.error('Error uploading PDF attachment:', error);
+      console.error('Error uploading attachment:', error);
       alert(t('common.error_save'));
     } finally {
       setUploadingAttachment(false);
@@ -154,14 +157,14 @@ export function NewsEditorSidebar({ formData, setFormData, metrics, lastAutosave
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Adjunt PDF</label>
-          <input ref={attachmentInputRef} type="file" accept="application/pdf,.pdf" onChange={handleAttachmentUpload} className="hidden" />
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Adjunt (PDF o imatge)</label>
+          <input ref={attachmentInputRef} type="file" accept="application/pdf,.pdf,image/*" onChange={handleAttachmentUpload} className="hidden" />
 
           {formData.attachment_url ? (
             <div className="rounded-2xl bg-slate-50 border-2 border-slate-100 p-3 flex items-center justify-between gap-3">
               <a href={formData.attachment_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold text-blue-700 min-w-0">
                 <Paperclip className="w-4 h-4 shrink-0" />
-                <span className="truncate">{formData.attachment_name || 'document.pdf'}</span>
+                <span className="truncate">{formData.attachment_name || 'arxiu'}</span>
               </a>
               <div className="flex items-center gap-2 shrink-0">
                 <button type="button" disabled={uploadingAttachment} onClick={() => attachmentInputRef.current?.click()} className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors disabled:opacity-50">
@@ -176,10 +179,10 @@ export function NewsEditorSidebar({ formData, setFormData, metrics, lastAutosave
           ) : (
             <button type="button" disabled={uploadingAttachment} onClick={() => attachmentInputRef.current?.click()} className="w-full px-4 py-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors text-sm font-bold inline-flex items-center justify-center gap-2 disabled:opacity-50">
               {uploadingAttachment ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-              {uploadingAttachment ? 'Pujant PDF...' : 'Pujar PDF'}
+              {uploadingAttachment ? 'Pujant arxiu...' : 'Pujar arxiu'}
             </button>
           )}
-          <p className="text-[10px] text-slate-400 ml-1">Format PDF. Mida màxima: 10MB.</p>
+          <p className="text-[10px] text-slate-400 ml-1">PDF o imatge (JPG, PNG, GIF, WEBP, AVIF, SVG). Mida màxima: 10MB.</p>
         </div>
       </div>
 
