@@ -17,6 +17,23 @@
     "suggestions": "Suggestions",
     "profile": "Profile"
   },
+  "documents": {
+    "seo_title": "Documents & Resources",
+    "seo_description": "Download meeting minutes, school regulations, registration forms and useful resources from AFA Escola Falguera.",
+    "page_title": "Documents & Resources",
+    "page_description": "Download space for official documents, minutes, regulations and information of interest for families.",
+    "search_placeholder": "Search documents...",
+    "no_results": "No documents found.",
+    "no_description": "No description",
+    "categories": {
+      "all": "All",
+      "actes": "Minutes",
+      "normativa": "Regulations",
+      "general": "General",
+      "menjador": "Cafeteria",
+      "extraescolars": "Activities"
+    }
+  },
   "legal": {
     "privacy_title": "Privacy Policy",
     "cookies_title": "Cookies Policy",

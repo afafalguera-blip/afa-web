@@ -17,6 +17,23 @@
     "suggestions": "Suggeriments",
     "profile": "Perfil"
   },
+  "documents": {
+    "seo_title": "Documents i Recursos",
+    "seo_description": "Descarrega actes d'assemblees, normativa escolar, formularis d'inscripció i recursos d'interès de l'AFA Escola Falguera.",
+    "page_title": "Documents i Recursos",
+    "page_description": "Espai de descàrrega de documentació oficial, actes, normativa i informació d'interès per a les famílies.",
+    "search_placeholder": "Cercar documents...",
+    "no_results": "No s'han trobat documents.",
+    "no_description": "Sense descripció",
+    "categories": {
+      "all": "Tots",
+      "actes": "Actes",
+      "normativa": "Normativa",
+      "general": "General",
+      "menjador": "Menjador",
+      "extraescolars": "Extraescolars"
+    }
+  },
   "legal": {
     "privacy_title": "Política de Privacitat",
     "cookies_title": "Política de Cookies",

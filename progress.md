@@ -55,6 +55,13 @@
   - Eliminación masiva de tipos `any` en componentes críticos.
   - Saneamiento de directivas `@ts-ignore` mediante tipado fuerte.
   - Modularización de 17/17 módulos principales.
+  - Fix i18n DocumentFilters: añadidas claves `documents.categories.*` + textos de página en `ca`/`es`/`en` (antes mostraba keys crudas por falta de fallback en `t()`).
+
+## Decisiones Operativas
+
+- **Storage de documentos públicos:** mantener en Supabase Storage (no migrar a Drive).
+  - **Why:** PDFs típicos (actas/normativa, <5MB) se cachean en CDN → tras primer hit, *cached egress* (cuota separada y barata en Pro). Drive empeora UX (login wall, sin preview consistente, fuera del admin panel).
+  - **How to apply:** Bucket público con `Cache-Control: public, max-age=31536000, immutable`. Solo plantear Drive para vídeos >50MB o archivos privados a grupos concretos. Revisar si aparecen picos reales en cuota egress.
 
 ## Próximos Pasos (por prioridad)
 
