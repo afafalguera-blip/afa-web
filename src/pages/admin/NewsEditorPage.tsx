@@ -192,25 +192,30 @@ export default function NewsEditorPage() {
     try {
       const sourceContent = formData.translations[activeLang];
       const otherLangs = AVAILABLE_LANGS.filter(l => l !== activeLang);
-      const needsTranslation = otherLangs.some(l => !formData.translations[l]?.title?.trim());
+      // Treat a target lang as needing translation if its title is empty OR identical to source title
+      // (legacy data was saved with the source content duplicated across all languages).
+      const isUntranslated = (lang: Lang) => {
+        const t = formData.translations[lang];
+        if (!t?.title?.trim()) return true;
+        return t.title.trim() === sourceContent.title.trim();
+      };
+      const langsToTranslate = otherLangs.filter(isUntranslated);
 
-      if (sourceContent.title.trim() && needsTranslation) {
+      if (sourceContent.title.trim() && langsToTranslate.length > 0) {
         setIsTranslating(true);
         try {
           const fields: Record<string, string> = { title: sourceContent.title };
           if (sourceContent.excerpt?.trim()) fields.excerpt = sourceContent.excerpt;
           if (sourceContent.content?.trim()) fields.content = sourceContent.content;
 
-          const result = await TranslationService.translateBulk(fields, activeLang, otherLangs);
+          const result = await TranslationService.translateBulk(fields, activeLang, langsToTranslate);
           const updatedTranslations = { ...formData.translations };
-          for (const lang of otherLangs) {
-            if (!formData.translations[lang]?.title?.trim()) {
-              updatedTranslations[lang] = {
-                title: result[lang]?.title || '',
-                excerpt: result[lang]?.excerpt || '',
-                content: result[lang]?.content || '',
-              };
-            }
+          for (const lang of langsToTranslate) {
+            updatedTranslations[lang] = {
+              title: result[lang]?.title || '',
+              excerpt: result[lang]?.excerpt || '',
+              content: result[lang]?.content || '',
+            };
           }
           setFormData(prev => ({ ...prev, translations: updatedTranslations }));
           await AdminNewsEditorService.saveArticle(id, { ...formData, translations: updatedTranslations });
