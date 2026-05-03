@@ -105,7 +105,7 @@ export function InventoryPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[200px] md:w-64">
+          <div className="relative flex-1 min-w-[160px] md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
             <input
               type="text"
@@ -117,20 +117,22 @@ export function InventoryPage() {
           </div>
           <button
             onClick={handleExportPDF}
+            title="Descarregar PDF"
             className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 border border-slate-200 dark:border-slate-700"
           >
             <Download className="w-5 h-5" />
-            <span>Descarregar PDF</span>
+            <span className="hidden sm:inline">Descarregar PDF</span>
           </button>
           <button
             onClick={() => {
               setEditingProduct(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
-            <span>Nou Producte</span>
+            <span className="hidden sm:inline">Nou Producte</span>
+            <span className="sm:hidden">Nou</span>
           </button>
         </div>
       </div>
@@ -150,24 +152,26 @@ export function InventoryPage() {
                 className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
               >
                 {/* Product Header inside Card */}
-                <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden">
+                <div className="p-4 md:p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden">
                       {product.image_url ? (
                         <img src={proxyStorageUrl(product.image_url)} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <Package className="w-6 h-6 text-slate-300" />
+                        <Package className="w-5 h-5 md:w-6 md:h-6 text-slate-300" />
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-lg">{tContent(product, 'name')}</h3>
-                      <div className="flex items-center gap-2 mt-0.5">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base md:text-lg truncate">{tContent(product, 'name')}</h3>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                         <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase rounded-md tracking-wider">
                           {product.category}
                         </span>
                         {isCalculated && (
                           <span className="flex items-center gap-1 px-2 py-0.5 bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-[10px] font-bold uppercase rounded-md tracking-wider">
-                            <Calculator className="w-3 h-3" /> Estoc Calculat
+                            <Calculator className="w-3 h-3" />
+                            <span className="hidden sm:inline">Estoc Calculat</span>
+                            <span className="sm:hidden">Calculat</span>
                           </span>
                         )}
                         {(!product.variants || product.variants.length === 0) && (
@@ -183,84 +187,139 @@ export function InventoryPage() {
                       setEditingProduct(product);
                       setIsModalOpen(true);
                     }}
-                    className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all font-semibold text-sm"
+                    className="flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all font-semibold text-sm"
                   >
                     <Edit className="w-4 h-4" />
-                    <span>Editar</span>
+                    <span className="hidden sm:inline">Editar</span>
                   </button>
                 </div>
 
-                {/* Variants Table/List */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50/30 dark:bg-slate-800/20 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
-                      <tr>
-                        <th className="px-6 py-3">Talla / Variant</th>
-                        <th className="px-6 py-3">Preu Soci</th>
-                        <th className="px-6 py-3">Preu No Soci</th>
-                        <th className="px-6 py-3">Estoc Actual</th>
-                        <th className="px-6 py-3 text-right">Estat</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                {/* Variants — table on md+, cards on mobile */}
+                {(!product.variants || product.variants.length === 0) ? (
+                  <div className="p-8 text-center bg-slate-50/50 dark:bg-slate-800/10">
+                    <p className="text-slate-400 text-sm italic">Aquest producte no té variants configurades.</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Mobile cards */}
+                    <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
                       {sortSizes(product.variants || []).map((variant) => (
-                        <tr key={variant.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                          <td className="px-6 py-4">
-                            <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold">{variant.size}</span>
-                          </td>
-                          <td className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-300">
-                            {variant.price_member}€
-                          </td>
-                          <td className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-300">
-                            {variant.price_non_member}€
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              {isCalculated ? (
-                                <div className="w-20 px-3 py-1.5 rounded-lg border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 font-bold text-sm flex items-center justify-center cursor-not-allowed" title="L'estoc es calcula automàticament">
-                                  {variant.stock}
-                                </div>
-                              ) : (
-                                <>
-                                  <input
-                                    type="number"
-                                    defaultValue={variant.stock}
-                                    className={`w-20 px-3 py-1.5 rounded-lg border text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${variant.stock <= 0
-                                      ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600'
-                                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-                                      }`}
-                                    onBlur={(e) => {
-                                      if (e.target.value !== variant.stock.toString()) {
-                                        handleStockUpdate(variant.id, e.target.value);
-                                      }
-                                    }}
-                                  />
-                                  {savingId === variant.id && (
-                                    <div className="animate-spin w-3 h-3 border-2 border-primary border-t-transparent rounded-full"></div>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            {variant.stock <= 0 ? (
-                              <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-black rounded-full uppercase">Esgotat</span>
-                            ) : variant.stock <= 5 ? (
-                              <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-full uppercase">Baix estoc</span>
+                        <div key={variant.id} className="px-4 py-3 flex items-center gap-3">
+                          <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded text-xs font-bold w-14 text-center flex-shrink-0">
+                            {variant.size}
+                          </span>
+                          <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                            <span className="text-xs text-slate-400">
+                              Soci <span className="font-semibold text-slate-600 dark:text-slate-300">{variant.price_member}€</span>
+                              <span className="mx-1.5 text-slate-300">·</span>
+                              No soci <span className="font-semibold text-slate-600 dark:text-slate-300">{variant.price_non_member}€</span>
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {isCalculated ? (
+                              <div className="w-16 px-2 py-1.5 rounded-lg border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 font-bold text-sm text-center cursor-not-allowed">
+                                {variant.stock}
+                              </div>
                             ) : (
-                              <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-black rounded-full uppercase">En estoc</span>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  defaultValue={variant.stock}
+                                  className={`w-16 px-2 py-1.5 rounded-lg border text-sm text-center focus:ring-2 focus:ring-primary/20 outline-none transition-all ${variant.stock <= 0
+                                    ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600'
+                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                                    }`}
+                                  onBlur={(e) => {
+                                    if (e.target.value !== variant.stock.toString()) {
+                                      handleStockUpdate(variant.id, e.target.value);
+                                    }
+                                  }}
+                                />
+                                {savingId === variant.id && (
+                                  <div className="absolute -right-4 top-1/2 -translate-y-1/2 animate-spin w-3 h-3 border-2 border-primary border-t-transparent rounded-full"></div>
+                                )}
+                              </div>
                             )}
-                          </td>
-                        </tr>
+                            {variant.stock <= 0 ? (
+                              <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-black rounded-full uppercase w-20 text-center">Esgotat</span>
+                            ) : variant.stock <= 5 ? (
+                              <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-full uppercase w-20 text-center">Baix estoc</span>
+                            ) : (
+                              <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-black rounded-full uppercase w-20 text-center">En estoc</span>
+                            )}
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                  {(!product.variants || product.variants.length === 0) && (
-                    <div className="p-8 text-center bg-slate-50/50 dark:bg-slate-800/10">
-                      <p className="text-slate-400 text-sm italic">Aquest producte no té variants configurades.</p>
                     </div>
-                  )}
-                </div>
+
+                    {/* Desktop table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50/30 dark:bg-slate-800/20 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+                          <tr>
+                            <th className="px-6 py-3">Talla / Variant</th>
+                            <th className="px-6 py-3">Preu Soci</th>
+                            <th className="px-6 py-3">Preu No Soci</th>
+                            <th className="px-6 py-3">Estoc Actual</th>
+                            <th className="px-6 py-3 text-right">Estat</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                          {sortSizes(product.variants || []).map((variant) => (
+                            <tr key={variant.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                              <td className="px-6 py-4">
+                                <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold">{variant.size}</span>
+                              </td>
+                              <td className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-300">
+                                {variant.price_member}€
+                              </td>
+                              <td className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-300">
+                                {variant.price_non_member}€
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  {isCalculated ? (
+                                    <div className="w-20 px-3 py-1.5 rounded-lg border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 font-bold text-sm flex items-center justify-center cursor-not-allowed" title="L'estoc es calcula automàticament">
+                                      {variant.stock}
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <input
+                                        type="number"
+                                        defaultValue={variant.stock}
+                                        className={`w-20 px-3 py-1.5 rounded-lg border text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${variant.stock <= 0
+                                          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600'
+                                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                                          }`}
+                                        onBlur={(e) => {
+                                          if (e.target.value !== variant.stock.toString()) {
+                                            handleStockUpdate(variant.id, e.target.value);
+                                          }
+                                        }}
+                                      />
+                                      {savingId === variant.id && (
+                                        <div className="animate-spin w-3 h-3 border-2 border-primary border-t-transparent rounded-full"></div>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                {variant.stock <= 0 ? (
+                                  <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-black rounded-full uppercase">Esgotat</span>
+                                ) : variant.stock <= 5 ? (
+                                  <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-full uppercase">Baix estoc</span>
+                                ) : (
+                                  <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-black rounded-full uppercase">En estoc</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
               </motion.div>
             );
           })}
