@@ -11,7 +11,7 @@ export interface TranslationResult {
 const TRANSLATION_PROXY_URL = import.meta.env.VITE_TRANSLATION_PROXY_URL as string | undefined;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 const ALLOW_PUBLIC_TRANSLATION_FALLBACK = import.meta.env.VITE_ALLOW_PUBLIC_TRANSLATION_FALLBACK === 'true';
-const TRANSLATION_TIMEOUT_MS = 12000;
+const TRANSLATION_TIMEOUT_MS = 20000;
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const CACHE_PREFIX = 'tx_';
 
@@ -39,7 +39,6 @@ function writeCache(key: string, value: string): void {
   try {
     localStorage.setItem(key, JSON.stringify({ value, expiry: Date.now() + CACHE_TTL_MS }));
   } catch {
-    // localStorage full — evict oldest translation entries
     try {
       const keys = Object.keys(localStorage).filter(k => k.startsWith(CACHE_PREFIX));
       if (keys.length > 0) localStorage.removeItem(keys[0]);
@@ -48,70 +47,71 @@ function writeCache(key: string, value: string): void {
   }
 }
 
+function proxyHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (SUPABASE_ANON_KEY) {
+    headers.apikey = SUPABASE_ANON_KEY;
+    headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
+  }
+  return headers;
+}
+
 async function fetchWithTimeout(input: string, init?: RequestInit) {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), TRANSLATION_TIMEOUT_MS);
-
   try {
-    return await fetch(input, {
-      ...init,
-      signal: controller.signal
-    });
+    return await fetch(input, { ...init, signal: controller.signal });
   } finally {
     window.clearTimeout(timeout);
   }
 }
 
-async function translateViaProxy(text: string, sourceLang: string, targetLang: string): Promise<string> {
-  if (!TRANSLATION_PROXY_URL) {
-    throw new Error('Translation proxy not configured');
-  }
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
-  };
-
-  if (SUPABASE_ANON_KEY) {
-    headers.apikey = SUPABASE_ANON_KEY;
-    headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
-  }
+// Translate multiple fields to multiple target languages in one API call.
+async function translateBulkViaProxy(
+  fields: Record<string, string>,
+  sourceLang: string,
+  targetLangs: string[],
+): Promise<Record<string, Record<string, string>>> {
+  if (!TRANSLATION_PROXY_URL) throw new Error('Translation proxy not configured');
 
   const response = await fetchWithTimeout(TRANSLATION_PROXY_URL, {
     method: 'POST',
-    headers,
-    body: JSON.stringify({
-      text,
-      sourceLang,
-      targetLang
-    })
+    headers: proxyHeaders(),
+    body: JSON.stringify({ fields, sourceLang, targetLangs }),
   });
 
-  if (!response.ok) {
-    throw new Error(`Translation proxy error: ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`Translation proxy error: ${response.status}`);
+
+  const data = (await response.json()) as { translations?: Record<string, Record<string, string>> };
+  if (!data?.translations) throw new Error('Translation proxy returned no content');
+
+  return data.translations;
+}
+
+// Single-field translation with cache (kept for legacy callers).
+async function translateViaProxy(text: string, sourceLang: string, targetLang: string): Promise<string> {
+  if (!TRANSLATION_PROXY_URL) throw new Error('Translation proxy not configured');
+
+  const response = await fetchWithTimeout(TRANSLATION_PROXY_URL, {
+    method: 'POST',
+    headers: proxyHeaders(),
+    body: JSON.stringify({ text, sourceLang, targetLang }),
+  });
+
+  if (!response.ok) throw new Error(`Translation proxy error: ${response.status}`);
 
   const data = (await response.json()) as { translatedText?: string };
-
-  if (!data?.translatedText) {
-    throw new Error('Translation proxy returned no content');
-  }
+  if (!data?.translatedText) throw new Error('Translation proxy returned no content');
 
   return data.translatedText;
 }
 
 async function translateViaPublicGoogle(text: string, sourceLang: string, targetLang: string): Promise<string> {
   const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-
   const response = await fetchWithTimeout(url);
-  if (!response.ok) {
-    throw new Error('Public translation endpoint unavailable');
-  }
-
+  if (!response.ok) throw new Error('Public translation endpoint unavailable');
   const data = await response.json();
-  if (!data || !data[0]) {
-    throw new Error('Invalid translation response');
-  }
-
+  if (!data || !data[0]) throw new Error('Invalid translation response');
   return (data[0] as string[][]).map((part) => part[0]).join('');
 }
 
@@ -134,6 +134,28 @@ async function translateText(text: string, sourceLang: string, targetLang: strin
 }
 
 export const TranslationService = {
+  // Translate multiple fields to multiple target languages in one call.
+  // Returns { ca: { title, content, ... }, en: { ... } }
+  async translateBulk(
+    fields: Record<string, string>,
+    sourceLang: string,
+    targetLangs: string[],
+  ): Promise<Record<string, Record<string, string>>> {
+    if (!TRANSLATION_PROXY_URL) {
+      // Fallback: translate field by field (DEV only)
+      const result: Record<string, Record<string, string>> = {};
+      for (const lang of targetLangs) {
+        result[lang] = {};
+        for (const [key, text] of Object.entries(fields)) {
+          if (!text?.trim()) { result[lang][key] = text; continue; }
+          result[lang][key] = await translateText(text, sourceLang, lang);
+        }
+      }
+      return result;
+    }
+    return translateBulkViaProxy(fields, sourceLang, targetLangs);
+  },
+
   async translateContent(
     source: TranslationResult,
     targetLang: string,

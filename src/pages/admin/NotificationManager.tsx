@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
+import { TranslationService } from '../../services/TranslationService';
 import { getRegionalLanguageTag } from '../../utils/locale';
 import { AdminNotificationService } from '../../services/admin/AdminNotificationService';
 import type { Notification, NotificationFormData } from '../../services/admin/AdminNotificationService';
@@ -104,7 +105,24 @@ export default function NotificationManager() {
     }
     setSaving(true);
     try {
-      await AdminNotificationService.saveNotification(formData, editingId ?? undefined);
+      const sourceLang = 'es';
+      const targetLangs = ['ca', 'en'];
+      const fields: Record<string, string> = { title: formData.title };
+      if (formData.message?.trim()) fields.message = formData.message;
+
+      let translations = formData.translations;
+      try {
+        const result = await TranslationService.translateBulk(fields, sourceLang, targetLangs);
+        translations = {
+          es: { title: formData.title, message: formData.message || undefined },
+          ca: { title: result.ca?.title || formData.title, message: result.ca?.message || undefined },
+          en: { title: result.en?.title || formData.title, message: result.en?.message || undefined },
+        };
+      } catch (translationErr) {
+        console.error('Auto-translation failed, saving without translations:', translationErr);
+      }
+
+      await AdminNotificationService.saveNotification({ ...formData, translations }, editingId ?? undefined);
       setIsModalOpen(false);
       fetchNotifications();
     } catch (error) {

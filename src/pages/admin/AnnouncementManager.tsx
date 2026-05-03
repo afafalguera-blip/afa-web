@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnnouncementService, type Announcement } from "../../services/AnnouncementService";
+import { TranslationService } from "../../services/TranslationService";
 import {
     Megaphone,
     Save,
@@ -53,17 +54,35 @@ export default function AnnouncementManager() {
         setError(null);
 
         try {
-            // Update the main message with the active language content for backward compatibility
+            const sourceText = announcement.translations?.[activeLang] || announcement.message || '';
+            const targetLangs = (['ca', 'es', 'en'] as const).filter(l => l !== activeLang);
+
+            let translations = { ...(announcement.translations || { ca: sourceText, es: sourceText, en: sourceText }) };
+
+            if (sourceText.trim()) {
+                const result = await TranslationService.translateBulk(
+                    { message: sourceText },
+                    activeLang,
+                    targetLangs,
+                );
+                for (const lang of targetLangs) {
+                    translations[lang] = result[lang]?.message ?? translations[lang];
+                }
+                translations[activeLang] = sourceText;
+            }
+
             const updatedAnnouncement = {
                 ...announcement,
-                message: announcement.translations?.[activeLang] || announcement.message
+                translations,
+                message: translations[activeLang] || announcement.message,
             };
             await AnnouncementService.update(updatedAnnouncement);
+            setAnnouncement(updatedAnnouncement);
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             console.error(err);
-            setError("Error al guardar els canvis. Recorda carregar la migració de la base de dades.");
+            setError("Error al guardar els canvis.");
         } finally {
             setSaving(false);
         }

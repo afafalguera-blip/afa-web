@@ -190,7 +190,37 @@ export default function NewsEditorPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await AdminNewsEditorService.saveArticle(id, formData);
+      const sourceContent = formData.translations[activeLang];
+      const otherLangs = AVAILABLE_LANGS.filter(l => l !== activeLang);
+      const needsTranslation = otherLangs.some(l => !formData.translations[l]?.title?.trim());
+
+      if (sourceContent.title.trim() && needsTranslation) {
+        setIsTranslating(true);
+        try {
+          const fields: Record<string, string> = { title: sourceContent.title };
+          if (sourceContent.excerpt?.trim()) fields.excerpt = sourceContent.excerpt;
+          if (sourceContent.content?.trim()) fields.content = sourceContent.content;
+
+          const result = await TranslationService.translateBulk(fields, activeLang, otherLangs);
+          const updatedTranslations = { ...formData.translations };
+          for (const lang of otherLangs) {
+            if (!formData.translations[lang]?.title?.trim()) {
+              updatedTranslations[lang] = {
+                title: result[lang]?.title || '',
+                excerpt: result[lang]?.excerpt || '',
+                content: result[lang]?.content || '',
+              };
+            }
+          }
+          setFormData(prev => ({ ...prev, translations: updatedTranslations }));
+          await AdminNewsEditorService.saveArticle(id, { ...formData, translations: updatedTranslations });
+        } finally {
+          setIsTranslating(false);
+        }
+      } else {
+        await AdminNewsEditorService.saveArticle(id, formData);
+      }
+
       localStorage.removeItem(draftKey);
       navigate('/admin/news');
     } catch (error) {

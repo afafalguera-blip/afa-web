@@ -1,5 +1,11 @@
 import { supabase } from '../../lib/supabase';
 
+export interface NotificationTranslations {
+  ca?: { title: string; message?: string };
+  es?: { title: string; message?: string };
+  en?: { title: string; message?: string };
+}
+
 export interface Notification {
   id: string;
   title: string;
@@ -10,6 +16,7 @@ export interface Notification {
   end_at: string | null;
   active: boolean;
   created_at: string;
+  translations: NotificationTranslations | null;
 }
 
 export interface NotificationFormData {
@@ -20,6 +27,7 @@ export interface NotificationFormData {
   start_at: string;
   end_at: string;
   active: boolean;
+  translations?: NotificationTranslations;
 }
 
 export const AdminNotificationService = {
@@ -41,7 +49,8 @@ export const AdminNotificationService = {
       link: formData.link || null,
       start_at: new Date(formData.start_at).toISOString(),
       end_at: formData.end_at ? new Date(formData.end_at).toISOString() : null,
-      active: formData.active
+      active: formData.active,
+      translations: formData.translations ?? null,
     };
 
     if (editingId) {
