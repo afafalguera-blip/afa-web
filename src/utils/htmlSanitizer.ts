@@ -1,3 +1,5 @@
+import { proxyStorageUrl } from './storageUrl';
+
 const ALLOWED_TAGS = new Set([
   'p',
   'br',
@@ -81,13 +83,22 @@ function sanitizeNode(element: Element): void {
         return;
       }
 
-      if (tag === 'a' && attrName === 'href' && !isSafeUrl(attrValue, true)) {
-        child.removeAttribute(attr.name);
-        return;
+      if (tag === 'a' && attrName === 'href') {
+        if (!isSafeUrl(attrValue, true)) {
+          child.removeAttribute(attr.name);
+          return;
+        }
+        const proxied = proxyStorageUrl(attrValue);
+        if (proxied !== attrValue) child.setAttribute('href', proxied);
       }
 
-      if (tag === 'img' && attrName === 'src' && !isSafeUrl(attrValue, false)) {
-        child.remove();
+      if (tag === 'img' && attrName === 'src') {
+        if (!isSafeUrl(attrValue, false)) {
+          child.remove();
+          return;
+        }
+        const proxied = proxyStorageUrl(attrValue);
+        if (proxied !== attrValue) child.setAttribute('src', proxied);
       }
     });
 

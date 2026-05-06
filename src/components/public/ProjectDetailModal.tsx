@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
 import { useContentTranslation } from '../../hooks/useContentTranslation';
+import { proxyStorageUrl } from '../../utils/storageUrl';
 
 interface ProjectDetailModalProps {
   isOpen: boolean;
@@ -79,7 +80,7 @@ export const ProjectDetailModal = ({ isOpen, onClose, project }: ProjectDetailMo
           >
             <div className="relative h-64 sm:h-80 shrink-0">
               <img
-                src={project.imageAfter}
+                src={proxyStorageUrl(project.imageAfter)}
                 alt={project.title}
                 className="w-full h-full object-cover"
               />
