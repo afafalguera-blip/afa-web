@@ -98,6 +98,24 @@ export interface HomepageConfig {
   assemblea_pdf_url: string;
 }
 
+export interface MenjadorInfoBlock {
+  intro: string;
+  schedule: string;
+  company: string;
+  allergies: string;
+  diets: string;
+  how_to: string;
+  contact: string;
+}
+
+export interface MenjadorInfoConfig {
+  translations: {
+    ca: MenjadorInfoBlock;
+    es: MenjadorInfoBlock;
+    en: MenjadorInfoBlock;
+  };
+}
+
 const CONFIG_CACHE_PREFIX = 'afa_config_';
 const CONFIG_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
@@ -120,7 +138,7 @@ function setCachedConfig<T>(key: string, value: T): void {
 }
 
 export const ConfigService = {
-  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage'): Promise<T | null> {
+  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info'): Promise<T | null> {
     // Return cached value if fresh
     const cached = getCachedConfig<T>(key);
     if (cached !== null) return cached;
@@ -140,7 +158,7 @@ export const ConfigService = {
     return data.value as T;
   },
 
-  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage', config: T): Promise<void> {
+  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info', config: T): Promise<void> {
     const { error } = await supabase
       .from('site_config')
       .update({ value: config, updated_at: new Date().toISOString() })
@@ -246,6 +264,23 @@ export const ConfigService = {
 
   async updateHomepageConfig(config: HomepageConfig): Promise<void> {
     return this.updateConfig('homepage', config);
+  },
+
+  async getMenjadorInfoConfig(): Promise<MenjadorInfoConfig | null> {
+    return this.getConfig<MenjadorInfoConfig>('menjador_info');
+  },
+
+  async updateMenjadorInfoConfig(config: MenjadorInfoConfig): Promise<void> {
+    return this.updateConfig('menjador_info', config);
+  },
+
+  async upsertMenjadorInfoConfig(config: MenjadorInfoConfig): Promise<void> {
+    // Site_config row may not exist in older databases — use upsert by key.
+    const { error } = await supabase
+      .from('site_config')
+      .upsert({ key: 'menjador_info', value: config, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+    try { localStorage.removeItem(CONFIG_CACHE_PREFIX + 'menjador_info'); } catch { /* ignore */ }
   },
 
   async uploadBrandingImage(file: File, prefix: string): Promise<string> {
