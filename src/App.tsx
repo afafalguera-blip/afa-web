@@ -25,6 +25,10 @@ const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ defaul
 const PrivacyPolicy = lazy(() => import('./pages/Legal/PrivacyPolicy'));
 const CookiesPolicy = lazy(() => import('./pages/Legal/CookiesPolicy'));
 const SantJordiIdeasPage = lazy(() => import('./pages/SantJordiIdeasPage'));
+const AboutAfaPage = lazy(() => import('./pages/AboutAfaPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const MenjadorPage = lazy(() => import('./pages/MenjadorPage'));
+const AcollidaPage = lazy(() => import('./pages/AcollidaPage'));
 const ShopLanding = lazy(() => import('./features/shop/pages/ShopLanding').then(m => ({ default: m.ShopLanding })));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
 
@@ -46,11 +50,13 @@ const NotificationManager = lazy(() => import('./pages/admin/NotificationManager
 const DocumentsManager = lazy(() => import('./pages/admin/DocumentsManager'));
 const AdminObservability = lazy(() => import('./pages/admin/AdminObservability'));
 const AcollidaManager = lazy(() => import('./pages/admin/AcollidaManager'));
+const MenjadorManager = lazy(() => import('./pages/admin/MenjadorManager'));
 const AnnouncementManager = lazy(() => import('./pages/admin/AnnouncementManager'));
 const ContactManager = lazy(() => import('./pages/admin/ContactManager'));
 const SiteSettingsManager = lazy(() => import('./pages/admin/SiteSettingsManager'));
 const TasksManager = lazy(() => import('./pages/admin/TasksManager'));
 const ShortLinksManager = lazy(() => import('./pages/admin/ShortLinksManager'));
+const BoardManager = lazy(() => import('./pages/admin/BoardManager'));
 
 function App() {
   return (
@@ -76,6 +82,10 @@ function App() {
                 <Route path="privacitat" element={<PrivacyPolicy />} />
                 <Route path="cookies" element={<CookiesPolicy />} />
                 <Route path="especial/sant-jordi" element={<SantJordiIdeasPage />} />
+                <Route path="sobre-afa" element={<AboutAfaPage />} />
+                <Route path="historia" element={<HistoryPage />} />
+                <Route path="menjador" element={<MenjadorPage />} />
+                <Route path="acollida" element={<AcollidaPage />} />
               </Route>
 
               <Route path="/admin/login" element={<AdminLogin />} />
@@ -97,9 +107,11 @@ function App() {
                 <Route path="documents" element={<DocumentsManager />} />
                 <Route path="notifications" element={<NotificationManager />} />
                 <Route path="acollida" element={<AcollidaManager />} />
+                <Route path="menjador" element={<MenjadorManager />} />
                 <Route path="banner" element={<AnnouncementManager />} />
                 <Route path="contactes" element={<ContactManager />} />
                 <Route path="settings" element={<SiteSettingsManager />} />
+                <Route path="board" element={<BoardManager />} />
                 <Route path="observability" element={<AdminObservability />} />
               </Route>
             </Routes>

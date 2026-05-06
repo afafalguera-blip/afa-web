@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FeaturedProjects } from '../components/public/FeaturedProjects';
-import { AcollidaModal } from '../components/public/AcollidaModal';
 import { useAuth } from '../hooks/useAuth';
 import { HeroSettingsModal } from '../components/public/HeroSettingsModal';
 import { AboutSettingsModal } from '../components/public/AboutSettingsModal';
 import { ConfigService, type HeroConfig, type AboutConfig, type ContactConfig } from '../services/ConfigService';
 import { SEO } from '../components/common/SEO';
 import { HomeHero } from '../components/public/HomeHero';
-import { HomeNav } from '../components/public/HomeNav';
 import { NewsSection } from '../features/news/components/NewsSection';
 import { EventsSection } from '../features/events/components/EventsSection';
 import { AboutSection } from '../components/public/AboutSection';
@@ -22,7 +20,6 @@ export function Home() {
   const { isAdmin } = useAuth();
   const homepageConfig = useHomepageConfig();
   const [aboutExpanded, setAboutExpanded] = useState(false);
-  const [isAcollidaModalOpen, setIsAcollidaModalOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<HeroConfig | null>(null);
   const [aboutConfig, setAboutConfig] = useState<AboutConfig | null>(null);
   const [contactConfig, setContactConfig] = useState<ContactConfig | null>(null);
@@ -94,8 +91,6 @@ export function Home() {
         onOpenModal={() => setIsHeroModalOpen(true)}
       />
 
-      <HomeNav onOpenAcollida={() => setIsAcollidaModalOpen(true)} />
-
       <NewsSection isAdmin={isAdmin} />
 
       <EventsSection />
@@ -146,11 +141,6 @@ export function Home() {
           </Link>
         </div>
       </section>
-
-      <AcollidaModal
-        isOpen={isAcollidaModalOpen}
-        onClose={() => setIsAcollidaModalOpen(false)}
-      />
 
       <FeaturedProjects />
 

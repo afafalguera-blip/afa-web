@@ -34,6 +34,7 @@ export function Layout() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
           <p>© {new Date().getFullYear()} AFA Escola Falguera. {t('footer.all_rights_reserved', 'Tots els drets reservats.')}</p>
           <div className="flex gap-6">
+            <Link to="/sobre-afa" className="hover:text-primary transition-colors">{t('nav.about_afa', 'Sobre l\'AFA')}</Link>
             <Link to="/privacitat" className="hover:text-primary transition-colors">{t('legal.privacy_title')}</Link>
             <Link to="/cookies" className="hover:text-primary transition-colors">{t('legal.cookies_title')}</Link>
           </div>
@@ -45,10 +46,6 @@ export function Layout() {
       </div>
 
       <CookieBanner />
-
-      {/* iOS Home Indicator Simulator - Mobile Only */}
-
-      <div className="fixed bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-300 dark:bg-slate-700 rounded-full z-[60] lg:hidden"></div>
     </div>
   );
 }

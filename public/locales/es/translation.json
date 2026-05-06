@@ -15,7 +15,152 @@
     "documents": "Documentos",
     "contact": "Contacto",
     "suggestions": "Sugerencias",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "about_afa": "Sobre el AFA",
+    "news": "Noticias",
+    "activities": "Actividades",
+    "activities_subtitle": "Inscripciones, cuotas y calendario",
+    "services": "Servicios",
+    "services_subtitle": "Acogida y comedor",
+    "more": "Más",
+    "more_subtitle": "Todo lo que puedes explorar"
+  },
+  "nav_menu": {
+    "extraescolars_desc": "Inscripciones y actividades",
+    "fees_desc": "Tarifas y pagos",
+    "calendar_desc": "Todo el curso de un vistazo",
+    "acollida_desc": "Horarios y tarifas",
+    "menjador_desc": "Menús, precios e info",
+    "about_desc": "Quiénes somos y la Junta",
+    "history_desc": "Medio siglo de escuela",
+    "news_desc": "Última hora del AFA",
+    "documents_desc": "Recursos y descargas",
+    "contact_desc": "Escríbenos",
+    "suggestions_desc": "Ideas y mejoras"
+  },
+  "about_afa": {
+    "title": "Sobre el AFA",
+    "subtitle": "Quiénes somos y cómo nos organizamos",
+    "mission_default": "El AFA (Asociación de Familias de Alumnos) es una entidad sin ánimo de lucro formada por las familias de la escuela. Trabajamos para apoyar el proyecto educativo, organizar actividades y representar a las familias ante la escuela y las administraciones.",
+    "composition_title": "La Junta Directiva",
+    "composition_intro": "La Junta se renueva en asamblea y está formada por los siguientes cargos:",
+    "empty": "Aún no se han publicado los miembros de la Junta.",
+    "roles": {
+      "president": "Presidente/a",
+      "vicepresident": "Vicepresidente/a",
+      "treasurer": "Tesorero/a",
+      "secretary": "Secretario/a",
+      "vocal": "Vocal"
+    },
+    "pillars": {
+      "families": { "title": "Familias que suman", "desc": "Toda familia matriculada forma parte y puede participar en la asamblea y comisiones." },
+      "mission": { "title": "Misión", "desc": "Acompañar el proyecto educativo y organizar actividades para el alumnado y las familias." },
+      "nonprofit": { "title": "Sin ánimo de lucro", "desc": "Todos los recursos se reinvierten en la escuela y la comunidad educativa." }
+    },
+    "cta": {
+      "title": "¿Quieres formar parte del AFA?",
+      "desc": "Escríbenos y te explicamos cómo participar en asamblea, comisiones o Junta.",
+      "contact": "Contacta con nosotros"
+    },
+    "history_promo": {
+      "eyebrow": "Medio siglo de escuela",
+      "title": "Conoce nuestra historia",
+      "desc": "De la escuela que nació de la lucha vecinal en los años 70 al proyecto educativo de hoy. Una historia del barrio de Falguera.",
+      "cta": "Léela"
+    }
+  },
+  "acollida_page": {
+    "seo_title": "Servicio de Acogida",
+    "seo_description": "Toda la información sobre el servicio de acogida: horarios, tarifas para socios y no socios, y opción ocasional.",
+    "eyebrow": "Servicio AFA",
+    "title": "Servicio de Acogida",
+    "intro": "Espacio seguro y acompañado antes y después del horario escolar para que las familias puedan conciliar con tranquilidad.",
+    "info": {
+      "schedule": { "title": "Horarios flexibles", "body": "Disponibilidad por la mañana antes de entrar a clase y por la tarde al salir, según las necesidades de cada familia." },
+      "team": { "title": "Equipo educativo", "body": "Monitorado titulado que acompaña el rato con juegos, lecturas y pequeñas actividades adaptadas a cada edad." },
+      "flex": { "title": "Mensual u ocasional", "body": "Puedes contratar el servicio todo el mes o usarlo en días puntuales cuando lo necesites." }
+    },
+    "rates_title": "Tarifas",
+    "rates_subtitle": "Precios para familias socias y no socias del AFA. Mensual u ocasional.",
+    "no_rates": "Aún no hay tarifas publicadas.",
+    "timeslot": "Franja horaria",
+    "member": "Socio/a",
+    "non_member": "No socio/a",
+    "per_month": "mes",
+    "occasional": "ocasional",
+    "note": "Los precios ocasionales se aplican a días puntuales. Para inscripciones o más información, contacta con el AFA.",
+    "cta": {
+      "title": "¿Necesitas más información?",
+      "desc": "Si tienes dudas o quieres apuntarte al servicio, escríbenos y te ayudamos con todos los detalles.",
+      "button": "Contacta con el AFA"
+    }
+  },
+  "history": {
+    "title": "Nuestra historia",
+    "subtitle": "Medio siglo de escuela pública",
+    "intro": "De la escuela del barrio que nació de la lucha vecinal al proyecto educativo que hoy acompaña a nuestras familias. Esta es la historia que cada día seguís escribiendo con nosotros.",
+    "stats": {
+      "years": "Años de historia",
+      "founded": "Año de fundación",
+      "lines": "Línea por curso",
+      "students": "Alumnos"
+    },
+    "origins": {
+      "eyebrow": "Los orígenes",
+      "title": "Una escuela que nació del barrio",
+      "p1": "A principios de los 70, el barrio de Falguera crecía al ritmo de las fábricas. Familias llegadas de medio país se encontraban sin plazas escolares: más de 600 niños y niñas tenían que ir en autobús a Barcelona cada mañana.",
+      "p2": "Las familias del barrio se organizaron y exigieron una escuela pública. La presión funcionó: en 1971 se cedieron los terrenos y se empezó a construir el centro, justo detrás del Palau Falguera."
+    },
+    "quote": {
+      "text": "\"La escuela pasó de ser franquista a catalana, y el barrio de no tener nada a estar lleno de vida.\"",
+      "author": "Crónica vecinal del barrio de Falguera"
+    },
+    "modelo": {
+      "eyebrow": "1972 · Inauguración",
+      "title": "La \"escuela sin puertas\"",
+      "fact": "escuelas \"sin puertas\" en toda España",
+      "p1": "El edificio original era un proyecto experimental: aulas diáfanas, grandes ventanales, luz natural y muchos espacios compartidos. Una de las solo cinco de su tipo en todo el Estado.",
+      "p2": "La escuela llegó a tener más de 1.000 alumnos y 38 maestros. Tanta vida no cabía en un solo espacio abierto y con el tiempo hubo que levantar paredes para crear aulas tradicionales."
+    },
+    "timeline": {
+      "eyebrow": "Línea del tiempo",
+      "title": "Momentos que nos han hecho",
+      "intro": "Cinco décadas de un vistazo.",
+      "1971": { "title": "Empieza la construcción", "desc": "El Ayuntamiento cede los terrenos detrás del Palau Falguera para hacer una nueva escuela pública." },
+      "1972": { "title": "Inauguración del Colegio Modelo", "desc": "El 11 de diciembre abre sus puertas una de las cinco \"escuelas sin puertas\" del país." },
+      "1976": { "title": "Primeras clases en catalán", "desc": "Se introducen las primeras clases en catalán dentro del aula." },
+      "1985": { "title": "Inmersión lingüística", "desc": "El centro se incorpora plenamente al programa de inmersión en catalán y pasa a dos líneas." },
+      "1988": { "title": "Nuevo nombre: Escola Falguera", "desc": "La comunidad decide cambiar el nombre para honrar al barrio y marcar una nueva etapa." },
+      "1997": { "title": "Edificio nuevo", "desc": "La escuela se traslada a un nuevo edificio en la calle Sant Josep, coincidiendo con el 25 aniversario." },
+      "2012": { "title": "Renovación integral", "desc": "Se modernizan aulas y espacios comunes para adaptarlos a la pedagogía actual." },
+      "2022": { "title": "50 años de escuela", "desc": "Medio siglo de comunidad educativa en el barrio de Falguera." }
+    },
+    "name": {
+      "eyebrow": "1988 · Un nombre propio",
+      "title": "De \"Colegio Modelo\" a Escola Falguera",
+      "desc": "La comunidad decidió cambiar el nombre para reivindicar el barrio, dejar atrás connotaciones de la época anterior y echar raíces donde viven las familias.",
+      "label": "Falguera"
+    },
+    "today": {
+      "eyebrow": "Hoy",
+      "title": "Una escuela en acción constante",
+      "intro": "Medio siglo después, la Falguera sigue siendo un proyecto vivo, arraigado al barrio y abierto al mundo.",
+      "green": { "title": "Escuela Verde", "desc": "Huerto escolar, sostenibilidad y actividades en la naturaleza aprovechando la proximidad al río y a Collserola." },
+      "cordes": { "title": "Proyecto Cuerdas", "desc": "Aprendizaje de instrumentos de cuerda dentro del aula, en colaboración con la Escuela Municipal de Música del Palau Falguera." },
+      "steam": { "title": "STE(IA)M", "desc": "Ciencia, tecnología, arte e inteligencia artificial integradas en el currículo con experiencias prácticas." },
+      "community": { "title": "Comunidad AFA", "desc": "Extraescolares, acogida y comedor con cocina propia: las familias hacen posible el día a día de la escuela." }
+    },
+    "palau": {
+      "eyebrow": "Nuestro nombre",
+      "title": "¿Por qué \"Falguera\"?",
+      "p1": "La escuela toma el nombre del Palau Falguera, una finca del siglo XVII que es el corazón histórico de Sant Feliu. Está justo al lado del centro y formamos parte de su paisaje cultural.",
+      "p2": "Hoy el Palau acoge la Escuela Municipal de Música y es el escenario de la Exposición Nacional de Rosas. Sus jardines son una extensión natural de nuestras aulas."
+    },
+    "cta": {
+      "title": "La historia la seguís escribiendo vosotros",
+      "desc": "Cada familia que se incorpora suma un nuevo capítulo. Conoce el AFA y descubre cómo participar.",
+      "button": "Conoce el AFA"
+    }
   },
   "documents": {
     "seo_title": "Documentos y Recursos",
@@ -54,6 +199,7 @@
     "fees": "Cuotas",
     "calendar": "Calendario",
     "acollida": "Acogida",
+    "menjador": "Comedor",
     "contact": "Contacto",
     "course_current": "Curso 2025 - 2026",
     "view_details": "Ver Detalles",
@@ -270,6 +416,45 @@
     "holder_label": "Titular",
     "footer_note": "Una vez realizada la transferencia, recuerda guardar el comprobante por si fuera necesario."
   },
+  "menjador_page": {
+    "seo_title": "Servicio de Comedor",
+    "seo_description": "Toda la información sobre el servicio de comedor escolar: horarios, precios para alumnado fijo y esporádico, y menús mensuales descargables.",
+    "title": "Servicio de Comedor",
+    "subtitle": "Horarios, precios y menús del servicio de comedor escolar.",
+    "schedule_title": "Horario",
+    "company_title": "Empresa proveedora",
+    "diets_title": "Dietas especiales",
+    "allergies_title": "Alergias e intolerancias",
+    "how_to_title": "Cómo se utiliza",
+    "contact_title": "Contacto",
+    "prices_title": "Precios",
+    "prices_subtitle": "Distinguimos entre alumnado fijo (medio mes o más + 1 día) y alumnado esporádico (días sueltos).",
+    "fix_title": "Alumnado fijo",
+    "fix_subtitle": "Medio mes o más + 1 día",
+    "esporadic_title": "Alumnado esporádico",
+    "esporadic_subtitle": "Días sueltos",
+    "price_member": "Socio",
+    "price_non_member": "No socio",
+    "no_rates": "Sin tarifas configuradas",
+    "menus_title": "Menús",
+    "menus_subtitle": "Descarga los menús mensuales en PDF.",
+    "no_menus": "Aún no hay menús publicados.",
+    "no_period": "Sin período"
+  },
+  "months": {
+    "january": "enero",
+    "february": "febrero",
+    "march": "marzo",
+    "april": "abril",
+    "may": "mayo",
+    "june": "junio",
+    "july": "julio",
+    "august": "agosto",
+    "september": "septiembre",
+    "october": "octubre",
+    "november": "noviembre",
+    "december": "diciembre"
+  },
   "shop_page": {
     "subtitle": "Reserva la ropa escolar y recógela en el AFA.",
     "search_placeholder": "Buscar productos...",
@@ -481,6 +666,7 @@
       "calendar": "Calendario Gen.",
       "tasks": "Tareas",
       "acollida": "Gestión Acogida",
+      "menjador": "Gestión Comedor",
       "communication": "Comunicación",
       "contact_messages": "Mensajes Web",
       "banner": "Banner Anuncios",

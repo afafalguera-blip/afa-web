@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useNavigate, NavLink } from 'react-router-dom';
+import { Outlet, useNavigate, NavLink, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -20,7 +20,9 @@ import {
   MessageSquare,
   Settings,
   ListTodo,
-  Link2
+  Link2,
+  UserSquare2,
+  Utensils
 } from 'lucide-react';
 
 export function AdminLayout() {
@@ -78,9 +80,13 @@ export function AdminLayout() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="h-16 flex-shrink-0 flex items-center px-6 border-b border-slate-100 bg-white">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <Link
+            to="/"
+            onClick={() => setSidebarOpen(false)}
+            className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+          >
             {t('admin.title')}
-          </h1>
+          </Link>
           <button
             className="ml-auto lg:hidden"
             onClick={() => setSidebarOpen(false)}
@@ -323,6 +329,19 @@ export function AdminLayout() {
               {t('admin.sidebar.acollida')}
             </NavLink>
             <NavLink
+              to="/admin/menjador"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <Utensils className="w-5 h-5" />
+              {t('admin.sidebar.menjador', 'Gestión Menjador')}
+            </NavLink>
+            <NavLink
               to="/admin/documents"
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => `
@@ -341,6 +360,19 @@ export function AdminLayout() {
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
               {t('admin.sidebar.system')}
             </p>
+            <NavLink
+              to="/admin/board"
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${isActive
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
+              `}
+            >
+              <UserSquare2 className="w-5 h-5" />
+              Sobre AFA / Junta
+            </NavLink>
             <NavLink
               to="/admin/settings"
               onClick={() => setSidebarOpen(false)}

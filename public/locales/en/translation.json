@@ -15,7 +15,152 @@
     "documents": "Documents",
     "contact": "Contact",
     "suggestions": "Suggestions",
-    "profile": "Profile"
+    "profile": "Profile",
+    "about_afa": "About AFA",
+    "news": "News",
+    "activities": "Activities",
+    "activities_subtitle": "Sign-ups, fees and calendar",
+    "services": "Services",
+    "services_subtitle": "Drop-off care and lunch",
+    "more": "More",
+    "more_subtitle": "Everything you can explore"
+  },
+  "nav_menu": {
+    "extraescolars_desc": "Sign-ups and activities",
+    "fees_desc": "Fees and payments",
+    "calendar_desc": "The whole year at a glance",
+    "acollida_desc": "Hours and rates",
+    "menjador_desc": "Menus, prices and info",
+    "about_desc": "Who we are and the Board",
+    "history_desc": "Half a century of school",
+    "news_desc": "Latest AFA updates",
+    "documents_desc": "Resources and downloads",
+    "contact_desc": "Write to us",
+    "suggestions_desc": "Ideas and improvements"
+  },
+  "about_afa": {
+    "title": "About AFA",
+    "subtitle": "Who we are and how we organize",
+    "mission_default": "AFA (Family Association) is a non-profit made up of the school families. We support the educational project, organize activities and represent families before the school and authorities.",
+    "composition_title": "The Board",
+    "composition_intro": "The Board is renewed at the assembly and is made up of the following roles:",
+    "empty": "Board members have not been published yet.",
+    "roles": {
+      "president": "President",
+      "vicepresident": "Vice-president",
+      "treasurer": "Treasurer",
+      "secretary": "Secretary",
+      "vocal": "Member"
+    },
+    "pillars": {
+      "families": { "title": "Families that add up", "desc": "Every enrolled family is part of it and can join the assembly and committees." },
+      "mission": { "title": "Mission", "desc": "Support the educational project and organize activities for students and families." },
+      "nonprofit": { "title": "Non-profit", "desc": "All resources are reinvested in the school and the educational community." }
+    },
+    "cta": {
+      "title": "Want to be part of AFA?",
+      "desc": "Write to us and we'll explain how to take part in the assembly, committees or Board.",
+      "contact": "Contact us"
+    },
+    "history_promo": {
+      "eyebrow": "Half a century of school",
+      "title": "Discover our history",
+      "desc": "From a school born out of community activism in the 70s to today's educational project. A story rooted in the Falguera neighbourhood.",
+      "cta": "Read it"
+    }
+  },
+  "acollida_page": {
+    "seo_title": "Drop-off Care Service",
+    "seo_description": "Everything you need to know about our drop-off care service: timetables, member and non-member rates, and occasional use.",
+    "eyebrow": "AFA Service",
+    "title": "Drop-off Care",
+    "intro": "A safe, supervised space before and after school hours so families can balance work and home life with peace of mind.",
+    "info": {
+      "schedule": { "title": "Flexible hours", "body": "Available in the morning before class and in the afternoon after school, adapted to each family's needs." },
+      "team": { "title": "Qualified team", "body": "Trained monitors look after the children with games, reading and small activities adapted to each age." },
+      "flex": { "title": "Monthly or occasional", "body": "Sign up for the full month or use the service on specific days whenever you need it." }
+    },
+    "rates_title": "Rates",
+    "rates_subtitle": "Prices for AFA member and non-member families. Monthly or occasional.",
+    "no_rates": "No rates published yet.",
+    "timeslot": "Time slot",
+    "member": "Member",
+    "non_member": "Non-member",
+    "per_month": "month",
+    "occasional": "occasional",
+    "note": "Occasional rates apply to specific days. For sign-ups or more information, contact AFA.",
+    "cta": {
+      "title": "Need more information?",
+      "desc": "If you have questions or want to sign up for the service, write to us and we'll help you with all the details.",
+      "button": "Contact AFA"
+    }
+  },
+  "history": {
+    "title": "Our history",
+    "subtitle": "Half a century of public schooling",
+    "intro": "From a neighbourhood school born of community activism to the educational project that now welcomes our families. This is the story you keep writing with us every day.",
+    "stats": {
+      "years": "Years of history",
+      "founded": "Founding year",
+      "lines": "Class per grade",
+      "students": "Students"
+    },
+    "origins": {
+      "eyebrow": "The beginnings",
+      "title": "A school born from the neighbourhood",
+      "p1": "In the early 70s, the Falguera neighbourhood was growing with the local factories. Families arriving from across the country had no school places: more than 600 children had to take a bus to Barcelona every morning.",
+      "p2": "Local families organised and demanded a public school. The pressure worked: in 1971 the land was granted and construction began, right behind Palau Falguera."
+    },
+    "quote": {
+      "text": "\"The school went from Francoist to Catalan, and the neighbourhood from having nothing to being full of life.\"",
+      "author": "Falguera neighbourhood chronicle"
+    },
+    "modelo": {
+      "eyebrow": "1972 · Opening",
+      "title": "The \"school without doors\"",
+      "fact": "\"schools without doors\" in all of Spain",
+      "p1": "The original building was an experimental project: open classrooms, large windows, natural light and shared spaces. One of only five of its kind in the entire country.",
+      "p2": "The school grew to over 1,000 students and 38 teachers. So much life couldn't fit in one open space, and over time walls were added to create traditional classrooms."
+    },
+    "timeline": {
+      "eyebrow": "Timeline",
+      "title": "Moments that shaped us",
+      "intro": "Five decades at a glance.",
+      "1971": { "title": "Construction begins", "desc": "The City Council grants the land behind Palau Falguera to build a new public school." },
+      "1972": { "title": "Colegio Modelo opens", "desc": "On December 11th, one of the country's five \"schools without doors\" opens its gates." },
+      "1976": { "title": "First Catalan lessons", "desc": "Catalan is introduced in the classroom for the first time." },
+      "1985": { "title": "Catalan immersion", "desc": "The school fully joins the Catalan immersion programme and moves to two classes per grade." },
+      "1988": { "title": "New name: Escola Falguera", "desc": "The community decides to rename the school to honour the neighbourhood and mark a new era." },
+      "1997": { "title": "New building", "desc": "The school moves to a new building on Sant Josep street, coinciding with its 25th anniversary." },
+      "2012": { "title": "Major renovation", "desc": "Classrooms and common areas are modernised for current pedagogical needs." },
+      "2022": { "title": "50 years of school", "desc": "Half a century of educational community in the Falguera neighbourhood." }
+    },
+    "name": {
+      "eyebrow": "1988 · A name of our own",
+      "title": "From \"Colegio Modelo\" to Escola Falguera",
+      "desc": "The community chose to rename the school to claim the neighbourhood, leave behind the connotations of an earlier era, and put down roots where the families live.",
+      "label": "Falguera"
+    },
+    "today": {
+      "eyebrow": "Today",
+      "title": "A school in constant action",
+      "intro": "Half a century on, Falguera is still a living project, rooted in the neighbourhood and open to the world.",
+      "green": { "title": "Green School", "desc": "School garden, sustainability and outdoor activities thanks to our proximity to the river and Collserola." },
+      "cordes": { "title": "Strings Project", "desc": "String instrument lessons in the classroom, in partnership with Palau Falguera's Municipal Music School." },
+      "steam": { "title": "STE(AI)M", "desc": "Science, technology, art and AI integrated into the curriculum through hands-on experiences." },
+      "community": { "title": "AFA Community", "desc": "After-school, drop-off care and an in-house kitchen: families make daily life at school possible." }
+    },
+    "palau": {
+      "eyebrow": "Our name",
+      "title": "Why \"Falguera\"?",
+      "p1": "The school is named after Palau Falguera, a 17th-century estate at the historic heart of Sant Feliu. It sits right next to us and shapes the cultural landscape of the school.",
+      "p2": "Today, Palau Falguera hosts the Municipal Music School and the National Rose Exhibition. Its gardens are a natural extension of our classrooms."
+    },
+    "cta": {
+      "title": "You keep writing the story",
+      "desc": "Every new family adds a new chapter. Get to know the AFA and discover how to take part.",
+      "button": "Meet the AFA"
+    }
   },
   "documents": {
     "seo_title": "Documents & Resources",
@@ -54,6 +199,7 @@
     "fees": "Fees",
     "calendar": "Calendar",
     "acollida": "Childcare",
+    "menjador": "Canteen",
     "contact": "Contact",
     "course_current": "Year 2025 - 2026",
     "view_details": "View Details",
@@ -242,6 +388,45 @@
     "entity_label": "Entity",
     "holder_label": "Holder",
     "footer_note": "Once the transfer is made, remember to keep the receipt in case it is necessary."
+  },
+  "menjador_page": {
+    "seo_title": "Canteen Service",
+    "seo_description": "All the information about the school canteen: schedule, prices for fixed and sporadic pupils, and downloadable monthly menus.",
+    "title": "Canteen Service",
+    "subtitle": "Schedule, prices and menus for the school canteen.",
+    "schedule_title": "Schedule",
+    "company_title": "Provider",
+    "diets_title": "Special diets",
+    "allergies_title": "Allergies and intolerances",
+    "how_to_title": "How it works",
+    "contact_title": "Contact",
+    "prices_title": "Prices",
+    "prices_subtitle": "We distinguish between fixed pupils (half month or more + 1 day) and sporadic pupils (individual days).",
+    "fix_title": "Fixed pupils",
+    "fix_subtitle": "Half month or more + 1 day",
+    "esporadic_title": "Sporadic pupils",
+    "esporadic_subtitle": "Individual days",
+    "price_member": "Member",
+    "price_non_member": "Non-member",
+    "no_rates": "No rates configured",
+    "menus_title": "Menus",
+    "menus_subtitle": "Download the monthly menus in PDF.",
+    "no_menus": "No menus published yet.",
+    "no_period": "No period"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
   },
   "shop_page": {
     "subtitle": "Reserve school clothing and pick it up at the AFA.",
@@ -453,6 +638,7 @@
       "calendar": "Main Calendar",
       "tasks": "Tasks",
       "acollida": "Childcare Management",
+      "menjador": "Canteen Management",
       "observability": "Auditing",
       "logout": "Logout"
     },
