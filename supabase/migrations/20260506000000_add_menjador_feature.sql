@@ -151,7 +151,7 @@ SELECT 'menjador_info', '{
       "company": "",
       "allergies": "Si el vostre fill o filla té al·lèrgies o intoleràncies, cal comunicar-ho a l''AFA i adjuntar el certificat mèdic abans de començar el servei.",
       "diets": "S''ofereixen dietes especials (al·lèrgies, intoleràncies, motius religiosos i dietes toves per malaltia) sota petició prèvia.",
-      "how_to": "Les famílies poden inscriure's per a tot el curs (fix) o utilitzar el servei de manera puntual (esporàdic). Per a dies esporàdics, cal avisar a l''AFA al matí.",
+      "how_to": "Les famílies poden inscriure''s per a tot el curs (fix) o utilitzar el servei de manera puntual (esporàdic). Per a dies esporàdics, cal avisar a l''AFA al matí.",
       "contact": "Per a qualsevol consulta, podeu escriure''ns des del formulari de contacte o passar per l''espai AFA els dilluns de 9:00 a 9:30 h."
     },
     "es": {
