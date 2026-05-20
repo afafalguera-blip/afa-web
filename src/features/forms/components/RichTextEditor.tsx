@@ -1,7 +1,5 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEffect } from 'react';
@@ -133,9 +131,10 @@ function Toolbar({ editor }: { editor: Editor | null }) {
 export function RichTextEditor({ value, onChange, placeholder = 'Escriu aquí...', minHeight = '200px' }: Props) {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: { levels: [2, 3] } }),
-      Underline,
-      Link.configure({ openOnClick: false, autolink: true, defaultProtocol: 'https' }),
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+        link: { openOnClick: false, autolink: true, defaultProtocol: 'https' },
+      }),
       Image.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder }),
     ],

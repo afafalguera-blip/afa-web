@@ -79,23 +79,6 @@ const fieldSchema = z
     { message: 'Las opciones son obligatorias para select/radio/checkbox', path: ['options'] },
   );
 
-const translationSchema = z
-  .object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    fields: z
-      .record(
-        z.string(),
-        z.object({
-          label: z.string().optional(),
-          placeholder: z.string().optional(),
-          options: z.array(z.string()).optional(),
-        }),
-      )
-      .optional(),
-  })
-  .optional();
-
 const formTemplateSchema = z.object({
   title: z.string().min(1, 'El título es obligatorio'),
   description: z.string().optional(),
@@ -108,13 +91,8 @@ const formTemplateSchema = z.object({
   closes_at: z.string().nullable().optional(),
   is_active: z.boolean(),
   fields_schema: z.array(fieldSchema).min(1, 'Debes agregar al menos un campo'),
-  translations: z
-    .object({
-      ca: translationSchema,
-      en: translationSchema,
-    })
-    .partial()
-    .optional(),
+  // translations shape is managed by TranslationsPanel; no client validation needed.
+  translations: z.any().optional(),
 });
 
 type FormBuilderData = z.infer<typeof formTemplateSchema>;
@@ -204,7 +182,18 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
   };
 
   const onInvalid = (errs: typeof errors) => {
-    console.warn('Form validation failed:', errs);
+    try {
+      console.warn(
+        'Form validation failed:\n' +
+          JSON.stringify(
+            errs,
+            (_k, v) => (v instanceof HTMLElement ? '[HTMLElement]' : v),
+            2,
+          ),
+      );
+    } catch {
+      console.warn('Form validation failed:', errs);
+    }
     const firstKey = Object.keys(errs)[0];
     const el = document.querySelector(`[name="${firstKey}"]`) as HTMLElement | null;
     el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
