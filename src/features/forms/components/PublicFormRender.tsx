@@ -625,7 +625,39 @@ export default function PublicFormRender({ slug }: { slug: string }) {
   return (
     <div className="min-h-screen bg-gray-50 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
+        <LangSwitcher />
         <DynamicFormInstance template={formTemplate} />
+      </div>
+    </div>
+  );
+}
+
+function LangSwitcher() {
+  const { i18n } = useTranslation();
+  const active = i18n.resolvedLanguage || i18n.language;
+  const langs: Array<{ code: 'ca' | 'es' | 'en'; label: string }> = [
+    { code: 'ca', label: 'CA' },
+    { code: 'es', label: 'ES' },
+    { code: 'en', label: 'EN' },
+  ];
+  return (
+    <div className="flex justify-end mb-3">
+      <div className="inline-flex items-center gap-1 bg-white border border-gray-200 rounded-full shadow-sm px-1.5 py-1">
+        {langs.map((l) => (
+          <button
+            key={l.code}
+            type="button"
+            translate="no"
+            onClick={() => i18n.changeLanguage(l.code)}
+            className={`notranslate text-xs font-bold px-2.5 py-1 rounded-full transition-colors ${
+              active === l.code
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-500 hover:bg-gray-100'
+            }`}
+          >
+            {l.label}
+          </button>
+        ))}
       </div>
     </div>
   );
