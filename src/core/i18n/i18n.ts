@@ -21,7 +21,10 @@ i18n
       escapeValue: false
     },
     detection: {
-      order: ['localStorage', 'cookie', 'navigator', 'htmlTag'],
+      // Catalan is the institutional default: never auto-switch from the
+      // browser locale. Honor only an explicit choice persisted in
+      // localStorage/cookie; otherwise fall through to fallbackLng = 'ca'.
+      order: ['localStorage', 'cookie'],
       lookupLocalStorage: 'i18nextLng',
       lookupCookie: 'i18next',
       caches: ['localStorage', 'cookie']
