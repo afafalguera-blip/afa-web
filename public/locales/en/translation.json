@@ -776,6 +776,30 @@
   "footer": {
     "all_rights_reserved": "All rights reserved."
   },
+  "settings": {
+    "ai_keys": {
+      "intro_title": "Hot-swappable AI keys",
+      "intro_body": "Keys are encrypted in transit and only revealed to the backend when needed. If a key expires or you hit a quota, just paste a new one — no redeploy.",
+      "loading": "Loading...",
+      "configured": "Configured",
+      "not_configured": "Not configured — auto-translation will not work",
+      "updated_on": "updated on {{date}}",
+      "rotate_label": "Replace with a new key",
+      "new_value_label": "Paste your API key here",
+      "value_placeholder": "AIza...",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved_ok": "Key saved.",
+      "save_error": "Could not save the key",
+      "delete": "Delete",
+      "delete_confirm": "Delete this key? Auto-translation will stop working until you configure a new one.",
+      "deleted_ok": "Key deleted.",
+      "delete_error": "Could not delete the key",
+      "load_error": "Could not load key status",
+      "show": "Show",
+      "hide": "Hide"
+    }
+  },
   "forms": {
     "public": {
       "loading": "Preparing secure form...",

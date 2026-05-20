@@ -15,7 +15,8 @@ import {
     CreditCard,
     Palette,
     LayoutDashboard,
-    BarChart3
+    BarChart3,
+    KeyRound
 } from "lucide-react";
 import { ContactSettings } from "./settings/ContactSettings";
 import { SocialSettings } from "./settings/SocialSettings";
@@ -26,10 +27,11 @@ import { FeesSettings } from "./settings/FeesSettings";
 import { BrandingSettings } from "./settings/BrandingSettings";
 import { HomepageSettings } from "./settings/HomepageSettings";
 import { AnalyticsSettings } from "./settings/AnalyticsSettings";
+import AiKeysSettings from "./settings/AiKeysSettings";
 import { invalidateBrandingCache } from "../../hooks/useBranding";
 import { invalidateHomepageCache } from "../../hooks/useHomepageConfig";
 
-type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics';
+type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics' | 'ai-keys';
 type LangType = 'ca' | 'es' | 'en';
 
 export default function SiteSettingsManager() {
@@ -186,6 +188,7 @@ export default function SiteSettingsManager() {
                     { id: 'privacy' as TabType, icon: FileLock2, label: 'Privacitat' },
                     { id: 'cookies' as TabType, icon: Cookie, label: 'Cookies' },
                     { id: 'shop' as TabType, icon: ShoppingBag, label: 'Botiga' },
+                    { id: 'ai-keys' as TabType, icon: KeyRound, label: 'Claus IA' },
                 ]).map(({ id, icon: Icon, label }) => (
                     <button
                         key={id}
@@ -282,22 +285,27 @@ export default function SiteSettingsManager() {
                     />
                 )}
 
-                {/* Feedback Messages */}
-                {error && (
+                {activeTab === 'ai-keys' && (
+                    <AiKeysSettings />
+                )}
+
+                {/* Feedback Messages — hidden in ai-keys tab (it manages its own inline state) */}
+                {activeTab !== 'ai-keys' && error && (
                     <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-xl animate-shake">
                         <AlertCircle size={20} />
                         <p className="font-medium text-sm">{error}</p>
                     </div>
                 )}
 
-                {success && (
+                {activeTab !== 'ai-keys' && success && (
                     <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-200 text-green-700 rounded-xl animate-in fade-in slide-in-from-top-2">
                         <CheckCircle2 size={20} />
                         <p className="font-medium text-sm">Configuració guardada correctament!</p>
                     </div>
                 )}
 
-                {/* Action Buttons */}
+                {/* Action Buttons — ai-keys uses its own per-row buttons */}
+                {activeTab !== 'ai-keys' && (
                 <div className="flex gap-4 items-center pt-4">
                     <button
                         disabled={saving}
@@ -318,6 +326,7 @@ export default function SiteSettingsManager() {
                         <p className="text-xs">Els canvis s'aplicaran a tota la web pública instantàniament.</p>
                     </div>
                 </div>
+                )}
             </form>
         </div>
     );

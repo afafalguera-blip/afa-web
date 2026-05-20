@@ -1,9 +1,37 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") || "https://afafalguera.com,https://www.afafalguera.com").split(",");
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") || "";
+const FALLBACK_GEMINI_KEY = Deno.env.get("GEMINI_API_KEY") || "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+/**
+ * Resolve the active Gemini key.
+ * Priority: app_settings table (admin-rotatable) → GEMINI_API_KEY env var (legacy fallback).
+ */
+async function resolveGeminiKey(): Promise<string> {
+  if (SUPABASE_URL && SERVICE_ROLE_KEY) {
+    try {
+      const sb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data, error } = await sb
+        .from("app_settings")
+        .select("value")
+        .eq("key", "GEMINI_API_KEY")
+        .maybeSingle();
+      if (!error && data && typeof data.value === "string" && data.value.trim()) {
+        return data.value.trim();
+      }
+    } catch (e) {
+      console.warn("resolveGeminiKey: app_settings lookup failed, falling back to env", e);
+    }
+  }
+  return FALLBACK_GEMINI_KEY;
+}
 
 const LANG_NAMES: Record<string, string> = {
   ca: "Catalan",
@@ -40,9 +68,10 @@ function jsonResponse(body: unknown, status: number, extraHeaders: Record<string
 }
 
 async function callGemini(systemPrompt: string, userContent: string): Promise<string> {
-  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
+  const apiKey = await resolveGeminiKey();
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured (set it from /admin/settings)");
 
-  const res = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

@@ -1007,6 +1007,30 @@
   "footer": {
     "all_rights_reserved": "Tots els drets reservats."
   },
+  "settings": {
+    "ai_keys": {
+      "intro_title": "Claus d'IA gestionades en calent",
+      "intro_body": "Les claus es xifren en trànsit i només s'exposen al backend quan cal. Si el valor caduca o s'esgota la quota, només cal desar-ne una de nova — sense redeploy.",
+      "loading": "Carregant...",
+      "configured": "Configurada",
+      "not_configured": "No configurada — l'auto-traducció no funcionarà",
+      "updated_on": "actualitzada el {{date}}",
+      "rotate_label": "Substituir per una nova clau",
+      "new_value_label": "Enganxa la teva API key aquí",
+      "value_placeholder": "AIza...",
+      "save": "Desar",
+      "saving": "Desant...",
+      "saved_ok": "Clau desada correctament.",
+      "save_error": "No s'ha pogut desar la clau",
+      "delete": "Eliminar",
+      "delete_confirm": "Eliminar aquesta clau? L'auto-traducció deixarà de funcionar fins que en configuris una altra.",
+      "deleted_ok": "Clau eliminada.",
+      "delete_error": "No s'ha pogut eliminar la clau",
+      "load_error": "No s'ha pogut carregar l'estat de la clau",
+      "show": "Mostrar",
+      "hide": "Amagar"
+    }
+  },
   "forms": {
     "public": {
       "loading": "Preparant formulari segur...",

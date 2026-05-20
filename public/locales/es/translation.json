@@ -1009,6 +1009,30 @@
   "footer": {
     "all_rights_reserved": "Todos los derechos reservados."
   },
+  "settings": {
+    "ai_keys": {
+      "intro_title": "Claves de IA gestionadas en caliente",
+      "intro_body": "Las claves se cifran en tránsito y solo se exponen al backend cuando se necesitan. Si el valor caduca o se agota la cuota, basta con guardar una nueva clave — sin redeploy.",
+      "loading": "Cargando...",
+      "configured": "Configurada",
+      "not_configured": "No configurada — la auto-traducción no funcionará",
+      "updated_on": "actualizada el {{date}}",
+      "rotate_label": "Reemplazar con una nueva clave",
+      "new_value_label": "Pega tu API key aquí",
+      "value_placeholder": "AIza...",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "saved_ok": "Clave guardada correctamente.",
+      "save_error": "No se pudo guardar la clave",
+      "delete": "Eliminar",
+      "delete_confirm": "¿Eliminar esta clave? La auto-traducción dejará de funcionar hasta que configures otra.",
+      "deleted_ok": "Clave eliminada.",
+      "delete_error": "No se pudo eliminar la clave",
+      "load_error": "No se pudo cargar el estado de la clave",
+      "show": "Mostrar",
+      "hide": "Ocultar"
+    }
+  },
   "forms": {
     "public": {
       "loading": "Preparando formulario seguro...",
