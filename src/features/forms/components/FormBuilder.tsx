@@ -191,15 +191,24 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
       }
       onSuccess?.();
     } catch (err: unknown) {
-      console.error(err);
+      console.error('formService error:', err);
       if (err instanceof Object && 'code' in err && (err as { code: string }).code === '23505') {
         setSaveError(t('forms.builder.slug_conflict'));
       } else {
-        setSaveError(t('forms.builder.save_error'));
+        const detail = (err as { message?: string })?.message;
+        setSaveError(detail ? `${t('forms.builder.save_error')} (${detail})` : t('forms.builder.save_error'));
       }
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const onInvalid = (errs: typeof errors) => {
+    console.warn('Form validation failed:', errs);
+    const firstKey = Object.keys(errs)[0];
+    const el = document.querySelector(`[name="${firstKey}"]`) as HTMLElement | null;
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el?.focus?.();
   };
 
   const handleAddField = (type: FormFieldType) => {
@@ -279,7 +288,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
       </div>
 
       <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-8">
         <section className="bg-gray-50 p-3 sm:p-5 rounded-lg border border-gray-200 space-y-4">
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Configuración general</h2>
 
@@ -663,26 +672,57 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                   {!isSectionHeader && needsOptions && (
                     <div className="mt-2 pl-4 border-l-2 border-blue-200">
                       <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
-                        Opciones separadas por coma (ej: Sí, No, Tal vez)
+                        {t('forms.builder.q_options_label')}
                       </label>
                       <Controller
                         name={`fields_schema.${index}.options` as const}
                         control={control}
-                        render={({ field: controllerField }) => (
-                          <input
-                            value={controllerField.value?.join(', ') || ''}
-                            onChange={(e) => {
-                              controllerField.onChange(
-                                e.target.value
-                                  .split(',')
-                                  .map((s) => s.trim())
-                                  .filter((s) => s !== ''),
-                              );
-                            }}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border text-sm"
-                            placeholder="Añade opciones..."
-                          />
-                        )}
+                        render={({ field: controllerField }) => {
+                          const opts = controllerField.value ?? [];
+                          const updateAt = (i: number, val: string) => {
+                            const next = [...opts];
+                            next[i] = val;
+                            controllerField.onChange(next);
+                          };
+                          const removeAt = (i: number) => {
+                            const next = opts.filter((_, j) => j !== i);
+                            controllerField.onChange(next.length === 0 ? [''] : next);
+                          };
+                          const addOne = () => controllerField.onChange([...opts, '']);
+                          return (
+                            <div className="space-y-2">
+                              {opts.map((opt, i) => (
+                                <div key={i} className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-400 w-5 text-right">{i + 1}.</span>
+                                  <input
+                                    type="text"
+                                    value={opt}
+                                    onChange={(e) => updateAt(i, e.target.value)}
+                                    placeholder={t('forms.builder.option_placeholder', { n: i + 1 })}
+                                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border text-sm"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeAt(i)}
+                                    disabled={opts.length <= 1}
+                                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                    title={t('forms.builder.remove_option')}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={addOne}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                {t('forms.builder.add_option')}
+                              </button>
+                            </div>
+                          );
+                        }}
                       />
                       {errors.fields_schema?.[index]?.options && (
                         <span className="text-red-500 text-xs mt-1 block">
@@ -868,6 +908,28 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
         <TranslationsPanel />
 
         <div className="pt-6 border-t border-gray-200">
+          {Object.keys(errors).length > 0 && (
+            <div className="mb-4 p-4 bg-amber-50 text-amber-800 text-sm rounded-md border border-amber-200">
+              <div className="font-bold mb-2">{t('forms.builder.fix_errors')}:</div>
+              <ul className="list-disc pl-5 space-y-1 text-xs">
+                {errors.title && <li>{errors.title.message as string}</li>}
+                {errors.slug && <li>{errors.slug.message as string}</li>}
+                {errors.fields_schema && !Array.isArray(errors.fields_schema) && (
+                  <li>{(errors.fields_schema as { message?: string }).message}</li>
+                )}
+                {Array.isArray(errors.fields_schema) &&
+                  errors.fields_schema.map((fe, i) =>
+                    fe ? (
+                      <li key={i}>
+                        {t('forms.builder.q_label')} #{i + 1}:{' '}
+                        {(fe as { label?: { message?: string }; options?: { message?: string } }).label?.message ||
+                          (fe as { label?: { message?: string }; options?: { message?: string } }).options?.message}
+                      </li>
+                    ) : null,
+                  )}
+              </ul>
+            </div>
+          )}
           {saveError && (
             <div className="mb-4 p-4 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">{saveError}</div>
           )}
