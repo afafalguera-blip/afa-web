@@ -31,6 +31,7 @@ const MenjadorPage = lazy(() => import('./pages/MenjadorPage'));
 const AcollidaPage = lazy(() => import('./pages/AcollidaPage'));
 const ShopLanding = lazy(() => import('./features/shop/pages/ShopLanding').then(m => ({ default: m.ShopLanding })));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
+const PublicFormPage = lazy(() => import('./features/forms/pages/PublicFormPage'));
 
 // Admin pages
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
@@ -57,6 +58,7 @@ const SiteSettingsManager = lazy(() => import('./pages/admin/SiteSettingsManager
 const TasksManager = lazy(() => import('./pages/admin/TasksManager'));
 const ShortLinksManager = lazy(() => import('./pages/admin/ShortLinksManager'));
 const BoardManager = lazy(() => import('./pages/admin/BoardManager'));
+const FormsAdminPage = lazy(() => import('./features/forms/pages/FormsAdminPage'));
 
 function App() {
   return (
@@ -67,6 +69,8 @@ function App() {
           <Suspense fallback={<Loading />}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+
+              <Route path="/f/:slug" element={<PublicFormPage />} />
 
               <Route path="/" element={<Layout />}>
                 <Route index element={<Home />} />
@@ -112,6 +116,7 @@ function App() {
                 <Route path="contactes" element={<ContactManager />} />
                 <Route path="settings" element={<SiteSettingsManager />} />
                 <Route path="board" element={<BoardManager />} />
+                <Route path="forms" element={<FormsAdminPage />} />
                 <Route path="observability" element={<AdminObservability />} />
               </Route>
             </Routes>
