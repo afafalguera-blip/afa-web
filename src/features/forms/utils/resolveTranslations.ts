@@ -26,6 +26,8 @@ export function resolveTemplateText(template: FormTemplate, lang: string | undef
   };
 }
 
+const isFilled = (s: unknown): s is string => typeof s === 'string' && s.trim() !== '';
+
 /** Returns a per-field translated label/placeholder/options object. Falls back to es. */
 export function resolveField(template: FormTemplate, field: FormField, lang: string | undefined): FormField {
   const l = langOrEs(lang);
@@ -34,13 +36,19 @@ export function resolveField(template: FormTemplate, field: FormField, lang: str
   const fx: FieldTranslation | undefined = template.translations?.[l]?.fields?.[field.id];
   if (!fx) return field;
 
+  let options = field.options;
+  if (
+    Array.isArray(fx.options) &&
+    fx.options.length === (field.options?.length ?? 0) &&
+    fx.options.some(isFilled)
+  ) {
+    options = field.options?.map((src, i) => (isFilled(fx.options?.[i]) ? (fx.options![i] as string) : src));
+  }
+
   return {
     ...field,
-    label: fx.label?.trim() ? fx.label : field.label,
-    placeholder: fx.placeholder?.trim() ? fx.placeholder : field.placeholder,
-    options:
-      fx.options && fx.options.length === (field.options?.length ?? 0) && fx.options.some((o) => o.trim() !== '')
-        ? fx.options
-        : field.options,
+    label: isFilled(fx.label) ? fx.label : field.label,
+    placeholder: isFilled(fx.placeholder) ? fx.placeholder : field.placeholder,
+    options,
   };
 }
