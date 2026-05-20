@@ -34,15 +34,33 @@ export default function TranslationsPanel() {
     setTranslateError(null);
     setTranslateOk(false);
     try {
-      const bag: Record<string, string> = {
-        title: sourceTitle || '',
+      // Build a flat bag with short numeric keys (k0, k1, ...) and a parallel
+      // mapping back to where each key belongs. The LLM is much more reliable
+      // with short opaque keys than with long structured paths like
+      // "field__<uuid>__option__0".
+      type Slot =
+        | { kind: 'title' }
+        | { kind: 'description' }
+        | { kind: 'label'; fieldId: string }
+        | { kind: 'placeholder'; fieldId: string }
+        | { kind: 'option'; fieldId: string; index: number };
+
+      const bag: Record<string, string> = {};
+      const mapping: Record<string, Slot> = {};
+      let nextKey = 0;
+      const push = (slot: Slot, value: string) => {
+        const key = `k${nextKey++}`;
+        bag[key] = value;
+        mapping[key] = slot;
       };
-      if (isNotEmpty(sourceDescription)) bag.description = sourceDescription;
+
+      push({ kind: 'title' }, sourceTitle || '');
+      if (isNotEmpty(sourceDescription)) push({ kind: 'description' }, sourceDescription);
       (fields || []).forEach((f) => {
-        if (isNotEmpty(f.label)) bag[`field__${f.id}__label`] = f.label;
-        if (isNotEmpty(f.placeholder)) bag[`field__${f.id}__placeholder`] = f.placeholder!;
+        if (isNotEmpty(f.label)) push({ kind: 'label', fieldId: f.id }, f.label);
+        if (isNotEmpty(f.placeholder)) push({ kind: 'placeholder', fieldId: f.id }, f.placeholder!);
         (f.options || []).forEach((opt, i) => {
-          if (isNotEmpty(opt)) bag[`field__${f.id}__option__${i}`] = opt;
+          if (isNotEmpty(opt)) push({ kind: 'option', fieldId: f.id, index: i }, opt);
         });
       });
 
@@ -50,31 +68,34 @@ export default function TranslationsPanel() {
 
       for (const lang of TARGET_LANGS) {
         const txMap = result[lang] || {};
-        const tx: FormTranslation = {
-          title: txMap.title ?? '',
-          description: txMap.description ?? '',
-          fields: {},
+        const tx: FormTranslation = { title: '', description: '', fields: {} };
+        const ensureField = (fid: string) => {
+          tx.fields![fid] = tx.fields![fid] ?? {};
+          return tx.fields![fid];
         };
-        (fields || []).forEach((f) => {
-          const ft: FormTranslation['fields'] = tx.fields!;
-          const lbl = txMap[`field__${f.id}__label`];
-          const ph = txMap[`field__${f.id}__placeholder`];
-          const fieldEntry: { label?: string; placeholder?: string; options?: string[] } = {};
-          if (lbl) fieldEntry.label = lbl;
-          if (ph) fieldEntry.placeholder = ph;
-          if (f.options && f.options.length > 0) {
-            fieldEntry.options = f.options.map((_, i) => txMap[`field__${f.id}__option__${i}`] ?? '');
+
+        for (const [key, value] of Object.entries(txMap)) {
+          const slot = mapping[key];
+          if (!slot || typeof value !== 'string') continue;
+          if (slot.kind === 'title') tx.title = value;
+          else if (slot.kind === 'description') tx.description = value;
+          else if (slot.kind === 'label') ensureField(slot.fieldId).label = value;
+          else if (slot.kind === 'placeholder') ensureField(slot.fieldId).placeholder = value;
+          else if (slot.kind === 'option') {
+            const fe = ensureField(slot.fieldId);
+            const sourceField = (fields || []).find((f) => f.id === slot.fieldId);
+            const len = sourceField?.options?.length ?? 0;
+            if (!fe.options) fe.options = new Array(len).fill('');
+            fe.options[slot.index] = value;
           }
-          if (Object.keys(fieldEntry).length > 0) {
-            ft[f.id] = fieldEntry;
-          }
-        });
+        }
         setValue(`translations.${lang}`, tx, { shouldDirty: true });
       }
       setTranslateOk(true);
     } catch (err) {
       console.error('Auto-translate error:', err);
-      setTranslateError(t('forms.builder.translate_error'));
+      const detail = err instanceof Error ? err.message : String(err);
+      setTranslateError(`${t('forms.builder.translate_error')} (${detail})`);
     } finally {
       setTranslating(false);
     }
