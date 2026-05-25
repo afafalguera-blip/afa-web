@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { StorageService } from '../../services/StorageService';
+import { compressImage } from '../../utils/imageCompression';
 
 interface ImageUploadProps {
   value: string | null;
@@ -32,14 +33,18 @@ export function ImageUpload({
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) { // 2MB limit
-      alert(t('admin.editor.image_too_large'));
-      return;
-    }
-
     setUploading(true);
     try {
-      const url = await StorageService.uploadImage(bucket, file, folder);
+      // Compress first so big originals (>2MB, often phone photos) pass through.
+      // StorageService re-checks but compressImage is idempotent on small files.
+      const processed = await compressImage(file).catch(() => file);
+
+      if (processed.size > 10 * 1024 * 1024) {
+        alert(t('admin.editor.image_too_large'));
+        return;
+      }
+
+      const url = await StorageService.uploadImage(bucket, processed, folder);
       onUpload(url);
     } catch (error) {
       console.error('Error uploading image:', error);

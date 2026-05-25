@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { formService } from '../services/formService';
 import type { FormTemplate, FormField } from '../types/formTypes';
+import { WEEKDAY_CODES, WEEKDAY_LABELS_CA, logicMatches } from '../types/formTypes';
 import { resolveTemplateText, resolveField } from '../utils/resolveTranslations';
 import { Loader2, CheckCircle, AlertCircle, Upload, Check, X as XIcon } from 'lucide-react';
 import { sanitizeRichTextHtml } from '../../../utils/htmlSanitizer';
@@ -130,7 +131,7 @@ const generateZodSchema = (fields: FormField[]) => {
 
   fields.forEach((f) => {
     if (f.type === 'section_header') return;
-    if (f.type === 'checkbox') {
+    if (f.type === 'checkbox' || f.type === 'weekdays') {
       schemaShape[f.id] = z.array(z.string()).default([]);
     } else if (f.type === 'file') {
       schemaShape[f.id] = z.unknown().optional();
@@ -143,14 +144,14 @@ const generateZodSchema = (fields: FormField[]) => {
     fields.forEach((f) => {
       let isVisible = true;
       if (f.logic && f.logic.dependsOn) {
-        isVisible = data[f.logic.dependsOn] === f.logic.value;
+        isVisible = logicMatches(data[f.logic.dependsOn], f.logic.value);
       }
 
       if (isVisible && f.required) {
         const val = data[f.id];
         let hasError = false;
 
-        if (f.type === 'checkbox') {
+        if (f.type === 'checkbox' || f.type === 'weekdays') {
           if (!val || (Array.isArray(val) && val.length === 0)) hasError = true;
         } else {
           if (!val || val === '') hasError = true;
@@ -195,7 +196,7 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
     const defaults: Record<string, string | string[]> = {};
     template.fields_schema.forEach((field) => {
       if (field.type === 'section_header') return;
-      if (field.type === 'checkbox') defaults[field.id] = [];
+      if (field.type === 'checkbox' || field.type === 'weekdays') defaults[field.id] = [];
       else defaults[field.id] = '';
     });
     return defaults;
@@ -235,10 +236,10 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
   useEffect(() => {
     template.fields_schema.forEach((field) => {
       if (field.logic?.dependsOn) {
-        const isVisible = parentValueMap[field.logic.dependsOn] === field.logic.value;
+        const isVisible = logicMatches(parentValueMap[field.logic.dependsOn], field.logic.value);
         if (!isVisible) {
           const currentVal = getValues(field.id);
-          const defaultValue = field.type === 'checkbox' ? [] : '';
+          const defaultValue = (field.type === 'checkbox' || field.type === 'weekdays') ? [] : '';
           if (JSON.stringify(currentVal) !== JSON.stringify(defaultValue)) {
             setValue(field.id, defaultValue);
           }
@@ -343,7 +344,7 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
             const isVisible = (() => {
               if (!rawField.logic || !rawField.logic.dependsOn) return true;
               const parentValue = watch(rawField.logic.dependsOn);
-              return parentValue === rawField.logic.value;
+              return logicMatches(parentValue, rawField.logic.value);
             })();
 
             if (!isVisible) return null;
@@ -511,6 +512,29 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
                       type="date"
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-3 px-4 border text-base bg-white"
                     />
+                    <ErrorMsg />
+                  </div>
+                )}
+
+                {field.type === 'weekdays' && (
+                  <div>
+                    <Label />
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {WEEKDAY_CODES.map((code) => (
+                        <label
+                          key={code}
+                          className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 has-[:checked]:text-blue-700"
+                        >
+                          <input
+                            type="checkbox"
+                            value={code}
+                            {...register(field.id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm font-medium">{WEEKDAY_LABELS_CA[code]}</span>
+                        </label>
+                      ))}
+                    </div>
                     <ErrorMsg />
                   </div>
                 )}

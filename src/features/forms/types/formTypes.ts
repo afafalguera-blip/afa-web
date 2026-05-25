@@ -3,7 +3,29 @@ export type FormFieldType =
   | 'select' | 'checkbox' | 'radio'
   | 'file'
   | 'date' | 'email' | 'phone' | 'number'
+  | 'weekdays'
   | 'section_header';
+
+/** Fixed weekday codes used by the 'weekdays' field type. Labels are rendered in the UI (CA by default). */
+export const WEEKDAY_CODES = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+export type WeekdayCode = (typeof WEEKDAY_CODES)[number];
+
+export const WEEKDAY_LABELS_CA: Record<WeekdayCode, string> = {
+  mon: 'Dilluns',
+  tue: 'Dimarts',
+  wed: 'Dimecres',
+  thu: 'Dijous',
+  fri: 'Divendres',
+  sat: 'Dissabte',
+  sun: 'Diumenge',
+};
+
+/** Helper: returns true when a parent value satisfies a logic.value condition. Arrays match via .includes(). */
+export const logicMatches = (parentValue: unknown, expected: string | undefined): boolean => {
+  if (expected === undefined || expected === '') return false;
+  if (Array.isArray(parentValue)) return parentValue.includes(expected);
+  return parentValue === expected;
+};
 
 export interface FormField {
   id: string;

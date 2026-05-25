@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formService } from '../services/formService';
 import { resolveTemplateText, resolveField } from '../utils/resolveTranslations';
-import type { FormTemplate, FormSubmission, FormField } from '../types/formTypes';
+import type { FormTemplate, FormSubmission, FormField, WeekdayCode } from '../types/formTypes';
+import { WEEKDAY_LABELS_CA } from '../types/formTypes';
 import {
   ArrowLeft,
   Download,
@@ -84,6 +85,10 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
   const formatCellValue = (f: FormField, val: unknown): string => {
     if (val == null || val === '') return '-';
     if (f.type === 'file') return String(val);
+    if (f.type === 'weekdays' && Array.isArray(val)) {
+      if (val.length === 0) return '-';
+      return val.map((c) => WEEKDAY_LABELS_CA[c as WeekdayCode] ?? c).join(', ');
+    }
     if (Array.isArray(val)) return val.join(', ');
     return String(val);
   };

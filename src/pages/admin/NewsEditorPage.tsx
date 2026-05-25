@@ -203,13 +203,14 @@ export default function NewsEditorPage() {
 
       if (sourceContent.title.trim() && langsToTranslate.length > 0) {
         setIsTranslating(true);
+        let updatedTranslations = formData.translations;
         try {
           const fields: Record<string, string> = { title: sourceContent.title };
           if (sourceContent.excerpt?.trim()) fields.excerpt = sourceContent.excerpt;
           if (sourceContent.content?.trim()) fields.content = sourceContent.content;
 
           const result = await TranslationService.translateBulk(fields, activeLang, langsToTranslate);
-          const updatedTranslations = { ...formData.translations };
+          updatedTranslations = { ...formData.translations };
           for (const lang of langsToTranslate) {
             updatedTranslations[lang] = {
               title: result[lang]?.title || '',
@@ -218,10 +219,13 @@ export default function NewsEditorPage() {
             };
           }
           setFormData(prev => ({ ...prev, translations: updatedTranslations }));
-          await AdminNewsEditorService.saveArticle(id, { ...formData, translations: updatedTranslations });
+        } catch (err) {
+          console.error('Auto-translate failed, saving without translations:', err);
+          alert(t('common.error_translation'));
         } finally {
           setIsTranslating(false);
         }
+        await AdminNewsEditorService.saveArticle(id, { ...formData, translations: updatedTranslations });
       } else {
         await AdminNewsEditorService.saveArticle(id, formData);
       }

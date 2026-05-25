@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import type { FormFieldType } from '../types/formTypes';
-import { FORM_FOLDERS } from '../types/formTypes';
+import { FORM_FOLDERS, WEEKDAY_CODES, WEEKDAY_LABELS_CA } from '../types/formTypes';
 import { formService } from '../services/formService';
 import TranslationsPanel from './TranslationsPanel';
 import {
@@ -56,6 +56,7 @@ const fieldSchema = z
       'email',
       'phone',
       'number',
+      'weekdays',
       'section_header',
     ]),
     label: z.string().min(1, 'La pregunta no puede estar vacía'),
@@ -108,6 +109,7 @@ const fieldTypesRecord: Record<FormFieldType, string> = {
   email: 'Email',
   phone: 'Teléfono',
   number: 'Número',
+  weekdays: 'Días de la semana',
   section_header: 'Separador / sección',
 };
 
@@ -201,12 +203,13 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
   };
 
   const handleAddField = (type: FormFieldType) => {
+    const needsOptionsList = ['select', 'radio', 'checkbox'].includes(type);
     append({
       id: `field_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       type,
       label: '',
       required: false,
-      options: [''],
+      options: needsOptionsList ? [''] : undefined,
     });
   };
 
@@ -751,7 +754,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             <option value="">Siempre visible</option>
                             {fields.slice(0, index).map((f, i) => {
                               const fieldType = watch(`fields_schema.${i}.type`);
-                              if (['select', 'radio'].includes(fieldType)) {
+                              if (['select', 'radio', 'checkbox', 'weekdays'].includes(fieldType)) {
                                 return (
                                   <option key={f.id} value={f.id}>
                                     Si en "{watch(`fields_schema.${i}.label`)}"
@@ -762,28 +765,35 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             })}
                           </select>
 
-                          {watch(`fields_schema.${index}.logic.dependsOn`) && (
-                            <div className="flex items-center gap-1">
-                              <span className="text-[11px] text-gray-400">es igual a</span>
-                              <select
-                                {...register(`fields_schema.${index}.logic.value` as const)}
-                                className="text-[11px] border-gray-200 rounded p-1.5 bg-white focus:ring-blue-500 w-full sm:w-auto"
-                              >
-                                <option value="">Selecciona valor...</option>
-                                {(() => {
-                                  const dependsOnId = watch(`fields_schema.${index}.logic.dependsOn`);
-                                  const parentIndex = fields.findIndex((f) => f.id === dependsOnId);
-                                  if (parentIndex === -1) return null;
-                                  const optionsStr = watch(`fields_schema.${parentIndex}.options`);
-                                  return (optionsStr || []).map((opt) => (
-                                    <option key={opt} value={opt}>
-                                      {opt}
+                          {watch(`fields_schema.${index}.logic.dependsOn`) && (() => {
+                            const dependsOnId = watch(`fields_schema.${index}.logic.dependsOn`);
+                            const parentIndex = fields.findIndex((f) => f.id === dependsOnId);
+                            if (parentIndex === -1) return null;
+                            const parentType = watch(`fields_schema.${parentIndex}.type`);
+                            const isParentMulti = parentType === 'checkbox' || parentType === 'weekdays';
+                            const parentOptions: Array<{ value: string; label: string }> =
+                              parentType === 'weekdays'
+                                ? WEEKDAY_CODES.map((c) => ({ value: c, label: WEEKDAY_LABELS_CA[c] }))
+                                : ((watch(`fields_schema.${parentIndex}.options`) || []).map((o) => ({ value: o, label: o })));
+                            return (
+                              <div className="flex items-center gap-1">
+                                <span className="text-[11px] text-gray-400">
+                                  {isParentMulti ? 'incluye' : 'es igual a'}
+                                </span>
+                                <select
+                                  {...register(`fields_schema.${index}.logic.value` as const)}
+                                  className="text-[11px] border-gray-200 rounded p-1.5 bg-white focus:ring-blue-500 w-full sm:w-auto"
+                                >
+                                  <option value="">Selecciona valor...</option>
+                                  {parentOptions.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                      {opt.label}
                                     </option>
-                                  ));
-                                })()}
-                              </select>
-                            </div>
-                          )}
+                                  ))}
+                                </select>
+                              </div>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>
@@ -861,6 +871,13 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Número
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAddField('weekdays')}
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                >
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Días de la semana
                 </button>
               </div>
 
