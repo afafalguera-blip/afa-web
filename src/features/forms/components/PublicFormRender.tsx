@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { formService } from '../services/formService';
 import type { FormTemplate, FormField } from '../types/formTypes';
-import { WEEKDAY_CODES, WEEKDAY_LABELS_CA, logicMatches } from '../types/formTypes';
+import { logicMatches } from '../types/formTypes';
 import { resolveTemplateText, resolveField } from '../utils/resolveTranslations';
 import { Loader2, CheckCircle, AlertCircle, Upload, Check, X as XIcon } from 'lucide-react';
 import { sanitizeRichTextHtml } from '../../../utils/htmlSanitizer';
@@ -520,18 +520,18 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
                   <div>
                     <Label />
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {WEEKDAY_CODES.map((code) => (
+                      {field.options?.map((day, i) => (
                         <label
-                          key={code}
+                          key={i}
                           className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 has-[:checked]:text-blue-700"
                         >
                           <input
                             type="checkbox"
-                            value={code}
+                            value={day}
                             {...register(field.id)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
-                          <span className="text-sm font-medium">{WEEKDAY_LABELS_CA[code]}</span>
+                          <span className="text-sm font-medium">{day}</span>
                         </label>
                       ))}
                     </div>

@@ -6,19 +6,22 @@ export type FormFieldType =
   | 'weekdays'
   | 'section_header';
 
-/** Fixed weekday codes used by the 'weekdays' field type. Labels are rendered in the UI (CA by default). */
-export const WEEKDAY_CODES = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
-export type WeekdayCode = (typeof WEEKDAY_CODES)[number];
+/** Source-language (es) labels for the seven weekdays. Used by the 'weekdays' field type
+ * as the default options pool. Real labels live in field.options (translatable via TranslationsPanel). */
+export const WEEKDAY_LABELS_ES = [
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado',
+  'Domingo',
+] as const;
 
-export const WEEKDAY_LABELS_CA: Record<WeekdayCode, string> = {
-  mon: 'Dilluns',
-  tue: 'Dimarts',
-  wed: 'Dimecres',
-  thu: 'Dijous',
-  fri: 'Divendres',
-  sat: 'Dissabte',
-  sun: 'Diumenge',
-};
+export type WeekdayLabelEs = (typeof WEEKDAY_LABELS_ES)[number];
+
+/** Defaults pre-selected when adding a new 'weekdays' field (school case: mon-fri). */
+export const WEEKDAY_DEFAULTS_ES: WeekdayLabelEs[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
 /** Helper: returns true when a parent value satisfies a logic.value condition. Arrays match via .includes(). */
 export const logicMatches = (parentValue: unknown, expected: string | undefined): boolean => {

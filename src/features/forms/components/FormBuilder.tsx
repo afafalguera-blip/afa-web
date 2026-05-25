@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import type { FormFieldType } from '../types/formTypes';
-import { FORM_FOLDERS, WEEKDAY_CODES, WEEKDAY_LABELS_CA } from '../types/formTypes';
+import { FORM_FOLDERS, WEEKDAY_LABELS_ES, WEEKDAY_DEFAULTS_ES } from '../types/formTypes';
 import { formService } from '../services/formService';
 import TranslationsPanel from './TranslationsPanel';
 import {
@@ -72,12 +72,12 @@ const fieldSchema = z
   })
   .refine(
     (data) => {
-      if (['select', 'radio', 'checkbox'].includes(data.type) && (!data.options || data.options.length === 0)) {
+      if (['select', 'radio', 'checkbox', 'weekdays'].includes(data.type) && (!data.options || data.options.length === 0)) {
         return false;
       }
       return true;
     },
-    { message: 'Las opciones son obligatorias para select/radio/checkbox', path: ['options'] },
+    { message: 'Debes seleccionar al menos una opción', path: ['options'] },
   );
 
 const formTemplateSchema = z.object({
@@ -204,12 +204,14 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
 
   const handleAddField = (type: FormFieldType) => {
     const needsOptionsList = ['select', 'radio', 'checkbox'].includes(type);
+    const defaultOptions =
+      type === 'weekdays' ? [...WEEKDAY_DEFAULTS_ES] : needsOptionsList ? [''] : undefined;
     append({
       id: `field_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       type,
       label: '',
       required: false,
-      options: needsOptionsList ? [''] : undefined,
+      options: defaultOptions,
     });
   };
 
@@ -519,6 +521,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
               const currentType = watch(`fields_schema.${index}.type`);
               const needsOptions = ['select', 'radio', 'checkbox'].includes(currentType);
               const isSectionHeader = currentType === 'section_header';
+              const isWeekdays = currentType === 'weekdays';
 
               const handleDuplicateField = () => {
                 const current = watch(`fields_schema.${index}`);
@@ -661,6 +664,51 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                     </div>
                   </div>
 
+                  {!isSectionHeader && isWeekdays && (
+                    <div className="mt-2 pl-4 border-l-2 border-blue-200">
+                      <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
+                        Días disponibles
+                      </label>
+                      <Controller
+                        name={`fields_schema.${index}.options` as const}
+                        control={control}
+                        render={({ field: controllerField }) => {
+                          const selected = controllerField.value ?? [];
+                          const toggle = (day: string) => {
+                            const next = selected.includes(day)
+                              ? selected.filter((d) => d !== day)
+                              : [...WEEKDAY_LABELS_ES].filter((d) => selected.includes(d) || d === day);
+                            controllerField.onChange(next);
+                          };
+                          return (
+                            <div className="flex flex-wrap gap-2">
+                              {WEEKDAY_LABELS_ES.map((day) => {
+                                const active = selected.includes(day);
+                                return (
+                                  <button
+                                    key={day}
+                                    type="button"
+                                    onClick={() => toggle(day)}
+                                    className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+                                      active
+                                        ? 'bg-blue-600 text-white border-blue-600'
+                                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    {day}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          );
+                        }}
+                      />
+                      <p className="text-[11px] text-gray-400 mt-2">
+                        El traductor automático traducirá estos nombres al cambiar de idioma.
+                      </p>
+                    </div>
+                  )}
+
                   {!isSectionHeader && needsOptions && (
                     <div className="mt-2 pl-4 border-l-2 border-blue-200">
                       <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -771,10 +819,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             if (parentIndex === -1) return null;
                             const parentType = watch(`fields_schema.${parentIndex}.type`);
                             const isParentMulti = parentType === 'checkbox' || parentType === 'weekdays';
-                            const parentOptions: Array<{ value: string; label: string }> =
-                              parentType === 'weekdays'
-                                ? WEEKDAY_CODES.map((c) => ({ value: c, label: WEEKDAY_LABELS_CA[c] }))
-                                : ((watch(`fields_schema.${parentIndex}.options`) || []).map((o) => ({ value: o, label: o })));
+                            const parentOptions = watch(`fields_schema.${parentIndex}.options`) || [];
                             return (
                               <div className="flex items-center gap-1">
                                 <span className="text-[11px] text-gray-400">
@@ -786,8 +831,8 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                                 >
                                   <option value="">Selecciona valor...</option>
                                   {parentOptions.map((opt) => (
-                                    <option key={opt.value} value={opt.value}>
-                                      {opt.label}
+                                    <option key={opt} value={opt}>
+                                      {opt}
                                     </option>
                                   ))}
                                 </select>
