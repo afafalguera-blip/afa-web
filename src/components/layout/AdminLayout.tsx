@@ -26,6 +26,18 @@ import {
   FileText
 } from 'lucide-react';
 
+// Payload-style hybrid shell: dark neutral sidebar, light content.
+// Flat (no gradients/shadows), small radii, compact nav.
+const navClass = ({ isActive }: { isActive: boolean }) => `
+  flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-colors
+  ${isActive
+    ? 'bg-neutral-800 text-white'
+    : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-100'}
+`;
+
+const sectionLabel = 'px-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1';
+const sectionWrap = 'pt-4 mt-4 border-t border-neutral-800';
+
 export function AdminLayout() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -56,379 +68,172 @@ export function AdminLayout() {
     navigate('/login');
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <div className="min-h-screen flex items-center justify-center bg-neutral-100">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-700"></div>
     </div>
   );
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-neutral-100 flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={closeSidebar}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static
+        fixed inset-y-0 left-0 z-50 w-60 bg-neutral-900 border-r border-neutral-800 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static
         flex flex-col h-screen overflow-hidden
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 flex-shrink-0 flex items-center px-6 border-b border-slate-100 bg-white">
+        <div className="h-14 flex-shrink-0 flex items-center px-4 border-b border-neutral-800">
           <Link
             to="/"
-            onClick={() => setSidebarOpen(false)}
-            className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+            onClick={closeSidebar}
+            className="text-[15px] font-semibold text-white hover:text-neutral-300 transition-colors"
           >
             {t('admin.title')}
           </Link>
           <button
             className="ml-auto lg:hidden"
-            onClick={() => setSidebarOpen(false)}
+            onClick={closeSidebar}
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 text-neutral-500" />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
-          <NavLink
-            to="/admin/dashboard"
-            onClick={() => setSidebarOpen(false)}
-            className={({ isActive }) => `
-              flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-              ${isActive
-                ? 'bg-blue-50 text-blue-700 shadow-sm'
-                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-            `}
-          >
-            <LayoutDashboard className="w-5 h-5" />
+        <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 custom-scrollbar">
+          <NavLink to="/admin/dashboard" onClick={closeSidebar} className={navClass}>
+            <LayoutDashboard className="w-[18px] h-[18px]" />
             {t('admin.sidebar.dashboard')}
           </NavLink>
 
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              {t('admin.sidebar.management')}
-            </p>
-            <NavLink
-              to="/admin/inscriptions"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Users className="w-5 h-5" />
+          <div className={sectionWrap}>
+            <p className={sectionLabel}>{t('admin.sidebar.management')}</p>
+            <NavLink to="/admin/inscriptions" onClick={closeSidebar} className={navClass}>
+              <Users className="w-[18px] h-[18px]" />
               {t('admin.sidebar.inscriptions')}
             </NavLink>
-            <NavLink
-              to="/admin/payments"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-
-              <CreditCard className="w-5 h-5" />
+            <NavLink to="/admin/payments" onClick={closeSidebar} className={navClass}>
+              <CreditCard className="w-[18px] h-[18px]" />
               {t('admin.sidebar.payments')}
             </NavLink>
-            <NavLink
-              to="/admin/finances"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <TrendingUp className="w-5 h-5" />
+            <NavLink to="/admin/finances" onClick={closeSidebar} className={navClass}>
+              <TrendingUp className="w-[18px] h-[18px]" />
               {t('admin.sidebar.finances')}
             </NavLink>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              {t('admin.sidebar.shop')}
-            </p>
-            <NavLink
-              to="/admin/shop/orders"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <CreditCard className="w-5 h-5" />
+          <div className={sectionWrap}>
+            <p className={sectionLabel}>{t('admin.sidebar.shop')}</p>
+            <NavLink to="/admin/shop/orders" onClick={closeSidebar} className={navClass}>
+              <CreditCard className="w-[18px] h-[18px]" />
               {t('admin.sidebar.orders')}
             </NavLink>
-            <NavLink
-              to="/admin/shop/inventory"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <LayoutDashboard className="w-5 h-5" />
+            <NavLink to="/admin/shop/inventory" onClick={closeSidebar} className={navClass}>
+              <LayoutDashboard className="w-[18px] h-[18px]" />
               {t('admin.sidebar.inventory')}
             </NavLink>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              {t('admin.sidebar.communication')}
-            </p>
-            <NavLink
-              to="/admin/contactes"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <MessageSquare className="w-5 h-5" />
+          <div className={sectionWrap}>
+            <p className={sectionLabel}>{t('admin.sidebar.communication')}</p>
+            <NavLink to="/admin/contactes" onClick={closeSidebar} className={navClass}>
+              <MessageSquare className="w-[18px] h-[18px]" />
               {t('admin.sidebar.contact_messages')}
             </NavLink>
-            <NavLink
-              to="/admin/notifications"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Bell className="w-5 h-5" />
+            <NavLink to="/admin/notifications" onClick={closeSidebar} className={navClass}>
+              <Bell className="w-[18px] h-[18px]" />
               {t('admin.sidebar.notifications')}
             </NavLink>
-            <NavLink
-              to="/admin/banner"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Megaphone className="w-5 h-5" />
+            <NavLink to="/admin/banner" onClick={closeSidebar} className={navClass}>
+              <Megaphone className="w-[18px] h-[18px]" />
               {t('admin.sidebar.banner')}
             </NavLink>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              {t('admin.sidebar.content')}
-            </p>
-            <NavLink
-              to="/admin/activities"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Calendar className="w-5 h-5" />
+          <div className={sectionWrap}>
+            <p className={sectionLabel}>{t('admin.sidebar.content')}</p>
+            <NavLink to="/admin/activities" onClick={closeSidebar} className={navClass}>
+              <Calendar className="w-[18px] h-[18px]" />
               {t('admin.sidebar.activities')}
             </NavLink>
-            <NavLink
-              to="/admin/news"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Newspaper className="w-5 h-5" />
+            <NavLink to="/admin/news" onClick={closeSidebar} className={navClass}>
+              <Newspaper className="w-[18px] h-[18px]" />
               {t('admin.sidebar.news')}
             </NavLink>
-            <NavLink
-              to="/admin/projects"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <FolderHeart className="w-5 h-5" />
+            <NavLink to="/admin/projects" onClick={closeSidebar} className={navClass}>
+              <FolderHeart className="w-[18px] h-[18px]" />
               {t('admin.sidebar.projects')}
             </NavLink>
-            <NavLink
-              to="/admin/calendar"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <CalendarRange className="w-5 h-5" />
+            <NavLink to="/admin/calendar" onClick={closeSidebar} className={navClass}>
+              <CalendarRange className="w-[18px] h-[18px]" />
               {t('admin.sidebar.calendar')}
             </NavLink>
-            <NavLink
-              to="/admin/tasks"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <ListTodo className="w-5 h-5" />
+            <NavLink to="/admin/tasks" onClick={closeSidebar} className={navClass}>
+              <ListTodo className="w-[18px] h-[18px]" />
               {t('admin.sidebar.tasks')}
             </NavLink>
-            <NavLink
-              to="/admin/short-links"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Link2 className="w-5 h-5" />
+            <NavLink to="/admin/short-links" onClick={closeSidebar} className={navClass}>
+              <Link2 className="w-[18px] h-[18px]" />
               Enlaces cortos
             </NavLink>
-            <NavLink
-              to="/admin/acollida"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Users className="w-5 h-5" />
+            <NavLink to="/admin/acollida" onClick={closeSidebar} className={navClass}>
+              <Users className="w-[18px] h-[18px]" />
               {t('admin.sidebar.acollida')}
             </NavLink>
-            <NavLink
-              to="/admin/menjador"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Utensils className="w-5 h-5" />
+            <NavLink to="/admin/menjador" onClick={closeSidebar} className={navClass}>
+              <Utensils className="w-[18px] h-[18px]" />
               {t('admin.sidebar.menjador', 'Gestión Menjador')}
             </NavLink>
-            <NavLink
-              to="/admin/documents"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <FolderHeart className="w-5 h-5" />
+            <NavLink to="/admin/documents" onClick={closeSidebar} className={navClass}>
+              <FolderHeart className="w-[18px] h-[18px]" />
               Documentos
             </NavLink>
-            <NavLink
-              to="/admin/forms"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <FileText className="w-5 h-5" />
+            <NavLink to="/admin/forms" onClick={closeSidebar} className={navClass}>
+              <FileText className="w-[18px] h-[18px]" />
               {t('forms.admin.title')}
             </NavLink>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              {t('admin.sidebar.system')}
-            </p>
-            <NavLink
-              to="/admin/board"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <UserSquare2 className="w-5 h-5" />
+          <div className={sectionWrap}>
+            <p className={sectionLabel}>{t('admin.sidebar.system')}</p>
+            <NavLink to="/admin/board" onClick={closeSidebar} className={navClass}>
+              <UserSquare2 className="w-[18px] h-[18px]" />
               Sobre AFA / Junta
             </NavLink>
-            <NavLink
-              to="/admin/settings"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <Settings className="w-5 h-5" />
+            <NavLink to="/admin/settings" onClick={closeSidebar} className={navClass}>
+              <Settings className="w-[18px] h-[18px]" />
               Configuració General
             </NavLink>
-            <NavLink
-              to="/admin/observability"
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-              `}
-            >
-              <HistoryIcon className="w-5 h-5" />
+            <NavLink to="/admin/observability" onClick={closeSidebar} className={navClass}>
+              <HistoryIcon className="w-[18px] h-[18px]" />
               {t('admin.sidebar.observability')}
             </NavLink>
           </div>
         </nav>
 
-        <div className="flex-shrink-0 p-4 border-t border-slate-100 bg-slate-50/50">
-          <div className="flex items-center gap-3 px-2 mb-3">
-            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase">
+        <div className="flex-shrink-0 p-3 border-t border-neutral-800">
+          <div className="flex items-center gap-3 px-1 mb-3">
+            <div className="w-8 h-8 rounded-md bg-neutral-700 text-neutral-100 flex items-center justify-center font-semibold text-xs uppercase">
               {profile?.full_name?.substring(0, 2) || user?.email?.substring(0, 2)}
             </div>
             <div className="overflow-hidden">
-              <p className="text-sm font-medium text-slate-900 truncate">{profile?.full_name || user?.email}</p>
-              <p className="text-xs text-slate-500 capitalize">{profile?.role || 'User'}</p>
+              <p className="text-[13px] font-medium text-neutral-100 truncate">{profile?.full_name || user?.email}</p>
+              <p className="text-xs text-neutral-500 capitalize">{profile?.role || 'User'}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-white hover:text-red-600 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-neutral-800 rounded-md text-[13px] font-medium text-neutral-400 hover:bg-neutral-800 hover:text-red-400 transition-colors"
           >
             <LogOut className="w-4 h-4" />
             {t('admin.sidebar.logout')}
@@ -439,19 +244,19 @@ export function AdminLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <header className="bg-white border-b border-slate-200 lg:hidden px-4 h-16 flex items-center justify-between">
+        <header className="bg-white border-b border-neutral-200 lg:hidden px-4 h-14 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 -ml-2 text-slate-500"
+            className="p-2 -ml-2 text-neutral-500"
           >
             <Menu className="w-6 h-6" />
           </button>
-          <span className="font-semibold text-slate-900">{t('admin.title')}</span>
+          <span className="font-semibold text-neutral-900">{t('admin.title')}</span>
           <div className="w-8" /> {/* Spacer */}
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-slate-50 p-4 lg:p-8">
+        <main className="flex-1 overflow-auto bg-neutral-100 p-4 lg:p-8">
           <Outlet />
         </main>
       </div>
