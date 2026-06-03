@@ -415,18 +415,18 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
           <div className="pt-2">
             <label className="block text-sm font-bold text-gray-800 mb-2">Imagen de cabecera (opcional)</label>
             {headerImageUrl ? (
-              <div className="relative w-full h-40 rounded-xl overflow-hidden border border-gray-200 group">
+              <div className="relative w-full h-40 rounded-lg overflow-hidden border border-gray-200 group">
                 <img src={headerImageUrl} alt="Header" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setValue('header_image_url', '')}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50">
                 {isUploadingHeader ? (
                   <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
                 ) : (
@@ -596,7 +596,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             <input
                               {...register(`fields_schema.${index}.label` as const)}
                               placeholder="Ej: Dades de l'infant, Informació addicional..."
-                              className="block w-full rounded-xl border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2.5 px-4 border text-gray-800 font-semibold"
+                              className="block w-full rounded-lg border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2.5 px-4 border text-gray-800 font-semibold"
                             />
                             {errors.fields_schema?.[index]?.label && (
                               <span className="text-red-500 text-xs mt-1 block font-bold">
@@ -625,7 +625,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                               {...register(`fields_schema.${index}.label` as const)}
                               placeholder="Escribe aquí tu pregunta..."
                               rows={2}
-                              className="mt-1 block w-full rounded-xl border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-3 px-4 border text-gray-800 font-medium transition-all"
+                              className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-3 px-4 border text-gray-800 font-medium transition-all"
                             />
                             {errors.fields_schema?.[index]?.label && (
                               <span className="text-red-500 text-xs mt-1 block font-bold">
@@ -857,70 +857,70 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                 <button
                   type="button"
                   onClick={() => handleAddField('text')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Texto corto
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('long_text')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Párrafo
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('select')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Desplegable
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('radio')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Selección única
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('checkbox')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Casillas
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('date')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Fecha
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('email')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Email
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('phone')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Teléfono
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('number')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Número
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('weekdays')}
-                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-xl border border-gray-200 flex items-center transition shadow-sm"
+                  className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Días de la semana
                 </button>
@@ -931,7 +931,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                 <button
                   type="button"
                   onClick={() => handleAddField('file')}
-                  className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-bold rounded-xl border border-purple-200 flex items-center transition shadow-sm"
+                  className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-bold rounded-lg border border-purple-200 flex items-center transition shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-2" /> Carga de archivos
                 </button>
@@ -942,7 +942,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                 <button
                   type="button"
                   onClick={() => handleAddField('section_header')}
-                  className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-bold rounded-xl border border-indigo-200 flex items-center transition shadow-sm"
+                  className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-bold rounded-lg border border-indigo-200 flex items-center transition shadow-sm"
                 >
                   <Minus className="w-4 h-4 mr-2" /> Separador / sección
                 </button>

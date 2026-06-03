@@ -145,13 +145,13 @@ export function PaymentsPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.payments.title')}</h1>
-          <p className="text-slate-500">{t('admin.payments.subtitle')}</p>
+          <h1 className="text-2xl font-bold text-neutral-900">{t('admin.payments.title')}</h1>
+          <p className="text-neutral-500">{t('admin.payments.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => ExportService.exportPaymentsCSV(payments, 'pagaments')}
-            className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
+            className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors text-sm font-medium"
           >
             <Download className="w-4 h-4" /> CSV
           </button>
@@ -166,36 +166,36 @@ export function PaymentsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="text-sm font-medium text-slate-500">{t('admin.payments.stats.total')}</div>
-          <div className="text-3xl font-bold text-slate-900 mt-2">{totalAmount.toFixed(2)}€</div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
+          <div className="text-sm font-medium text-neutral-500">{t('admin.payments.stats.total')}</div>
+          <div className="text-3xl font-bold text-neutral-900 mt-2">{totalAmount.toFixed(2)}€</div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="text-sm font-medium text-slate-500">{t('admin.payments.stats.paid')}</div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
+          <div className="text-sm font-medium text-neutral-500">{t('admin.payments.stats.paid')}</div>
           <div className="text-3xl font-bold text-green-600 mt-2">{paidAmount.toFixed(2)}€</div>
-          <div className="text-xs text-slate-400 mt-1">{t('admin.payments.stats.percentage_hint', { percentage: ((paidAmount / totalAmount || 0) * 100).toFixed(0) })}</div>
+          <div className="text-xs text-neutral-400 mt-1">{t('admin.payments.stats.percentage_hint', { percentage: ((paidAmount / totalAmount || 0) * 100).toFixed(0) })}</div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="text-sm font-medium text-slate-500">{t('admin.payments.stats.pending')}</div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
+          <div className="text-sm font-medium text-neutral-500">{t('admin.payments.stats.pending')}</div>
           <div className="text-3xl font-bold text-amber-600 mt-2">{pendingAmount.toFixed(2)}€</div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-neutral-200 flex flex-wrap gap-4 items-center">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
           <input
             type="text"
             placeholder={t('admin.payments.search_placeholder')}
-            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none"
+            className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary outline-none"
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
           />
         </div>
 
         <select
-          className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
+          className="px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
           value={monthFilter}
           onChange={e => setMonthFilter(e.target.value)}
         >
@@ -208,7 +208,7 @@ export function PaymentsPage() {
         </select>
 
         <select
-          className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
+          className="px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
         >
@@ -220,38 +220,38 @@ export function PaymentsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
         <table className="w-full text-left">
-          <thead className="bg-slate-50 border-b border-slate-200">
+          <thead className="bg-neutral-50 border-b border-neutral-200">
             <tr>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.student')}</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.concept')}</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.amount')}</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.due_date')}</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.status')}</th>
-              <th className="px-6 py-4 font-semibold text-slate-700 text-sm">{t('admin.payments.table.actions')}</th>
+              <th className="px-6 py-4 font-semibold text-neutral-700 text-sm">{t('admin.payments.table.student')}</th>
+              <th className="px-6 py-4 font-semibold text-neutral-700 text-sm">{t('admin.payments.table.concept')}</th>
+              <th className="px-6 py-4 font-semibold text-neutral-700 text-sm">{t('admin.payments.table.amount')}</th>
+              <th className="px-6 py-4 font-semibold text-neutral-700 text-sm">{t('admin.payments.table.due_date')}</th>
+              <th className="px-6 py-4 font-semibold text-neutral-700 text-sm">{t('admin.payments.table.status')}</th>
+              <th className="px-6 py-4 font-semibold text-neutral-700 text-sm">{t('admin.payments.table.actions')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-neutral-100">
             {filteredPayments.map((payment) => {
               const st = getStatus(payment);
               return (
-                <tr key={payment.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={payment.id} className="hover:bg-neutral-50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-slate-900">{payment.student_name} {payment.student_surname}</div>
-                    <div className="text-xs text-slate-500">{payment.course}</div>
+                    <div className="font-medium text-neutral-900">{payment.student_name} {payment.student_surname}</div>
+                    <div className="text-xs text-neutral-500">{payment.course}</div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
+                  <td className="px-6 py-4 text-sm text-neutral-600">
                     <div className="flex flex-wrap gap-1">
                       {payment.activities && Array.isArray(payment.activities) && payment.activities.map(act => (
-                        <span key={act} className="text-xs bg-slate-100 px-1 rounded">{act}</span>
+                        <span key={act} className="text-xs bg-neutral-100 px-1 rounded">{act}</span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                  <td className="px-6 py-4 text-sm font-medium text-neutral-900">
                     {Number(payment.amount).toFixed(2)}€
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
+                  <td className="px-6 py-4 text-sm text-neutral-600">
                     {new Date(payment.due_date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
@@ -293,7 +293,7 @@ export function PaymentsPage() {
           </tbody>
         </table>
         {filteredPayments.length === 0 && (
-          <div className="p-12 text-center text-slate-500">
+          <div className="p-12 text-center text-neutral-500">
             {t('admin.payments.table.no_results')}
           </div>
         )}

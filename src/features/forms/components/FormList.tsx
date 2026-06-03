@@ -221,7 +221,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
         <>
           <div className="space-y-3 md:hidden">
             {filteredForms.map((form) => (
-              <div key={form.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div key={form.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0">
                     <div className="text-sm font-bold text-gray-900 truncate">{resolveTemplateText(form, activeLang).title}</div>
@@ -311,7 +311,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
             ))}
           </div>
 
-          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>

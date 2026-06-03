@@ -99,7 +99,7 @@ export default function InscriptionsPage() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={fetchInscriptions}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-white hover:bg-slate-50 h-9 px-4 py-2 text-slate-700"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-white hover:bg-neutral-50 h-9 px-4 py-2 text-neutral-700"
             title={t('admin.inscriptions.reload_tooltip')}
           >
             <RefreshCw className="h-4 w-4" />
@@ -186,14 +186,14 @@ export default function InscriptionsPage() {
                     <td className="px-4 py-3">
                       <div className="space-y-2">
                         {Array.isArray(inscription.students) && inscription.students.map((student: InscriptionStudent, idx: number) => (
-                          <div key={idx} className={`p-2 rounded border ${student.suspended ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
-                            <p className="font-medium text-xs text-slate-700 flex justify-between">
-                              <span>{student.name} {student.surname} <span className="text-slate-400">({student.course})</span></span>
+                          <div key={idx} className={`p-2 rounded border ${student.suspended ? 'bg-red-50 border-red-100' : 'bg-neutral-50 border-neutral-100'}`}>
+                            <p className="font-medium text-xs text-neutral-700 flex justify-between">
+                              <span>{student.name} {student.surname} <span className="text-neutral-400">({student.course})</span></span>
                               {student.suspended && <span className="text-[10px] text-red-600 font-bold uppercase">{t('admin.inscriptions.suspended_badge')}</span>}
                             </p>
                             <div className="mt-1 flex flex-wrap gap-1">
                               {student.activities && student.activities.map((act: string, k: number) => (
-                                <span key={k} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-white border border-slate-200 text-slate-600">
+                                <span key={k} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-white border border-neutral-200 text-neutral-600">
                                   {act}
                                 </span>
                               ))}

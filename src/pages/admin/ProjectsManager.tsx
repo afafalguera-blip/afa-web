@@ -198,8 +198,8 @@ export default function ProjectsManager() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : filteredProjects.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500">
-          <FolderHeart className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+        <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center text-neutral-500">
+          <FolderHeart className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
           {searchText || statusFilter !== 'all' ? t('admin.projects.no_results') : t('admin.projects.no_projects')}
         </div>
       ) : (

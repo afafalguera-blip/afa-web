@@ -61,7 +61,7 @@ export default function NewsEditorPage() {
     content: activeContent,
     editorProps: {
       attributes: {
-        class: 'min-h-[420px] px-6 py-5 text-lg leading-relaxed text-slate-700 focus:outline-none prose prose-slate max-w-none'
+        class: 'min-h-[420px] px-6 py-5 text-lg leading-relaxed text-neutral-700 focus:outline-none prose prose-slate max-w-none'
       }
     },
     onUpdate: ({ editor: editorInstance }) => {
@@ -258,26 +258,26 @@ export default function NewsEditorPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 mb-8 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
-          <button type="button" onClick={handleBack} className="p-3 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 shadow-sm transition-all text-slate-500 active:scale-95">
+          <button type="button" onClick={handleBack} className="p-3 bg-white hover:bg-neutral-50 rounded-lg border border-neutral-200 shadow-sm transition-all text-neutral-500 active:scale-95">
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 leading-none mb-1">
+            <h1 className="text-2xl font-black text-neutral-900 leading-none mb-1">
               {id === 'new' ? 'Nova Notícia' : 'Editar Notícia'}
             </h1>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">URL:</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">URL:</span>
               <code className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-lg">/noticies/{formData.slug || '...'}</code>
             </div>
           </div>
         </div>
 
         <div className="flex gap-3 w-full md:w-auto">
-          <button type="button" onClick={() => setShowPreview((prev) => !prev)} className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-black text-xs uppercase tracking-wider">
+          <button type="button" onClick={() => setShowPreview((prev) => !prev)} className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-neutral-200 bg-white text-neutral-700 font-black text-xs uppercase tracking-wider">
             {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {showPreview ? 'Ocultar Preview' : 'Ver Preview'}
           </button>
-          <button type="button" onClick={handleSave} disabled={saving} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50">
+          <button type="button" onClick={handleSave} disabled={saving} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-lg font-black shadow-sm shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50">
             <Save className="w-5 h-5" />
             {saving ? t('common.saving') : t('common.save')}
           </button>
@@ -287,17 +287,17 @@ export default function NewsEditorPage() {
       {/* Content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden border-b-4 border-b-slate-100">
+          <div className="bg-white rounded-[2.5rem] border border-neutral-200 shadow-sm overflow-hidden border-b-4 border-b-neutral-100">
             {/* Language switcher + translate */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-slate-100 bg-slate-50/50">
-              <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-inner">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-neutral-100 bg-neutral-50/50">
+              <div className="flex bg-white p-1 rounded-lg border border-neutral-200 shadow-inner">
                 {AVAILABLE_LANGS.map((lang) => (
-                  <button key={lang} type="button" onClick={() => setActiveLang(lang)} className={`px-5 py-2 rounded-lg text-xs font-black transition-all ${activeLang === lang ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <button key={lang} type="button" onClick={() => setActiveLang(lang)} className={`px-5 py-2 rounded-lg text-xs font-black transition-all ${activeLang === lang ? 'bg-blue-600 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}>
                     {lang.toUpperCase()}
                   </button>
                 ))}
               </div>
-              <button type="button" onClick={handleAutoTranslate} disabled={isTranslating} className="flex items-center gap-2 px-6 py-2 bg-amber-500 text-white rounded-xl text-xs font-black hover:bg-amber-600 transition-all shadow-lg shadow-amber-100 disabled:opacity-50">
+              <button type="button" onClick={handleAutoTranslate} disabled={isTranslating} className="flex items-center gap-2 px-6 py-2 bg-amber-500 text-white rounded-lg text-xs font-black hover:bg-amber-600 transition-all shadow-sm shadow-amber-100 disabled:opacity-50">
                 <Wand2 className={`w-4 h-4 ${isTranslating ? 'animate-pulse' : ''}`} />
                 {isTranslating ? 'Traduint...' : 'Auto-traduir'}
               </button>
@@ -306,18 +306,18 @@ export default function NewsEditorPage() {
             {/* Title, excerpt, body */}
             <div className="p-8 sm:p-12 space-y-8">
               <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Títol de la notícia ({activeLang})</label>
-                <input type="text" value={formData.translations[activeLang]?.title || ''} onChange={(e) => updateTranslationField(activeLang, 'title', e.target.value)} className="w-full px-0 text-4xl sm:text-5xl font-black text-slate-900 border-none focus:ring-0 placeholder:text-slate-200 bg-transparent leading-tight" placeholder="Escriu un títol impactant..." />
+                <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-3">Títol de la notícia ({activeLang})</label>
+                <input type="text" value={formData.translations[activeLang]?.title || ''} onChange={(e) => updateTranslationField(activeLang, 'title', e.target.value)} className="w-full px-0 text-4xl sm:text-5xl font-black text-neutral-900 border-none focus:ring-0 placeholder:text-neutral-200 bg-transparent leading-tight" placeholder="Escriu un títol impactant..." />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Resum o entradilla</label>
-                <textarea value={formData.translations[activeLang]?.excerpt || ''} onChange={(e) => updateTranslationField(activeLang, 'excerpt', e.target.value)} className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-3xl focus:ring-0 focus:border-blue-200 outline-none transition-all resize-none text-lg text-slate-600 font-medium leading-relaxed italic" rows={3} placeholder="Un breu resum que convidi a llegir més..." />
+                <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-3">Resum o entradilla</label>
+                <textarea value={formData.translations[activeLang]?.excerpt || ''} onChange={(e) => updateTranslationField(activeLang, 'excerpt', e.target.value)} className="w-full px-6 py-5 bg-neutral-50 border-2 border-neutral-100 rounded-3xl focus:ring-0 focus:border-blue-200 outline-none transition-all resize-none text-lg text-neutral-600 font-medium leading-relaxed italic" rows={3} placeholder="Un breu resum que convidi a llegir més..." />
               </div>
 
               <div className="space-y-4">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Cos de la notícia</label>
-                <div className="rounded-3xl border-2 border-slate-100 overflow-hidden">
+                <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-1">Cos de la notícia</label>
+                <div className="rounded-3xl border-2 border-neutral-100 overflow-hidden">
                   <EditorToolbar editor={editor} />
                   <EditorContent editor={editor} />
                 </div>

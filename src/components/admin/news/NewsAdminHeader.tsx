@@ -13,17 +13,17 @@ export function NewsAdminHeader({ onRefresh, onCreate, loading }: NewsAdminHeade
     return (
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
                     {t('admin.news.title')}
                 </h1>
-                <p className="text-slate-500">
+                <p className="text-neutral-500">
                     {t('admin.news.subtitle')}
                 </p>
             </div>
             <div className="flex gap-2">
                 <button
                     onClick={onRefresh}
-                    className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    className="p-2 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
                     title={t('common.refresh')}
                 >
                     <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />

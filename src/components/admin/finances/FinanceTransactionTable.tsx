@@ -31,30 +31,30 @@ export function FinanceTransactionTable({
     });
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
             {/* Table Controls */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="p-4 border-b border-neutral-100 dark:border-neutral-700 flex flex-col sm:flex-row gap-4 justify-between items-center bg-neutral-50/50 dark:bg-neutral-800/50">
                 <div className="relative w-full sm:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
                     <input
                         type="text"
                         placeholder={t('admin.finances.search_placeholder', 'Cerca per descripció o categoria...')}
-                        className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        className="w-full pl-10 pr-4 py-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
                     />
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <Filter className="text-slate-400 w-4 h-4 mr-1" />
-                    <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl w-full sm:w-auto">
+                    <Filter className="text-neutral-400 w-4 h-4 mr-1" />
+                    <div className="flex bg-neutral-100 dark:bg-neutral-900 p-1 rounded-lg w-full sm:w-auto">
                         {(['all', 'income', 'expense'] as const).map((type) => (
                             <button
                                 key={type}
                                 onClick={() => onFilterChange(type)}
                                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${filterType === type
-                                        ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                        ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                        : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
                                     }`}
                             >
                                 {t(`admin.finances.filter_${type}`, type.toUpperCase())}
@@ -67,7 +67,7 @@ export function FinanceTransactionTable({
             {/* Table content */}
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                    <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-800 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
+                    <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 dark:bg-neutral-800 dark:text-neutral-400 border-b border-neutral-100 dark:border-neutral-700">
                         <tr>
                             <th className="px-6 py-4 font-bold">{t('admin.finances.date', 'Data')}</th>
                             <th className="px-6 py-4 font-bold">{t('admin.finances.description', 'Descripció')}</th>
@@ -76,30 +76,30 @@ export function FinanceTransactionTable({
                             <th className="px-6 py-4 font-bold text-center">{t('admin.finances.document', 'Doc')}</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                    <tbody className="divide-y divide-neutral-100 dark:divide-neutral-700">
                         {loading ? (
                             Array.from({ length: 5 }).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td colSpan={5} className="px-6 py-4 h-12 bg-slate-50/50 dark:bg-slate-800/50" />
+                                    <td colSpan={5} className="px-6 py-4 h-12 bg-neutral-50/50 dark:bg-neutral-800/50" />
                                 </tr>
                             ))
                         ) : filteredTransactions.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                                <td colSpan={5} className="px-6 py-12 text-center text-neutral-500 dark:text-neutral-400">
                                     {t('admin.finances.no_results', 'No s\'han trobat transaccions.')}
                                 </td>
                             </tr>
                         ) : (
                             filteredTransactions.map((tx) => (
-                                <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                                <tr key={tx.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-700/50 transition-colors">
+                                    <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
                                         {format(new Date(tx.date), 'dd MMM yyyy', { locale: ca })}
                                     </td>
-                                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
+                                    <td className="px-6 py-4 font-semibold text-neutral-900 dark:text-white">
                                         {tx.description}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600">
                                             {tx.category}
                                         </span>
                                     </td>
@@ -119,7 +119,7 @@ export function FinanceTransactionTable({
                                                 <FileText className="w-4 h-4" />
                                             </a>
                                         ) : (
-                                            <span className="text-slate-300 dark:text-slate-600">-</span>
+                                            <span className="text-neutral-300 dark:text-neutral-600">-</span>
                                         )}
                                     </td>
                                 </tr>

@@ -16,21 +16,21 @@ export function HomepageSettings({ homepage, setHomepage }: HomepageSettingsProp
     ];
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-            <div className="border-b border-slate-50 dark:border-slate-700 pb-4">
-                <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+        <div className="bg-white dark:bg-neutral-800 rounded-3xl p-8 shadow-sm border border-neutral-100 dark:border-neutral-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
+            <div className="border-b border-neutral-50 dark:border-neutral-700 pb-4">
+                <h3 className="text-xl font-bold text-neutral-800 dark:text-white flex items-center gap-2">
                     <LayoutDashboard size={20} className="text-primary" />
                     Pàgina d'Inici
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">Configura quants elements es mostren a cada secció de la home.</p>
+                <p className="text-xs text-neutral-500 mt-1">Configura quants elements es mostren a cada secció de la home.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {fields.map(({ key, label, description, min, max }) => (
-                    <div key={key} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700 space-y-3">
+                    <div key={key} className="p-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-100 dark:border-neutral-700 space-y-3">
                         <div>
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">{label}</label>
-                            <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+                            <label className="text-sm font-bold text-neutral-700 dark:text-neutral-300">{label}</label>
+                            <p className="text-xs text-neutral-400 mt-0.5">{description}</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <input
@@ -47,17 +47,17 @@ export function HomepageSettings({ homepage, setHomepage }: HomepageSettingsProp
                 ))}
             </div>
 
-            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700 space-y-3">
+            <div className="p-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-100 dark:border-neutral-700 space-y-3">
                 <div>
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">URL Acta Assemblea (PDF)</label>
-                    <p className="text-xs text-slate-400 mt-0.5">Enllaç al PDF de l'acta d'assemblea que es mostra a la home.</p>
+                    <label className="text-sm font-bold text-neutral-700 dark:text-neutral-300">URL Acta Assemblea (PDF)</label>
+                    <p className="text-xs text-neutral-400 mt-0.5">Enllaç al PDF de l'acta d'assemblea que es mostra a la home.</p>
                 </div>
                 <input
                     type="url"
                     value={homepage.assemblea_pdf_url || ''}
                     onChange={(e) => setHomepage({ ...homepage, assemblea_pdf_url: e.target.value })}
                     placeholder="https://..."
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
             </div>
         </div>

@@ -68,7 +68,7 @@ export function ImageUpload({
   return (
     <div className={`space-y-4 ${className}`}>
       {value ? (
-        <div className="relative group aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+        <div className="relative group aspect-video rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50">
           <img 
             src={value} 
             alt="Preview" 
@@ -78,7 +78,7 @@ export function ImageUpload({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 bg-white rounded-full text-slate-700 hover:bg-slate-100 transition-colors"
+              className="p-2 bg-white rounded-full text-neutral-700 hover:bg-neutral-100 transition-colors"
               title={t('admin.editor.change_image')}
             >
               <Upload className="w-5 h-5" />
@@ -98,7 +98,7 @@ export function ImageUpload({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="w-full aspect-video border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-blue-500 hover:bg-blue-50/30 transition-all text-slate-500 disabled:opacity-50"
+          className="w-full aspect-video border-2 border-dashed border-neutral-300 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-blue-500 hover:bg-blue-50/30 transition-all text-neutral-500 disabled:opacity-50"
         >
           {uploading ? (
             <>
@@ -107,14 +107,14 @@ export function ImageUpload({
             </>
           ) : (
             <>
-              <div className="p-3 bg-slate-100 rounded-full">
-                <ImageIcon className="w-6 h-6 text-slate-400" />
+              <div className="p-3 bg-neutral-100 rounded-full">
+                <ImageIcon className="w-6 h-6 text-neutral-400" />
               </div>
               <div className="text-center">
                 <span className="text-sm font-medium text-blue-600">
                   {t('admin.editor.upload_image')}
                 </span>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-neutral-400 mt-1">
                   {t('admin.editor.image_hint')}
                 </p>
               </div>

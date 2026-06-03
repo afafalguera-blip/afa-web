@@ -106,15 +106,15 @@ export function InscriptionEditModal({ inscription, onClose, onSave }: Inscripti
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+        className="bg-white w-full max-w-lg rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
-          <h3 className="text-xl font-bold text-slate-800">Editar Inscripció</h3>
+        <div className="flex items-center justify-between p-6 border-b border-neutral-100 bg-neutral-50/50">
+          <h3 className="text-xl font-bold text-neutral-800">Editar Inscripció</h3>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-200 rounded-full transition text-slate-500"
+            className="p-2 hover:bg-neutral-200 rounded-full transition text-neutral-500"
           >
             <X className="w-5 h-5" />
           </button>
@@ -125,21 +125,21 @@ export function InscriptionEditModal({ inscription, onClose, onSave }: Inscripti
           {/* Name fields */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Nom</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Nom</label>
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Cognoms</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Cognoms</label>
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 value={formData.surname}
                 onChange={(e) => handleChange('surname', e.target.value)}
               />
@@ -148,10 +148,10 @@ export function InscriptionEditModal({ inscription, onClose, onSave }: Inscripti
 
           {/* Course */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Curs</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Curs</label>
             <select
               required
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               value={formData.course}
               onChange={(e) => handleChange('course', e.target.value)}
             >
@@ -167,21 +167,21 @@ export function InscriptionEditModal({ inscription, onClose, onSave }: Inscripti
           {/* Contact fields */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Telèfon Pares</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Telèfon Pares</label>
               <input
                 type="tel"
                 required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 value={formData.parent_phone}
                 onChange={(e) => handleChange('parent_phone', e.target.value)}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email Pares</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Email Pares</label>
               <input
                 type="email"
                 required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 value={formData.parent_email}
                 onChange={(e) => handleChange('parent_email', e.target.value)}
               />
@@ -190,17 +190,17 @@ export function InscriptionEditModal({ inscription, onClose, onSave }: Inscripti
 
           {/* Activities */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
               Activitats (separades par comes)
             </label>
             <input
               type="text"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               value={formData.activities}
               onChange={(e) => handleChange('activities', e.target.value)}
               placeholder="Ex: Futbol, Anglès"
             />
-            <p className="text-xs text-slate-500 mt-1">Introdueix les activitats exactes.</p>
+            <p className="text-xs text-neutral-500 mt-1">Introdueix les activitats exactes.</p>
           </div>
 
           {/* AFA Member */}
@@ -210,20 +210,20 @@ export function InscriptionEditModal({ inscription, onClose, onSave }: Inscripti
               id="afa_member"
               checked={formData.afa_member}
               onChange={(e) => handleChange('afa_member', e.target.checked)}
-              className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+              className="w-4 h-4 text-blue-600 rounded border-neutral-300 focus:ring-blue-500"
             />
-            <label htmlFor="afa_member" className="text-sm font-medium text-slate-700">
+            <label htmlFor="afa_member" className="text-sm font-medium text-neutral-700">
               Soci de l'AFA
             </label>
           </div>
         </form>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+        <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition"
+            className="px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-700 font-medium hover:bg-neutral-50 transition"
           >
             Cancel·lar
           </button>

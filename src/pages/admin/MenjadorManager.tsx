@@ -41,14 +41,14 @@ export default function MenjadorManager() {
     <div className="p-2 md:p-6 max-w-6xl mx-auto space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-neutral-800 flex items-center gap-2">
             <Utensils className="w-7 h-7 text-amber-600" /> Gestión Menjador
           </h1>
-          <p className="text-slate-500">Información del servicio, tarifas y menús mensuales.</p>
+          <p className="text-neutral-500">Información del servicio, tarifas y menús mensuales.</p>
         </div>
       </header>
 
-      <nav className="flex gap-2 border-b border-slate-200 overflow-x-auto">
+      <nav className="flex gap-2 border-b border-neutral-200 overflow-x-auto">
         <TabButton active={tab === 'info'} onClick={() => setTab('info')} icon={<Info size={16} />}>Información</TabButton>
         <TabButton active={tab === 'rates'} onClick={() => setTab('rates')} icon={<ListOrdered size={16} />}>Tarifas</TabButton>
         <TabButton active={tab === 'menus'} onClick={() => setTab('menus')} icon={<FileText size={16} />}>Menús</TabButton>
@@ -66,7 +66,7 @@ function TabButton({ active, onClick, icon, children }: { active: boolean; onCli
     <button
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-2 text-sm font-bold border-b-2 -mb-px transition-colors whitespace-nowrap ${
-        active ? 'border-amber-500 text-amber-700' : 'border-transparent text-slate-500 hover:text-slate-800'
+        active ? 'border-amber-500 text-amber-700' : 'border-transparent text-neutral-500 hover:text-neutral-800'
       }`}
     >
       {icon}
@@ -137,15 +137,15 @@ function InfoTab() {
   const block = config.translations[activeLang];
 
   return (
-    <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-5">
+    <section className="bg-white rounded-3xl border border-neutral-200 shadow-sm p-6 space-y-5">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+        <div className="flex gap-1 bg-neutral-100 p-1 rounded-lg">
           {(['ca', 'es', 'en'] as Lang[]).map(l => (
             <button
               key={l}
               onClick={() => setActiveLang(l)}
               className={`px-4 py-1.5 text-xs font-bold rounded-lg uppercase ${
-                activeLang === l ? 'bg-white text-slate-900 shadow' : 'text-slate-500 hover:text-slate-800'
+                activeLang === l ? 'bg-white text-neutral-900 shadow' : 'text-neutral-500 hover:text-neutral-800'
               }`}
             >
               {l}
@@ -157,7 +157,7 @@ function InfoTab() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2 disabled:opacity-50"
+            className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-bold flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? 'Guardando...' : <><Save className="w-4 h-4" /> Guardar</>}
           </button>
@@ -166,21 +166,21 @@ function InfoTab() {
 
       {error && <ErrorBanner message={error} />}
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-neutral-500">
         Edita los textos descriptivos del servicio de menjador. Cada idioma se guarda por separado.
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {FIELD_ROWS.map(({ key, rows }) => (
           <div key={key} className={key === 'intro' || key === 'how_to' ? 'lg:col-span-2' : ''}>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-1">
               {FIELD_LABELS[key]}
             </label>
             <textarea
               value={block[key]}
               onChange={e => handleChange(key, e.target.value)}
               rows={rows}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
               placeholder={FIELD_LABELS[key]}
             />
           </div>
@@ -269,19 +269,19 @@ function RatesTab() {
 
   return (
     <section className="space-y-6">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+      <div className="bg-white rounded-3xl border border-neutral-200 shadow-sm p-6">
         <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-800">Tarifas</h2>
-            <p className="text-xs text-slate-500">Distinguimos entre alumnado <strong>fijo</strong> (mig mes o més + 1 dia) y <strong>esporádico</strong> (días sueltos).</p>
+            <h2 className="text-lg font-bold text-neutral-800">Tarifas</h2>
+            <p className="text-xs text-neutral-500">Distinguimos entre alumnado <strong>fijo</strong> (mig mes o més + 1 dia) y <strong>esporádico</strong> (días sueltos).</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+            <div className="flex gap-1 bg-neutral-100 p-1 rounded-lg">
               {(['ca', 'es', 'en'] as Lang[]).map(l => (
                 <button
                   key={l}
                   onClick={() => setActiveLang(l)}
-                  className={`px-3 py-1 text-xs font-bold rounded-lg uppercase ${activeLang === l ? 'bg-white text-slate-900 shadow' : 'text-slate-500'}`}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg uppercase ${activeLang === l ? 'bg-white text-neutral-900 shadow' : 'text-neutral-500'}`}
                 >
                   {l}
                 </button>
@@ -291,7 +291,7 @@ function RatesTab() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2 disabled:opacity-50"
+              className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-bold flex items-center gap-2 disabled:opacity-50"
             >
               {saving ? 'Guardando...' : <><Save className="w-4 h-4" /> Guardar</>}
             </button>
@@ -311,7 +311,7 @@ function RatesTab() {
           onRemove={handleRemove}
         />
 
-        <div className="h-px bg-slate-100 my-6" />
+        <div className="h-px bg-neutral-100 my-6" />
 
         <RateGroup
           title="Alumnado esporádico"
@@ -347,8 +347,8 @@ function RateGroup({ title, subtitle, rates, rateType, activeLang, onAdd, onChan
     <div>
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="font-bold text-slate-700 text-sm">{title}</h3>
-          <p className="text-xs text-slate-400">{subtitle}</p>
+          <h3 className="font-bold text-neutral-700 text-sm">{title}</h3>
+          <p className="text-xs text-neutral-400">{subtitle}</p>
         </div>
         <button
           onClick={onAdd}
@@ -362,18 +362,18 @@ function RateGroup({ title, subtitle, rates, rateType, activeLang, onAdd, onChan
         {rates.map((rate, idx) => {
           if (rate.rate_type !== rateType) return null;
           return (
-            <div key={rate.id} className="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-3">
+            <div key={rate.id} className="bg-neutral-50 rounded-lg p-4 border border-neutral-100 space-y-3">
               <div className="flex items-start gap-3">
                 <input
                   type="text"
                   value={(rate[labelKey] as string) ?? ''}
                   onChange={e => onChange(idx, labelKey, e.target.value as AdminMenjadorRate[typeof labelKey])}
                   placeholder={`Etiqueta (${activeLang.toUpperCase()})`}
-                  className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+                  className="flex-1 px-3 py-2 bg-white border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
                 />
                 <button
                   onClick={() => onRemove(idx)}
-                  className="p-2 text-slate-400 hover:text-red-500"
+                  className="p-2 text-neutral-400 hover:text-red-500"
                   title="Eliminar"
                 >
                   <Trash2 size={16} />
@@ -382,29 +382,29 @@ function RateGroup({ title, subtitle, rates, rateType, activeLang, onAdd, onChan
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Precio Soci</label>
+                  <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Precio Soci</label>
                   <input
                     type="text"
                     value={rate.preu_soci}
                     onChange={e => onChange(idx, 'preu_soci', e.target.value)}
                     placeholder="Ej: 6,80 €/dia"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+                    className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Precio No Soci</label>
+                  <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Precio No Soci</label>
                   <input
                     type="text"
                     value={rate.preu_no_soci}
                     onChange={e => onChange(idx, 'preu_no_soci', e.target.value)}
                     placeholder="Ej: 7,20 €/dia"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+                    className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                <label className="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">
                   Nota ({activeLang.toUpperCase()})
                 </label>
                 <textarea
@@ -412,14 +412,14 @@ function RateGroup({ title, subtitle, rates, rateType, activeLang, onAdd, onChan
                   onChange={e => onChange(idx, noteKey, e.target.value as AdminMenjadorRate[typeof noteKey])}
                   placeholder="Aclaración opcional"
                   rows={2}
-                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+                  className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
                 />
               </div>
             </div>
           );
         })}
         {rates.filter(r => r.rate_type === rateType).length === 0 && (
-          <p className="text-sm text-slate-400 italic text-center py-4">Sin tarifas</p>
+          <p className="text-sm text-neutral-400 italic text-center py-4">Sin tarifas</p>
         )}
       </div>
     </div>
@@ -475,15 +475,15 @@ function MenusTab() {
   if (loading) return <Loading />;
 
   return (
-    <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-5">
+    <section className="bg-white rounded-3xl border border-neutral-200 shadow-sm p-6 space-y-5">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-lg font-bold text-slate-800">Menús publicados</h2>
-          <p className="text-xs text-slate-500">Sube los menús mensuales en PDF. Solo se muestran al público los activos.</p>
+          <h2 className="text-lg font-bold text-neutral-800">Menús publicados</h2>
+          <p className="text-xs text-neutral-500">Sube los menús mensuales en PDF. Solo se muestran al público los activos.</p>
         </div>
         <button
           onClick={() => setShowUpload(true)}
-          className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2"
+          className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg font-bold flex items-center gap-2"
         >
           <Upload className="w-4 h-4" /> Subir menú
         </button>
@@ -492,20 +492,20 @@ function MenusTab() {
       {error && <ErrorBanner message={error} />}
 
       {menus.length === 0 ? (
-        <div className="bg-slate-50 rounded-2xl p-8 text-center border border-dashed border-slate-200">
-          <FileText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-          <p className="text-slate-500 text-sm">No hay menús subidos.</p>
+        <div className="bg-neutral-50 rounded-lg p-8 text-center border border-dashed border-neutral-200">
+          <FileText className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
+          <p className="text-neutral-500 text-sm">No hay menús subidos.</p>
         </div>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-neutral-100">
           {menus.map(menu => (
             <li key={menu.id} className="flex items-center gap-3 py-3">
-              <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
                 <FileText className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-slate-800 text-sm truncate">{menu.title}</p>
-                <p className="text-xs text-slate-500">
+                <p className="font-bold text-neutral-800 text-sm truncate">{menu.title}</p>
+                <p className="text-xs text-neutral-500">
                   {formatPeriodAdmin(menu.month, menu.year)} · {(menu.size_bytes ?? 0) > 0 ? `${((menu.size_bytes ?? 0) / 1024 / 1024).toFixed(1)} MB · ` : ''}
                   <a href={proxyStorageUrl(menu.file_url)} target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline">Abrir PDF</a>
                 </p>
@@ -513,14 +513,14 @@ function MenusTab() {
               <button
                 onClick={() => handleToggle(menu)}
                 title={menu.is_active ? 'Ocultar al público' : 'Mostrar al público'}
-                className={`p-2 rounded-lg ${menu.is_active ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
+                className={`p-2 rounded-lg ${menu.is_active ? 'text-emerald-600 hover:bg-emerald-50' : 'text-neutral-400 hover:bg-neutral-100'}`}
               >
                 {menu.is_active ? <Eye size={18} /> : <EyeOff size={18} />}
               </button>
               <button
                 onClick={() => handleDelete(menu)}
                 title="Eliminar"
-                className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50"
+                className="p-2 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50"
               >
                 <Trash2 size={18} />
               </button>
@@ -610,8 +610,8 @@ function UploadMenuModal({ onClose, onUploaded }: { onClose: () => void; onUploa
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={uploading ? undefined : onClose} />
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 overflow-hidden">
+      <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" onClick={uploading ? undefined : onClose} />
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg z-10 overflow-hidden">
         <header className="bg-amber-500 text-white p-5">
           <h2 className="font-bold text-lg flex items-center gap-2">
             <Upload className="w-5 h-5" /> Subir menú
@@ -621,23 +621,23 @@ function UploadMenuModal({ onClose, onUploaded }: { onClose: () => void; onUploa
           {error && <ErrorBanner message={error} />}
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Título</label>
+            <label className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-1">Título</label>
             <input
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="Ej: Menú Mayo 2026"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Mes</label>
+              <label className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-1">Mes</label>
               <select
                 value={month}
                 onChange={e => setMonth(e.target.value ? Number(e.target.value) : '')}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+                className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
               >
                 <option value="">— Sin mes —</option>
                 {MONTH_NAMES_ES.map((name, i) => (
@@ -646,41 +646,41 @@ function UploadMenuModal({ onClose, onUploaded }: { onClose: () => void; onUploa
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Año</label>
+              <label className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-1">Año</label>
               <input
                 type="number"
                 min={2020}
                 max={2100}
                 value={year}
                 onChange={e => setYear(e.target.value ? Number(e.target.value) : '')}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
+                className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/30 text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Archivo PDF (máx. 15 MB)</label>
+            <label className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-1">Archivo PDF (máx. 15 MB)</label>
             <input
               type="file"
               accept="application/pdf"
               onChange={e => handleFile(e.target.files?.[0] ?? null)}
-              className="w-full text-sm text-slate-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200"
+              className="w-full text-sm text-neutral-700 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200"
             />
-            {file && <p className="text-xs text-slate-500 mt-1">{file.name} · {(file.size / 1024 / 1024).toFixed(2)} MB</p>}
+            {file && <p className="text-xs text-neutral-500 mt-1">{file.name} · {(file.size / 1024 / 1024).toFixed(2)} MB</p>}
           </div>
         </div>
-        <footer className="p-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+        <footer className="p-5 border-t border-neutral-100 flex justify-end gap-3 bg-neutral-50/50">
           <button
             onClick={onClose}
             disabled={uploading}
-            className="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+            className="px-4 py-2 rounded-lg text-sm font-bold text-neutral-600 hover:bg-neutral-100 disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={uploading || !file}
-            className="px-4 py-2 rounded-xl text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 rounded-lg text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50 flex items-center gap-2"
           >
             {uploading ? 'Subiendo...' : <><Upload className="w-4 h-4" /> Subir</>}
           </button>
@@ -703,7 +703,7 @@ function Loading() {
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="bg-red-50 text-red-800 p-4 rounded-xl flex items-center gap-3 border border-red-200">
+    <div className="bg-red-50 text-red-800 p-4 rounded-lg flex items-center gap-3 border border-red-200">
       <AlertCircle className="w-5 h-5 shrink-0" />
       <span className="text-sm">{message}</span>
     </div>

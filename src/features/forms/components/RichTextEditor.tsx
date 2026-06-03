@@ -38,7 +38,7 @@ function ToolbarButton({ title, active = false, onClick, icon }: ToolbarButtonPr
       title={title}
       onClick={onClick}
       className={`p-1.5 rounded-md transition-colors text-sm ${
-        active ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:bg-slate-100'
+        active ? 'bg-blue-100 text-blue-700' : 'text-neutral-500 hover:bg-neutral-100'
       }`}
     >
       {icon}
@@ -61,7 +61,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1 px-2 py-1.5 border-b border-slate-200 bg-slate-50">
+    <div className="flex flex-wrap items-center gap-1 px-2 py-1.5 border-b border-neutral-200 bg-neutral-50">
       <ToolbarButton
         title="Negrita"
         active={editor.isActive('bold')}
@@ -86,7 +86,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         onClick={() => editor.chain().focus().toggleStrike().run()}
         icon={<Strikethrough className="w-4 h-4" />}
       />
-      <div className="w-px h-5 bg-slate-200 mx-1" />
+      <div className="w-px h-5 bg-neutral-200 mx-1" />
       <ToolbarButton
         title="Encabezado 2"
         active={editor.isActive('heading', { level: 2 })}
@@ -99,7 +99,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         icon={<Heading3 className="w-4 h-4" />}
       />
-      <div className="w-px h-5 bg-slate-200 mx-1" />
+      <div className="w-px h-5 bg-neutral-200 mx-1" />
       <ToolbarButton
         title="Lista"
         active={editor.isActive('bulletList')}
@@ -112,7 +112,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         icon={<ListOrdered className="w-4 h-4" />}
       />
-      <div className="w-px h-5 bg-slate-200 mx-1" />
+      <div className="w-px h-5 bg-neutral-200 mx-1" />
       <ToolbarButton
         title="Enlace"
         active={editor.isActive('link')}
@@ -158,7 +158,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Escriu aquí...
   }, [value, editor]);
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+    <div className="border border-neutral-200 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
       <Toolbar editor={editor} />
       <EditorContent editor={editor} />
       <style>{`

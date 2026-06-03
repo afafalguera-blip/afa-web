@@ -30,19 +30,19 @@ export function FinanceTransactionModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-neutral-800 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-700 animate-in zoom-in-95 duration-200">
                 {/* Modal Header */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center bg-neutral-50/50 dark:bg-neutral-800/50">
                     <div>
-                        <h2 className="text-xl font-black text-slate-900 dark:text-white">
+                        <h2 className="text-xl font-black text-neutral-900 dark:text-white">
                             {t('admin.finances.new_transaction_title', 'Nova Transacció')}
                         </h2>
-                        <p className="text-xs text-slate-500">Registra un nou moviment econòmic</p>
+                        <p className="text-xs text-neutral-500">Registra un nou moviment econòmic</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-500"
+                        className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors text-neutral-500"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -53,10 +53,10 @@ export function FinanceTransactionModal({
                     {/* Type & Date Row */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                            <label className="text-xs font-bold text-neutral-500 uppercase ml-1 flex items-center gap-1.5">
                                 <CreditCard className="w-3 h-3" /> {t('admin.finances.type', 'Tipus')}
                             </label>
-                            <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                            <div className="flex bg-neutral-100 dark:bg-neutral-900 p-1 rounded-lg">
                                 {(['income', 'expense'] as const).map((type) => (
                                     <button
                                         key={type}
@@ -66,7 +66,7 @@ export function FinanceTransactionModal({
                                                 ? type === 'income'
                                                     ? 'bg-emerald-500 text-white shadow-sm'
                                                     : 'bg-rose-500 text-white shadow-sm'
-                                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                                : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
                                             }`}
                                     >
                                         {t(`admin.finances.${type}`, type.toUpperCase())}
@@ -75,14 +75,14 @@ export function FinanceTransactionModal({
                             </div>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                            <label className="text-xs font-bold text-neutral-500 uppercase ml-1 flex items-center gap-1.5">
                                 <Calendar className="w-3 h-3" /> {t('admin.finances.date', 'Data')}
                             </label>
                             <input
                                 type="date"
                                 lang={nativeDateLocale}
                                 required
-                                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                                className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                                 value={transaction.date}
                                 onChange={e => setTransaction({ ...transaction, date: e.target.value })}
                             />
@@ -91,14 +91,14 @@ export function FinanceTransactionModal({
 
                     {/* Description */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                        <label className="text-xs font-bold text-neutral-500 uppercase ml-1 flex items-center gap-1.5">
                             <Type className="w-3 h-3" /> {t('admin.finances.description_label', 'Descripció')}
                         </label>
                         <input
                             type="text"
                             required
                             placeholder="Ex: Pagament botiga, Subvenció AFA..."
-                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                            className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                             value={transaction.description}
                             onChange={e => setTransaction({ ...transaction, description: e.target.value })}
                         />
@@ -107,28 +107,28 @@ export function FinanceTransactionModal({
                     {/* Amount & Category Row */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                            <label className="text-xs font-bold text-neutral-500 uppercase ml-1 flex items-center gap-1.5">
                                 {transaction.type === 'income' ? '+' : '-'} {t('admin.finances.amount', 'Import (€)')}
                             </label>
                             <input
                                 type="number"
                                 step="0.01"
                                 required
-                                className={`w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-2 outline-none transition-all dark:text-white ${transaction.type === 'income' ? 'focus:ring-emerald-500' : 'focus:ring-rose-500'
+                                className={`w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2.5 text-sm font-bold focus:ring-2 outline-none transition-all dark:text-white ${transaction.type === 'income' ? 'focus:ring-emerald-500' : 'focus:ring-rose-500'
                                     }`}
                                 value={transaction.amount}
                                 onChange={e => setTransaction({ ...transaction, amount: Number(e.target.value) })}
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                            <label className="text-xs font-bold text-neutral-500 uppercase ml-1 flex items-center gap-1.5">
                                 <Tag className="w-3 h-3" /> {t('admin.finances.category', 'Categoria')}
                             </label>
                             <input
                                 type="text"
                                 list="categories"
                                 required
-                                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
+                                className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white"
                                 value={transaction.category}
                                 onChange={e => setTransaction({ ...transaction, category: e.target.value })}
                             />
@@ -144,10 +144,10 @@ export function FinanceTransactionModal({
 
                     {/* File Upload */}
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                        <label className="text-xs font-bold text-neutral-500 uppercase ml-1 flex items-center gap-1.5">
                             <Upload className="w-3 h-3" /> {t('admin.finances.attachment', 'Adjuntar Factura/Rebut (PDF/Img)')}
                         </label>
-                        <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-center hover:bg-slate-50 dark:hover:bg-slate-900 transition-all cursor-pointer relative group">
+                        <div className="border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg p-6 text-center hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-all cursor-pointer relative group">
                             <input
                                 type="file"
                                 accept="image/*,.pdf"
@@ -158,12 +158,12 @@ export function FinanceTransactionModal({
                                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full">
                                     <Upload className="w-6 h-6" />
                                 </div>
-                                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                                <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                                     {uploadFile ? (
                                         <span className="text-blue-600 dark:text-blue-400 font-bold">{uploadFile.name}</span>
                                     ) : t('admin.finances.upload_hint', 'Fes clic o arrossega un arxiu')}
                                 </p>
-                                <p className="text-[10px] text-slate-400 uppercase tracking-widest">PDF, PNG, JPG (MÀX. 5MB)</p>
+                                <p className="text-[10px] text-neutral-400 uppercase tracking-widest">PDF, PNG, JPG (MÀX. 5MB)</p>
                             </div>
                         </div>
                     </div>
@@ -174,14 +174,14 @@ export function FinanceTransactionModal({
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold rounded-2xl transition-all active:scale-95 disabled:opacity-50"
+                            className="flex-1 py-3 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-300 font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
                         >
                             {t('common.cancel', 'Cancel·lar')}
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className={`flex-1 py-3 font-bold text-white rounded-2xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 ${transaction.type === 'income'
+                            className={`flex-1 py-3 font-bold text-white rounded-lg transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 ${transaction.type === 'income'
                                     ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'
                                     : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20'
                                 }`}

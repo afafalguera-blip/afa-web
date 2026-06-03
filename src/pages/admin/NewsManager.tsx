@@ -119,7 +119,7 @@ export default function NewsManager() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : filteredArticles.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center text-slate-500">
+        <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 p-8 text-center text-neutral-500">
           {hasActiveFilters ? t('admin.news.no_results') : t('admin.news.no_articles')}
         </div>
       ) : (

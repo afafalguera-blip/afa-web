@@ -93,7 +93,7 @@ export default function AiKeysSettings() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
         <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-900 space-y-1">
           <p className="font-medium">{t('settings.ai_keys.intro_title')}</p>
@@ -104,15 +104,15 @@ export default function AiKeysSettings() {
       {APP_SETTING_DEFINITIONS.map((def) => {
         const row = rows[def.key];
         return (
-          <div key={def.key} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm">
+          <div key={def.key} className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-1">
-              <KeyRound className="w-4 h-4 text-slate-500" />
-              <code className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100">{def.key}</code>
+              <KeyRound className="w-4 h-4 text-neutral-500" />
+              <code className="text-sm font-mono font-bold text-neutral-900 dark:text-neutral-100">{def.key}</code>
             </div>
-            <p className="text-xs text-slate-500 mb-4">{def.description}</p>
+            <p className="text-xs text-neutral-500 mb-4">{def.description}</p>
 
             {row.loading ? (
-              <div className="flex items-center text-slate-400 text-sm">
+              <div className="flex items-center text-neutral-400 text-sm">
                 <Loader2 className="w-4 h-4 animate-spin mr-2" /> {t('settings.ai_keys.loading')}
               </div>
             ) : (
@@ -121,9 +121,9 @@ export default function AiKeysSettings() {
                   <div className="flex flex-wrap items-center gap-3 mb-4 p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     <span className="text-sm font-bold text-emerald-700">{t('settings.ai_keys.configured')}</span>
-                    <span className="text-xs font-mono text-slate-600 bg-white px-2 py-0.5 rounded">{row.meta.masked}</span>
+                    <span className="text-xs font-mono text-neutral-600 bg-white px-2 py-0.5 rounded">{row.meta.masked}</span>
                     {row.meta.updated_at && (
-                      <span className="text-[11px] text-slate-500">
+                      <span className="text-[11px] text-neutral-500">
                         {t('settings.ai_keys.updated_on', { date: formatDate(row.meta.updated_at) })}
                         {row.meta.updated_by_email ? ` · ${row.meta.updated_by_email}` : ''}
                       </span>
@@ -146,7 +146,7 @@ export default function AiKeysSettings() {
                 )}
 
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider">
                     {row.meta?.is_set ? t('settings.ai_keys.rotate_label') : t('settings.ai_keys.new_value_label')}
                   </label>
                   <div className="flex gap-2">
@@ -157,12 +157,12 @@ export default function AiKeysSettings() {
                         value={row.draft}
                         onChange={(e) => patch(def.key, { draft: e.target.value, okMessage: null })}
                         placeholder={t('settings.ai_keys.value_placeholder')}
-                        className="w-full pr-10 py-2 px-3 border border-slate-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pr-10 py-2 px-3 border border-neutral-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <button
                         type="button"
                         onClick={() => patch(def.key, { showDraft: !row.showDraft })}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600"
                         title={row.showDraft ? t('settings.ai_keys.hide') : t('settings.ai_keys.show')}
                       >
                         {row.showDraft ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

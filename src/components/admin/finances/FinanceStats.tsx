@@ -44,14 +44,14 @@ export function FinanceStats({ stats }: FinanceStatsProps) {
             {cards.map((card) => (
                 <div
                     key={card.label}
-                    className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-4 transition-all hover:shadow-md"
+                    className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-neutral-100 dark:border-neutral-700 flex items-center gap-4 transition-all hover:shadow-sm"
                 >
-                    <div className={`p-3 rounded-xl ${card.bgColor} ${card.textColor}`}>
+                    <div className={`p-3 rounded-lg ${card.bgColor} ${card.textColor}`}>
                         <card.icon className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{card.label}</p>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white">
+                        <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{card.label}</p>
+                        <p className="text-2xl font-black text-neutral-900 dark:text-white">
                             {card.value.toLocaleString('ca-ES', { style: 'currency', currency: 'EUR' })}
                         </p>
                     </div>

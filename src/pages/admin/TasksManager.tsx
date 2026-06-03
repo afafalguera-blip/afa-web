@@ -186,11 +186,11 @@ export default function TasksManager() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{t('admin.tasks.title')}</h1>
-          <p className="text-slate-500">{t('admin.tasks.subtitle')}</p>
+          <h1 className="text-2xl font-bold text-neutral-900">{t('admin.tasks.title')}</h1>
+          <p className="text-neutral-500">{t('admin.tasks.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={fetchData} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title={t('common.refresh')}>
+          <button onClick={fetchData} className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title={t('common.refresh')}>
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button onClick={handleCreate} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">
@@ -213,8 +213,8 @@ export default function TasksManager() {
       {loading ? (
         <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
       ) : filteredTasks.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center text-slate-500 shadow-sm">
-          <CheckCircle className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+        <div className="bg-white rounded-lg border border-neutral-200 p-10 text-center text-neutral-500 shadow-sm">
+          <CheckCircle className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
           {searchText || statusFilter !== 'all' || priorityFilter !== 'all' || assigneeFilter !== 'all' ? t('admin.tasks.no_results') : t('admin.tasks.no_tasks')}
         </div>
       ) : (

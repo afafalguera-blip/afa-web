@@ -167,16 +167,16 @@ export default function SiteSettingsManager() {
         <div className="p-6 max-w-5xl mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-neutral-800 dark:text-white flex items-center gap-3">
                         <Settings className="text-primary w-8 h-8" />
                         Configuració del Lloc
                     </h1>
-                    <p className="text-slate-500 text-sm mt-1">Personalitza la informació global de l'AFA sense tocar codi.</p>
+                    <p className="text-neutral-500 text-sm mt-1">Personalitza la informació global de l'AFA sense tocar codi.</p>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex flex-wrap p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-2xl mb-8 gap-1">
+            <div className="flex flex-wrap p-1 bg-neutral-200/50 dark:bg-neutral-800/50 rounded-lg mb-8 gap-1">
                 {([
                     { id: 'contact' as TabType, icon: Mail, label: 'Contacte' },
                     { id: 'social' as TabType, icon: Instagram, label: 'Xarxes' },
@@ -193,9 +193,9 @@ export default function SiteSettingsManager() {
                     <button
                         key={id}
                         onClick={() => setActiveTab(id)}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm ${activeTab === id
-                            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm ring-1 ring-slate-200 dark:ring-slate-600'
-                            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all text-sm ${activeTab === id
+                            ? 'bg-white dark:bg-neutral-700 text-primary shadow-sm ring-1 ring-neutral-200 dark:ring-neutral-600'
+                            : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'
                             }`}
                     >
                         <Icon size={16} /> {label}
@@ -291,14 +291,14 @@ export default function SiteSettingsManager() {
 
                 {/* Feedback Messages — hidden in ai-keys tab (it manages its own inline state) */}
                 {activeTab !== 'ai-keys' && error && (
-                    <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-xl animate-shake">
+                    <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg animate-shake">
                         <AlertCircle size={20} />
                         <p className="font-medium text-sm">{error}</p>
                     </div>
                 )}
 
                 {activeTab !== 'ai-keys' && success && (
-                    <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-200 text-green-700 rounded-xl animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-200 text-green-700 rounded-lg animate-in fade-in slide-in-from-top-2">
                         <CheckCircle2 size={20} />
                         <p className="font-medium text-sm">Configuració guardada correctament!</p>
                     </div>
@@ -310,7 +310,7 @@ export default function SiteSettingsManager() {
                     <button
                         disabled={saving}
                         type="submit"
-                        className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-primary/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                        className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-lg flex items-center justify-center gap-3 shadow-sm shadow-primary/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                     >
                         {saving ? (
                             <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -321,7 +321,7 @@ export default function SiteSettingsManager() {
                             </>
                         )}
                     </button>
-                    <div className="hidden md:flex items-center gap-2 p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
+                    <div className="hidden md:flex items-center gap-2 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400">
                         <HelpCircle size={18} />
                         <p className="text-xs">Els canvis s'aplicaran a tota la web pública instantàniament.</p>
                     </div>

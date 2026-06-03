@@ -34,13 +34,13 @@ function ImageUploadField({ label, value, onChange, prefix }: {
 
     return (
         <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500">{label}</label>
+            <label className="text-xs font-bold text-neutral-500">{label}</label>
             <div className="flex gap-2">
                 <input
                     type="url"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm font-mono text-xs"
+                    className="flex-1 px-4 py-3 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm font-mono text-xs"
                     placeholder="https://..."
                 />
                 <input
@@ -58,14 +58,14 @@ function ImageUploadField({ label, value, onChange, prefix }: {
                     type="button"
                     onClick={() => inputRef.current?.click()}
                     disabled={uploading}
-                    className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-1.5 disabled:opacity-50 shrink-0"
+                    className="px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:opacity-90 transition-opacity flex items-center gap-1.5 disabled:opacity-50 shrink-0"
                 >
                     {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                     Pujar
                 </button>
             </div>
             {value && (
-                <div className="mt-1 w-16 h-16 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-white">
+                <div className="mt-1 w-16 h-16 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden bg-white">
                     <img src={value} alt="Preview" className="w-full h-full object-contain p-1" />
                 </div>
             )}
@@ -75,24 +75,24 @@ function ImageUploadField({ label, value, onChange, prefix }: {
 
 export function BrandingSettings({ branding, setBranding, activeLang, setActiveLang }: BrandingSettingsProps) {
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-50 dark:border-slate-700 pb-4">
+        <div className="bg-white dark:bg-neutral-800 rounded-3xl p-8 shadow-sm border border-neutral-100 dark:border-neutral-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-50 dark:border-neutral-700 pb-4">
                 <div>
-                    <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-neutral-800 dark:text-white flex items-center gap-2">
                         <Palette size={20} className="text-primary" />
                         Marca i SEO
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1">Nom del lloc, logo, imatges per defecte i descripció SEO.</p>
+                    <p className="text-xs text-neutral-500 mt-1">Nom del lloc, logo, imatges per defecte i descripció SEO.</p>
                 </div>
-                <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
+                <div className="flex p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg w-fit">
                     {(['ca', 'es', 'en'] as const).map((lang) => (
                         <button
                             key={lang}
                             type="button"
                             onClick={() => setActiveLang(lang)}
                             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
-                                ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-                                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                                ? 'bg-white dark:bg-neutral-700 text-primary shadow-sm'
+                                : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
                                 }`}
                         >
                             {lang.toUpperCase()}
@@ -103,12 +103,12 @@ export function BrandingSettings({ branding, setBranding, activeLang, setActiveL
 
             <div className="space-y-4">
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500">Nom del Lloc</label>
+                    <label className="text-xs font-bold text-neutral-500">Nom del Lloc</label>
                     <input
                         type="text"
                         value={branding.site_name}
                         onChange={(e) => setBranding({ ...branding, site_name: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm"
+                        className="w-full px-4 py-3 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm"
                         placeholder="AFA Escola Falguera"
                     />
                 </div>
@@ -135,14 +135,14 @@ export function BrandingSettings({ branding, setBranding, activeLang, setActiveL
                     />
                 </div>
 
-                <hr className="border-slate-100 dark:border-slate-700" />
+                <hr className="border-neutral-100 dark:border-neutral-700" />
 
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20">
+                    <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20">
                         <Globe size={18} />
                         <p className="text-xs font-medium">Editant descripció SEO en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
                     </div>
-                    <label className="text-xs font-bold text-slate-500">Descripció SEO per Defecte</label>
+                    <label className="text-xs font-bold text-neutral-500">Descripció SEO per Defecte</label>
                     <textarea
                         value={branding.default_seo_description[activeLang]}
                         onChange={(e) => setBranding({
@@ -150,7 +150,7 @@ export function BrandingSettings({ branding, setBranding, activeLang, setActiveL
                             default_seo_description: { ...branding.default_seo_description, [activeLang]: e.target.value }
                         })}
                         rows={3}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-sm leading-relaxed"
+                        className="w-full px-4 py-3 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm leading-relaxed"
                         placeholder="Descripció del lloc per als motors de cerca..."
                     />
                 </div>

@@ -10,13 +10,13 @@ export function NotificationHeader({ onRefresh, onCreate, loading }: Notificatio
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Gestor de Notificaciones</h1>
-        <p className="text-slate-500">Administra los avisos y alertas de la campanita</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Gestor de Notificaciones</h1>
+        <p className="text-neutral-500">Administra los avisos y alertas de la campanita</p>
       </div>
       <div className="flex gap-2">
         <button
           onClick={onRefresh}
-          className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
         >
           <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
         </button>

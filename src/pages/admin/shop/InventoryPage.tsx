@@ -87,7 +87,7 @@ export function InventoryPage() {
     return (
       <div className="flex flex-col justify-center items-center h-64 gap-4">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-        <p className="text-slate-500 font-medium animate-pulse">Carregant inventari...</p>
+        <p className="text-neutral-500 font-medium animate-pulse">Carregant inventari...</p>
       </div>
     )
   }
@@ -97,28 +97,28 @@ export function InventoryPage() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
+          <h1 className="text-3xl font-extrabold text-neutral-900 dark:text-white flex items-center gap-3">
             <Package className="w-8 h-8 text-primary" />
             Gestió d'Inventari
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Controla l'estoc, preus i talles dels productes de la botiga.</p>
+          <p className="text-neutral-500 dark:text-neutral-400 mt-1">Controla l'estoc, preus i talles dels productes de la botiga.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[160px] md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
             <input
               type="text"
               placeholder="Buscar producte..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
             />
           </div>
           <button
             onClick={handleExportPDF}
             title="Descarregar PDF"
-            className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 border border-slate-200 dark:border-slate-700"
+            className="flex items-center gap-2 px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-bold rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-all active:scale-95 border border-neutral-200 dark:border-neutral-700"
           >
             <Download className="w-5 h-5" />
             <span className="hidden sm:inline">Descarregar PDF</span>
@@ -128,7 +128,7 @@ export function InventoryPage() {
               setEditingProduct(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-all shadow-sm shadow-primary/20 active:scale-95 whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
             <span className="hidden sm:inline">Nou Producte</span>
@@ -149,20 +149,20 @@ export function InventoryPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-800 shadow-sm overflow-hidden hover:shadow-sm transition-shadow"
               >
                 {/* Product Header inside Card */}
-                <div className="p-4 md:p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between gap-3">
+                <div className="p-4 md:p-5 border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/30 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 flex items-center justify-center overflow-hidden">
                       {product.image_url ? (
                         <img src={proxyStorageUrl(product.image_url)} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <Package className="w-5 h-5 md:w-6 md:h-6 text-slate-300" />
+                        <Package className="w-5 h-5 md:w-6 md:h-6 text-neutral-300" />
                       )}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-bold text-slate-900 dark:text-white text-base md:text-lg truncate">{tContent(product, 'name')}</h3>
+                      <h3 className="font-bold text-neutral-900 dark:text-white text-base md:text-lg truncate">{tContent(product, 'name')}</h3>
                       <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                         <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase rounded-md tracking-wider">
                           {product.category}
@@ -187,7 +187,7 @@ export function InventoryPage() {
                       setEditingProduct(product);
                       setIsModalOpen(true);
                     }}
-                    className="flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all font-semibold text-sm"
+                    className="flex-shrink-0 flex items-center gap-2 px-3 md:px-4 py-2 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-all font-semibold text-sm"
                   >
                     <Edit className="w-4 h-4" />
                     <span className="hidden sm:inline">Editar</span>
@@ -196,28 +196,28 @@ export function InventoryPage() {
 
                 {/* Variants — table on md+, cards on mobile */}
                 {(!product.variants || product.variants.length === 0) ? (
-                  <div className="p-8 text-center bg-slate-50/50 dark:bg-slate-800/10">
-                    <p className="text-slate-400 text-sm italic">Aquest producte no té variants configurades.</p>
+                  <div className="p-8 text-center bg-neutral-50/50 dark:bg-neutral-800/10">
+                    <p className="text-neutral-400 text-sm italic">Aquest producte no té variants configurades.</p>
                   </div>
                 ) : (
                   <>
                     {/* Mobile cards */}
-                    <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="md:hidden divide-y divide-neutral-100 dark:divide-neutral-800">
                       {sortSizes(product.variants || []).map((variant) => (
                         <div key={variant.id} className="px-4 py-3 flex items-center gap-3">
-                          <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded text-xs font-bold w-14 text-center flex-shrink-0">
+                          <span className="font-mono bg-neutral-100 dark:bg-neutral-800 px-2.5 py-1 rounded text-xs font-bold w-14 text-center flex-shrink-0">
                             {variant.size}
                           </span>
                           <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                            <span className="text-xs text-slate-400">
-                              Soci <span className="font-semibold text-slate-600 dark:text-slate-300">{variant.price_member}€</span>
-                              <span className="mx-1.5 text-slate-300">·</span>
-                              No soci <span className="font-semibold text-slate-600 dark:text-slate-300">{variant.price_non_member}€</span>
+                            <span className="text-xs text-neutral-400">
+                              Soci <span className="font-semibold text-neutral-600 dark:text-neutral-300">{variant.price_member}€</span>
+                              <span className="mx-1.5 text-neutral-300">·</span>
+                              No soci <span className="font-semibold text-neutral-600 dark:text-neutral-300">{variant.price_non_member}€</span>
                             </span>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             {isCalculated ? (
-                              <div className="w-16 px-2 py-1.5 rounded-lg border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 font-bold text-sm text-center cursor-not-allowed">
+                              <div className="w-16 px-2 py-1.5 rounded-lg border bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-500 font-bold text-sm text-center cursor-not-allowed">
                                 {variant.stock}
                               </div>
                             ) : (
@@ -227,7 +227,7 @@ export function InventoryPage() {
                                   defaultValue={variant.stock}
                                   className={`w-16 px-2 py-1.5 rounded-lg border text-sm text-center focus:ring-2 focus:ring-primary/20 outline-none transition-all ${variant.stock <= 0
                                     ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600'
-                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                                    : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700'
                                     }`}
                                   onBlur={(e) => {
                                     if (e.target.value !== variant.stock.toString()) {
@@ -255,7 +255,7 @@ export function InventoryPage() {
                     {/* Desktop table */}
                     <div className="hidden md:block overflow-x-auto">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50/30 dark:bg-slate-800/20 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+                        <thead className="bg-neutral-50/30 dark:bg-neutral-800/20 text-neutral-400 uppercase text-[10px] font-bold tracking-widest">
                           <tr>
                             <th className="px-6 py-3">Talla / Variant</th>
                             <th className="px-6 py-3">Preu Soci</th>
@@ -264,22 +264,22 @@ export function InventoryPage() {
                             <th className="px-6 py-3 text-right">Estat</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                        <tbody className="divide-y divide-neutral-50 dark:divide-neutral-800">
                           {sortSizes(product.variants || []).map((variant) => (
-                            <tr key={variant.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                            <tr key={variant.id} className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors">
                               <td className="px-6 py-4">
-                                <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-xs font-bold">{variant.size}</span>
+                                <span className="font-mono bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded text-xs font-bold">{variant.size}</span>
                               </td>
-                              <td className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-300">
+                              <td className="px-6 py-4 font-semibold text-neutral-600 dark:text-neutral-300">
                                 {variant.price_member}€
                               </td>
-                              <td className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-300">
+                              <td className="px-6 py-4 font-semibold text-neutral-600 dark:text-neutral-300">
                                 {variant.price_non_member}€
                               </td>
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-2">
                                   {isCalculated ? (
-                                    <div className="w-20 px-3 py-1.5 rounded-lg border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 font-bold text-sm flex items-center justify-center cursor-not-allowed" title="L'estoc es calcula automàticament">
+                                    <div className="w-20 px-3 py-1.5 rounded-lg border bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-500 font-bold text-sm flex items-center justify-center cursor-not-allowed" title="L'estoc es calcula automàticament">
                                       {variant.stock}
                                     </div>
                                   ) : (
@@ -289,7 +289,7 @@ export function InventoryPage() {
                                         defaultValue={variant.stock}
                                         className={`w-20 px-3 py-1.5 rounded-lg border text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all ${variant.stock <= 0
                                           ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600'
-                                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                                          : 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700'
                                           }`}
                                         onBlur={(e) => {
                                           if (e.target.value !== variant.stock.toString()) {
@@ -326,18 +326,18 @@ export function InventoryPage() {
         </AnimatePresence>
 
         {filteredProducts.length === 0 && (
-          <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 shadow-inner">
-            <div className="inline-flex items-center justify-center p-4 bg-slate-50 dark:bg-slate-800 rounded-full mb-4">
-              <Search className="w-8 h-8 text-slate-300" />
+          <div className="text-center py-20 bg-white dark:bg-neutral-900 rounded-3xl border border-dashed border-neutral-200 dark:border-neutral-800 shadow-inner">
+            <div className="inline-flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-800 rounded-full mb-4">
+              <Search className="w-8 h-8 text-neutral-300" />
             </div>
             <h3 className="text-xl font-bold dark:text-white">No s'han trobat productes</h3>
-            <p className="text-slate-500 mt-2">Prova amb una altra cerca o crea un producte nou.</p>
+            <p className="text-neutral-500 mt-2">Prova amb una altra cerca o crea un producte nou.</p>
           </div>
         )}
       </div>
 
       {/* Info Legend */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-6 p-6 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-6 p-6 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg">
         <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-400 text-center">
           <Info className="w-4 h-4 flex-shrink-0" />
           <span>

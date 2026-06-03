@@ -169,40 +169,40 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="bg-white dark:bg-neutral-900 w-full max-w-4xl max-h-[90vh] rounded-lg shadow-2xl flex flex-col overflow-hidden"
       >
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex justify-between items-center p-6 border-b border-neutral-200 dark:border-neutral-700">
           <h2 className="text-2xl font-bold dark:text-white">
             {activity ? t('admin.editor.edit_title') : t('admin.editor.new_title')}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-            <X className="w-6 h-6 text-slate-500" />
+          <button onClick={onClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
+            <X className="w-6 h-6 text-neutral-500" />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {/* Language Tabs */}
-          <div className="flex gap-2 mb-6 border-b border-slate-200 dark:border-slate-700 pb-1">
+          <div className="flex gap-2 mb-6 border-b border-neutral-200 dark:border-neutral-700 pb-1">
             <button
               type="button"
               onClick={() => setCurrentLang('es')}
-              className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'es' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'es' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-neutral-500 hover:text-neutral-700'}`}
             >
               🇪🇸 Español
             </button>
             <button
               type="button"
               onClick={() => setCurrentLang('ca')}
-              className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'ca' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'ca' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-neutral-500 hover:text-neutral-700'}`}
             >
               🏴 Català
             </button>
             <button
               type="button"
               onClick={() => setCurrentLang('en')}
-              className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'en' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${currentLang === 'en' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600' : 'text-neutral-500 hover:text-neutral-700'}`}
             >
               🇬🇧 English
             </button>
@@ -213,19 +213,19 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
             {/* Main Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.title')} ({currentLang.toUpperCase()})</label>
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.title')} ({currentLang.toUpperCase()})</label>
                 <input
                   required={currentLang === 'es'}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                   value={getValue('title')}
                   onChange={e => handleChange('title', e.target.value)}
                   placeholder={currentLang !== 'es' ? '(Optional) Leave empty to use default' : ''}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.category')}</label>
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.category')}</label>
                 <select
-                  className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                   value={formData.category} // Category is universal
                   onChange={e => handleChange('category', e.target.value)}
                 >
@@ -240,10 +240,10 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.description')} ({currentLang.toUpperCase()})</label>
+              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.description')} ({currentLang.toUpperCase()})</label>
               <textarea
                 rows={3}
-                className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                 value={getValue('description')}
                 onChange={e => handleChange('description', e.target.value)}
               />
@@ -252,36 +252,36 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
             {/* Pricing & Logistics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.price_member')}</label>
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.price_member')}</label>
                 <input
                   type="number"
-                  className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                   value={formData.price_member ?? 0}
                   onChange={e => handleChange('price_member', parseFloat(e.target.value))}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.price_non_member')}</label>
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.price_non_member')}</label>
                 <input
                   type="number"
-                  className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                   value={formData.price_non_member ?? 0}
                   onChange={e => handleChange('price_non_member', parseFloat(e.target.value))}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.price_unit')}</label>
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.price_unit')}</label>
                 <input
-                  className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                   value={formData.price_info ?? ''}
                   onChange={e => handleChange('price_info', e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.spots')}</label>
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.spots')}</label>
                 <input
                   type="number"
-                  className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                   value={formData.spots ?? 0}
                   onChange={e => handleChange('spots', parseInt(e.target.value))}
                 />
@@ -290,31 +290,31 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
 
             {/* Image Upload */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.image')}</label>
+              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.image')}</label>
               <div className="flex gap-4 items-start">
-                <div className="w-32 h-20 bg-slate-100 rounded-lg overflow-hidden border border-slate-300 flex items-center justify-center">
+                <div className="w-32 h-20 bg-neutral-100 rounded-lg overflow-hidden border border-neutral-300 flex items-center justify-center">
                   {imagePreview ? (
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xs text-slate-400">No Image</span>
+                    <span className="text-xs text-neutral-400">No Image</span>
                   )}
                 </div>
                 <div className="flex-1">
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition-colors text-sm font-medium">
+                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 rounded-lg transition-colors text-sm font-medium">
                     <Upload className="w-4 h-4" /> {t('admin.editor.upload_image')}
                     <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
                   </label>
-                  <p className="text-xs text-slate-500 mt-2">{t('admin.editor.image_hint')}</p>
+                  <p className="text-xs text-neutral-500 mt-2">{t('admin.editor.image_hint')}</p>
                 </div>
               </div>
             </div>
 
             {/* Schedule Details (Structured Session Editor) */}
-            <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="space-y-4 bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-lg border border-neutral-200 dark:border-neutral-700">
               <div className="flex justify-between items-center mb-2">
                 <div>
-                  <h3 className="font-bold text-slate-900 dark:text-white">{t('admin.editor.schedule_title')}</h3>
-                  <p className="text-xs text-slate-500">{t('admin.editor.schedule_subtitle')}</p>
+                  <h3 className="font-bold text-neutral-900 dark:text-white">{t('admin.editor.schedule_title')}</h3>
+                  <p className="text-xs text-neutral-500">{t('admin.editor.schedule_subtitle')}</p>
                 </div>
                 <button type="button" onClick={addScheduleGroup} className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-bold">
                   <Plus className="w-4 h-4" /> {t('admin.editor.add_group')}
@@ -323,10 +323,10 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
 
               <div className="space-y-6">
                 {formData.schedule_details?.map((group, gIdx) => (
-                  <div key={gIdx} className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-4">
+                  <div key={gIdx} className="bg-white dark:bg-neutral-900 p-4 rounded-lg border border-neutral-200 dark:border-neutral-800 space-y-4">
                     <div className="flex items-center gap-4">
                       <input
-                        className="flex-1 px-3 py-1.5 font-bold text-slate-800 dark:text-white border-b-2 border-transparent focus:border-blue-500 bg-transparent outline-none"
+                        className="flex-1 px-3 py-1.5 font-bold text-neutral-800 dark:text-white border-b-2 border-transparent focus:border-blue-500 bg-transparent outline-none"
                         value={group.group}
                         onChange={e => updateGroupName(gIdx, e.target.value)}
                         placeholder={t('admin.editor.group_placeholder')}
@@ -338,9 +338,9 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
 
                     <div className="space-y-2">
                       {group.sessions?.map((session, sIdx) => (
-                        <div key={sIdx} className="flex flex-wrap md:flex-nowrap gap-2 items-center bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                        <div key={sIdx} className="flex flex-wrap md:flex-nowrap gap-2 items-center bg-neutral-50 dark:bg-neutral-800 p-2 rounded-lg border border-neutral-100 dark:border-neutral-700">
                           <select
-                            className="flex-1 min-w-[120px] p-1.5 text-sm border rounded bg-white dark:bg-slate-900 dark:text-white"
+                            className="flex-1 min-w-[120px] p-1.5 text-sm border rounded bg-white dark:bg-neutral-900 dark:text-white"
                             value={session.day}
                             onChange={e => updateSession(gIdx, sIdx, 'day', e.target.value)}
                           >
@@ -354,32 +354,32 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                           <div className="flex items-center gap-2">
                             <input
                               type="time"
-                              className="p-1.5 text-sm border rounded bg-white dark:bg-slate-900 dark:text-white"
+                              className="p-1.5 text-sm border rounded bg-white dark:bg-neutral-900 dark:text-white"
                               value={session.startTime}
                               onChange={e => updateSession(gIdx, sIdx, 'startTime', e.target.value)}
                             />
-                            <span className="text-slate-400">a</span>
+                            <span className="text-neutral-400">a</span>
                             <input
                               type="time"
-                              className="p-1.5 text-sm border rounded bg-white dark:bg-slate-900 dark:text-white"
+                              className="p-1.5 text-sm border rounded bg-white dark:bg-neutral-900 dark:text-white"
                               value={session.endTime}
                               onChange={e => updateSession(gIdx, sIdx, 'endTime', e.target.value)}
                             />
                           </div>
-                          <button type="button" onClick={() => removeSession(gIdx, sIdx)} className="p-1 text-slate-400 hover:text-red-500 transition-colors">
+                          <button type="button" onClick={() => removeSession(gIdx, sIdx)} className="p-1 text-neutral-400 hover:text-red-500 transition-colors">
                             <X className="w-4 h-4" />
                           </button>
                         </div>
                       ))}
-                      <button type="button" onClick={() => addSession(gIdx)} className="w-full py-2 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-2 mt-2">
+                      <button type="button" onClick={() => addSession(gIdx)} className="w-full py-2 border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg text-xs font-medium text-neutral-500 hover:border-blue-400 hover:text-blue-500 transition-all flex items-center justify-center gap-2 mt-2">
                         <Plus className="w-3 h-3" /> {t('admin.editor.add_session')}
                       </button>
                     </div>
                   </div>
                 ))}
                 {(!formData.schedule_details || formData.schedule_details.length === 0) && (
-                  <div className="text-center py-8 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                    <p className="text-sm text-slate-500 italic">{t('admin.editor.no_schedule')}</p>
+                  <div className="text-center py-8 bg-neutral-100/50 dark:bg-neutral-900/50 rounded-lg border-2 border-dashed border-neutral-200 dark:border-neutral-800">
+                    <p className="text-sm text-neutral-500 italic">{t('admin.editor.no_schedule')}</p>
                   </div>
                 )}
               </div>
@@ -388,28 +388,28 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
             {/* Extra Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.grades')} ({currentLang.toUpperCase()})</label>
-                <input className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" value={getValue('grades')} onChange={e => handleChange('grades', e.target.value)} placeholder="Ex: 3r - 6è" />
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.grades')} ({currentLang.toUpperCase()})</label>
+                <input className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white" value={getValue('grades')} onChange={e => handleChange('grades', e.target.value)} placeholder="Ex: 3r - 6è" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.place')}</label>
-                <input className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" value={formData.place} onChange={e => handleChange('place', e.target.value)} placeholder="Ex: Gimnàs" />
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.place')}</label>
+                <input className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white" value={formData.place} onChange={e => handleChange('place', e.target.value)} placeholder="Ex: Gimnàs" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.color')}</label>
-                <input className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" value={formData.color} onChange={e => handleChange('color', e.target.value)} placeholder="Ex: bg-blue-500" />
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.color')}</label>
+                <input className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white" value={formData.color} onChange={e => handleChange('color', e.target.value)} placeholder="Ex: bg-blue-500" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('admin.editor.icon')}</label>
-                <input className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white" value={formData.category_icon} onChange={e => handleChange('category_icon', e.target.value)} placeholder="Ex: school" />
+                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('admin.editor.icon')}</label>
+                <input className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white" value={formData.category_icon} onChange={e => handleChange('category_icon', e.target.value)} placeholder="Ex: school" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('inscription.activity_modal.note_label')} ({currentLang.toUpperCase()})</label>
+              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{t('inscription.activity_modal.note_label')} ({currentLang.toUpperCase()})</label>
               <textarea
                 rows={2}
-                className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500"
                 value={getValue('important_note')}
                 onChange={e => handleChange('important_note', e.target.value)}
                 placeholder="Important note..."
@@ -418,12 +418,12 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
 
             <div className="flex items-center gap-2">
               <input type="checkbox" id="stem" checked={formData.is_stem_approved} onChange={e => handleChange('is_stem_approved', e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
-              <label htmlFor="stem" className="text-sm text-slate-700 dark:text-slate-300">{t('admin.editor.stem')}</label>
+              <label htmlFor="stem" className="text-sm text-neutral-700 dark:text-neutral-300">{t('admin.editor.stem')}</label>
             </div>
 
             {/* Inscription Form Config */}
-            <div className="col-span-2 border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
-              <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-3">Formulari d'Inscripció</h4>
+            <div className="col-span-2 border-t border-neutral-200 dark:border-neutral-700 pt-4 mt-2">
+              <h4 className="text-sm font-bold text-neutral-800 dark:text-white mb-3">Formulari d'Inscripció</h4>
               <div className="flex items-center gap-2 mb-4">
                 <input
                   type="checkbox"
@@ -432,13 +432,13 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                   onChange={e => handleChange('inscription_enabled', e.target.checked)}
                   className="w-4 h-4 text-blue-600 rounded"
                 />
-                <label htmlFor="inscription_enabled" className="text-sm text-slate-700 dark:text-slate-300">
+                <label htmlFor="inscription_enabled" className="text-sm text-neutral-700 dark:text-neutral-300">
                   Disponible al formulari d'inscripció
                 </label>
               </div>
               {formData.inscription_enabled && (
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">Grups de cursos assignats</label>
+                  <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2 block">Grups de cursos assignats</label>
                   <div className="flex flex-wrap gap-3">
                     {['infantil', 'primaria1', 'primaria2'].map(ct => (
                       <label key={ct} className="flex items-center gap-2 cursor-pointer">
@@ -454,7 +454,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
                           }}
                           className="w-4 h-4 text-blue-600 rounded"
                         />
-                        <span className="text-sm text-slate-600 dark:text-slate-400 capitalize">
+                        <span className="text-sm text-neutral-600 dark:text-neutral-400 capitalize">
                           {ct === 'infantil' ? 'Infantil (I3-I5)' : ct === 'primaria1' ? 'Primària 1r-3r' : 'Primària 4t-6è'}
                         </span>
                       </label>
@@ -468,12 +468,12 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2.5 text-slate-600 font-medium hover:bg-slate-200 rounded-lg transition-colors">{t('admin.editor.cancel')}</button>
+        <div className="p-6 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50 flex justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2.5 text-neutral-600 font-medium hover:bg-neutral-200 rounded-lg transition-colors">{t('admin.editor.cancel')}</button>
           <button
             form="activity-form"
             disabled={loading}
-            className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-sm shadow-blue-500/30 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {t('admin.editor.save')}

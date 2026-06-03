@@ -130,7 +130,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-lg shadow-sm w-full max-w-2xl flex flex-col max-h-[90vh]">
         <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-xl z-10">
           <h2 className="text-xl font-bold text-gray-900">
             {payment ? 'Editar Pagament' : 'Registrar Nou Pagament'}
@@ -144,7 +144,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
 
           {/* Student Selection (Only if Creating) */}
           {!payment && (
-            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
               <label className="block text-sm font-medium text-gray-700 mb-2">Cercar Alumne (Opcional)</label>
               <select
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"

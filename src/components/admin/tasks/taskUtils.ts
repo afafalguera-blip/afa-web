@@ -18,14 +18,14 @@ export const STATUS_OPTIONS: TaskStatus[] = ['pending', 'in_progress', 'blocked'
 export const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high', 'urgent'];
 
 export const statusClasses: Record<TaskStatus, string> = {
-  pending: 'bg-slate-100 text-slate-700',
+  pending: 'bg-neutral-100 text-neutral-700',
   in_progress: 'bg-blue-100 text-blue-700',
   blocked: 'bg-amber-100 text-amber-700',
   done: 'bg-emerald-100 text-emerald-700'
 };
 
 export const priorityClasses: Record<TaskPriority, string> = {
-  low: 'bg-slate-100 text-slate-600',
+  low: 'bg-neutral-100 text-neutral-600',
   medium: 'bg-sky-100 text-sky-700',
   high: 'bg-orange-100 text-orange-700',
   urgent: 'bg-rose-100 text-rose-700'

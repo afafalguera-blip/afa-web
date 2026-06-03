@@ -75,7 +75,7 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl my-8 flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-lg shadow-sm w-full max-w-4xl my-8 flex flex-col max-h-[90vh]">
         <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-xl z-10">
           <h2 className="text-xl font-bold text-gray-900">Editar Inscripció</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -146,7 +146,7 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
             <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b">Alumnes</h3>
             <div className="space-y-6">
               {(formData.students || []).map((student: InscriptionStudent, idx: number) => (
-                <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div key={idx} className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
@@ -203,8 +203,8 @@ export function EditInscriptionModal({ inscription, isOpen, onClose, onSave }: E
                   </div>
 
                   {/* Status Toggle for Student */}
-                  <div className="mt-4 pt-4 border-t border-slate-200 flex justify-end">
-                    <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600 hover:text-slate-800">
+                  <div className="mt-4 pt-4 border-t border-neutral-200 flex justify-end">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-neutral-600 hover:text-neutral-800">
                       <input
                         type="checkbox"
                         checked={student.suspended || false}

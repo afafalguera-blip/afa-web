@@ -311,7 +311,7 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
             </button>
 
             {showColumnsMenu && (
-              <div className="absolute right-0 mt-2 z-30 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 max-h-96 overflow-y-auto">
+              <div className="absolute right-0 mt-2 z-30 w-72 bg-white border border-gray-200 rounded-lg shadow-sm p-3 max-h-96 overflow-y-auto">
                 <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
                   <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                     {t('forms.viewer.columns_to_export', 'Columnas a exportar')}
@@ -413,7 +413,7 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
           <h3 className="mt-3 font-semibold text-gray-700">{t('forms.viewer.no_match', { q: searchTerm })}</h3>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">

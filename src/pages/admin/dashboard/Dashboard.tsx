@@ -68,8 +68,8 @@ export function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">{t('admin.dashboard.title')}</h2>
-          <p className="text-slate-500">{t('admin.dashboard.subtitle')}</p>
+          <h2 className="text-2xl font-bold text-neutral-900">{t('admin.dashboard.title')}</h2>
+          <p className="text-neutral-500">{t('admin.dashboard.subtitle')}</p>
         </div>
 
         <div className="flex gap-2">
@@ -105,7 +105,7 @@ export function Dashboard() {
       <FinancialStatsCards financial={financialStats} shop={shopStats} />
 
       {/* Table with Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div className="bg-white rounded-lg shadow-sm border border-neutral-200">
         <Filters
           course={filters.course}
           setCourse={(value: string) => setFilter('course', value)}

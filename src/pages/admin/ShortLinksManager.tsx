@@ -162,70 +162,70 @@ export default function ShortLinksManager() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Enlaces cortos</h1>
-          <p className="text-slate-500">Crea y gestiona redirecciones cortas para campañas, PDFs y recursos.</p>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold text-neutral-900">Enlaces cortos</h1>
+          <p className="text-neutral-500">Crea y gestiona redirecciones cortas para campañas, PDFs y recursos.</p>
+          <p className="text-xs text-neutral-400 mt-1">
             Base de enlace corto: <span className="font-mono">{shortBaseUrl || 'No configurada'}</span>
           </p>
         </div>
         <button
           type="button"
           onClick={fetchLinks}
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 transition-colors"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Recargar
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-        <div className="flex items-center gap-2 text-slate-900 font-semibold">
+      <form onSubmit={handleSubmit} className="bg-white border border-neutral-200 rounded-lg p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 text-neutral-900 font-semibold">
           <Plus className="w-4 h-4" />
           {editingId ? 'Editar enlace corto' : 'Nuevo enlace corto'}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Slug</label>
+            <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Slug</label>
             <input
               type="text"
               value={formData.slug}
               onChange={(event) => setFormData((prev) => ({ ...prev, slug: normalizeSlug(event.target.value) }))}
               placeholder="santjordi"
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none font-mono text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none font-mono text-sm"
               required
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Expira el (opcional)</label>
+            <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Expira el (opcional)</label>
             <input
               type="datetime-local"
               value={formData.expires_at}
               onChange={(event) => setFormData((prev) => ({ ...prev, expires_at: event.target.value }))}
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none"
+              className="w-full px-3 py-2 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none"
             />
           </div>
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">URL de destino</label>
+          <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">URL de destino</label>
           <input
             type="url"
             value={formData.target_url}
             onChange={(event) => setFormData((prev) => ({ ...prev, target_url: event.target.value }))}
             placeholder="https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/..."
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none"
+            className="w-full px-3 py-2 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none"
             required
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Descripción interna</label>
+          <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">Descripción interna</label>
           <textarea
             value={formData.description}
             onChange={(event) => setFormData((prev) => ({ ...prev, description: event.target.value }))}
             placeholder="Cartel Sant Jordi 2026 (PDF)"
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none min-h-[88px]"
+            className="w-full px-3 py-2 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none min-h-[88px]"
           />
         </div>
 
@@ -242,7 +242,7 @@ export default function ShortLinksManager() {
             <button
               type="button"
               onClick={resetForm}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-300 text-neutral-700 hover:bg-neutral-50 transition-colors"
             >
               <X className="w-4 h-4" />
               Cancelar edición
@@ -251,25 +251,25 @@ export default function ShortLinksManager() {
         </div>
       </form>
 
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100">
+      <div className="bg-white border border-neutral-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-neutral-100">
           <input
             type="text"
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
             placeholder="Buscar por slug, destino o descripción..."
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none"
+            className="w-full px-3 py-2 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 outline-none"
           />
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-slate-500">Cargando enlaces...</div>
+          <div className="p-8 text-center text-neutral-500">Cargando enlaces...</div>
         ) : filteredLinks.length === 0 ? (
-          <div className="p-8 text-center text-slate-500">No hay enlaces para mostrar.</div>
+          <div className="p-8 text-center text-neutral-500">No hay enlaces para mostrar.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-600 uppercase text-xs tracking-wide">
+              <thead className="bg-neutral-50 text-neutral-600 uppercase text-xs tracking-wide">
                 <tr>
                   <th className="text-left px-4 py-3">Slug</th>
                   <th className="text-left px-4 py-3">Descripción</th>
@@ -285,9 +285,9 @@ export default function ShortLinksManager() {
                   const shortUrl = shortBaseUrl ? `${shortBaseUrl}/${item.slug}` : item.slug;
 
                   return (
-                    <tr key={item.id} className="border-t border-slate-100">
+                    <tr key={item.id} className="border-t border-neutral-100">
                       <td className="px-4 py-3 align-top">
-                        <div className="font-mono font-semibold text-slate-900">{item.slug}</div>
+                        <div className="font-mono font-semibold text-neutral-900">{item.slug}</div>
                         <a
                           href={shortUrl}
                           target="_blank"
@@ -297,22 +297,22 @@ export default function ShortLinksManager() {
                           {shortUrl}
                         </a>
                       </td>
-                      <td className="px-4 py-3 align-top text-slate-700">
-                        {item.description || <span className="text-slate-400">-</span>}
+                      <td className="px-4 py-3 align-top text-neutral-700">
+                        {item.description || <span className="text-neutral-400">-</span>}
                       </td>
                       <td className="px-4 py-3 align-top">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-700 font-semibold">
                           {item.clicks}
                         </span>
                       </td>
-                      <td className="px-4 py-3 align-top text-slate-600">{formatDateTime(item.created_at)}</td>
+                      <td className="px-4 py-3 align-top text-neutral-600">{formatDateTime(item.created_at)}</td>
                       <td className="px-4 py-3 align-top">
                         {item.expires_at ? (
-                          <span className={expired ? 'text-red-600 font-semibold' : 'text-slate-600'}>
+                          <span className={expired ? 'text-red-600 font-semibold' : 'text-neutral-600'}>
                             {formatDateTime(item.expires_at)}
                           </span>
                         ) : (
-                          <span className="text-slate-400">-</span>
+                          <span className="text-neutral-400">-</span>
                         )}
                       </td>
                       <td className="px-4 py-3 align-top">
@@ -320,7 +320,7 @@ export default function ShortLinksManager() {
                           <button
                             type="button"
                             onClick={() => handleCopy(item.slug)}
-                            className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+                            className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600"
                             title="Copiar enlace corto"
                           >
                             {copiedSlug === item.slug ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
@@ -328,7 +328,7 @@ export default function ShortLinksManager() {
                           <button
                             type="button"
                             onClick={() => handleEdit(item)}
-                            className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+                            className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600"
                             title="Editar"
                           >
                             <Pencil className="w-4 h-4" />

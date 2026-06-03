@@ -21,10 +21,10 @@ function ToolbarButton({ title, active = false, disabled = false, onClick, icon 
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`h-9 w-9 rounded-lg border text-slate-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+      className={`h-9 w-9 rounded-lg border text-neutral-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
         active
           ? 'border-blue-200 bg-blue-50 text-blue-700'
-          : 'border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-900'
+          : 'border-neutral-200 bg-white hover:bg-neutral-50 hover:text-neutral-900'
       }`}
     >
       <span className="flex items-center justify-center">{icon}</span>
@@ -77,7 +77,7 @@ interface EditorToolbarProps {
 
 export function EditorToolbar({ editor }: EditorToolbarProps) {
   return (
-    <div className="flex flex-wrap gap-2 border-b border-slate-100 bg-slate-50 p-3">
+    <div className="flex flex-wrap gap-2 border-b border-neutral-100 bg-neutral-50 p-3">
       <ToolbarButton title="Negrita" active={editor?.isActive('bold')} disabled={!editor} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold className="w-4 h-4" />} />
       <ToolbarButton title="Cursiva" active={editor?.isActive('italic')} disabled={!editor} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic className="w-4 h-4" />} />
       <ToolbarButton title="Subrayado" active={editor?.isActive('underline')} disabled={!editor} onClick={() => editor?.chain().focus().toggleUnderline().run()} icon={<UnderlineIcon className="w-4 h-4" />} />

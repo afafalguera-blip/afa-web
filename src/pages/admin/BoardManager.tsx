@@ -323,15 +323,15 @@ export default function BoardManager() {
     <div className="max-w-6xl mx-auto space-y-8">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 flex items-center gap-3">
+          <h1 className="text-3xl font-black text-neutral-900 flex items-center gap-3">
             <Users className="w-8 h-8 text-blue-600" />
             Sobre AFA / Junta Directiva
           </h1>
-          <p className="text-slate-500 mt-1">Configura los textos públicos y los miembros visibles en /sobre-afa.</p>
+          <p className="text-neutral-500 mt-1">Configura los textos públicos y los miembros visibles en /sobre-afa.</p>
         </div>
         <button
           onClick={startCreate}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Nuevo miembro
@@ -339,7 +339,7 @@ export default function BoardManager() {
       </header>
 
       {toast && (
-        <div className={`flex items-center gap-2 px-4 py-3 rounded-xl border ${
+        <div className={`flex items-center gap-2 px-4 py-3 rounded-lg border ${
           toast.kind === 'ok'
             ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
             : 'bg-rose-50 border-rose-200 text-rose-800'
@@ -350,9 +350,9 @@ export default function BoardManager() {
       )}
 
       {/* Section copy */}
-      <section className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-900 mb-1">Textos de la página</h2>
-        <p className="text-sm text-slate-500 mb-4">Hero y subtítulos en CA / ES / EN.</p>
+      <section className="bg-white rounded-lg border border-neutral-200 p-6 shadow-sm">
+        <h2 className="text-lg font-bold text-neutral-900 mb-1">Textos de la página</h2>
+        <p className="text-sm text-neutral-500 mb-4">Hero y subtítulos en CA / ES / EN.</p>
 
         <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
           <div className="flex gap-2">
@@ -362,7 +362,7 @@ export default function BoardManager() {
                 type="button"
                 onClick={() => setActiveConfigLang(l)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider ${
-                  activeConfigLang === l ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  activeConfigLang === l ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }`}
               >
                 {l}
@@ -383,44 +383,44 @@ export default function BoardManager() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">Título</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Título</label>
             <input
               value={config.translations?.[activeConfigLang]?.title || ''}
               onChange={e => setConfigField(activeConfigLang, 'title', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">Subtítulo</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Subtítulo</label>
             <input
               value={config.translations?.[activeConfigLang]?.subtitle || ''}
               onChange={e => setConfigField(activeConfigLang, 'subtitle', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">¿Qué es el AFA? (misión)</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block">¿Qué es el AFA? (misión)</label>
             <textarea
               value={config.translations?.[activeConfigLang]?.mission || ''}
               onChange={e => setConfigField(activeConfigLang, 'mission', e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">Título de la sección Junta</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Título de la sección Junta</label>
             <input
               value={config.translations?.[activeConfigLang]?.composition_title || ''}
               onChange={e => setConfigField(activeConfigLang, 'composition_title', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">Intro de la Junta</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Intro de la Junta</label>
             <input
               value={config.translations?.[activeConfigLang]?.composition_intro || ''}
               onChange={e => setConfigField(activeConfigLang, 'composition_intro', e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -438,9 +438,9 @@ export default function BoardManager() {
       </section>
 
       {/* Members list */}
-      <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="font-bold text-slate-900">Miembros ({members.length})</h2>
+      <section className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
+          <h2 className="font-bold text-neutral-900">Miembros ({members.length})</h2>
         </div>
 
         {loading ? (
@@ -449,21 +449,21 @@ export default function BoardManager() {
           </div>
         ) : members.length === 0 ? (
           <div className="p-12 text-center">
-            <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 mb-4">No hay miembros aún.</p>
+            <Users className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+            <p className="text-neutral-500 mb-4">No hay miembros aún.</p>
             <button onClick={startCreate} className="text-blue-600 font-semibold hover:underline">
               Añadir el primero
             </button>
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-neutral-100">
             {members.map((m, idx) => (
-              <li key={m.id} className="flex items-center gap-4 p-4 hover:bg-slate-50">
+              <li key={m.id} className="flex items-center gap-4 p-4 hover:bg-neutral-50">
                 <div className="flex flex-col gap-1">
                   <button
                     onClick={() => move(idx, -1)}
                     disabled={idx === 0}
-                    className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                    className="p-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
                     title="Subir"
                   >
                     <ArrowUp className="w-4 h-4" />
@@ -471,38 +471,38 @@ export default function BoardManager() {
                   <button
                     onClick={() => move(idx, 1)}
                     disabled={idx === members.length - 1}
-                    className="p-1 text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                    className="p-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
                     title="Bajar"
                   >
                     <ArrowDown className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="w-14 h-14 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-14 h-14 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
                   {m.photo_url ? (
                     <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
                   ) : (
-                    <ImageIcon className="w-6 h-6 text-slate-300" />
+                    <ImageIcon className="w-6 h-6 text-neutral-300" />
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-slate-900 truncate">{m.name}</p>
+                    <p className="font-semibold text-neutral-900 truncate">{m.name}</p>
                     {!m.is_visible && (
-                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">
+                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded-full">
                         Oculto
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-500 truncate">{m.role}</p>
-                  {m.email && <p className="text-xs text-slate-400 truncate">{m.email}</p>}
+                  <p className="text-sm text-neutral-500 truncate">{m.role}</p>
+                  {m.email && <p className="text-xs text-neutral-400 truncate">{m.email}</p>}
                 </div>
 
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleToggleVisible(m)}
-                    className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+                    className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg"
                     title={m.is_visible ? 'Ocultar' : 'Mostrar'}
                   >
                     {m.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -531,12 +531,12 @@ export default function BoardManager() {
       {/* Form modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl my-8 max-h-[calc(100vh-4rem)] flex flex-col">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 flex-shrink-0">
-              <h3 className="text-lg font-bold text-slate-900">
+          <div className="bg-white rounded-lg w-full max-w-2xl shadow-2xl my-8 max-h-[calc(100vh-4rem)] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-neutral-100 flex-shrink-0">
+              <h3 className="text-lg font-bold text-neutral-900">
                 {form.id ? 'Editar miembro' : 'Nuevo miembro'}
               </h3>
-              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-lg">
+              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-neutral-100 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -544,20 +544,20 @@ export default function BoardManager() {
             <form onSubmit={handleSave} className="p-5 space-y-4 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Nombre completo *</label>
+                  <label className="text-xs font-semibold text-neutral-600 mb-1 block">Nombre completo *</label>
                   <input
                     required
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Cargo *</label>
+                  <label className="text-xs font-semibold text-neutral-600 mb-1 block">Cargo *</label>
                   <select
                     value={form.role_key}
                     onChange={e => setForm({ ...form, role_key: e.target.value as BoardRoleKey })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     {ROLE_KEYS.map(r => (
                       <option key={r.value} value={r.value}>{r.label}</option>
@@ -565,28 +565,28 @@ export default function BoardManager() {
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Email (opcional)</label>
+                  <label className="text-xs font-semibold text-neutral-600 mb-1 block">Email (opcional)</label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
 
               {/* Photo */}
               <div>
-                <label className="text-xs font-semibold text-slate-600 mb-1 block">Foto</label>
+                <label className="text-xs font-semibold text-neutral-600 mb-1 block">Foto</label>
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
                     {form.photo_url ? (
                       <img src={form.photo_url} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <ImageIcon className="w-8 h-8 text-slate-300" />
+                      <ImageIcon className="w-8 h-8 text-neutral-300" />
                     )}
                   </div>
-                  <label className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 text-sm font-semibold text-slate-700">
+                  <label className="flex items-center gap-2 px-3 py-2 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50 text-sm font-semibold text-neutral-700">
                     <Upload className="w-4 h-4" />
                     {uploading ? 'Subiendo...' : 'Subir foto'}
                     <input
@@ -612,9 +612,9 @@ export default function BoardManager() {
               </div>
 
               {/* Translations */}
-              <div className="border-t border-slate-100 pt-4">
+              <div className="border-t border-neutral-100 pt-4">
                 <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-                  <p className="text-xs font-semibold text-slate-600">Traducciones (cargo descriptivo + bio)</p>
+                  <p className="text-xs font-semibold text-neutral-600">Traducciones (cargo descriptivo + bio)</p>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -633,7 +633,7 @@ export default function BoardManager() {
                           type="button"
                           onClick={() => setActiveLang(l)}
                           className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase ${
-                            activeLang === l ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
+                            activeLang === l ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-600'
                           }`}
                         >
                           {l}
@@ -645,7 +645,7 @@ export default function BoardManager() {
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs text-slate-500 mb-1 block">Cargo (texto público)</label>
+                    <label className="text-xs text-neutral-500 mb-1 block">Cargo (texto público)</label>
                     <input
                       value={form.translations[activeLang].role}
                       onChange={e => setForm({
@@ -656,11 +656,11 @@ export default function BoardManager() {
                         },
                       })}
                       placeholder={ROLE_KEYS.find(r => r.value === form.role_key)?.label}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-500 mb-1 block">Bio breve (opcional)</label>
+                    <label className="text-xs text-neutral-500 mb-1 block">Bio breve (opcional)</label>
                     <textarea
                       value={form.translations[activeLang].bio}
                       rows={3}
@@ -671,7 +671,7 @@ export default function BoardManager() {
                           [activeLang]: { ...form.translations[activeLang], bio: e.target.value },
                         },
                       })}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -682,17 +682,17 @@ export default function BoardManager() {
                   type="checkbox"
                   checked={form.is_visible}
                   onChange={e => setForm({ ...form, is_visible: e.target.checked })}
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm text-slate-700">Visible en la web pública</span>
+                <span className="text-sm text-neutral-700">Visible en la web pública</span>
               </label>
             </form>
 
-            <div className="flex justify-end gap-2 p-5 border-t border-slate-100 flex-shrink-0">
+            <div className="flex justify-end gap-2 p-5 border-t border-neutral-100 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 border border-slate-200 rounded-lg font-semibold text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 border border-neutral-200 rounded-lg font-semibold text-neutral-600 hover:bg-neutral-50"
               >
                 Cancelar
               </button>

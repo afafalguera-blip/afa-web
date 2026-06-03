@@ -15,11 +15,11 @@ export function ProjectCard({ project, onEdit, onDelete, onToggleArchive }: Proj
 
   return (
     <div
-      className={`bg-white rounded-xl border shadow-sm overflow-hidden transition-all hover:shadow-md ${
-        project.status === 'archived' ? 'border-slate-300 opacity-70' : 'border-slate-200'
+      className={`bg-white rounded-lg border shadow-sm overflow-hidden transition-all hover:shadow-sm ${
+        project.status === 'archived' ? 'border-neutral-300 opacity-70' : 'border-neutral-200'
       }`}
     >
-      <div className="aspect-video bg-slate-100 relative">
+      <div className="aspect-video bg-neutral-100 relative">
         <img
           src={proxyStorageUrl(project.image_url) || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop'}
           alt={project.title}
@@ -28,17 +28,17 @@ export function ProjectCard({ project, onEdit, onDelete, onToggleArchive }: Proj
       </div>
       <div className="p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-slate-900">{project.title}</h3>
+          <h3 className="font-semibold text-neutral-900">{project.title}</h3>
           {project.status === 'archived' && (
-            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
+            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-600">
               {t('admin.projects.status_archived')}
             </span>
           )}
         </div>
         {project.description && (
-          <p className="text-sm text-slate-500 line-clamp-3 mb-4">{project.description}</p>
+          <p className="text-sm text-neutral-500 line-clamp-3 mb-4">{project.description}</p>
         )}
-        <div className="flex items-center gap-1 pt-4 border-t border-slate-100">
+        <div className="flex items-center gap-1 pt-4 border-t border-neutral-100">
           <button
             onClick={() => onToggleArchive(project)}
             className={`p-2 rounded-lg transition-colors ${

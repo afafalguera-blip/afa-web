@@ -16,7 +16,7 @@ export function ExportOptionsModal({ isOpen, onClose, onExport, count }: ExportO
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+      <div className="bg-white rounded-lg shadow-sm w-full max-w-md">
         <div className="p-6 border-b flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900">Opcions d'Exportació</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -29,7 +29,7 @@ export function ExportOptionsModal({ isOpen, onClose, onExport, count }: ExportO
             <label className="text-sm font-medium text-gray-700">Contingut:</label>
             
             <div className="space-y-3">
-              <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+              <label className="flex items-start gap-3 p-3 rounded-lg border border-neutral-200 cursor-pointer hover:bg-neutral-50 transition-colors">
                 <input 
                   type="radio" 
                   name="exportType" 
@@ -38,12 +38,12 @@ export function ExportOptionsModal({ isOpen, onClose, onExport, count }: ExportO
                   className="mt-1"
                 />
                 <div>
-                  <span className="block font-medium text-slate-900">Totes les dades (Complet)</span>
-                  <span className="text-xs text-slate-500">Inclou dades de contacte, salut, autoritzacions, etc. ideal per a fitxes.</span>
+                  <span className="block font-medium text-neutral-900">Totes les dades (Complet)</span>
+                  <span className="text-xs text-neutral-500">Inclou dades de contacte, salut, autoritzacions, etc. ideal per a fitxes.</span>
                 </div>
               </label>
 
-              <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+              <label className="flex items-start gap-3 p-3 rounded-lg border border-neutral-200 cursor-pointer hover:bg-neutral-50 transition-colors">
                 <input 
                   type="radio" 
                   name="exportType" 
@@ -52,8 +52,8 @@ export function ExportOptionsModal({ isOpen, onClose, onExport, count }: ExportO
                   className="mt-1"
                 />
                 <div>
-                  <span className="block font-medium text-slate-900">Llistat Simple</span>
-                  <span className="text-xs text-slate-500">Nom, curs i activitat. Ideal per a llistes d'assistència.</span>
+                  <span className="block font-medium text-neutral-900">Llistat Simple</span>
+                  <span className="text-xs text-neutral-500">Nom, curs i activitat. Ideal per a llistes d'assistència.</span>
                 </div>
               </label>
             </div>

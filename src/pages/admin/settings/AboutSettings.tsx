@@ -39,22 +39,22 @@ export function AboutSettings({ about, setAbout, activeLang, setActiveLang }: Ab
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-50 dark:border-slate-700 pb-4 mb-6">
-                <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+        <div className="bg-white dark:bg-neutral-800 rounded-3xl p-8 shadow-sm border border-neutral-100 dark:border-neutral-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-50 dark:border-neutral-700 pb-4 mb-6">
+                <h3 className="text-xl font-bold text-neutral-800 dark:text-white">
                     Informació Corporativa (Sobre l'AFA)
                 </h3>
 
                 {/* Language Switcher for About */}
-                <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
+                <div className="flex p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg w-fit">
                     {(['ca', 'es', 'en'] as const).map((lang) => (
                         <button
                             key={lang}
                             type="button"
                             onClick={() => setActiveLang(lang)}
                             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
-                                ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-                                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                                ? 'bg-white dark:bg-neutral-700 text-primary shadow-sm'
+                                : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
                                 }`}
                         >
                             {lang.toUpperCase()}
@@ -64,13 +64,13 @@ export function AboutSettings({ about, setAbout, activeLang, setActiveLang }: Ab
             </div>
 
             <div className="space-y-6">
-                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4">
+                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20 mb-4">
                     <Globe size={18} />
                     <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Descripció Principal (Qui som)</label>
+                    <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300">Descripció Principal (Qui som)</label>
                     <textarea
                         required
                         value={about.translations?.[activeLang]?.text || ""}
@@ -85,14 +85,14 @@ export function AboutSettings({ about, setAbout, activeLang, setActiveLang }: Ab
                             setAbout({ ...about, translations: newTranslations });
                         }}
                         rows={8}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed"
+                        className="w-full px-4 py-3 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed"
                         placeholder="Explica la missió i valors de l'AFA..."
                     />
                 </div>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Funcions de l'AFA (Llista)</label>
+                        <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300">Funcions de l'AFA (Llista)</label>
                         <button
                             type="button"
                             onClick={addAboutFunction}
@@ -105,27 +105,27 @@ export function AboutSettings({ about, setAbout, activeLang, setActiveLang }: Ab
                     <div className="space-y-3">
                         {(about.translations?.[activeLang]?.functions || []).map((func, index) => (
                             <div key={index} className="flex gap-2">
-                                <div className="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-lg text-xs font-bold shrink-0 mt-2">
+                                <div className="w-8 h-8 flex items-center justify-center bg-neutral-100 dark:bg-neutral-700 rounded-lg text-xs font-bold shrink-0 mt-2">
                                     {index + 1}
                                 </div>
                                 <input
                                     type="text"
                                     value={func}
                                     onChange={(e) => handleAboutFunctionChange(index, e.target.value)}
-                                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm"
+                                    className="flex-1 px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm"
                                     placeholder="Ex: Representar les famílies davant l'escola"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => removeAboutFunction(index)}
-                                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                                    className="p-2 text-neutral-400 hover:text-red-500 transition-colors"
                                 >
                                     <X size={18} />
                                 </button>
                             </div>
                         ))}
                         {(about.translations?.[activeLang]?.functions || []).length === 0 && (
-                            <p className="text-xs text-slate-400 italic text-center py-4">No hi ha funcions definides.</p>
+                            <p className="text-xs text-neutral-400 italic text-center py-4">No hi ha funcions definides.</p>
                         )}
                     </div>
                 </div>

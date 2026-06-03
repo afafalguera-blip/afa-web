@@ -13,13 +13,13 @@ export function ProjectsHeader({ loading, onRefresh, onCreate }: ProjectsHeaderP
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">{t('admin.projects.title')}</h1>
-        <p className="text-slate-500">{t('admin.projects.subtitle')}</p>
+        <h1 className="text-2xl font-bold text-neutral-900">{t('admin.projects.title')}</h1>
+        <p className="text-neutral-500">{t('admin.projects.subtitle')}</p>
       </div>
       <div className="flex gap-2">
         <button
           onClick={onRefresh}
-          className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
           title={t('common.refresh')}
         >
           <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />

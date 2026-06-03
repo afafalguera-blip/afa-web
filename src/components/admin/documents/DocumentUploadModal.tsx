@@ -48,23 +48,23 @@ export function DocumentUploadModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-                <div className="flex justify-between items-center p-8 border-b border-slate-100 dark:border-slate-800">
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+        <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-neutral-200 dark:border-neutral-800 animate-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center p-8 border-b border-neutral-100 dark:border-neutral-800">
+                    <h2 className="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
                         {t('admin.documents.upload_title', 'Pujar Document')}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                        className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
                     >
-                        <X className="w-6 h-6 text-slate-400" />
+                        <X className="w-6 h-6 text-neutral-400" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
                             {t('admin.documents.field_title', 'Títol')} *
                         </label>
                         <input
@@ -72,19 +72,19 @@ export function DocumentUploadModal({
                             required
                             value={formData.title}
                             onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-2xl outline-none transition-all text-slate-900 dark:text-white font-medium shadow-inner"
+                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner"
                             placeholder={t('admin.documents.title_placeholder', 'Nom del document')}
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
                             {t('admin.documents.field_category', 'Categoria')}
                         </label>
                         <select
                             value={formData.category}
                             onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                            className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-2xl outline-none transition-all text-slate-900 dark:text-white font-medium shadow-inner appearance-none cursor-pointer"
+                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner appearance-none cursor-pointer"
                         >
                             {CATEGORIES.map(cat => (
                                 <option key={cat} value={cat} className="capitalize">{cat}</option>
@@ -93,19 +93,19 @@ export function DocumentUploadModal({
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
                             {t('admin.documents.field_description', 'Descripció (Opcional)')}
                         </label>
                         <textarea
                             value={formData.description}
                             onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                            className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-2xl outline-none transition-all text-slate-900 dark:text-white font-medium shadow-inner resize-none"
+                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner resize-none"
                             rows={2}
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
                             {t('admin.documents.field_file', 'Fitxer')} *
                         </label>
                         <div className="relative">
@@ -118,10 +118,10 @@ export function DocumentUploadModal({
                             />
                             <label
                                 htmlFor="file-upload"
-                                className="flex items-center gap-3 w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group"
+                                className="flex items-center gap-3 w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group"
                             >
-                                <FileUp className="w-5 h-5 text-slate-400 group-hover:text-primary" />
-                                <span className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary truncate">
+                                <FileUp className="w-5 h-5 text-neutral-400 group-hover:text-primary" />
+                                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 group-hover:text-primary truncate">
                                     {formData.file ? formData.file.name : t('admin.documents.choose_file', 'Seleccionar fitxer')}
                                 </span>
                             </label>
@@ -132,14 +132,14 @@ export function DocumentUploadModal({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-8 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                            className="px-8 py-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-700 dark:text-neutral-300 font-bold hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all shadow-sm"
                         >
                             {t('common.cancel', 'Cancel·lar')}
                         </button>
                         <button
                             type="submit"
                             disabled={uploading || !formData.file || !formData.title}
-                            className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl font-black hover:bg-primary/90 transition-all disabled:opacity-50 shadow-xl shadow-primary/20 active:scale-95"
+                            className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-lg font-black hover:bg-primary/90 transition-all disabled:opacity-50 shadow-sm shadow-primary/20 active:scale-95"
                         >
                             {uploading && <Loader2 className="w-5 h-5 animate-spin" />}
                             {uploading ? t('common.uploading', 'Pujant...') : t('admin.documents.upload_btn', 'Pujar Document')}

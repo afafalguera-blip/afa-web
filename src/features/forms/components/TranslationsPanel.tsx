@@ -105,7 +105,7 @@ export default function TranslationsPanel() {
   const currentTx = (getValues(`translations.${activeLang}`) as FormTranslation) || {};
 
   return (
-    <section className="bg-gradient-to-br from-violet-50 to-blue-50 p-3 sm:p-5 rounded-lg border border-violet-100 space-y-4">
+    <section className="bg-neutral-50 p-3 sm:p-5 rounded-lg border border-neutral-200 space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
           <Languages className="w-5 h-5 text-violet-600" />

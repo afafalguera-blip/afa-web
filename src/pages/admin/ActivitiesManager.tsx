@@ -61,7 +61,7 @@ export default function ActivitiesManager() {
       <ActivityAdminHeader onCreate={handleCreate} />
 
       {error && (
-        <div className="bg-red-50 text-red-800 p-4 rounded-xl mb-6 flex items-center gap-3 border border-red-200">
+        <div className="bg-red-50 text-red-800 p-4 rounded-lg mb-6 flex items-center gap-3 border border-red-200">
           <AlertCircle className="w-5 h-5" />
           {error}
         </div>
@@ -69,7 +69,7 @@ export default function ActivitiesManager() {
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <div key={i} className="h-64 bg-slate-100 rounded-2xl animate-pulse"></div>)}
+          {[1, 2, 3].map(i => <div key={i} className="h-64 bg-neutral-100 rounded-lg animate-pulse"></div>)}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
