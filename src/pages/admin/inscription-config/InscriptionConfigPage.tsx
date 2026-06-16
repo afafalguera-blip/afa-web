@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ClipboardList, Save, CalendarRange, FileText, ListChecks, CheckCircle2, AlertCircle } from 'lucide-react';
 import { ConfigService, type InscriptionFormConfig } from '../../../services/ConfigService';
+import { TranslationService } from '../../../services/TranslationService';
 import SeasonSettings from '../settings/SeasonSettings';
 import { TextosTab } from './TextosTab';
 import { CampsTab } from './CampsTab';
@@ -43,6 +44,30 @@ export default function InscriptionConfigPage() {
     });
   }, []);
 
+  // Auto-translate (like the news editor): fields filled in the active language
+  // are translated into the other two, only where the target is still empty.
+  const autoTranslateContent = async (
+    content: InscriptionFormConfig['content'],
+  ): Promise<InscriptionFormConfig['content']> => {
+    const src = content[activeLang] as Record<string, string>;
+    const fields: Record<string, string> = {};
+    for (const [k, v] of Object.entries(src)) {
+      if (typeof v === 'string' && v.trim()) fields[k] = v;
+    }
+    if (Object.keys(fields).length === 0) return content;
+
+    const targets = (['ca', 'es', 'en'] as Lang[]).filter(l => l !== activeLang);
+    const result = await TranslationService.translateBulk(fields, activeLang, targets);
+    const next = { ca: { ...content.ca }, es: { ...content.es }, en: { ...content.en } };
+    for (const lang of targets) {
+      const block = next[lang] as Record<string, string>;
+      for (const k of Object.keys(fields)) {
+        if (!block[k] || !block[k].trim()) block[k] = result[lang]?.[k] || '';
+      }
+    }
+    return next;
+  };
+
   const handleSave = async () => {
     if (!cfg) return;
     setSaving(true); setSuccess(false); setError(null);
@@ -51,7 +76,17 @@ export default function InscriptionConfigPage() {
       const keys = cfg.customQuestions.map(q => q.key);
       if (keys.some(k => !k)) throw new Error('Hi ha preguntes sense clau.');
       if (new Set(keys).size !== keys.length) throw new Error('Hi ha claus de pregunta duplicades.');
-      await ConfigService.updateInscriptionFormConfig(cfg);
+
+      // Auto-fill the other languages from the active one before saving.
+      let content = cfg.content;
+      try {
+        content = await autoTranslateContent(cfg.content);
+        if (content !== cfg.content) setCfg({ ...cfg, content });
+      } catch (txErr) {
+        console.error('Auto-translate failed, saving without translations:', txErr);
+      }
+
+      await ConfigService.updateInscriptionFormConfig({ ...cfg, content });
       setLockedKeys(new Set(keys));
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
