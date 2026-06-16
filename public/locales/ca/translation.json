@@ -53,9 +53,18 @@
       "vocal": "Vocal"
     },
     "pillars": {
-      "families": { "title": "Famílies que sumen", "desc": "Tota família matriculada n'és part i pot participar a l'assemblea i les comissions." },
-      "mission": { "title": "Missió", "desc": "Acompanyar el projecte educatiu i organitzar activitats per a l'alumnat i les famílies." },
-      "nonprofit": { "title": "Sense ànim de lucre", "desc": "Tots els recursos es reinverteixen en l'escola i la comunitat educativa." }
+      "families": {
+        "title": "Famílies que sumen",
+        "desc": "Tota família matriculada n'és part i pot participar a l'assemblea i les comissions."
+      },
+      "mission": {
+        "title": "Missió",
+        "desc": "Acompanyar el projecte educatiu i organitzar activitats per a l'alumnat i les famílies."
+      },
+      "nonprofit": {
+        "title": "Sense ànim de lucre",
+        "desc": "Tots els recursos es reinverteixen en l'escola i la comunitat educativa."
+      }
     },
     "cta": {
       "title": "Vols formar part de l'AFA?",
@@ -76,9 +85,18 @@
     "title": "Servei d'Acollida",
     "intro": "Espai segur i acompanyat abans i després de l'horari escolar perquè les famílies puguin conciliar amb tranquil·litat.",
     "info": {
-      "schedule": { "title": "Horaris flexibles", "body": "Disponibilitat al matí abans d'entrar a classe i a la tarda en sortir, segons les necessitats de cada família." },
-      "team": { "title": "Equip educatiu", "body": "Monitoratge titulat que acompanya l'estona amb jocs, lectures i petites activitats adaptades a cada edat." },
-      "flex": { "title": "Mensual o ocasional", "body": "Pots contractar el servei tot el mes o utilitzar-lo en dies puntuals quan ho necessitis." }
+      "schedule": {
+        "title": "Horaris flexibles",
+        "body": "Disponibilitat al matí abans d'entrar a classe i a la tarda en sortir, segons les necessitats de cada família."
+      },
+      "team": {
+        "title": "Equip educatiu",
+        "body": "Monitoratge titulat que acompanya l'estona amb jocs, lectures i petites activitats adaptades a cada edat."
+      },
+      "flex": {
+        "title": "Mensual o ocasional",
+        "body": "Pots contractar el servei tot el mes o utilitzar-lo en dies puntuals quan ho necessitis."
+      }
     },
     "rates_title": "Tarifes",
     "rates_subtitle": "Preus per a famílies sòcies i no sòcies de l'AFA. Mensual o ocasional.",
@@ -126,14 +144,38 @@
       "eyebrow": "Línia del temps",
       "title": "Moments que ens han fet",
       "intro": "Cinc dècades en un cop d'ull.",
-      "1971": { "title": "Comença la construcció", "desc": "L'Ajuntament cedeix els terrenys darrere del Palau Falguera per fer una escola pública nova." },
-      "1972": { "title": "Inauguració del Colegio Modelo", "desc": "L'11 de desembre obre les portes una de les cinc \"escoles sense portes\" de tot l'Estat." },
-      "1976": { "title": "Primeres classes en català", "desc": "S'introdueixen les primeres classes en català dins l'aula." },
-      "1985": { "title": "Immersió lingüística", "desc": "El centre s'incorpora plenament al programa d'immersió en català i passa a dues línies." },
-      "1988": { "title": "Nou nom: Escola Falguera", "desc": "La comunitat decideix canviar el nom per honorar el barri i marcar una nova etapa." },
-      "1997": { "title": "Edifici nou", "desc": "L'escola es trasllada a un nou edifici al carrer Sant Josep, coincidint amb el 25è aniversari." },
-      "2012": { "title": "Renovació integral", "desc": "Es modernitzen aules i espais comuns per adaptar-los a la pedagogia actual." },
-      "2022": { "title": "50 anys d'escola", "desc": "Mig segle de comunitat educativa al barri de Falguera." }
+      "1971": {
+        "title": "Comença la construcció",
+        "desc": "L'Ajuntament cedeix els terrenys darrere del Palau Falguera per fer una escola pública nova."
+      },
+      "1972": {
+        "title": "Inauguració del Colegio Modelo",
+        "desc": "L'11 de desembre obre les portes una de les cinc \"escoles sense portes\" de tot l'Estat."
+      },
+      "1976": {
+        "title": "Primeres classes en català",
+        "desc": "S'introdueixen les primeres classes en català dins l'aula."
+      },
+      "1985": {
+        "title": "Immersió lingüística",
+        "desc": "El centre s'incorpora plenament al programa d'immersió en català i passa a dues línies."
+      },
+      "1988": {
+        "title": "Nou nom: Escola Falguera",
+        "desc": "La comunitat decideix canviar el nom per honorar el barri i marcar una nova etapa."
+      },
+      "1997": {
+        "title": "Edifici nou",
+        "desc": "L'escola es trasllada a un nou edifici al carrer Sant Josep, coincidint amb el 25è aniversari."
+      },
+      "2012": {
+        "title": "Renovació integral",
+        "desc": "Es modernitzen aules i espais comuns per adaptar-los a la pedagogia actual."
+      },
+      "2022": {
+        "title": "50 anys d'escola",
+        "desc": "Mig segle de comunitat educativa al barri de Falguera."
+      }
     },
     "name": {
       "eyebrow": "1988 · Un nom propi",
@@ -145,10 +187,22 @@
       "eyebrow": "Avui",
       "title": "Una escola en acció constant",
       "intro": "Mig segle després, la Falguera continua sent un projecte viu, arrelat al barri i obert al món.",
-      "green": { "title": "Escola Verda", "desc": "Hort escolar, sostenibilitat i activitats a la natura aprofitant la proximitat al riu i a Collserola." },
-      "cordes": { "title": "Projecte Cordes", "desc": "Aprenentatge d'instruments de corda dins l'aula, en col·laboració amb l'Escola Municipal de Música del Palau Falguera." },
-      "steam": { "title": "STE(IA)M", "desc": "Ciència, tecnologia, art i intel·ligència artificial integrades al currículum amb experiències pràctiques." },
-      "community": { "title": "Comunitat AFA", "desc": "Extraescolars, acollida i menjador amb cuina pròpia: les famílies fan possible el dia a dia de l'escola." }
+      "green": {
+        "title": "Escola Verda",
+        "desc": "Hort escolar, sostenibilitat i activitats a la natura aprofitant la proximitat al riu i a Collserola."
+      },
+      "cordes": {
+        "title": "Projecte Cordes",
+        "desc": "Aprenentatge d'instruments de corda dins l'aula, en col·laboració amb l'Escola Municipal de Música del Palau Falguera."
+      },
+      "steam": {
+        "title": "STE(IA)M",
+        "desc": "Ciència, tecnologia, art i intel·ligència artificial integrades al currículum amb experiències pràctiques."
+      },
+      "community": {
+        "title": "Comunitat AFA",
+        "desc": "Extraescolars, acollida i menjador amb cuina pròpia: les famílies fan possible el dia a dia de l'escola."
+      }
     },
     "palau": {
       "eyebrow": "El nostre nom",
@@ -227,9 +281,9 @@
       "subtitle": "Mantén-te al dia de tot el que passa a la nostra escola i dels projectes de l'AFA."
     },
     "assemblea_banner": {
-       "tag": "Documentació",
-       "title": "Assemblea General",
-       "description": "Resum d'acords, estat de comptes i nous projectes de l'AFA."
+      "tag": "Documentació",
+      "title": "Assemblea General",
+      "description": "Resum d'acords, estat de comptes i nous projectes de l'AFA."
     },
     "contact_banner": {
       "tag": "Cita Prèvia",
@@ -306,11 +360,11 @@
       "economics": {
         "title": "Situació Econòmica",
         "items": [
-           "Saldo positiu i estalvi de seguretat.",
-           "Sense deutes ni pagaments pendents.",
-           "Increment de la recaptació gràcies a l'alta participació.",
-           "Fons de reserva destinat a futures inversions.",
-           "Gestió transparent i auditada."
+          "Saldo positiu i estalvi de seguretat.",
+          "Sense deutes ni pagaments pendents.",
+          "Increment de la recaptació gràcies a l'alta participació.",
+          "Fons de reserva destinat a futures inversions.",
+          "Gestió transparent i auditada."
         ]
       },
       "investments": {
@@ -324,26 +378,26 @@
         ]
       },
       "functions": {
-         "title": "Funcions de l'AFA",
-         "items": [
-           "Gestió d'extraescolars",
-           "Organització de festes",
-           "Recaptació de fons",
-           "Intermediació famílies-escola",
-           "Millora d'instal·lacions",
-           "Socialització de llibres",
-           "Suport a famílies"
-         ]
+        "title": "Funcions de l'AFA",
+        "items": [
+          "Gestió d'extraescolars",
+          "Organització de festes",
+          "Recaptació de fons",
+          "Intermediació famílies-escola",
+          "Millora d'instal·lacions",
+          "Socialització de llibres",
+          "Suport a famílies"
+        ]
       },
       "quota": {
-         "title": "A què destinem la quota?",
-         "items": [
-           "Material escolar col·lectiu",
-           "Festes tradicionales (Castanyada, etc.)",
-           "Xerrades educatives",
-           "Digitalització de l'escola",
-           "Fons d'ajuda escolar"
-         ]
+        "title": "A què destinem la quota?",
+        "items": [
+          "Material escolar col·lectiu",
+          "Festes tradicionales (Castanyada, etc.)",
+          "Xerrades educatives",
+          "Digitalització de l'escola",
+          "Fons d'ajuda escolar"
+        ]
       },
       "importance": {
         "title": "Per què és important participar?",
@@ -354,28 +408,28 @@
       "projects": {
         "title": "Projectes i Millores",
         "commissions": {
-           "title": "Comissions de Famílies",
-           "desc": "Grups actius de famílies que treballen per millorar l'escola i dinamitzar la comunitat educativa."
+          "title": "Comissions de Famílies",
+          "desc": "Grups actius de famílies que treballen per millorar l'escola i dinamitzar la comunitat educativa."
         },
         "done": {
-           "title": "Fet (24-25)",
-           "desc": "Projectes i millores executades amb èxit durant el darrer curs.",
-           "items": [
-             "Pintura pista",
-             "Hort escolar",
-             "Ombra infantil",
-             "Banc de llibres"
-           ]
+          "title": "Fet (24-25)",
+          "desc": "Projectes i millores executades amb èxit durant el darrer curs.",
+          "items": [
+            "Pintura pista",
+            "Hort escolar",
+            "Ombra infantil",
+            "Banc de llibres"
+          ]
         },
         "future": {
-           "title": "Propera (25-26)",
-           "desc": "Nous reptes i iniciatives planificades per al curs vinent.",
-           "items": [
-             "Renovació biblioteca",
-             "Pati inclusiu",
-             "Cuina pròpia",
-             "Aula polivalent"
-           ]
+          "title": "Propera (25-26)",
+          "desc": "Nous reptes i iniciatives planificades per al curs vinent.",
+          "items": [
+            "Renovació biblioteca",
+            "Pati inclusiu",
+            "Cuina pròpia",
+            "Aula polivalent"
+          ]
         }
       },
       "board_change": {
@@ -675,7 +729,8 @@
       "notifications": "Notificacions",
       "system": "Sistema",
       "observability": "Auditoria",
-      "logout": "Tancar Sessió"
+      "logout": "Tancar Sessió",
+      "faq": "FAQ"
     },
     "acollidaManager": {
       "addRate": "Afegir Nova Tarifa",
@@ -972,6 +1027,27 @@
       "mark_done": "Marcar com feta",
       "reopen": "Reobrir",
       "overdue_badge": "Vençuda"
+    },
+    "faq": {
+      "title": "Preguntes frequents",
+      "subtitle": "Gestiona les FAQ de la seccio d'extraescolars.",
+      "new": "Nova pregunta",
+      "edit": "Edita la pregunta",
+      "empty": "Encara no hi ha preguntes. Crea la primera.",
+      "delete_confirm": "Vols eliminar aquesta pregunta?",
+      "required": "La pregunta i la resposta (ES) son obligatories.",
+      "fill_source_first": "Omple primer la pregunta en l'idioma d'origen.",
+      "auto_translate": "Auto-tradueix",
+      "translating": "Traduint...",
+      "field_category": "Categoria",
+      "category_placeholder": "Ex.: Inscripcions, places i llista d'espera",
+      "category_hint": "Les preguntes amb la mateixa categoria s'agrupen juntes.",
+      "field_question": "Pregunta",
+      "field_answer": "Resposta",
+      "field_order": "Ordre",
+      "field_active": "Visible",
+      "hide": "Amaga",
+      "show": "Mostra"
     }
   },
   "common": {
@@ -1197,5 +1273,9 @@
       "actions_col": "Accions",
       "exported_on": "Exportat {{date}}"
     }
+  },
+  "faq": {
+    "title": "Preguntes freqüents",
+    "subtitle": "Resolem els dubtes més habituals sobre les extraescolars."
   }
 }

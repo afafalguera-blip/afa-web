@@ -53,9 +53,18 @@
       "vocal": "Vocal"
     },
     "pillars": {
-      "families": { "title": "Familias que suman", "desc": "Toda familia matriculada forma parte y puede participar en la asamblea y comisiones." },
-      "mission": { "title": "Misión", "desc": "Acompañar el proyecto educativo y organizar actividades para el alumnado y las familias." },
-      "nonprofit": { "title": "Sin ánimo de lucro", "desc": "Todos los recursos se reinvierten en la escuela y la comunidad educativa." }
+      "families": {
+        "title": "Familias que suman",
+        "desc": "Toda familia matriculada forma parte y puede participar en la asamblea y comisiones."
+      },
+      "mission": {
+        "title": "Misión",
+        "desc": "Acompañar el proyecto educativo y organizar actividades para el alumnado y las familias."
+      },
+      "nonprofit": {
+        "title": "Sin ánimo de lucro",
+        "desc": "Todos los recursos se reinvierten en la escuela y la comunidad educativa."
+      }
     },
     "cta": {
       "title": "¿Quieres formar parte del AFA?",
@@ -76,9 +85,18 @@
     "title": "Servicio de Acogida",
     "intro": "Espacio seguro y acompañado antes y después del horario escolar para que las familias puedan conciliar con tranquilidad.",
     "info": {
-      "schedule": { "title": "Horarios flexibles", "body": "Disponibilidad por la mañana antes de entrar a clase y por la tarde al salir, según las necesidades de cada familia." },
-      "team": { "title": "Equipo educativo", "body": "Monitorado titulado que acompaña el rato con juegos, lecturas y pequeñas actividades adaptadas a cada edad." },
-      "flex": { "title": "Mensual u ocasional", "body": "Puedes contratar el servicio todo el mes o usarlo en días puntuales cuando lo necesites." }
+      "schedule": {
+        "title": "Horarios flexibles",
+        "body": "Disponibilidad por la mañana antes de entrar a clase y por la tarde al salir, según las necesidades de cada familia."
+      },
+      "team": {
+        "title": "Equipo educativo",
+        "body": "Monitorado titulado que acompaña el rato con juegos, lecturas y pequeñas actividades adaptadas a cada edad."
+      },
+      "flex": {
+        "title": "Mensual u ocasional",
+        "body": "Puedes contratar el servicio todo el mes o usarlo en días puntuales cuando lo necesites."
+      }
     },
     "rates_title": "Tarifas",
     "rates_subtitle": "Precios para familias socias y no socias del AFA. Mensual u ocasional.",
@@ -126,14 +144,38 @@
       "eyebrow": "Línea del tiempo",
       "title": "Momentos que nos han hecho",
       "intro": "Cinco décadas de un vistazo.",
-      "1971": { "title": "Empieza la construcción", "desc": "El Ayuntamiento cede los terrenos detrás del Palau Falguera para hacer una nueva escuela pública." },
-      "1972": { "title": "Inauguración del Colegio Modelo", "desc": "El 11 de diciembre abre sus puertas una de las cinco \"escuelas sin puertas\" del país." },
-      "1976": { "title": "Primeras clases en catalán", "desc": "Se introducen las primeras clases en catalán dentro del aula." },
-      "1985": { "title": "Inmersión lingüística", "desc": "El centro se incorpora plenamente al programa de inmersión en catalán y pasa a dos líneas." },
-      "1988": { "title": "Nuevo nombre: Escola Falguera", "desc": "La comunidad decide cambiar el nombre para honrar al barrio y marcar una nueva etapa." },
-      "1997": { "title": "Edificio nuevo", "desc": "La escuela se traslada a un nuevo edificio en la calle Sant Josep, coincidiendo con el 25 aniversario." },
-      "2012": { "title": "Renovación integral", "desc": "Se modernizan aulas y espacios comunes para adaptarlos a la pedagogía actual." },
-      "2022": { "title": "50 años de escuela", "desc": "Medio siglo de comunidad educativa en el barrio de Falguera." }
+      "1971": {
+        "title": "Empieza la construcción",
+        "desc": "El Ayuntamiento cede los terrenos detrás del Palau Falguera para hacer una nueva escuela pública."
+      },
+      "1972": {
+        "title": "Inauguración del Colegio Modelo",
+        "desc": "El 11 de diciembre abre sus puertas una de las cinco \"escuelas sin puertas\" del país."
+      },
+      "1976": {
+        "title": "Primeras clases en catalán",
+        "desc": "Se introducen las primeras clases en catalán dentro del aula."
+      },
+      "1985": {
+        "title": "Inmersión lingüística",
+        "desc": "El centro se incorpora plenamente al programa de inmersión en catalán y pasa a dos líneas."
+      },
+      "1988": {
+        "title": "Nuevo nombre: Escola Falguera",
+        "desc": "La comunidad decide cambiar el nombre para honrar al barrio y marcar una nueva etapa."
+      },
+      "1997": {
+        "title": "Edificio nuevo",
+        "desc": "La escuela se traslada a un nuevo edificio en la calle Sant Josep, coincidiendo con el 25 aniversario."
+      },
+      "2012": {
+        "title": "Renovación integral",
+        "desc": "Se modernizan aulas y espacios comunes para adaptarlos a la pedagogía actual."
+      },
+      "2022": {
+        "title": "50 años de escuela",
+        "desc": "Medio siglo de comunidad educativa en el barrio de Falguera."
+      }
     },
     "name": {
       "eyebrow": "1988 · Un nombre propio",
@@ -145,10 +187,22 @@
       "eyebrow": "Hoy",
       "title": "Una escuela en acción constante",
       "intro": "Medio siglo después, la Falguera sigue siendo un proyecto vivo, arraigado al barrio y abierto al mundo.",
-      "green": { "title": "Escuela Verde", "desc": "Huerto escolar, sostenibilidad y actividades en la naturaleza aprovechando la proximidad al río y a Collserola." },
-      "cordes": { "title": "Proyecto Cuerdas", "desc": "Aprendizaje de instrumentos de cuerda dentro del aula, en colaboración con la Escuela Municipal de Música del Palau Falguera." },
-      "steam": { "title": "STE(IA)M", "desc": "Ciencia, tecnología, arte e inteligencia artificial integradas en el currículo con experiencias prácticas." },
-      "community": { "title": "Comunidad AFA", "desc": "Extraescolares, acogida y comedor con cocina propia: las familias hacen posible el día a día de la escuela." }
+      "green": {
+        "title": "Escuela Verde",
+        "desc": "Huerto escolar, sostenibilidad y actividades en la naturaleza aprovechando la proximidad al río y a Collserola."
+      },
+      "cordes": {
+        "title": "Proyecto Cuerdas",
+        "desc": "Aprendizaje de instrumentos de cuerda dentro del aula, en colaboración con la Escuela Municipal de Música del Palau Falguera."
+      },
+      "steam": {
+        "title": "STE(IA)M",
+        "desc": "Ciencia, tecnología, arte e inteligencia artificial integradas en el currículo con experiencias prácticas."
+      },
+      "community": {
+        "title": "Comunidad AFA",
+        "desc": "Extraescolares, acogida y comedor con cocina propia: las familias hacen posible el día a día de la escuela."
+      }
     },
     "palau": {
       "eyebrow": "Nuestro nombre",
@@ -206,7 +260,6 @@
     "news_title": "Últimas Noticias",
     "see_all": "Ver todo",
     "events_title": "Próximos Eventos",
-
     "about_title": "¿Qué hace el AFA?",
     "about_text_1": "El AFA es la asociación formada por la mayoría de las familias de la escuela. La junta directiva es la responsable y la que coordina las diversas actividades. Formar parte de la junta es voluntario. Por tanto, cualquier ayuda vuestra, por pequeña que sea, será muy bien acogida.",
     "about_text_2": "La junta organiza y gestiona las actividades extraescolares con las cuales pretende complementar la formación de los niños y niñas de la escuela, y colabora en muchas otras actividades que van surgiendo a lo largo del curso.",
@@ -226,9 +279,9 @@
       "subtitle": "Mantente al día de todo lo que sucede en nuestra escuela y de los proyectos del AFA."
     },
     "assemblea_banner": {
-       "tag": "Documentación",
-       "title": "Asamblea General",
-       "description": "Resumen de acuerdos, estado de cuentas y nuevos proyectos del AFA."
+      "tag": "Documentación",
+      "title": "Asamblea General",
+      "description": "Resumen de acuerdos, estado de cuentas y nuevos proyectos del AFA."
     },
     "contact_banner": {
       "tag": "Cita Previa",
@@ -305,11 +358,11 @@
       "economics": {
         "title": "Situación Económica",
         "items": [
-           "Saldo positivo y ahorro de seguridad.",
-           "Sin deudas ni pagos pendientes.",
-           "Incremento de la recaudación gracias a la alta participación.",
-           "Fondo de reserva destinado a futuras inversiones.",
-           "Gestión transparente y auditada."
+          "Saldo positivo y ahorro de seguridad.",
+          "Sin deudas ni pagos pendientes.",
+          "Incremento de la recaudación gracias a la alta participación.",
+          "Fondo de reserva destinado a futuras inversiones.",
+          "Gestión transparente y auditada."
         ]
       },
       "investments": {
@@ -323,26 +376,26 @@
         ]
       },
       "functions": {
-         "title": "Funciones del AFA",
-         "items": [
-           "Gestión de extraescolares",
-           "Organización de fiestas",
-           "Recaudación de fondos",
-           "Intermediación familias-escuela",
-           "Mejora de instalaciones",
-           "Socialización de libros",
-           "Apoyo a familias"
-         ]
+        "title": "Funciones del AFA",
+        "items": [
+          "Gestión de extraescolares",
+          "Organización de fiestas",
+          "Recaudación de fondos",
+          "Intermediación familias-escuela",
+          "Mejora de instalaciones",
+          "Socialización de libros",
+          "Apoyo a familias"
+        ]
       },
       "quota": {
-         "title": "¿A qué destinamos la cuota?",
-         "items": [
-           "Material escolar colectivo",
-           "Fiestas tradicionales (Castañada, etc.)",
-           "Charlas educativas",
-           "Digitalización de la escuela",
-           "Fondo de ayuda escolar"
-         ]
+        "title": "¿A qué destinamos la cuota?",
+        "items": [
+          "Material escolar colectivo",
+          "Fiestas tradicionales (Castañada, etc.)",
+          "Charlas educativas",
+          "Digitalización de la escuela",
+          "Fondo de ayuda escolar"
+        ]
       },
       "importance": {
         "title": "¿Por qué es importante participar?",
@@ -353,28 +406,28 @@
       "projects": {
         "title": "Proyectos y Mejoras",
         "commissions": {
-           "title": "Comisiones de Familias",
-           "desc": "Grupos activos de familias que trabajan para mejorar la escuela y dinamizar la comunidad educativa."
+          "title": "Comisiones de Familias",
+          "desc": "Grupos activos de familias que trabajan para mejorar la escuela y dinamizar la comunidad educativa."
         },
         "done": {
-           "title": "Hecho (24-25)",
-           "desc": "Proyectos y mejoras ejecutadas con éxito durante el último curso.",
-           "items": [
-             "Pintura pista",
-             "Huerto escolar",
-             "Sombra infantil",
-             "Banco de libros"
-           ]
+          "title": "Hecho (24-25)",
+          "desc": "Proyectos y mejoras ejecutadas con éxito durante el último curso.",
+          "items": [
+            "Pintura pista",
+            "Huerto escolar",
+            "Sombra infantil",
+            "Banco de libros"
+          ]
         },
         "future": {
-           "title": "Próximo (25-26)",
-           "desc": "Nuevos retos e iniciativas planificadas para el curso que viene.",
-           "items": [
-             "Renovación biblioteca",
-             "Patio inclusivo",
-             "Cocina propia",
-             "Aula polivalente"
-           ]
+          "title": "Próximo (25-26)",
+          "desc": "Nuevos retos e iniciativas planificadas para el curso que viene.",
+          "items": [
+            "Renovación biblioteca",
+            "Patio inclusivo",
+            "Cocina propia",
+            "Aula polivalente"
+          ]
         }
       },
       "board_change": {
@@ -673,7 +726,8 @@
       "notifications": "Notificaciones",
       "system": "Sistema",
       "observability": "Auditoría",
-      "logout": "Cerrar Sesión"
+      "logout": "Cerrar Sesión",
+      "faq": "FAQ"
     },
     "acollidaManager": {
       "addRate": "Añadir Nueva Tarifa",
@@ -682,39 +736,39 @@
         "description": "Los cambios realizados aquí se reflejarán inmediatamente en el modal público de la página de inicio. Asegúrate de incluir el símbolo de Euro (€) para mantener la consistencia visual."
       }
     },
-      "dashboard": {
-        "title": "Inscripciones",
-        "subtitle": "Gestión de las inscripciones a extraescolares",
-        "update": "Actualizar",
-        "export_excel": "Exportar a Excel",
-        "export_pdf": "Exportar a PDF",
-        "filters": {
-          "search_placeholder": "Buscar alumno...",
-          "all_activities": "Todas las actividades",
-          "all_courses": "Todos los cursos",
-          "all_statuses": "Todos los estados",
-          "status_active": "Activos",
-          "status_suspended": "Suspendidos",
-          "status_baja": "Bajas"
-        },
-        "stats": {
-          "active": "Inscritos (altas)",
-          "bajas": "Bajas",
-          "afa_members": "Socios AFA",
-          "popular": "Popular",
-          "financial": {
-            "income": "Ingresos",
-            "income_subtitle": "de {{total}}€ previstos",
-            "pending": "Pendiente de Cobro",
-            "pending_subtitle": "Cuotas pendientes",
-            "shop_orders": "Tienda: Pedidos",
-            "shop_orders_subtitle": "{{pending}} pendientes",
-            "shop_revenue": "Tienda: Facturación",
-            "shop_revenue_subtitle": "Total ventas"
-          }
-        }
+    "dashboard": {
+      "title": "Inscripciones",
+      "subtitle": "Gestión de las inscripciones a extraescolares",
+      "update": "Actualizar",
+      "export_excel": "Exportar a Excel",
+      "export_pdf": "Exportar a PDF",
+      "filters": {
+        "search_placeholder": "Buscar alumno...",
+        "all_activities": "Todas las actividades",
+        "all_courses": "Todos los cursos",
+        "all_statuses": "Todos los estados",
+        "status_active": "Activos",
+        "status_suspended": "Suspendidos",
+        "status_baja": "Bajas"
       },
-      "observability": {
+      "stats": {
+        "active": "Inscritos (altas)",
+        "bajas": "Bajas",
+        "afa_members": "Socios AFA",
+        "popular": "Popular",
+        "financial": {
+          "income": "Ingresos",
+          "income_subtitle": "de {{total}}€ previstos",
+          "pending": "Pendiente de Cobro",
+          "pending_subtitle": "Cuotas pendientes",
+          "shop_orders": "Tienda: Pedidos",
+          "shop_orders_subtitle": "{{pending}} pendientes",
+          "shop_revenue": "Tienda: Facturación",
+          "shop_revenue_subtitle": "Total ventas"
+        }
+      }
+    },
+    "observability": {
       "title": "Observabilidad y Auditoría",
       "subtitle": "Registro de todas las modificaciones realizadas al sistema.",
       "loading": "Cargando registros...",
@@ -902,7 +956,6 @@
       "impact_placeholder": "Ej: +450 alumnos, mejora del patio...",
       "field_participants": "Participantes",
       "participants_placeholder": "Ej: Familias, Alumnos...",
-
       "field_image_url": "URL de la imagen"
     },
     "calendar": {
@@ -974,6 +1027,27 @@
       "mark_done": "Marcar hecha",
       "reopen": "Reabrir",
       "overdue_badge": "Vencida"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "subtitle": "Gestiona las FAQ de la seccion de extraescolares.",
+      "new": "Nueva pregunta",
+      "edit": "Editar pregunta",
+      "empty": "Aun no hay preguntas. Crea la primera.",
+      "delete_confirm": "Eliminar esta pregunta?",
+      "required": "La pregunta y la respuesta (ES) son obligatorias.",
+      "fill_source_first": "Rellena primero la pregunta en el idioma de origen.",
+      "auto_translate": "Auto-traducir",
+      "translating": "Traduciendo...",
+      "field_category": "Categoria",
+      "category_placeholder": "Ej.: Inscripciones, plazas y lista de espera",
+      "category_hint": "Las preguntas con la misma categoria se agrupan juntas.",
+      "field_question": "Pregunta",
+      "field_answer": "Respuesta",
+      "field_order": "Orden",
+      "field_active": "Visible",
+      "hide": "Ocultar",
+      "show": "Mostrar"
     }
   },
   "common": {
@@ -1199,6 +1273,9 @@
       "actions_col": "Acciones",
       "exported_on": "Exportado {{date}}"
     }
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "subtitle": "Resolvemos las dudas más habituales sobre las extraescolares."
   }
 }
-

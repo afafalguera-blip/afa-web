@@ -53,9 +53,18 @@
       "vocal": "Member"
     },
     "pillars": {
-      "families": { "title": "Families that add up", "desc": "Every enrolled family is part of it and can join the assembly and committees." },
-      "mission": { "title": "Mission", "desc": "Support the educational project and organize activities for students and families." },
-      "nonprofit": { "title": "Non-profit", "desc": "All resources are reinvested in the school and the educational community." }
+      "families": {
+        "title": "Families that add up",
+        "desc": "Every enrolled family is part of it and can join the assembly and committees."
+      },
+      "mission": {
+        "title": "Mission",
+        "desc": "Support the educational project and organize activities for students and families."
+      },
+      "nonprofit": {
+        "title": "Non-profit",
+        "desc": "All resources are reinvested in the school and the educational community."
+      }
     },
     "cta": {
       "title": "Want to be part of AFA?",
@@ -76,9 +85,18 @@
     "title": "Drop-off Care",
     "intro": "A safe, supervised space before and after school hours so families can balance work and home life with peace of mind.",
     "info": {
-      "schedule": { "title": "Flexible hours", "body": "Available in the morning before class and in the afternoon after school, adapted to each family's needs." },
-      "team": { "title": "Qualified team", "body": "Trained monitors look after the children with games, reading and small activities adapted to each age." },
-      "flex": { "title": "Monthly or occasional", "body": "Sign up for the full month or use the service on specific days whenever you need it." }
+      "schedule": {
+        "title": "Flexible hours",
+        "body": "Available in the morning before class and in the afternoon after school, adapted to each family's needs."
+      },
+      "team": {
+        "title": "Qualified team",
+        "body": "Trained monitors look after the children with games, reading and small activities adapted to each age."
+      },
+      "flex": {
+        "title": "Monthly or occasional",
+        "body": "Sign up for the full month or use the service on specific days whenever you need it."
+      }
     },
     "rates_title": "Rates",
     "rates_subtitle": "Prices for AFA member and non-member families. Monthly or occasional.",
@@ -126,14 +144,38 @@
       "eyebrow": "Timeline",
       "title": "Moments that shaped us",
       "intro": "Five decades at a glance.",
-      "1971": { "title": "Construction begins", "desc": "The City Council grants the land behind Palau Falguera to build a new public school." },
-      "1972": { "title": "Colegio Modelo opens", "desc": "On December 11th, one of the country's five \"schools without doors\" opens its gates." },
-      "1976": { "title": "First Catalan lessons", "desc": "Catalan is introduced in the classroom for the first time." },
-      "1985": { "title": "Catalan immersion", "desc": "The school fully joins the Catalan immersion programme and moves to two classes per grade." },
-      "1988": { "title": "New name: Escola Falguera", "desc": "The community decides to rename the school to honour the neighbourhood and mark a new era." },
-      "1997": { "title": "New building", "desc": "The school moves to a new building on Sant Josep street, coinciding with its 25th anniversary." },
-      "2012": { "title": "Major renovation", "desc": "Classrooms and common areas are modernised for current pedagogical needs." },
-      "2022": { "title": "50 years of school", "desc": "Half a century of educational community in the Falguera neighbourhood." }
+      "1971": {
+        "title": "Construction begins",
+        "desc": "The City Council grants the land behind Palau Falguera to build a new public school."
+      },
+      "1972": {
+        "title": "Colegio Modelo opens",
+        "desc": "On December 11th, one of the country's five \"schools without doors\" opens its gates."
+      },
+      "1976": {
+        "title": "First Catalan lessons",
+        "desc": "Catalan is introduced in the classroom for the first time."
+      },
+      "1985": {
+        "title": "Catalan immersion",
+        "desc": "The school fully joins the Catalan immersion programme and moves to two classes per grade."
+      },
+      "1988": {
+        "title": "New name: Escola Falguera",
+        "desc": "The community decides to rename the school to honour the neighbourhood and mark a new era."
+      },
+      "1997": {
+        "title": "New building",
+        "desc": "The school moves to a new building on Sant Josep street, coinciding with its 25th anniversary."
+      },
+      "2012": {
+        "title": "Major renovation",
+        "desc": "Classrooms and common areas are modernised for current pedagogical needs."
+      },
+      "2022": {
+        "title": "50 years of school",
+        "desc": "Half a century of educational community in the Falguera neighbourhood."
+      }
     },
     "name": {
       "eyebrow": "1988 · A name of our own",
@@ -145,10 +187,22 @@
       "eyebrow": "Today",
       "title": "A school in constant action",
       "intro": "Half a century on, Falguera is still a living project, rooted in the neighbourhood and open to the world.",
-      "green": { "title": "Green School", "desc": "School garden, sustainability and outdoor activities thanks to our proximity to the river and Collserola." },
-      "cordes": { "title": "Strings Project", "desc": "String instrument lessons in the classroom, in partnership with Palau Falguera's Municipal Music School." },
-      "steam": { "title": "STE(AI)M", "desc": "Science, technology, art and AI integrated into the curriculum through hands-on experiences." },
-      "community": { "title": "AFA Community", "desc": "After-school, drop-off care and an in-house kitchen: families make daily life at school possible." }
+      "green": {
+        "title": "Green School",
+        "desc": "School garden, sustainability and outdoor activities thanks to our proximity to the river and Collserola."
+      },
+      "cordes": {
+        "title": "Strings Project",
+        "desc": "String instrument lessons in the classroom, in partnership with Palau Falguera's Municipal Music School."
+      },
+      "steam": {
+        "title": "STE(AI)M",
+        "desc": "Science, technology, art and AI integrated into the curriculum through hands-on experiences."
+      },
+      "community": {
+        "title": "AFA Community",
+        "desc": "After-school, drop-off care and an in-house kitchen: families make daily life at school possible."
+      }
     },
     "palau": {
       "eyebrow": "Our name",
@@ -206,7 +260,6 @@
     "news_title": "Latest News",
     "see_all": "See all",
     "events_title": "Upcoming Events",
-
     "about_title": "What does the AFA do?",
     "about_text_1": "The AFA is the association formed by the majority of the school's families. The board of directors is responsible for coordinating various activities. Joining the board is voluntary. Therefore, any help from you, no matter how small, will be very welcome.",
     "about_text_2": "The board organizes and manages extracurricular activities intended to complement the children's education, and collaborates in many other activities throughout the school year.",
@@ -226,9 +279,9 @@
       "subtitle": "Keep up to date with everything happening in our school and AFA projects."
     },
     "assemblea_banner": {
-       "tag": "Documentation",
-       "title": "General Assembly",
-       "description": "Summary of agreements, financial status, and new AFA projects."
+      "tag": "Documentation",
+      "title": "General Assembly",
+      "description": "Summary of agreements, financial status, and new AFA projects."
     },
     "contact_banner": {
       "tag": "Prior Appointment",
@@ -287,11 +340,11 @@
       "economics": {
         "title": "Economic Situation",
         "items": [
-           "Positive balance and safety savings.",
-           "No debts or pending payments.",
-           "Increased revenue thanks to high participation.",
-           "Reserve fund destined for future investments.",
-           "Transparent and audited management."
+          "Positive balance and safety savings.",
+          "No debts or pending payments.",
+          "Increased revenue thanks to high participation.",
+          "Reserve fund destined for future investments.",
+          "Transparent and audited management."
         ]
       },
       "investments": {
@@ -305,50 +358,50 @@
         ]
       },
       "functions": {
-         "title": "AFA Functions",
-         "items": [
-           "Management of extracurriculars",
-           "Organization of festivals",
-           "Fundraising",
-           "Family-school intermediation",
-           "Improvement of facilities",
-           "Book socialization",
-           "Support for families"
-         ]
+        "title": "AFA Functions",
+        "items": [
+          "Management of extracurriculars",
+          "Organization of festivals",
+          "Fundraising",
+          "Family-school intermediation",
+          "Improvement of facilities",
+          "Book socialization",
+          "Support for families"
+        ]
       },
       "quota": {
-         "title": "What is the fee used for?",
-         "items": [
-           "Collective school material",
-           "Traditional festivals (Castanyada, etc.)",
-           "Educational talks",
-           "School digitalization",
-           "School aid fund"
-         ]
+        "title": "What is the fee used for?",
+        "items": [
+          "Collective school material",
+          "Traditional festivals (Castanyada, etc.)",
+          "Educational talks",
+          "School digitalization",
+          "School aid fund"
+        ]
       },
       "projects": {
         "title": "Projects and Improvements",
         "commissions": {
-           "title": "Family Commissions",
-           "desc": "Active groups of families working to improve the school and energize the educational community."
+          "title": "Family Commissions",
+          "desc": "Active groups of families working to improve the school and energize the educational community."
         },
         "done": {
-           "title": "Done (24-25)",
-           "items": [
-             "Track painting",
-             "School garden",
-             "Infant shade",
-             "Book bench"
-           ]
+          "title": "Done (24-25)",
+          "items": [
+            "Track painting",
+            "School garden",
+            "Infant shade",
+            "Book bench"
+          ]
         },
         "future": {
-           "title": "Next (25-26)",
-           "items": [
-             "Library renovation",
-             "Inclusive patio",
-             "Own kitchen",
-             "Multipurpose room"
-           ]
+          "title": "Next (25-26)",
+          "items": [
+            "Library renovation",
+            "Inclusive patio",
+            "Own kitchen",
+            "Multipurpose room"
+          ]
         }
       },
       "board_change": {
@@ -640,7 +693,8 @@
       "acollida": "Childcare Management",
       "menjador": "Canteen Management",
       "observability": "Auditing",
-      "logout": "Logout"
+      "logout": "Logout",
+      "faq": "FAQ"
     },
     "acollidaManager": {
       "addRate": "Add New Rate",
@@ -742,6 +796,27 @@
       "mark_done": "Mark done",
       "reopen": "Reopen",
       "overdue_badge": "Overdue"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "subtitle": "Manage the FAQ of the extracurricular section.",
+      "new": "New question",
+      "edit": "Edit question",
+      "empty": "No questions yet. Create the first one.",
+      "delete_confirm": "Delete this question?",
+      "required": "The question and answer (ES) are required.",
+      "fill_source_first": "Fill in the question in the source language first.",
+      "auto_translate": "Auto-translate",
+      "translating": "Translating...",
+      "field_category": "Category",
+      "category_placeholder": "E.g.: Enrolment, places and waiting list",
+      "category_hint": "Questions with the same category are grouped together.",
+      "field_question": "Question",
+      "field_answer": "Answer",
+      "field_order": "Order",
+      "field_active": "Visible",
+      "hide": "Hide",
+      "show": "Show"
     }
   },
   "common": {
@@ -966,6 +1041,9 @@
       "actions_col": "Actions",
       "exported_on": "Exported {{date}}"
     }
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "subtitle": "Answers to the most common questions about extracurricular activities."
   }
 }
-

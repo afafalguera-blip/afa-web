@@ -11,6 +11,7 @@ import { ExtraescolarsHeader } from '../components/public/extraescolars/Extraesc
 import { ExtraescolarsFilters } from '../components/public/extraescolars/ExtraescolarsFilters';
 import { ActivityCard } from '../components/public/extraescolars/ActivityCard';
 import { EnrollmentBanner } from '../components/public/extraescolars/EnrollmentBanner';
+import { ExtraescolarsFaq } from '../components/public/extraescolars/ExtraescolarsFaq';
 import { MAINTENANCE_MODE } from '../utils/maintenance';
 import { MaintenancePlaceholder } from '../components/public/MaintenancePlaceholder';
 
@@ -128,6 +129,8 @@ export function Extraescolars() {
           />
         )}
       </div>
+
+      {!MAINTENANCE_MODE && viewMode === 'list' && <ExtraescolarsFaq />}
 
       {selectedActivity && (
         <ActivityDetailModal

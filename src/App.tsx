@@ -43,6 +43,7 @@ const InscriptionsPage = lazy(() => import('./pages/admin/inscriptions/Inscripti
 const PaymentsPage = lazy(() => import('./pages/admin/payments/PaymentsPage').then(m => ({ default: m.PaymentsPage })));
 const FinanceDashboard = lazy(() => import('./pages/admin/finances/FinanceDashboard').then(m => ({ default: m.FinanceDashboard })));
 const ActivitiesManager = lazy(() => import('./pages/admin/ActivitiesManager'));
+const FaqManager = lazy(() => import('./pages/admin/FaqManager'));
 const NewsManager = lazy(() => import('./pages/admin/NewsManager'));
 const NewsEditorPage = lazy(() => import('./pages/admin/NewsEditorPage'));
 const ProjectsManager = lazy(() => import('./pages/admin/ProjectsManager'));
@@ -102,6 +103,7 @@ function App() {
                 <Route path="shop/inventory" element={<InventoryPage />} />
                 <Route path="shop/orders" element={<OrdersPage />} />
                 <Route path="activities" element={<ActivitiesManager />} />
+                <Route path="faq" element={<FaqManager />} />
                 <Route path="news" element={<NewsManager />} />
                 <Route path="news/:id" element={<NewsEditorPage />} />
                 <Route path="projects" element={<ProjectsManager />} />

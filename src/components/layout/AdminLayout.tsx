@@ -23,7 +23,8 @@ import {
   Link2,
   UserSquare2,
   Utensils,
-  FileText
+  FileText,
+  HelpCircle
 } from 'lucide-react';
 
 // Payload-style hybrid shell: dark neutral sidebar, light content.
@@ -165,6 +166,10 @@ export function AdminLayout() {
             <NavLink to="/admin/activities" onClick={closeSidebar} className={navClass}>
               <Calendar className="w-[18px] h-[18px]" />
               {t('admin.sidebar.activities')}
+            </NavLink>
+            <NavLink to="/admin/faq" onClick={closeSidebar} className={navClass}>
+              <HelpCircle className="w-[18px] h-[18px]" />
+              {t('admin.sidebar.faq', 'FAQ')}
             </NavLink>
             <NavLink to="/admin/news" onClick={closeSidebar} className={navClass}>
               <Newspaper className="w-[18px] h-[18px]" />
