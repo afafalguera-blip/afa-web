@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Wand2, Loader2, Download } from 'lucide-react';
+import { FileText, Wand2, Loader2 } from 'lucide-react';
 import type { InscriptionContentBlock, InscriptionFormConfig } from '../../../services/ConfigService';
 import { TranslationService } from '../../../services/TranslationService';
 
@@ -68,19 +68,6 @@ export function TextosTab({ content, setContent, activeLang, setActiveLang }: Te
     setContent({ ...content, [activeLang]: { ...content[activeLang], [key]: value } });
   };
 
-  // Fill the empty fields of the active language with the current texts shown
-  // on the public form (the i18n defaults), so they become editable instead of
-  // staying as a grey placeholder. Already-edited fields are left untouched.
-  const loadCurrentTexts = () => {
-    const block: InscriptionContentBlock = { ...content[activeLang] };
-    for (const g of GROUPS) for (const f of g.fields) {
-      if (!f.i18nKey) continue;
-      const cur = block[f.key];
-      if (!cur || !cur.trim()) block[f.key] = t(f.i18nKey);
-    }
-    setContent({ ...content, [activeLang]: block });
-  };
-
   const autoTranslate = async () => {
     setTranslating(true);
     setTranslateError(null);
@@ -117,7 +104,7 @@ export function TextosTab({ content, setContent, activeLang, setActiveLang }: Te
           <h3 className="text-xl font-bold text-neutral-800 dark:text-white flex items-center gap-2">
             <FileText size={20} className="text-primary" /> Textos del formulari
           </h3>
-          <p className="text-xs text-neutral-500 mt-1">Buit = es mostra el text per defecte (en gris). Fes «Carregar textos actuals» per editar-los.</p>
+          <p className="text-xs text-neutral-500 mt-1">Es mostren els textos actuals. Edita'ls i desa; si esborres un camp, torna al text per defecte.</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg">
@@ -128,10 +115,6 @@ export function TextosTab({ content, setContent, activeLang, setActiveLang }: Te
               </button>
             ))}
           </div>
-          <button type="button" onClick={loadCurrentTexts}
-            className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-            <Download size={14} /> Carregar textos actuals
-          </button>
           <button type="button" onClick={autoTranslate} disabled={translating}
             className="text-xs font-bold text-primary hover:underline flex items-center gap-1 disabled:opacity-50">
             {translating ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />} Traduir (ES→CA/EN)
@@ -147,7 +130,10 @@ export function TextosTab({ content, setContent, activeLang, setActiveLang }: Te
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {group.fields.map(f => {
               const hint = f.i18nKey ? t(f.i18nKey) : '';
-              const value = content[activeLang][f.key] || '';
+              // Show the current text by default: stored override, else the
+              // live i18n text. Stored value stays empty until edited, so the
+              // "empty = default" fallback on the public form is preserved.
+              const value = content[activeLang][f.key] || hint;
               return (
                 <div key={f.key} className={`space-y-1 ${f.multiline ? 'md:col-span-2' : ''}`}>
                   <label className="text-[11px] font-bold text-neutral-500">{f.key}</label>
