@@ -1,0 +1,1 @@
+import{n as e}from"./createLucideIcon-jJWuC4vA.js";import{G as t,H as n}from"./index-DvmxeuvC.js";import{n as r}from"./PublicFormRender-BEqnb2Uo.js";var i=e();function a(){let{slug:e}=n(),{t:a}=t();return e?(0,i.jsx)(r,{slug:e}):(0,i.jsx)(`div`,{className:`text-center p-12 text-gray-500`,children:a(`forms.public.invalid_link`)})}export{a as default};

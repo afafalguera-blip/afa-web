@@ -1,4 +1,10 @@
 {
+  "maintenance": {
+    "banner": "We're updating the website. We'll be back on April 16! For any questions:",
+    "section_unavailable": "This section is temporarily unavailable.",
+    "page_title": "Page under maintenance",
+    "page_description": "We're working to improve the website. We'll be back on April 16 with all features. For any questions or needs, write to us!"
+  },
   "header": {
     "greeting": "Good morning, Family 👋"
   },
@@ -9,7 +15,223 @@
     "documents": "Documents",
     "contact": "Contact",
     "suggestions": "Suggestions",
-    "profile": "Profile"
+    "profile": "Profile",
+    "about_afa": "About AFA",
+    "news": "News",
+    "activities": "Activities",
+    "activities_subtitle": "Sign-ups, fees and calendar",
+    "services": "Services",
+    "services_subtitle": "Drop-off care and lunch",
+    "more": "More",
+    "more_subtitle": "Everything you can explore"
+  },
+  "nav_menu": {
+    "extraescolars_desc": "Sign-ups and activities",
+    "fees_desc": "Fees and payments",
+    "calendar_desc": "The whole year at a glance",
+    "acollida_desc": "Hours and rates",
+    "menjador_desc": "Menus, prices and info",
+    "about_desc": "Who we are and the Board",
+    "history_desc": "Half a century of school",
+    "news_desc": "Latest AFA updates",
+    "documents_desc": "Resources and downloads",
+    "contact_desc": "Write to us",
+    "suggestions_desc": "Ideas and improvements"
+  },
+  "about_afa": {
+    "title": "About AFA",
+    "subtitle": "Who we are and how we organize",
+    "mission_default": "AFA (Family Association) is a non-profit made up of the school families. We support the educational project, organize activities and represent families before the school and authorities.",
+    "composition_title": "The Board",
+    "composition_intro": "The Board is renewed at the assembly and is made up of the following roles:",
+    "empty": "Board members have not been published yet.",
+    "roles": {
+      "president": "President",
+      "vicepresident": "Vice-president",
+      "treasurer": "Treasurer",
+      "secretary": "Secretary",
+      "vocal": "Member"
+    },
+    "pillars": {
+      "families": {
+        "title": "Families that add up",
+        "desc": "Every enrolled family is part of it and can join the assembly and committees."
+      },
+      "mission": {
+        "title": "Mission",
+        "desc": "Support the educational project and organize activities for students and families."
+      },
+      "nonprofit": {
+        "title": "Non-profit",
+        "desc": "All resources are reinvested in the school and the educational community."
+      }
+    },
+    "cta": {
+      "title": "Want to be part of AFA?",
+      "desc": "Write to us and we'll explain how to take part in the assembly, committees or Board.",
+      "contact": "Contact us"
+    },
+    "history_promo": {
+      "eyebrow": "Half a century of school",
+      "title": "Discover our history",
+      "desc": "From a school born out of community activism in the 70s to today's educational project. A story rooted in the Falguera neighbourhood.",
+      "cta": "Read it"
+    }
+  },
+  "acollida_page": {
+    "seo_title": "Drop-off Care Service",
+    "seo_description": "Everything you need to know about our drop-off care service: timetables, member and non-member rates, and occasional use.",
+    "eyebrow": "AFA Service",
+    "title": "Drop-off Care",
+    "intro": "A safe, supervised space before and after school hours so families can balance work and home life with peace of mind.",
+    "info": {
+      "schedule": {
+        "title": "Flexible hours",
+        "body": "Available in the morning before class and in the afternoon after school, adapted to each family's needs."
+      },
+      "team": {
+        "title": "Qualified team",
+        "body": "Trained monitors look after the children with games, reading and small activities adapted to each age."
+      },
+      "flex": {
+        "title": "Monthly or occasional",
+        "body": "Sign up for the full month or use the service on specific days whenever you need it."
+      }
+    },
+    "rates_title": "Rates",
+    "rates_subtitle": "Prices for AFA member and non-member families. Monthly or occasional.",
+    "no_rates": "No rates published yet.",
+    "timeslot": "Time slot",
+    "member": "Member",
+    "non_member": "Non-member",
+    "per_month": "month",
+    "occasional": "occasional",
+    "note": "Occasional rates apply to specific days. For sign-ups or more information, contact AFA.",
+    "cta": {
+      "title": "Need more information?",
+      "desc": "If you have questions or want to sign up for the service, write to us and we'll help you with all the details.",
+      "button": "Contact AFA"
+    }
+  },
+  "history": {
+    "title": "Our history",
+    "subtitle": "Half a century of public schooling",
+    "intro": "From a neighbourhood school born of community activism to the educational project that now welcomes our families. This is the story you keep writing with us every day.",
+    "stats": {
+      "years": "Years of history",
+      "founded": "Founding year",
+      "lines": "Class per grade",
+      "students": "Students"
+    },
+    "origins": {
+      "eyebrow": "The beginnings",
+      "title": "A school born from the neighbourhood",
+      "p1": "In the early 70s, the Falguera neighbourhood was growing with the local factories. Families arriving from across the country had no school places: more than 600 children had to take a bus to Barcelona every morning.",
+      "p2": "Local families organised and demanded a public school. The pressure worked: in 1971 the land was granted and construction began, right behind Palau Falguera."
+    },
+    "quote": {
+      "text": "\"The school went from Francoist to Catalan, and the neighbourhood from having nothing to being full of life.\"",
+      "author": "Falguera neighbourhood chronicle"
+    },
+    "modelo": {
+      "eyebrow": "1972 · Opening",
+      "title": "The \"school without doors\"",
+      "fact": "\"schools without doors\" in all of Spain",
+      "p1": "The original building was an experimental project: open classrooms, large windows, natural light and shared spaces. One of only five of its kind in the entire country.",
+      "p2": "The school grew to over 1,000 students and 38 teachers. So much life couldn't fit in one open space, and over time walls were added to create traditional classrooms."
+    },
+    "timeline": {
+      "eyebrow": "Timeline",
+      "title": "Moments that shaped us",
+      "intro": "Five decades at a glance.",
+      "1971": {
+        "title": "Construction begins",
+        "desc": "The City Council grants the land behind Palau Falguera to build a new public school."
+      },
+      "1972": {
+        "title": "Colegio Modelo opens",
+        "desc": "On December 11th, one of the country's five \"schools without doors\" opens its gates."
+      },
+      "1976": {
+        "title": "First Catalan lessons",
+        "desc": "Catalan is introduced in the classroom for the first time."
+      },
+      "1985": {
+        "title": "Catalan immersion",
+        "desc": "The school fully joins the Catalan immersion programme and moves to two classes per grade."
+      },
+      "1988": {
+        "title": "New name: Escola Falguera",
+        "desc": "The community decides to rename the school to honour the neighbourhood and mark a new era."
+      },
+      "1997": {
+        "title": "New building",
+        "desc": "The school moves to a new building on Sant Josep street, coinciding with its 25th anniversary."
+      },
+      "2012": {
+        "title": "Major renovation",
+        "desc": "Classrooms and common areas are modernised for current pedagogical needs."
+      },
+      "2022": {
+        "title": "50 years of school",
+        "desc": "Half a century of educational community in the Falguera neighbourhood."
+      }
+    },
+    "name": {
+      "eyebrow": "1988 · A name of our own",
+      "title": "From \"Colegio Modelo\" to Escola Falguera",
+      "desc": "The community chose to rename the school to claim the neighbourhood, leave behind the connotations of an earlier era, and put down roots where the families live.",
+      "label": "Falguera"
+    },
+    "today": {
+      "eyebrow": "Today",
+      "title": "A school in constant action",
+      "intro": "Half a century on, Falguera is still a living project, rooted in the neighbourhood and open to the world.",
+      "green": {
+        "title": "Green School",
+        "desc": "School garden, sustainability and outdoor activities thanks to our proximity to the river and Collserola."
+      },
+      "cordes": {
+        "title": "Strings Project",
+        "desc": "String instrument lessons in the classroom, in partnership with Palau Falguera's Municipal Music School."
+      },
+      "steam": {
+        "title": "STE(AI)M",
+        "desc": "Science, technology, art and AI integrated into the curriculum through hands-on experiences."
+      },
+      "community": {
+        "title": "AFA Community",
+        "desc": "After-school, drop-off care and an in-house kitchen: families make daily life at school possible."
+      }
+    },
+    "palau": {
+      "eyebrow": "Our name",
+      "title": "Why \"Falguera\"?",
+      "p1": "The school is named after Palau Falguera, a 17th-century estate at the historic heart of Sant Feliu. It sits right next to us and shapes the cultural landscape of the school.",
+      "p2": "Today, Palau Falguera hosts the Municipal Music School and the National Rose Exhibition. Its gardens are a natural extension of our classrooms."
+    },
+    "cta": {
+      "title": "You keep writing the story",
+      "desc": "Every new family adds a new chapter. Get to know the AFA and discover how to take part.",
+      "button": "Meet the AFA"
+    }
+  },
+  "documents": {
+    "seo_title": "Documents & Resources",
+    "seo_description": "Download meeting minutes, school regulations, registration forms and useful resources from AFA Escola Falguera.",
+    "page_title": "Documents & Resources",
+    "page_description": "Download space for official documents, minutes, regulations and information of interest for families.",
+    "search_placeholder": "Search documents...",
+    "no_results": "No documents found.",
+    "no_description": "No description",
+    "categories": {
+      "all": "All",
+      "actes": "Minutes",
+      "normativa": "Regulations",
+      "general": "General",
+      "menjador": "Cafeteria",
+      "extraescolars": "Activities"
+    }
   },
   "legal": {
     "privacy_title": "Privacy Policy",
@@ -31,13 +253,13 @@
     "fees": "Fees",
     "calendar": "Calendar",
     "acollida": "Childcare",
+    "menjador": "Canteen",
     "contact": "Contact",
     "course_current": "Year 2025 - 2026",
     "view_details": "View Details",
     "news_title": "Latest News",
     "see_all": "See all",
     "events_title": "Upcoming Events",
-
     "about_title": "What does the AFA do?",
     "about_text_1": "The AFA is the association formed by the majority of the school's families. The board of directors is responsible for coordinating various activities. Joining the board is voluntary. Therefore, any help from you, no matter how small, will be very welcome.",
     "about_text_2": "The board organizes and manages extracurricular activities intended to complement the children's education, and collaborates in many other activities throughout the school year.",
@@ -57,9 +279,9 @@
       "subtitle": "Keep up to date with everything happening in our school and AFA projects."
     },
     "assemblea_banner": {
-       "tag": "Documentation",
-       "title": "General Assembly",
-       "description": "Summary of agreements, financial status, and new AFA projects."
+      "tag": "Documentation",
+      "title": "General Assembly",
+      "description": "Summary of agreements, financial status, and new AFA projects."
     },
     "contact_banner": {
       "tag": "Prior Appointment",
@@ -118,11 +340,11 @@
       "economics": {
         "title": "Economic Situation",
         "items": [
-           "Positive balance and safety savings.",
-           "No debts or pending payments.",
-           "Increased revenue thanks to high participation.",
-           "Reserve fund destined for future investments.",
-           "Transparent and audited management."
+          "Positive balance and safety savings.",
+          "No debts or pending payments.",
+          "Increased revenue thanks to high participation.",
+          "Reserve fund destined for future investments.",
+          "Transparent and audited management."
         ]
       },
       "investments": {
@@ -136,50 +358,50 @@
         ]
       },
       "functions": {
-         "title": "AFA Functions",
-         "items": [
-           "Management of extracurriculars",
-           "Organization of festivals",
-           "Fundraising",
-           "Family-school intermediation",
-           "Improvement of facilities",
-           "Book socialization",
-           "Support for families"
-         ]
+        "title": "AFA Functions",
+        "items": [
+          "Management of extracurriculars",
+          "Organization of festivals",
+          "Fundraising",
+          "Family-school intermediation",
+          "Improvement of facilities",
+          "Book socialization",
+          "Support for families"
+        ]
       },
       "quota": {
-         "title": "What is the fee used for?",
-         "items": [
-           "Collective school material",
-           "Traditional festivals (Castanyada, etc.)",
-           "Educational talks",
-           "School digitalization",
-           "School aid fund"
-         ]
+        "title": "What is the fee used for?",
+        "items": [
+          "Collective school material",
+          "Traditional festivals (Castanyada, etc.)",
+          "Educational talks",
+          "School digitalization",
+          "School aid fund"
+        ]
       },
       "projects": {
         "title": "Projects and Improvements",
         "commissions": {
-           "title": "Family Commissions",
-           "desc": "Active groups of families working to improve the school and energize the educational community."
+          "title": "Family Commissions",
+          "desc": "Active groups of families working to improve the school and energize the educational community."
         },
         "done": {
-           "title": "Done (24-25)",
-           "items": [
-             "Track painting",
-             "School garden",
-             "Infant shade",
-             "Book bench"
-           ]
+          "title": "Done (24-25)",
+          "items": [
+            "Track painting",
+            "School garden",
+            "Infant shade",
+            "Book bench"
+          ]
         },
         "future": {
-           "title": "Next (25-26)",
-           "items": [
-             "Library renovation",
-             "Inclusive patio",
-             "Own kitchen",
-             "Multipurpose room"
-           ]
+          "title": "Next (25-26)",
+          "items": [
+            "Library renovation",
+            "Inclusive patio",
+            "Own kitchen",
+            "Multipurpose room"
+          ]
         }
       },
       "board_change": {
@@ -219,6 +441,45 @@
     "entity_label": "Entity",
     "holder_label": "Holder",
     "footer_note": "Once the transfer is made, remember to keep the receipt in case it is necessary."
+  },
+  "menjador_page": {
+    "seo_title": "Canteen Service",
+    "seo_description": "All the information about the school canteen: schedule, prices for fixed and sporadic pupils, and downloadable monthly menus.",
+    "title": "Canteen Service",
+    "subtitle": "Schedule, prices and menus for the school canteen.",
+    "schedule_title": "Schedule",
+    "company_title": "Provider",
+    "diets_title": "Special diets",
+    "allergies_title": "Allergies and intolerances",
+    "how_to_title": "How it works",
+    "contact_title": "Contact",
+    "prices_title": "Prices",
+    "prices_subtitle": "We distinguish between fixed pupils (half month or more + 1 day) and sporadic pupils (individual days).",
+    "fix_title": "Fixed pupils",
+    "fix_subtitle": "Half month or more + 1 day",
+    "esporadic_title": "Sporadic pupils",
+    "esporadic_subtitle": "Individual days",
+    "price_member": "Member",
+    "price_non_member": "Non-member",
+    "no_rates": "No rates configured",
+    "menus_title": "Menus",
+    "menus_subtitle": "Download the monthly menus in PDF.",
+    "no_menus": "No menus published yet.",
+    "no_period": "No period"
+  },
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
   },
   "shop_page": {
     "subtitle": "Reserve school clothing and pick it up at the AFA.",
@@ -430,8 +691,10 @@
       "calendar": "Main Calendar",
       "tasks": "Tasks",
       "acollida": "Childcare Management",
+      "menjador": "Canteen Management",
       "observability": "Auditing",
-      "logout": "Logout"
+      "logout": "Logout",
+      "faq": "FAQ"
     },
     "acollidaManager": {
       "addRate": "Add New Rate",
@@ -533,6 +796,27 @@
       "mark_done": "Mark done",
       "reopen": "Reopen",
       "overdue_badge": "Overdue"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "subtitle": "Manage the FAQ of the extracurricular section.",
+      "new": "New question",
+      "edit": "Edit question",
+      "empty": "No questions yet. Create the first one.",
+      "delete_confirm": "Delete this question?",
+      "required": "The question and answer (ES) are required.",
+      "fill_source_first": "Fill in the question in the source language first.",
+      "auto_translate": "Auto-translate",
+      "translating": "Translating...",
+      "field_category": "Category",
+      "category_placeholder": "E.g.: Enrolment, places and waiting list",
+      "category_hint": "Questions with the same category are grouped together.",
+      "field_question": "Question",
+      "field_answer": "Answer",
+      "field_order": "Order",
+      "field_active": "Visible",
+      "hide": "Hide",
+      "show": "Show"
     }
   },
   "common": {
@@ -566,6 +850,200 @@
   },
   "footer": {
     "all_rights_reserved": "All rights reserved."
+  },
+  "settings": {
+    "ai_keys": {
+      "intro_title": "Hot-swappable AI keys",
+      "intro_body": "Keys are encrypted in transit and only revealed to the backend when needed. If a key expires or you hit a quota, just paste a new one — no redeploy.",
+      "loading": "Loading...",
+      "configured": "Configured",
+      "not_configured": "Not configured — auto-translation will not work",
+      "updated_on": "updated on {{date}}",
+      "rotate_label": "Replace with a new key",
+      "new_value_label": "Paste your API key here",
+      "value_placeholder": "AIza...",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved_ok": "Key saved.",
+      "save_error": "Could not save the key",
+      "delete": "Delete",
+      "delete_confirm": "Delete this key? Auto-translation will stop working until you configure a new one.",
+      "deleted_ok": "Key deleted.",
+      "delete_error": "Could not delete the key",
+      "load_error": "Could not load key status",
+      "show": "Show",
+      "hide": "Hide"
+    }
+  },
+  "forms": {
+    "public": {
+      "loading": "Preparing secure form...",
+      "not_available": "Form unavailable",
+      "not_found": "The form does not exist or has been deactivated.",
+      "load_error": "Could not load the form.",
+      "closed_title": "Closed",
+      "closed_body": "The submission window for this form has ended.",
+      "invalid_link": "Invalid form link.",
+      "submit": "Submit",
+      "submitting": "Processing...",
+      "success_title": "Submitted!",
+      "success_body": "Your response has been recorded.",
+      "success_thanks": "Thanks for completing the form.",
+      "success_close": "You can now close this window",
+      "submit_error": "There was an error processing your submission. Please try again later.",
+      "required": "This field is required.",
+      "invalid_email": "Enter a valid email.",
+      "select_placeholder": "Select an option...",
+      "your_answer": "Your answer...",
+      "preview_alert": "Preview mode: the form will not be submitted. All fields are valid.",
+      "file_upload": "Click to upload or drag",
+      "file_types": "PDF, images or DOC (max {{mb}}MB)",
+      "file_too_large": "File too large. Max {{mb}}MB.",
+      "file_error": "There was an error uploading the file.",
+      "file_uploaded": "Uploaded successfully",
+      "file_view": "VIEW",
+      "file_uploading": "Uploading document...",
+      "file_cant_get_url": "Could not get the file link."
+    },
+    "admin": {
+      "title": "Forms",
+      "subtitle": "Create forms for families, students and collaborators.",
+      "new": "New form",
+      "all": "All",
+      "general": "General",
+      "empty_title": "No forms yet",
+      "empty_body": "Start collecting information by building the first one.",
+      "empty_cta": "Create the first form →",
+      "empty_folder_title": "No forms in this folder",
+      "empty_folder_body": "Create a new one or move existing forms into this section.",
+      "load_error": "Could not load forms",
+      "retry": "Retry",
+      "published": "Published",
+      "draft": "Draft",
+      "responses": "RESPONSES",
+      "delete_confirm": "Delete \"{{title}}\"?",
+      "delete_confirm_with_responses": "\"{{title}}\" has {{count}} responses. They will be permanently deleted.\n\nContinue?",
+      "view_link": "Open link",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "loading": "Loading...",
+      "title_col": "Title",
+      "folder_col": "Folder",
+      "status_col": "Status",
+      "info_col": "Info",
+      "actions_col": "Actions",
+      "fields_count": "{{count}} fields",
+      "responses_count": "{{count}} responses",
+      "click_publish": "Click to publish",
+      "click_unpublish": "Click to unpublish"
+    },
+    "builder": {
+      "editing": "Edit form",
+      "creating": "Create new form",
+      "intro": "Configure the questions you will send to the public.",
+      "preview": "Preview",
+      "back": "Back",
+      "general": "General settings",
+      "title_label": "Title",
+      "title_placeholder": "E.g. Extracurricular sign-up",
+      "slug_label": "Link (slug)",
+      "slug_placeholder": "extracurricular-signup",
+      "folder_label": "Folder / section",
+      "folder_none": "No folder (general)",
+      "folder_new": "New",
+      "folder_create": "Create",
+      "folder_cancel": "Cancel",
+      "folder_new_placeholder": "New folder name...",
+      "header_label": "Header image (optional)",
+      "header_upload": "Upload header image",
+      "header_recommended": "Recommended: 1200×400px",
+      "description": "Instructions / description",
+      "description_hint": "(Supports bold, lists, etc.)",
+      "description_placeholder": "Write here the instructions for the audience...",
+      "activate": "Activate the form immediately",
+      "closes_at": "Auto-closes on:",
+      "no_close": "No closing date",
+      "questions": "Questions",
+      "no_questions": "No questions in this form yet.",
+      "q_label": "Question title",
+      "q_label_placeholder": "Write your question here...",
+      "q_placeholder_label": "Helper text (placeholder)",
+      "q_type": "Type:",
+      "q_required": "Required",
+      "q_options": "Options separated by commas (e.g. Yes, No, Maybe)",
+      "q_options_placeholder": "Add options...",
+      "q_options_label": "Options",
+      "option_placeholder": "Option {{n}}",
+      "add_option": "Add option",
+      "remove_option": "Remove option",
+      "fix_errors": "Please fix the fields before saving",
+      "q_visibility": "Visibility:",
+      "q_always_visible": "Always visible",
+      "q_if_in": "If in \"{{label}}\"",
+      "q_equals": "equals",
+      "q_choose_value": "Choose value...",
+      "move_up": "Move up",
+      "move_down": "Move down",
+      "duplicate_field": "Duplicate field",
+      "delete_field": "Delete question",
+      "section_label": "Separator / section title",
+      "section_title": "Title",
+      "section_desc": "Description (optional)",
+      "section_title_ph": "E.g. Child information, Additional info...",
+      "section_desc_ph": "Explanatory text under the title...",
+      "add_question": "Add new question",
+      "cat_basic": "BASIC",
+      "cat_advanced": "ADVANCED",
+      "cat_structure": "STRUCTURE",
+      "ft_text": "Short text",
+      "ft_long_text": "Paragraph",
+      "ft_select": "Dropdown",
+      "ft_radio": "Single choice",
+      "ft_checkbox": "Checkboxes",
+      "ft_date": "Date",
+      "ft_email": "Email",
+      "ft_phone": "Phone",
+      "ft_number": "Number",
+      "ft_file": "File upload",
+      "ft_section": "Section divider",
+      "save": "Save and publish form",
+      "saving": "Saving...",
+      "save_error": "An error occurred while saving the form.",
+      "slug_conflict": "The slug is already used by another form.",
+      "preview_label": "Form preview",
+      "close": "Close",
+      "lang_source": "(source)",
+      "lang_tab_es": "Español",
+      "lang_tab_ca": "Català",
+      "lang_tab_en": "English",
+      "translate_all": "Auto-translate",
+      "translating": "Translating...",
+      "translate_error": "Translation error.",
+      "translate_done": "Translations generated.",
+      "translate_fill_source_first": "Fill the Spanish content first.",
+      "translate_explain": "Edit the texts in this language. If left empty, the Spanish content will be shown.",
+      "translate_source_explain": "This is the source language. Auto-translate will use this content to fill the others."
+    },
+    "viewer": {
+      "back": "Back",
+      "responses_count": "{{count}} responses",
+      "of_total": " of {{total}} total",
+      "view_link": "Open link",
+      "search_placeholder": "Search all responses...",
+      "empty_title": "No responses yet",
+      "empty_body": "Share the form link to start collecting responses.",
+      "no_match": "No responses match \"{{q}}\"",
+      "delete_confirm": "Delete this response? Reversible only from the database.",
+      "delete_error": "Could not delete response",
+      "load_error": "Could not load responses",
+      "date_col": "Date",
+      "actions_col": "Actions",
+      "exported_on": "Exported {{date}}"
+    }
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "subtitle": "Answers to the most common questions about extracurricular activities."
   }
 }
-

@@ -1,0 +1,1 @@
+var e=`https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/`;function t(t){return t?t.startsWith(e)?`/storage/`+t.slice(52):t:``}export{t};

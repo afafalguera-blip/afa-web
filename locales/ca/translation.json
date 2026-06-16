@@ -1,4 +1,10 @@
 {
+  "maintenance": {
+    "banner": "Estem actualitzant la web. Tornarem el 16 d'abril! Per qualsevol consulta:",
+    "section_unavailable": "Aquesta secció no està disponible temporalment.",
+    "page_title": "Pàgina en manteniment",
+    "page_description": "Estem treballant per millorar la web. Estarem de tornada el 16 d'abril amb totes les funcionalitats. Per qualsevol consulta o necessitat, escriu-nos!"
+  },
   "header": {
     "greeting": "Bon dia, Família 👋"
   },
@@ -9,7 +15,223 @@
     "documents": "Documents",
     "contact": "Contacte",
     "suggestions": "Suggeriments",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "about_afa": "Sobre l'AFA",
+    "news": "Notícies",
+    "activities": "Activitats",
+    "activities_subtitle": "Inscripcions, quotes i calendari",
+    "services": "Serveis",
+    "services_subtitle": "Acollida i menjador",
+    "more": "Més",
+    "more_subtitle": "Tot el que pots explorar"
+  },
+  "nav_menu": {
+    "extraescolars_desc": "Inscripcions i activitats",
+    "fees_desc": "Tarifes i pagaments",
+    "calendar_desc": "Tot el curs en un cop d'ull",
+    "acollida_desc": "Horaris i tarifes",
+    "menjador_desc": "Menús, preus i info",
+    "about_desc": "Qui som i la Junta",
+    "history_desc": "Mig segle d'escola",
+    "news_desc": "Última hora de l'AFA",
+    "documents_desc": "Recursos i descàrregues",
+    "contact_desc": "Escriu-nos",
+    "suggestions_desc": "Idees i millores"
+  },
+  "about_afa": {
+    "title": "Sobre l'AFA",
+    "subtitle": "Qui som i com ens organitzem",
+    "mission_default": "L'AFA (Associació de Famílies d'Alumnes) és una entitat sense ànim de lucre formada per les famílies de l'escola. Treballem per donar suport al projecte educatiu, organitzar activitats i representar les famílies davant l'escola i les administracions.",
+    "composition_title": "La Junta Directiva",
+    "composition_intro": "La Junta es renova en assemblea i està formada pels següents càrrecs:",
+    "empty": "Encara no s'han publicat els membres de la Junta.",
+    "roles": {
+      "president": "President/a",
+      "vicepresident": "Vicepresident/a",
+      "treasurer": "Tresorer/a",
+      "secretary": "Secretari/ària",
+      "vocal": "Vocal"
+    },
+    "pillars": {
+      "families": {
+        "title": "Famílies que sumen",
+        "desc": "Tota família matriculada n'és part i pot participar a l'assemblea i les comissions."
+      },
+      "mission": {
+        "title": "Missió",
+        "desc": "Acompanyar el projecte educatiu i organitzar activitats per a l'alumnat i les famílies."
+      },
+      "nonprofit": {
+        "title": "Sense ànim de lucre",
+        "desc": "Tots els recursos es reinverteixen en l'escola i la comunitat educativa."
+      }
+    },
+    "cta": {
+      "title": "Vols formar part de l'AFA?",
+      "desc": "Escriu-nos i t'expliquem com participar a l'assemblea, comissions o Junta.",
+      "contact": "Contacta amb nosaltres"
+    },
+    "history_promo": {
+      "eyebrow": "Mig segle d'escola",
+      "title": "Coneix la nostra història",
+      "desc": "De l'escola que va néixer de la lluita veïnal als anys 70 al projecte educatiu d'avui. Una història del barri de Falguera.",
+      "cta": "Llegeix-la"
+    }
+  },
+  "acollida_page": {
+    "seo_title": "Servei d'Acollida",
+    "seo_description": "Tota la informació sobre el servei d'acollida: horaris, tarifes per a socis i no socis, i opció ocasional.",
+    "eyebrow": "Servei AFA",
+    "title": "Servei d'Acollida",
+    "intro": "Espai segur i acompanyat abans i després de l'horari escolar perquè les famílies puguin conciliar amb tranquil·litat.",
+    "info": {
+      "schedule": {
+        "title": "Horaris flexibles",
+        "body": "Disponibilitat al matí abans d'entrar a classe i a la tarda en sortir, segons les necessitats de cada família."
+      },
+      "team": {
+        "title": "Equip educatiu",
+        "body": "Monitoratge titulat que acompanya l'estona amb jocs, lectures i petites activitats adaptades a cada edat."
+      },
+      "flex": {
+        "title": "Mensual o ocasional",
+        "body": "Pots contractar el servei tot el mes o utilitzar-lo en dies puntuals quan ho necessitis."
+      }
+    },
+    "rates_title": "Tarifes",
+    "rates_subtitle": "Preus per a famílies sòcies i no sòcies de l'AFA. Mensual o ocasional.",
+    "no_rates": "Encara no hi ha tarifes publicades.",
+    "timeslot": "Franja horària",
+    "member": "Soci/a",
+    "non_member": "No soci/a",
+    "per_month": "mes",
+    "occasional": "ocasional",
+    "note": "Els preus ocasionals s'apliquen a dies puntuals. Per a inscripcions o més informació, contacta amb l'AFA.",
+    "cta": {
+      "title": "Necessites més informació?",
+      "desc": "Si tens dubtes o vols apuntar-te al servei, escriu-nos i t'ajudem amb tots els detalls.",
+      "button": "Contacta amb l'AFA"
+    }
+  },
+  "history": {
+    "title": "La nostra història",
+    "subtitle": "Mig segle d'escola pública",
+    "intro": "De l'escola del barri que va néixer de la lluita veïnal al projecte educatiu que avui acompanya les nostres famílies. Aquesta és la història que cada dia continueu escrivint amb nosaltres.",
+    "stats": {
+      "years": "Anys d'història",
+      "founded": "Any de fundació",
+      "lines": "Línia per curs",
+      "students": "Alumnes"
+    },
+    "origins": {
+      "eyebrow": "Els orígens",
+      "title": "Una escola que va néixer del barri",
+      "p1": "A principis dels anys 70, el barri de Falguera creixia al ritme de les fàbriques. Famílies arribades de mig Estat es trobaven sense places escolars: més de 600 nens i nenes havien d'anar amb autobús a Barcelona cada matí.",
+      "p2": "Les famílies del barri es van organitzar i van exigir una escola pública. La pressió va funcionar: el 1971 es van cedir els terrenys i es va començar a construir el centre, just darrere del Palau Falguera."
+    },
+    "quote": {
+      "text": "\"L'escola va passar de ser franquista a catalana, i el barri de no tenir res a estar ple de vida.\"",
+      "author": "Crònica veïnal del barri de Falguera"
+    },
+    "modelo": {
+      "eyebrow": "1972 · Inauguració",
+      "title": "L'\"escola sense portes\"",
+      "fact": "escoles \"sense portes\" a tot Espanya",
+      "p1": "L'edifici original era un projecte experimental: aules diàfanes, grans finestrals, llum natural i molts espais compartits. Una de les només cinc del seu tipus a tot l'Estat.",
+      "p2": "L'escola va arribar a tenir més de 1.000 alumnes i 38 mestres. Tanta vida no cabia en un sol espai obert i amb el temps es van haver d'aixecar parets per crear aules tradicionals."
+    },
+    "timeline": {
+      "eyebrow": "Línia del temps",
+      "title": "Moments que ens han fet",
+      "intro": "Cinc dècades en un cop d'ull.",
+      "1971": {
+        "title": "Comença la construcció",
+        "desc": "L'Ajuntament cedeix els terrenys darrere del Palau Falguera per fer una escola pública nova."
+      },
+      "1972": {
+        "title": "Inauguració del Colegio Modelo",
+        "desc": "L'11 de desembre obre les portes una de les cinc \"escoles sense portes\" de tot l'Estat."
+      },
+      "1976": {
+        "title": "Primeres classes en català",
+        "desc": "S'introdueixen les primeres classes en català dins l'aula."
+      },
+      "1985": {
+        "title": "Immersió lingüística",
+        "desc": "El centre s'incorpora plenament al programa d'immersió en català i passa a dues línies."
+      },
+      "1988": {
+        "title": "Nou nom: Escola Falguera",
+        "desc": "La comunitat decideix canviar el nom per honorar el barri i marcar una nova etapa."
+      },
+      "1997": {
+        "title": "Edifici nou",
+        "desc": "L'escola es trasllada a un nou edifici al carrer Sant Josep, coincidint amb el 25è aniversari."
+      },
+      "2012": {
+        "title": "Renovació integral",
+        "desc": "Es modernitzen aules i espais comuns per adaptar-los a la pedagogia actual."
+      },
+      "2022": {
+        "title": "50 anys d'escola",
+        "desc": "Mig segle de comunitat educativa al barri de Falguera."
+      }
+    },
+    "name": {
+      "eyebrow": "1988 · Un nom propi",
+      "title": "De \"Colegio Modelo\" a Escola Falguera",
+      "desc": "La comunitat va decidir canviar el nom per reivindicar el barri, deixar enrere connotacions de l'època anterior i posar arrels en el lloc on viuen les famílies.",
+      "label": "Falguera"
+    },
+    "today": {
+      "eyebrow": "Avui",
+      "title": "Una escola en acció constant",
+      "intro": "Mig segle després, la Falguera continua sent un projecte viu, arrelat al barri i obert al món.",
+      "green": {
+        "title": "Escola Verda",
+        "desc": "Hort escolar, sostenibilitat i activitats a la natura aprofitant la proximitat al riu i a Collserola."
+      },
+      "cordes": {
+        "title": "Projecte Cordes",
+        "desc": "Aprenentatge d'instruments de corda dins l'aula, en col·laboració amb l'Escola Municipal de Música del Palau Falguera."
+      },
+      "steam": {
+        "title": "STE(IA)M",
+        "desc": "Ciència, tecnologia, art i intel·ligència artificial integrades al currículum amb experiències pràctiques."
+      },
+      "community": {
+        "title": "Comunitat AFA",
+        "desc": "Extraescolars, acollida i menjador amb cuina pròpia: les famílies fan possible el dia a dia de l'escola."
+      }
+    },
+    "palau": {
+      "eyebrow": "El nostre nom",
+      "title": "Per què \"Falguera\"?",
+      "p1": "L'escola pren el nom del Palau Falguera, una finca del segle XVII que és el cor històric de Sant Feliu. Es troba just al costat del centre i en formem part del seu paisatge cultural.",
+      "p2": "Avui el Palau acull l'Escola Municipal de Música i és l'escenari de l'Exposició Nacional de Roses. Els seus jardins són una extensió natural de les nostres aules."
+    },
+    "cta": {
+      "title": "La història la continueu escrivint vosaltres",
+      "desc": "Cada família que s'incorpora suma un capítol nou. Coneix l'AFA i descobreix com participar-hi.",
+      "button": "Coneix l'AFA"
+    }
+  },
+  "documents": {
+    "seo_title": "Documents i Recursos",
+    "seo_description": "Descarrega actes d'assemblees, normativa escolar, formularis d'inscripció i recursos d'interès de l'AFA Escola Falguera.",
+    "page_title": "Documents i Recursos",
+    "page_description": "Espai de descàrrega de documentació oficial, actes, normativa i informació d'interès per a les famílies.",
+    "search_placeholder": "Cercar documents...",
+    "no_results": "No s'han trobat documents.",
+    "no_description": "Sense descripció",
+    "categories": {
+      "all": "Tots",
+      "actes": "Actes",
+      "normativa": "Normativa",
+      "general": "General",
+      "menjador": "Menjador",
+      "extraescolars": "Extraescolars"
+    }
   },
   "legal": {
     "privacy_title": "Política de Privacitat",
@@ -31,6 +253,7 @@
     "fees": "Quotes",
     "calendar": "Calendari",
     "acollida": "Acollida",
+    "menjador": "Menjador",
     "contact": "Contacte",
     "course_current": "Curs 2025 - 2026",
     "view_details": "Veure Detalls",
@@ -58,9 +281,9 @@
       "subtitle": "Mantén-te al dia de tot el que passa a la nostra escola i dels projectes de l'AFA."
     },
     "assemblea_banner": {
-       "tag": "Documentació",
-       "title": "Assemblea General",
-       "description": "Resum d'acords, estat de comptes i nous projectes de l'AFA."
+      "tag": "Documentació",
+      "title": "Assemblea General",
+      "description": "Resum d'acords, estat de comptes i nous projectes de l'AFA."
     },
     "contact_banner": {
       "tag": "Cita Prèvia",
@@ -137,11 +360,11 @@
       "economics": {
         "title": "Situació Econòmica",
         "items": [
-           "Saldo positiu i estalvi de seguretat.",
-           "Sense deutes ni pagaments pendents.",
-           "Increment de la recaptació gràcies a l'alta participació.",
-           "Fons de reserva destinat a futures inversions.",
-           "Gestió transparent i auditada."
+          "Saldo positiu i estalvi de seguretat.",
+          "Sense deutes ni pagaments pendents.",
+          "Increment de la recaptació gràcies a l'alta participació.",
+          "Fons de reserva destinat a futures inversions.",
+          "Gestió transparent i auditada."
         ]
       },
       "investments": {
@@ -155,26 +378,26 @@
         ]
       },
       "functions": {
-         "title": "Funcions de l'AFA",
-         "items": [
-           "Gestió d'extraescolars",
-           "Organització de festes",
-           "Recaptació de fons",
-           "Intermediació famílies-escola",
-           "Millora d'instal·lacions",
-           "Socialització de llibres",
-           "Suport a famílies"
-         ]
+        "title": "Funcions de l'AFA",
+        "items": [
+          "Gestió d'extraescolars",
+          "Organització de festes",
+          "Recaptació de fons",
+          "Intermediació famílies-escola",
+          "Millora d'instal·lacions",
+          "Socialització de llibres",
+          "Suport a famílies"
+        ]
       },
       "quota": {
-         "title": "A què destinem la quota?",
-         "items": [
-           "Material escolar col·lectiu",
-           "Festes tradicionales (Castanyada, etc.)",
-           "Xerrades educatives",
-           "Digitalització de l'escola",
-           "Fons d'ajuda escolar"
-         ]
+        "title": "A què destinem la quota?",
+        "items": [
+          "Material escolar col·lectiu",
+          "Festes tradicionales (Castanyada, etc.)",
+          "Xerrades educatives",
+          "Digitalització de l'escola",
+          "Fons d'ajuda escolar"
+        ]
       },
       "importance": {
         "title": "Per què és important participar?",
@@ -185,28 +408,28 @@
       "projects": {
         "title": "Projectes i Millores",
         "commissions": {
-           "title": "Comissions de Famílies",
-           "desc": "Grups actius de famílies que treballen per millorar l'escola i dinamitzar la comunitat educativa."
+          "title": "Comissions de Famílies",
+          "desc": "Grups actius de famílies que treballen per millorar l'escola i dinamitzar la comunitat educativa."
         },
         "done": {
-           "title": "Fet (24-25)",
-           "desc": "Projectes i millores executades amb èxit durant el darrer curs.",
-           "items": [
-             "Pintura pista",
-             "Hort escolar",
-             "Ombra infantil",
-             "Banc de llibres"
-           ]
+          "title": "Fet (24-25)",
+          "desc": "Projectes i millores executades amb èxit durant el darrer curs.",
+          "items": [
+            "Pintura pista",
+            "Hort escolar",
+            "Ombra infantil",
+            "Banc de llibres"
+          ]
         },
         "future": {
-           "title": "Propera (25-26)",
-           "desc": "Nous reptes i iniciatives planificades per al curs vinent.",
-           "items": [
-             "Renovació biblioteca",
-             "Pati inclusiu",
-             "Cuina pròpia",
-             "Aula polivalent"
-           ]
+          "title": "Propera (25-26)",
+          "desc": "Nous reptes i iniciatives planificades per al curs vinent.",
+          "items": [
+            "Renovació biblioteca",
+            "Pati inclusiu",
+            "Cuina pròpia",
+            "Aula polivalent"
+          ]
         }
       },
       "board_change": {
@@ -247,6 +470,45 @@
     "entity_label": "Entitat",
     "holder_label": "Titular",
     "footer_note": "Un cop realitzada la transferència, recordeu guardar el comprovant per si fos necessari."
+  },
+  "menjador_page": {
+    "seo_title": "Servei de Menjador",
+    "seo_description": "Tota la informació sobre el servei de menjador escolar: horaris, preus per a alumnat fix i esporàdic, i menús mensuals descarregables.",
+    "title": "Servei de Menjador",
+    "subtitle": "Horaris, preus i menús del servei de menjador escolar.",
+    "schedule_title": "Horari",
+    "company_title": "Empresa proveïdora",
+    "diets_title": "Dietes especials",
+    "allergies_title": "Al·lèrgies i intoleràncies",
+    "how_to_title": "Com s'utilitza",
+    "contact_title": "Contacte",
+    "prices_title": "Preus",
+    "prices_subtitle": "Es distingeix entre alumnat fix (mig mes o més + 1 dia) i alumnat esporàdic (dies solts).",
+    "fix_title": "Alumnat fix",
+    "fix_subtitle": "Mig mes o més + 1 dia",
+    "esporadic_title": "Alumnat esporàdic",
+    "esporadic_subtitle": "Dies solts",
+    "price_member": "Soci",
+    "price_non_member": "No soci",
+    "no_rates": "Sense tarifes configurades",
+    "menus_title": "Menús",
+    "menus_subtitle": "Descarrega els menús mensuals en PDF.",
+    "no_menus": "Encara no hi ha menús publicats.",
+    "no_period": "Sense període"
+  },
+  "months": {
+    "january": "gener",
+    "february": "febrer",
+    "march": "març",
+    "april": "abril",
+    "may": "maig",
+    "june": "juny",
+    "july": "juliol",
+    "august": "agost",
+    "september": "setembre",
+    "october": "octubre",
+    "november": "novembre",
+    "december": "desembre"
   },
   "shop_page": {
     "subtitle": "Reserva la roba escolar i recull-la a l'AFA.",
@@ -460,13 +722,15 @@
       "calendar": "Calendari Gen.",
       "tasks": "Tasques",
       "acollida": "Gestió Acollida",
+      "menjador": "Gestió Menjador",
       "communication": "Comunicació",
       "contact_messages": "Missatges Web",
       "banner": "Banner Anuncis",
       "notifications": "Notificacions",
       "system": "Sistema",
       "observability": "Auditoria",
-      "logout": "Tancar Sessió"
+      "logout": "Tancar Sessió",
+      "faq": "FAQ"
     },
     "acollidaManager": {
       "addRate": "Afegir Nova Tarifa",
@@ -763,6 +1027,27 @@
       "mark_done": "Marcar com feta",
       "reopen": "Reobrir",
       "overdue_badge": "Vençuda"
+    },
+    "faq": {
+      "title": "Preguntes frequents",
+      "subtitle": "Gestiona les FAQ de la seccio d'extraescolars.",
+      "new": "Nova pregunta",
+      "edit": "Edita la pregunta",
+      "empty": "Encara no hi ha preguntes. Crea la primera.",
+      "delete_confirm": "Vols eliminar aquesta pregunta?",
+      "required": "La pregunta i la resposta (ES) son obligatories.",
+      "fill_source_first": "Omple primer la pregunta en l'idioma d'origen.",
+      "auto_translate": "Auto-tradueix",
+      "translating": "Traduint...",
+      "field_category": "Categoria",
+      "category_placeholder": "Ex.: Inscripcions, places i llista d'espera",
+      "category_hint": "Les preguntes amb la mateixa categoria s'agrupen juntes.",
+      "field_question": "Pregunta",
+      "field_answer": "Resposta",
+      "field_order": "Ordre",
+      "field_active": "Visible",
+      "hide": "Amaga",
+      "show": "Mostra"
     }
   },
   "common": {
@@ -797,5 +1082,200 @@
   },
   "footer": {
     "all_rights_reserved": "Tots els drets reservats."
+  },
+  "settings": {
+    "ai_keys": {
+      "intro_title": "Claus d'IA gestionades en calent",
+      "intro_body": "Les claus es xifren en trànsit i només s'exposen al backend quan cal. Si el valor caduca o s'esgota la quota, només cal desar-ne una de nova — sense redeploy.",
+      "loading": "Carregant...",
+      "configured": "Configurada",
+      "not_configured": "No configurada — l'auto-traducció no funcionarà",
+      "updated_on": "actualitzada el {{date}}",
+      "rotate_label": "Substituir per una nova clau",
+      "new_value_label": "Enganxa la teva API key aquí",
+      "value_placeholder": "AIza...",
+      "save": "Desar",
+      "saving": "Desant...",
+      "saved_ok": "Clau desada correctament.",
+      "save_error": "No s'ha pogut desar la clau",
+      "delete": "Eliminar",
+      "delete_confirm": "Eliminar aquesta clau? L'auto-traducció deixarà de funcionar fins que en configuris una altra.",
+      "deleted_ok": "Clau eliminada.",
+      "delete_error": "No s'ha pogut eliminar la clau",
+      "load_error": "No s'ha pogut carregar l'estat de la clau",
+      "show": "Mostrar",
+      "hide": "Amagar"
+    }
+  },
+  "forms": {
+    "public": {
+      "loading": "Preparant formulari segur...",
+      "not_available": "Formulari no disponible",
+      "not_found": "El formulari no existeix o ha estat desactivat.",
+      "load_error": "No s'ha pogut carregar el formulari.",
+      "closed_title": "Termini tancat",
+      "closed_body": "El període d'inscripció per a aquest formulari ha finalitzat.",
+      "invalid_link": "Enllaç de formulari no vàlid.",
+      "submit": "Enviar resposta",
+      "submitting": "Processant...",
+      "success_title": "Resposta enviada!",
+      "success_body": "La teva resposta s'ha registrat correctament.",
+      "success_thanks": "Gràcies per completar el formulari.",
+      "success_close": "Ja pots tancar aquesta finestra",
+      "submit_error": "Hi ha hagut un error en processar la teva sol·licitud. Torna-ho a provar més tard.",
+      "required": "Aquest camp és obligatori.",
+      "invalid_email": "Introdueix un email vàlid.",
+      "select_placeholder": "Selecciona una opció...",
+      "your_answer": "La teva resposta...",
+      "preview_alert": "Vista prèvia: el formulari no s'enviarà. Tots els camps són vàlids.",
+      "file_upload": "Fes clic per pujar o arrossega",
+      "file_types": "PDF, imatges o DOC (màx {{mb}}MB)",
+      "file_too_large": "El fitxer és massa gran. Màxim {{mb}}MB.",
+      "file_error": "Hi ha hagut un error en pujar el fitxer.",
+      "file_uploaded": "Pujada correcta",
+      "file_view": "VEURE",
+      "file_uploading": "Pujant document...",
+      "file_cant_get_url": "No s'ha pogut obtenir l'enllaç del fitxer."
+    },
+    "admin": {
+      "title": "Formularis",
+      "subtitle": "Crea formularis per a famílies, alumnes i col·laboradors.",
+      "new": "Nou formulari",
+      "all": "Tots",
+      "general": "General",
+      "empty_title": "Encara no hi ha formularis",
+      "empty_body": "Comença a recollir informació construint el primer.",
+      "empty_cta": "Crear el primer formulari →",
+      "empty_folder_title": "Sense formularis en aquesta carpeta",
+      "empty_folder_body": "Crea'n un de nou o mou-ne d'existents a aquesta secció.",
+      "load_error": "No s'han pogut carregar els formularis",
+      "retry": "Reintentar",
+      "published": "Publicat",
+      "draft": "Esborrany",
+      "responses": "RESPOSTES",
+      "delete_confirm": "Eliminar \"{{title}}\"?",
+      "delete_confirm_with_responses": "\"{{title}}\" té {{count}} respostes. S'eliminaran permanentment.\n\nContinuar?",
+      "view_link": "Veure enllaç",
+      "edit": "Editar",
+      "duplicate": "Duplicar",
+      "delete": "Eliminar",
+      "loading": "Carregant...",
+      "title_col": "Títol",
+      "folder_col": "Carpeta",
+      "status_col": "Estat",
+      "info_col": "Info",
+      "actions_col": "Accions",
+      "fields_count": "{{count}} camps",
+      "responses_count": "{{count}} respostes",
+      "click_publish": "Clic per publicar",
+      "click_unpublish": "Clic per despublicar"
+    },
+    "builder": {
+      "editing": "Editar formulari",
+      "creating": "Crear nou formulari",
+      "intro": "Configura les preguntes que enviaràs al públic.",
+      "preview": "Vista prèvia",
+      "back": "Tornar",
+      "general": "Configuració general",
+      "title_label": "Títol",
+      "title_placeholder": "Ex: Inscripció extraescolars",
+      "slug_label": "Enllaç (slug)",
+      "slug_placeholder": "inscripcio-extraescolars",
+      "folder_label": "Carpeta / secció",
+      "folder_none": "Sense carpeta (general)",
+      "folder_new": "Nova",
+      "folder_create": "Crear",
+      "folder_cancel": "Cancel·lar",
+      "folder_new_placeholder": "Nom de la nova carpeta...",
+      "header_label": "Imatge de capçalera (opcional)",
+      "header_upload": "Pujar imatge de capçalera",
+      "header_recommended": "Recomanat: 1200×400px",
+      "description": "Instruccions / descripció",
+      "description_hint": "(Admet negreta, llistes, etc.)",
+      "description_placeholder": "Escriu aquí les instruccions per al públic...",
+      "activate": "Activar el formulari immediatament",
+      "closes_at": "Es tanca automàticament el:",
+      "no_close": "Sense data de tancament",
+      "questions": "Preguntes",
+      "no_questions": "Encara no hi ha preguntes al formulari.",
+      "q_label": "Títol de la pregunta",
+      "q_label_placeholder": "Escriu aquí la teva pregunta...",
+      "q_placeholder_label": "Text d'ajuda (placeholder)",
+      "q_type": "Tipus:",
+      "q_required": "Resposta obligatòria",
+      "q_options": "Opcions separades per coma (ex: Sí, No, Potser)",
+      "q_options_placeholder": "Afegeix opcions...",
+      "q_options_label": "Opcions",
+      "option_placeholder": "Opció {{n}}",
+      "add_option": "Afegir opció",
+      "remove_option": "Treure opció",
+      "fix_errors": "Revisa els camps abans de desar",
+      "q_visibility": "Visibilitat:",
+      "q_always_visible": "Sempre visible",
+      "q_if_in": "Si a \"{{label}}\"",
+      "q_equals": "és igual a",
+      "q_choose_value": "Selecciona valor...",
+      "move_up": "Moure amunt",
+      "move_down": "Moure avall",
+      "duplicate_field": "Duplicar camp",
+      "delete_field": "Eliminar pregunta",
+      "section_label": "Separador / títol de secció",
+      "section_title": "Títol",
+      "section_desc": "Descripció (opcional)",
+      "section_title_ph": "Ex: Dades de l'infant, Informació addicional...",
+      "section_desc_ph": "Text explicatiu sota el títol...",
+      "add_question": "Afegir nova pregunta",
+      "cat_basic": "BÀSICS",
+      "cat_advanced": "AVANÇAT",
+      "cat_structure": "ESTRUCTURA",
+      "ft_text": "Text curt",
+      "ft_long_text": "Paràgraf",
+      "ft_select": "Desplegable",
+      "ft_radio": "Selecció única",
+      "ft_checkbox": "Caselles",
+      "ft_date": "Data",
+      "ft_email": "Email",
+      "ft_phone": "Telèfon",
+      "ft_number": "Número",
+      "ft_file": "Càrrega de fitxers",
+      "ft_section": "Separador / secció",
+      "save": "Desar i publicar formulari",
+      "saving": "Desant...",
+      "save_error": "S'ha produït un error en desar el formulari.",
+      "slug_conflict": "El slug ja està en ús per un altre formulari.",
+      "preview_label": "Vista prèvia del formulari",
+      "close": "Tancar",
+      "lang_source": "(font)",
+      "lang_tab_es": "Español",
+      "lang_tab_ca": "Català",
+      "lang_tab_en": "English",
+      "translate_all": "Traduir automàticament",
+      "translating": "Traduint...",
+      "translate_error": "Error en traduir.",
+      "translate_done": "Traduccions generades correctament.",
+      "translate_fill_source_first": "Omple primer el contingut en espanyol.",
+      "translate_explain": "Edita els textos en aquest idioma. Si el deixes en blanc, es mostrarà el contingut en espanyol.",
+      "translate_source_explain": "Aquest és l'idioma font. En traduir, aquest contingut es traduirà automàticament a la resta."
+    },
+    "viewer": {
+      "back": "Tornar",
+      "responses_count": "{{count}} respostes",
+      "of_total": " de {{total}} totals",
+      "view_link": "Veure enllaç",
+      "search_placeholder": "Cerca a totes les respostes...",
+      "empty_title": "Encara no hi ha respostes",
+      "empty_body": "Comparteix l'enllaç del formulari per començar a rebre respostes.",
+      "no_match": "Cap resposta coincideix amb \"{{q}}\"",
+      "delete_confirm": "Eliminar aquesta resposta? L'acció només és reversible des de la base de dades.",
+      "delete_error": "No s'ha pogut eliminar la resposta",
+      "load_error": "No s'han pogut carregar les respostes",
+      "date_col": "Data",
+      "actions_col": "Accions",
+      "exported_on": "Exportat {{date}}"
+    }
+  },
+  "faq": {
+    "title": "Preguntes freqüents",
+    "subtitle": "Resolem els dubtes més habituals sobre les extraescolars."
   }
 }
