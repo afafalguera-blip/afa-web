@@ -41,6 +41,7 @@ export interface InscriptionRaw {
   health_info?: string;
   conditions_accepted?: boolean;
   form_language?: string;
+  extra_answers?: Record<string, string>;
 }
 
 export interface Inscription {
@@ -66,6 +67,8 @@ export interface Inscription {
   health_info?: string;
   conditions_accepted?: boolean;
   form_language?: string;
+  academic_year?: string;
+  extra_answers?: Record<string, string>;
 }
 
 /**

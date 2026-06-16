@@ -45,12 +45,14 @@ const runWithTableFallback = async <T>(
 };
 
 export const AdminInscriptionsService = {
-  async getInscriptions(): Promise<Inscription[]> {
+  async getInscriptions(academicYear?: string): Promise<Inscription[]> {
     const fetchTable = async (table: InscriptionsTableName) => {
-      const result = await supabase
+      let query = supabase
         .from(table)
         .select('*')
         .order('created_at', { ascending: false });
+      if (academicYear) query = query.eq('academic_year', academicYear);
+      const result = await query;
 
       return { data: (result.data || []) as Inscription[], error: result.error };
     };
@@ -70,6 +72,16 @@ export const AdminInscriptionsService = {
 
     const data = await runWithTableFallback<Inscription[]>(fetchTable);
     return data;
+  },
+
+  async getAcademicYears(): Promise<string[]> {
+    const data = await runWithTableFallback<{ academic_year?: string }[]>(async (table) => {
+      const result = await supabase.from(table).select('academic_year');
+      return { data: (result.data || []) as { academic_year?: string }[], error: result.error };
+    });
+    const years = new Set<string>();
+    for (const r of data) if (r.academic_year) years.add(r.academic_year);
+    return Array.from(years).sort().reverse();
   },
 
   async deleteInscription(id: number | string) {

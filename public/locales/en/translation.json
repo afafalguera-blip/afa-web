@@ -672,6 +672,20 @@
       "per_month": "month",
       "occasional": "occasional",
       "footer_note": "Occasional prices apply to single days. For more information or permanent registrations, contact the AFA."
+    },
+    "calendar_info": {
+      "title": "Schedule & snack",
+      "text": "Activities run from 5:00 to 6:00 pm. After school (4:30 pm) there is a snack time until 5:00 pm, organised and coordinated by the extracurricular activities company."
+    },
+    "calendar_filter": {
+      "all": "All",
+      "infantil": "Pre-school",
+      "cycle1": "Y1-Y3",
+      "cycle2": "Y4-Y6"
+    },
+    "closed": {
+      "title": "Enrolment closed",
+      "message": "The inscription form is not open at the moment. We will publish the dates for the coming year soon. Thanks for your patience!"
     }
   },
   "admin": {
@@ -694,7 +708,8 @@
       "menjador": "Canteen Management",
       "observability": "Auditing",
       "logout": "Logout",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "inscription_config": "Inscription config"
     },
     "acollidaManager": {
       "addRate": "Add New Rate",
@@ -731,7 +746,7 @@
       "save": "Save Changes",
       "categories": {
         "educational": "Educational",
-        "artistic": "Artistic",
+        "artistic": "Art & music",
         "languages": "Languages",
         "music": "Music",
         "sports": "Sports"

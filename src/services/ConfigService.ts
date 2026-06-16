@@ -69,6 +69,10 @@ export interface PricingTier {
   member_price: number;
   non_member_price: number;
   note?: { ca: string; es: string; en: string };
+  // Optional overrides for the two price line captions (default: "socis" / "no socis").
+  // Used e.g. for English, billed per pupil as "1 dia" / "2 dies".
+  member_price_label?: { ca: string; es: string; en: string };
+  non_member_price_label?: { ca: string; es: string; en: string };
 }
 
 export interface PricingConfig {
@@ -116,6 +120,94 @@ export interface MenjadorInfoConfig {
   };
 }
 
+export interface SeasonConfig {
+  active_year: string;          // e.g. "2026-27"
+  inscriptions_open: boolean;   // is the public inscription form accepting entries?
+  open_at: string | null;       // ISO date, informational
+  close_at: string | null;      // ISO date, informational
+}
+
+// Configurable monthly-fee rules applied on top of per-activity prices.
+export interface FeeRulesConfig {
+  // Activity titles NOT billed by the AFA (e.g. English → external academy).
+  exclude_titles: string[];
+  // Flat combined price when a pupil takes >= min_activities billable activities.
+  multiactivity: {
+    min_activities: number;
+    member_price: number;
+    non_member_price: number;
+  };
+}
+
+export type Lang = 'ca' | 'es' | 'en';
+export type LangText = { ca: string; es: string; en: string };
+
+// Per-language editable text content for the inscription form.
+// Every field is optional: empty/missing falls back to the i18n string.
+export interface InscriptionContentBlock {
+  title_prefix?: string;
+  title_highlight?: string;
+  subtitle_prefix?: string;
+  subtitle_highlight?: string;
+  subtitle_suffix?: string;
+  info_box_title?: string;
+  info_box_text?: string;
+  important_info_title?: string;
+  important_info_text?: string;
+  english_warning_title?: string;
+  english_warning_body?: string;
+  payment_method_title?: string;
+  payment_method_body?: string;
+  iban_hint?: string;
+  terms_accept?: string;
+  terms_link?: string;
+  terms_url?: string;
+  student_section?: string;
+  parent_section?: string;
+  additional_section?: string;
+  pricing_title?: string;
+  submit_btn?: string;
+  privacy_note?: string;
+  success_title?: string;
+  success_message?: string;
+}
+
+// The configurable existing optional fields. `key` maps to a fixed slot
+// in the form/payload; admin can only toggle/relabel.
+export type OptionalFieldKey =
+  | 'parent_dni'
+  | 'parent_phone_2'
+  | 'parent_email_2'
+  | 'health_info'
+  | 'image_rights'
+  | 'leave_alone';
+
+export interface OptionalFieldConfig {
+  key: OptionalFieldKey;
+  enabled: boolean;
+  required: boolean;
+  label: LangText;
+  helpText?: LangText;
+}
+
+export type CustomQuestionType = 'text' | 'long_text' | 'select';
+
+export interface CustomQuestion {
+  key: string;              // stable slug, used as extra_answers key
+  type: CustomQuestionType;
+  label: LangText;
+  placeholder?: LangText;
+  required: boolean;
+  options?: LangText[];     // only for type 'select'
+  enabled: boolean;
+}
+
+export interface InscriptionFormConfig {
+  content: { ca: InscriptionContentBlock; es: InscriptionContentBlock; en: InscriptionContentBlock };
+  fields: OptionalFieldConfig[];
+  customQuestions: CustomQuestion[];
+}
+
 const CONFIG_CACHE_PREFIX = 'afa_config_';
 const CONFIG_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
@@ -138,7 +230,7 @@ function setCachedConfig<T>(key: string, value: T): void {
 }
 
 export const ConfigService = {
-  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info'): Promise<T | null> {
+  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules'): Promise<T | null> {
     // Return cached value if fresh
     const cached = getCachedConfig<T>(key);
     if (cached !== null) return cached;
@@ -158,7 +250,7 @@ export const ConfigService = {
     return data.value as T;
   },
 
-  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info', config: T): Promise<void> {
+  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules', config: T): Promise<void> {
     const { error } = await supabase
       .from('site_config')
       .update({ value: config, updated_at: new Date().toISOString() })
@@ -272,6 +364,44 @@ export const ConfigService = {
 
   async updateMenjadorInfoConfig(config: MenjadorInfoConfig): Promise<void> {
     return this.updateConfig('menjador_info', config);
+  },
+
+  async getSeasonConfig(): Promise<SeasonConfig | null> {
+    return this.getConfig<SeasonConfig>('season');
+  },
+
+  async getInscriptionFormConfig(): Promise<InscriptionFormConfig | null> {
+    return this.getConfig<InscriptionFormConfig>('inscription_form');
+  },
+
+  async updateInscriptionFormConfig(config: InscriptionFormConfig): Promise<void> {
+    // Upsert keeps it resilient on DBs predating the seed migration.
+    const { error } = await supabase
+      .from('site_config')
+      .upsert({ key: 'inscription_form', value: config, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+    try { localStorage.removeItem(CONFIG_CACHE_PREFIX + 'inscription_form'); } catch { /* ignore */ }
+  },
+
+  async updateSeasonConfig(config: SeasonConfig): Promise<void> {
+    // Row is seeded by migration, but upsert keeps it resilient on older DBs.
+    const { error } = await supabase
+      .from('site_config')
+      .upsert({ key: 'season', value: config, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+    try { localStorage.removeItem(CONFIG_CACHE_PREFIX + 'season'); } catch { /* ignore */ }
+  },
+
+  async getFeeRulesConfig(): Promise<FeeRulesConfig | null> {
+    return this.getConfig<FeeRulesConfig>('fee_rules');
+  },
+
+  async updateFeeRulesConfig(config: FeeRulesConfig): Promise<void> {
+    const { error } = await supabase
+      .from('site_config')
+      .upsert({ key: 'fee_rules', value: config, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+    try { localStorage.removeItem(CONFIG_CACHE_PREFIX + 'fee_rules'); } catch { /* ignore */ }
   },
 
   async upsertMenjadorInfoConfig(config: MenjadorInfoConfig): Promise<void> {

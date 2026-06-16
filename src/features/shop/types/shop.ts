@@ -61,6 +61,7 @@ export interface ShopOrder {
   delivery_status: OrderDeliveryStatus;
   user_id?: string | null;
   is_member: boolean;
+  academic_year?: string;
   items?: ShopOrderItem[];
 }
 

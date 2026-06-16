@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ShopService } from '../../../features/shop/services/ShopService';
+import { ConfigService } from '../../../services/ConfigService';
 import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle, Mail, Phone, BadgeCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
@@ -16,21 +17,38 @@ export function OrdersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState('');
+    const [academicYear, setAcademicYear] = useState('');
+    const [years, setYears] = useState<string[]>([]);
 
-    const fetchOrders = async () => {
+    const fetchOrders = useCallback(async () => {
         try {
-            const data = await ShopService.getOrders();
+            const data = await ShopService.getOrders(academicYear || undefined);
             setOrders(data);
         } catch (error) {
             console.error('Error fetching orders:', error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [academicYear]);
+
+    // Initialise the course selector: default to the active season's course.
+    useEffect(() => {
+        (async () => {
+            const [list, season] = await Promise.all([
+                ShopService.getOrderAcademicYears(),
+                ConfigService.getSeasonConfig(),
+            ]);
+            setYears(list);
+            const preferred = season?.active_year && list.includes(season.active_year)
+                ? season.active_year
+                : (list[0] || '');
+            setAcademicYear(preferred);
+        })();
+    }, []);
 
     useEffect(() => {
         fetchOrders();
-    }, []);
+    }, [fetchOrders]);
 
     const handleCreateOrder = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -132,6 +150,18 @@ export function OrdersPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
+                    <select
+                        value={academicYear}
+                        onChange={(e) => setAcademicYear(e.target.value)}
+                        className="h-10 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/20"
+                        title="Curs"
+                    >
+                        <option value="">Tots els cursos</option>
+                        {years.map((y) => (
+                            <option key={y} value={y}>{y}</option>
+                        ))}
+                    </select>
+
                     <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg">
                         <button
                             onClick={() => setView('active')}

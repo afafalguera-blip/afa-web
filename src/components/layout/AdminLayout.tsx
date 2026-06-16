@@ -24,7 +24,8 @@ import {
   UserSquare2,
   Utensils,
   FileText,
-  HelpCircle
+  HelpCircle,
+  ClipboardList
 } from 'lucide-react';
 
 // Payload-style hybrid shell: dark neutral sidebar, light content.
@@ -122,6 +123,10 @@ export function AdminLayout() {
             <NavLink to="/admin/inscriptions" onClick={closeSidebar} className={navClass}>
               <Users className="w-[18px] h-[18px]" />
               {t('admin.sidebar.inscriptions')}
+            </NavLink>
+            <NavLink to="/admin/inscription-config" onClick={closeSidebar} className={navClass}>
+              <ClipboardList className="w-[18px] h-[18px]" />
+              {t('admin.sidebar.inscription_config', "Config. Inscripcions")}
             </NavLink>
             <NavLink to="/admin/payments" onClick={closeSidebar} className={navClass}>
               <CreditCard className="w-[18px] h-[18px]" />

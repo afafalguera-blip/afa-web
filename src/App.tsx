@@ -15,6 +15,7 @@ const Loading = () => (
 // Public pages
 const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
 const Extraescolars = lazy(() => import('./pages/Extraescolars').then(m => ({ default: m.Extraescolars })));
+const ActivityDetailPage = lazy(() => import('./pages/ActivityDetailPage'));
 const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })));
 const NewsDetailPage = lazy(() => import('./pages/NewsDetailPage'));
 const InscriptionPage = lazy(() => import('./pages/InscriptionPage'));
@@ -40,6 +41,7 @@ const Dashboard = lazy(() => import('./pages/admin/dashboard/Dashboard').then(m 
 const InventoryPage = lazy(() => import('./pages/admin/shop/InventoryPage').then(m => ({ default: m.InventoryPage })));
 const OrdersPage = lazy(() => import('./pages/admin/shop/OrdersPage').then(m => ({ default: m.OrdersPage })));
 const InscriptionsPage = lazy(() => import('./pages/admin/inscriptions/InscriptionsPage'));
+const InscriptionConfigPage = lazy(() => import('./pages/admin/inscription-config/InscriptionConfigPage'));
 const PaymentsPage = lazy(() => import('./pages/admin/payments/PaymentsPage').then(m => ({ default: m.PaymentsPage })));
 const FinanceDashboard = lazy(() => import('./pages/admin/finances/FinanceDashboard').then(m => ({ default: m.FinanceDashboard })));
 const ActivitiesManager = lazy(() => import('./pages/admin/ActivitiesManager'));
@@ -79,6 +81,8 @@ function App() {
                 <Route path="noticies" element={<NewsPage />} />
                 <Route path="noticies/:slug" element={<NewsDetailPage />} />
                 <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
+                <Route path="extraescolars/:id" element={<ActivityDetailPage />} />
+                <Route path="extraescolars/:id/:slug" element={<ActivityDetailPage />} />
                 <Route path="botiga" element={<ShopLanding />} />
                 <Route path="quotes" element={<FeesPage />} />
                 <Route path="calendari" element={<GeneralCalendarPage />} />
@@ -98,6 +102,7 @@ function App() {
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="inscriptions" element={<InscriptionsPage />} />
+                <Route path="inscription-config" element={<InscriptionConfigPage />} />
                 <Route path="payments" element={<PaymentsPage />} />
                 <Route path="finances" element={<FinanceDashboard />} />
                 <Route path="shop/inventory" element={<InventoryPage />} />

@@ -698,6 +698,20 @@
       "per_month": "mes",
       "occasional": "ocasional",
       "footer_note": "Los precios ocasionales se aplican a días puntuales. Para más información o inscripciones permanentes, contactad con el AFA."
+    },
+    "calendar_info": {
+      "title": "Horario y merienda",
+      "text": "Las actividades son de 17:00 a 18:00 h. Al salir del colegio (16:30 h) hay un rato de merienda hasta las 17:00 h, organizado y coordinado por la empresa de las extraescolares."
+    },
+    "calendar_filter": {
+      "all": "Todos",
+      "infantil": "Infantil",
+      "cycle1": "1º-3º",
+      "cycle2": "4º-6º"
+    },
+    "closed": {
+      "title": "Inscripciones cerradas",
+      "message": "En este momento el formulario de inscripción no está abierto. Pronto publicaremos las fechas del próximo curso. ¡Gracias por tu paciencia!"
     }
   },
   "admin": {
@@ -727,7 +741,8 @@
       "system": "Sistema",
       "observability": "Auditoría",
       "logout": "Cerrar Sesión",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "inscription_config": "Config. Inscripciones"
     },
     "acollidaManager": {
       "addRate": "Añadir Nueva Tarifa",
@@ -884,7 +899,7 @@
       "save": "Guardar Cambios",
       "categories": {
         "educational": "Educativo",
-        "artistic": "Artística",
+        "artistic": "Arte y música",
         "languages": "Idiomas",
         "music": "Música",
         "sports": "Deportes"

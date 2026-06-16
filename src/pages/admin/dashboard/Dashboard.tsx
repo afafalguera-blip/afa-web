@@ -34,6 +34,9 @@ export function Dashboard() {
     isLoading,
     filters,
     setFilter,
+    academicYear,
+    setAcademicYear,
+    academicYears,
     reload,
     handleDelete,
     handleStatusChange,
@@ -72,7 +75,19 @@ export function Dashboard() {
           <p className="text-neutral-500">{t('admin.dashboard.subtitle')}</p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <select
+            value={academicYear}
+            onChange={(e) => setAcademicYear(e.target.value)}
+            className="h-9 rounded-lg border border-neutral-300 bg-white px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+            title="Curs"
+          >
+            <option value="">Tots els cursos</option>
+            {academicYears.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+
           <button
             onClick={handleExportExcel}
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2 text-sm font-medium"

@@ -16,7 +16,9 @@ import {
     Palette,
     LayoutDashboard,
     BarChart3,
-    KeyRound
+    KeyRound,
+    CalendarRange,
+    Coins
 } from "lucide-react";
 import { ContactSettings } from "./settings/ContactSettings";
 import { SocialSettings } from "./settings/SocialSettings";
@@ -28,10 +30,12 @@ import { BrandingSettings } from "./settings/BrandingSettings";
 import { HomepageSettings } from "./settings/HomepageSettings";
 import { AnalyticsSettings } from "./settings/AnalyticsSettings";
 import AiKeysSettings from "./settings/AiKeysSettings";
+import SeasonSettings from "./settings/SeasonSettings";
+import FeeRulesSettings from "./settings/FeeRulesSettings";
 import { invalidateBrandingCache } from "../../hooks/useBranding";
 import { invalidateHomepageCache } from "../../hooks/useHomepageConfig";
 
-type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics' | 'ai-keys';
+type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics' | 'ai-keys' | 'season' | 'fee-rules';
 type LangType = 'ca' | 'es' | 'en';
 
 export default function SiteSettingsManager() {
@@ -178,6 +182,8 @@ export default function SiteSettingsManager() {
             {/* Tabs */}
             <div className="flex flex-wrap p-1 bg-neutral-200/50 dark:bg-neutral-800/50 rounded-lg mb-8 gap-1">
                 {([
+                    { id: 'season' as TabType, icon: CalendarRange, label: 'Curs' },
+                    { id: 'fee-rules' as TabType, icon: Coins, label: 'Quotes auto' },
                     { id: 'contact' as TabType, icon: Mail, label: 'Contacte' },
                     { id: 'social' as TabType, icon: Instagram, label: 'Xarxes' },
                     { id: 'about' as TabType, icon: Info, label: "Sobre l'AFA" },
@@ -289,23 +295,31 @@ export default function SiteSettingsManager() {
                     <AiKeysSettings />
                 )}
 
-                {/* Feedback Messages — hidden in ai-keys tab (it manages its own inline state) */}
-                {activeTab !== 'ai-keys' && error && (
+                {activeTab === 'season' && (
+                    <SeasonSettings />
+                )}
+
+                {activeTab === 'fee-rules' && (
+                    <FeeRulesSettings />
+                )}
+
+                {/* Feedback Messages — hidden in self-managed tabs (ai-keys, season, fee-rules) */}
+                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && error && (
                     <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg animate-shake">
                         <AlertCircle size={20} />
                         <p className="font-medium text-sm">{error}</p>
                     </div>
                 )}
 
-                {activeTab !== 'ai-keys' && success && (
+                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && success && (
                     <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-200 text-green-700 rounded-lg animate-in fade-in slide-in-from-top-2">
                         <CheckCircle2 size={20} />
                         <p className="font-medium text-sm">Configuració guardada correctament!</p>
                     </div>
                 )}
 
-                {/* Action Buttons — ai-keys uses its own per-row buttons */}
-                {activeTab !== 'ai-keys' && (
+                {/* Action Buttons — ai-keys, season and fee-rules use their own buttons */}
+                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && (
                 <div className="flex gap-4 items-center pt-4">
                     <button
                         disabled={saving}

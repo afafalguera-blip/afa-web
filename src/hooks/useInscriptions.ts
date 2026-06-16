@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AdminInscriptionsService } from '../services/admin/AdminInscriptionsService';
+import { ConfigService } from '../services/ConfigService';
 import { flattenInscriptions, filterInscriptions } from '../logic/inscriptionFilters';
 import { STATUS_FILTER } from '../constants/status';
 import type { Inscription, InscriptionFlat, InscriptionFilters, InscriptionStatus } from '../types/inscription';
@@ -23,6 +24,12 @@ interface UseInscriptionsReturn {
   filters: InscriptionFilters;
   /** Update a single filter */
   setFilter: <K extends keyof InscriptionFilters>(key: K, value: InscriptionFilters[K]) => void;
+  /** Currently selected academic-year cohort ('' = all) */
+  academicYear: string;
+  /** Change the academic-year cohort (server-side filter, triggers reload) */
+  setAcademicYear: (year: string) => void;
+  /** Available academic years across all inscriptions */
+  academicYears: string[];
   /** Reload inscriptions from API */
   reload: () => Promise<void>;
   /** Delete an inscription by ID */
@@ -41,6 +48,10 @@ export function useInscriptions(): UseInscriptionsReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Academic-year cohort (server-side filter). '' = all cohorts.
+  const [academicYear, setAcademicYearState] = useState<string>('');
+  const [academicYears, setAcademicYears] = useState<string[]>([]);
+
   // Filter state
   const [filters, setFilters] = useState<InscriptionFilters>({
     course: '',
@@ -56,7 +67,7 @@ export function useInscriptions(): UseInscriptionsReturn {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await AdminInscriptionsService.getInscriptions();
+      const data = await AdminInscriptionsService.getInscriptions(academicYear || undefined);
       setInscriptions(data);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error loading inscriptions';
@@ -65,14 +76,35 @@ export function useInscriptions(): UseInscriptionsReturn {
     } finally {
       setIsLoading(false);
     }
+  }, [academicYear]);
+
+  /**
+   * Initialise the cohort selector: default to the active season's course.
+   */
+  useEffect(() => {
+    (async () => {
+      const [list, season] = await Promise.all([
+        AdminInscriptionsService.getAcademicYears(),
+        ConfigService.getSeasonConfig(),
+      ]);
+      setAcademicYears(list);
+      const preferred = season?.active_year && list.includes(season.active_year)
+        ? season.active_year
+        : (list[0] || '');
+      setAcademicYearState(preferred);
+    })();
   }, []);
 
   /**
-   * Initial load
+   * Load whenever the selected cohort changes (and on first run).
    */
   useEffect(() => {
     loadInscriptions();
   }, [loadInscriptions]);
+
+  const setAcademicYear = useCallback((year: string) => {
+    setAcademicYearState(year);
+  }, []);
 
   /**
    * Update a single filter value
@@ -139,6 +171,9 @@ export function useInscriptions(): UseInscriptionsReturn {
     error,
     filters,
     setFilter,
+    academicYear,
+    setAcademicYear,
+    academicYears,
     reload: loadInscriptions,
     handleDelete,
     handleStatusChange,

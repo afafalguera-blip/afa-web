@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
-import { ActivityDetailModal } from '../components/public/ActivityDetailModal';
 import { ActivitiesCalendar } from '../components/public/ActivitiesCalendar';
+import { activityPath } from '../utils/slug';
 import { useContentTranslation } from '../hooks/useContentTranslation';
 import { ActivityService, type Activity } from '../services/ActivityService';
 import { useAuth } from '../hooks/useAuth';
@@ -22,8 +22,6 @@ export function Extraescolars() {
 
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
@@ -47,8 +45,11 @@ export function Extraescolars() {
     }
   };
 
+  // Merge 'music' into 'artistic' so both share a single "Art i música" tab
+  const groupCategory = (cat: string) => (cat === 'music' ? 'artistic' : cat);
+
   const categories = useMemo(() =>
-    ['all', ...Array.from(new Set(activities.map(a => a.category)))],
+    ['all', ...Array.from(new Set(activities.map(a => groupCategory(a.category))))],
     [activities]
   );
 
@@ -59,16 +60,13 @@ export function Extraescolars() {
 
       const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || groupCategory(activity.category) === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [activities, searchQuery, selectedCategory, tContent]);
 
   const handleActivityClick = (activity: Activity) => {
-    setSelectedActivity({
-      ...activity,
-    });
-    setIsModalOpen(true);
+    navigate(activityPath(activity));
   };
 
   if (loading) {
@@ -131,15 +129,6 @@ export function Extraescolars() {
       </div>
 
       {!MAINTENANCE_MODE && viewMode === 'list' && <ExtraescolarsFaq />}
-
-      {selectedActivity && (
-        <ActivityDetailModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          activity={selectedActivity}
-          onSignUp={() => navigate('/extraescolars/inscripcio')}
-        />
-      )}
     </div>
   );
 }

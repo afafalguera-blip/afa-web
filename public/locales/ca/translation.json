@@ -701,6 +701,20 @@
       "per_month": "mes",
       "occasional": "ocasional",
       "footer_note": "Els preus ocasionals s'apliquen a dies puntuals. Per a més informació o inscripcions permanents, contacteu amb l'AFA."
+    },
+    "calendar_info": {
+      "title": "Horari i berenar",
+      "text": "Les activitats són de 17:00 a 18:00 h. En sortir de l'escola (16:30 h) hi ha una estona de berenar fins a les 17:00 h, organitzada i coordinada per l'empresa de les extraescolars."
+    },
+    "calendar_filter": {
+      "all": "Tots",
+      "infantil": "Infantil",
+      "cycle1": "1r-3r",
+      "cycle2": "4t-6è"
+    },
+    "closed": {
+      "title": "Inscripcions tancades",
+      "message": "En aquest moment el formulari d'inscripció no està obert. Aviat publicarem les dates del curs vinent. Gràcies per la vostra paciència!"
     }
   },
   "admin": {
@@ -730,7 +744,8 @@
       "system": "Sistema",
       "observability": "Auditoria",
       "logout": "Tancar Sessió",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "inscription_config": "Config. Inscripcions"
     },
     "acollidaManager": {
       "addRate": "Afegir Nova Tarifa",
@@ -887,7 +902,7 @@
       "save": "Desar Canvis",
       "categories": {
         "educational": "Educatiu",
-        "artistic": "Artística",
+        "artistic": "Art i música",
         "languages": "Idiomes",
         "music": "Música",
         "sports": "Esports"

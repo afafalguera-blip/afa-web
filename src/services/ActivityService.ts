@@ -65,6 +65,17 @@ export const ActivityService = {
     return data as Activity[];
   },
 
+  async getById(id: number) {
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data as Activity | null;
+  },
+
   async create(activity: Omit<Activity, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('activities')

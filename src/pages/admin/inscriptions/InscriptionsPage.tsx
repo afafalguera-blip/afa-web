@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AdminInscriptionsService } from '../../../services/admin/AdminInscriptionsService';
+import { ConfigService } from '../../../services/ConfigService';
 import { ExportService } from '../../../services/ExportService';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, Search, Edit, Trash2, FileSpreadsheet } from 'lucide-react';
@@ -20,9 +21,16 @@ export default function InscriptionsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingInscription, setEditingInscription] = useState<Inscription | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [customLabels, setCustomLabels] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchInscriptions();
+    ConfigService.getInscriptionFormConfig().then(cfg => {
+      if (!cfg) return;
+      const m: Record<string, string> = {};
+      (cfg.customQuestions || []).forEach(q => { m[q.key] = q.label.es || q.label.ca || q.key; });
+      setCustomLabels(m);
+    });
   }, []);
 
   const fetchInscriptions = async () => {
@@ -200,10 +208,19 @@ export default function InscriptionsPage() {
                             </div>
                           </div>
                         ))}
+                        {inscription.extra_answers && Object.keys(inscription.extra_answers).length > 0 && (
+                          <div className="mt-1 space-y-0.5 border-t border-dashed border-neutral-200 pt-1">
+                            {Object.entries(inscription.extra_answers).filter(([, v]) => v).map(([k, v]) => (
+                              <p key={k} className="text-[10px] text-neutral-600">
+                                <span className="font-semibold">{customLabels[k] || k}:</span> {String(v)}
+                              </p>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent 
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent
                                 ${inscription.status === 'alta' ? 'bg-green-100 text-green-800' :
                           inscription.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                             'bg-red-100 text-red-800'}`}>

@@ -13,15 +13,18 @@ export interface FinanceTransaction {
     attachment_url?: string;
     reference_id?: string;
     reference_type?: string;
+    academic_year?: string;
 }
 
 export const FinanceService = {
-    async getTransactions() {
-        const { data, error } = await supabase
+    async getTransactions(academicYear?: string) {
+        let query = supabase
             .from('finance_transactions')
             .select('*')
             .order('date', { ascending: false });
-        
+        if (academicYear) query = query.eq('academic_year', academicYear);
+        const { data, error } = await query;
+
         if (error) throw error;
         return data || [];
     },
@@ -73,18 +76,35 @@ export const FinanceService = {
         return publicUrl;
     },
 
-    async getStats() {
-        const { data: transactions, error: transError } = await supabase
+    // List the academic years present across finance data (newest first).
+    async getAcademicYears(): Promise<string[]> {
+        const [tx, pay] = await Promise.all([
+            supabase.from('finance_transactions').select('academic_year'),
+            supabase.from('payments').select('academic_year'),
+        ]);
+        const years = new Set<string>();
+        for (const r of tx.data || []) if (r.academic_year) years.add(r.academic_year as string);
+        for (const r of pay.data || []) if (r.academic_year) years.add(r.academic_year as string);
+        return Array.from(years).sort().reverse();
+    },
+
+    // Stats for a single academic year, or all-time when academicYear is omitted.
+    async getStats(academicYear?: string) {
+        let txQuery = supabase
             .from('finance_transactions')
             .select('amount, type, date');
+        if (academicYear) txQuery = txQuery.eq('academic_year', academicYear);
+        const { data: transactions, error: transError } = await txQuery;
 
         if (transError) throw transError;
 
-        const { data: payments, error: payError } = await supabase
+        let payQuery = supabase
             .from('payments')
             .select('amount, status')
             .eq('status', 'paid');
-            
+        if (academicYear) payQuery = payQuery.eq('academic_year', academicYear);
+        const { data: payments, error: payError } = await payQuery;
+
         if (payError) throw payError;
 
         const transactionIncome = transactions

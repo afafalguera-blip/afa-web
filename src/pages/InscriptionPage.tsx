@@ -4,9 +4,11 @@ import { supabase } from '../lib/supabase';
 import { Loader2, CheckCircle2, AlertCircle, Rocket, Info, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { ConfigService, type FeesConfig, type PricingConfig } from '../services/ConfigService';
+import { ConfigService, type FeesConfig, type PricingConfig, type SeasonConfig, type InscriptionFormConfig, type OptionalFieldKey, type OptionalFieldConfig, type Lang } from '../services/ConfigService';
 import { useHomepageConfig } from '../hooks/useHomepageConfig';
 import { ActivityService, type Activity } from '../services/ActivityService';
+import { classifyGroup } from '../utils/courseStage';
+import { makeContentResolver, pickLang } from '../utils/inscriptionContent';
 
 
 
@@ -42,20 +44,51 @@ export default function InscriptionPage() {
   const [fees, setFees] = useState<FeesConfig | null>(null);
   const [pricing, setPricing] = useState<PricingConfig | null>(null);
   const [dbActivities, setDbActivities] = useState<Activity[]>([]);
+  const [season, setSeason] = useState<SeasonConfig | null>(null);
+  const [formCfg, setFormCfg] = useState<InscriptionFormConfig | null>(null);
+  const [extraAnswers, setExtraAnswers] = useState<Record<string, string>>({});
+  const [configLoaded, setConfigLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([
       ConfigService.getFeesConfig(),
       ConfigService.getPricingConfig(),
       ActivityService.getForInscription(),
-    ]).then(([f, p, acts]) => {
+      ConfigService.getSeasonConfig(),
+      ConfigService.getInscriptionFormConfig(),
+    ]).then(([f, p, acts, s, fc]) => {
       setFees(f);
       setPricing(p);
       setDbActivities(acts);
+      setSeason(s);
+      setFormCfg(fc);
+      setConfigLoaded(true);
     });
   }, []);
 
+  // Inscriptions are open by default unless admin has explicitly closed them
+  // (or the season config row is missing on older databases).
+  const inscriptionsOpen = season ? season.inscriptions_open : true;
+
   const iban = fees?.iban || 'ES22 0081 1604 7400 0103 8208';
+
+  // Admin-editable content + fields (config-first, i18n fallback)
+  const lang = i18n.language as Lang;
+  const content = formCfg ? pickLang(formCfg.content, lang) : undefined;
+  const c = makeContentResolver(content, t);
+
+  const fieldCfg = useMemo(() => {
+    const m: Partial<Record<OptionalFieldKey, OptionalFieldConfig>> = {};
+    (formCfg?.fields ?? []).forEach(f => { m[f.key] = f; });
+    return m;
+  }, [formCfg]);
+  const isFieldOn = (k: OptionalFieldKey) => (fieldCfg[k] ? fieldCfg[k]!.enabled : true);
+  const isFieldReq = (k: OptionalFieldKey) => !!fieldCfg[k]?.required;
+  const fieldLabel = (k: OptionalFieldKey, i18nKey: string) => {
+    const l = fieldCfg[k]?.label?.[lang];
+    return l && l.trim() ? l : t(i18nKey);
+  };
+  const customQuestions = (formCfg?.customQuestions ?? []).filter(q => q.enabled);
 
   const COURSES = useMemo(() => [
     { value: 'I3', label: t('inscription.courses.i3'), type: 'infantil' },
@@ -69,44 +102,37 @@ export default function InscriptionPage() {
     { value: '6PRI', label: t('inscription.courses.6pri'), type: 'primaria2' },
   ], [t]);
 
-  // Build activity options from DB: each schedule_details group becomes a separate selectable option
+  const DAY_KEYS = ['', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+  // Build activity options from DB: each schedule group is offered only to its own
+  // course stage (infantil / primaria1 / primaria2), classified from the group label.
   const ALL_ACTIVITIES = useMemo(() => {
     const grouped: Record<string, { value: string; label: string }[]> = {};
+    const lang = i18n.language as 'ca' | 'es' | 'en';
+
     for (const act of dbActivities) {
-      const courseTypes = act.inscription_course_types || [];
-      const lang = i18n.language as 'ca' | 'es' | 'en';
       const titleKey = `title_${lang}` as keyof Activity;
       const title = (act[titleKey] as string) || act.title;
       const scheduleDetails = act.schedule_details || [];
 
-      for (const courseType of courseTypes) {
-        if (!grouped[courseType]) grouped[courseType] = [];
+      for (const detail of scheduleDetails) {
+        const stage = classifyGroup(detail.group);
+        if (!stage) continue;
+        if (!grouped[stage]) grouped[stage] = [];
 
-        if (scheduleDetails.length > 0) {
-          // Create one option per schedule group that matches this course type
-          for (const detail of scheduleDetails) {
-            const dayLabel = detail.days || detail.group || '';
-            const timeLabel = detail.time || '';
-            const value = `${act.title} (${dayLabel})`;
-            const label = `${title} - ${dayLabel} ${timeLabel}`;
-            // Avoid duplicates
-            if (!grouped[courseType].some(a => a.value === value)) {
-              grouped[courseType].push({ value, label });
-            }
-          }
-        } else {
-          // Fallback: single option with schedule_summary
-          const summaryKey = `schedule_summary_${lang}` as keyof Activity;
-          const summary = (act[summaryKey] as string) || act.schedule_summary || '';
-          grouped[courseType].push({
-            value: act.title,
-            label: `${title} - ${summary}`,
-          });
+        const days = (detail.sessions || [])
+          .map(s => DAY_KEYS[s.day] ? t(`admin.editor.days.${DAY_KEYS[s.day]}`) : '')
+          .filter(Boolean)
+          .join(' / ');
+        const value = `${act.title} (${detail.group})`;
+        const label = days ? `${title} (${days})` : title;
+        if (!grouped[stage].some(a => a.value === value)) {
+          grouped[stage].push({ value, label });
         }
       }
     }
     return grouped;
-  }, [dbActivities, i18n.language]);
+  }, [dbActivities, i18n.language, t]);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -181,6 +207,21 @@ export default function InscriptionPage() {
       return;
     }
 
+    // Required enabled optional field: DNI (others are free-text/optional or radios)
+    if (isFieldOn('parent_dni') && isFieldReq('parent_dni') && !parentInfo.dni.trim()) {
+      setError(fieldLabel('parent_dni', 'inscription.form.dni'));
+      setLoading(false);
+      return;
+    }
+
+    // Required custom questions
+    const missingCustom = customQuestions.find(q => q.required && !(extraAnswers[q.key] || '').trim());
+    if (missingCustom) {
+      setError(missingCustom.label[lang] || missingCustom.key);
+      setLoading(false);
+      return;
+    }
+
     try {
       const payload = {
         parent_name: parentInfo.name,
@@ -201,6 +242,7 @@ export default function InscriptionPage() {
         can_leave_alone: additionalInfo.canLeaveAlone === 'true',
         authorized_pickup: additionalInfo.authorizedPickup || null,
         conditions_accepted: true,
+        extra_answers: extraAnswers,
         form_language: i18n.language,
         status: 'alta'
       };
@@ -223,6 +265,26 @@ export default function InscriptionPage() {
     }
   };
 
+  if (configLoaded && !inscriptionsOpen) {
+    return (
+      <div className="container mx-auto px-4 py-12 max-w-2xl text-center">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 shadow-sm">
+          <div className="rounded-full bg-amber-100 p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <Info className="w-8 h-8 text-amber-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-amber-900 mb-2">{t('inscription.closed.title')}</h2>
+          <p className="text-amber-800 mb-6 leading-relaxed">{t('inscription.closed.message')}</p>
+          <button
+            onClick={() => navigate('/')}
+            className="bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-6 rounded-md transition-colors"
+          >
+            {t('inscription.form.back_home')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="container mx-auto px-4 py-12 max-w-2xl text-center">
@@ -230,9 +292,9 @@ export default function InscriptionPage() {
           <div className="rounded-full bg-green-100 p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-green-800 mb-2">{t('inscription.form.success_title')}</h2>
+          <h2 className="text-2xl font-bold text-green-800 mb-2">{c('success_title', 'inscription.form.success_title')}</h2>
           <p className="text-green-700 mb-6">
-            {t('inscription.form.success_message')}
+            {c('success_message', 'inscription.form.success_message')}
           </p>
           <button
             onClick={() => navigate('/')}
@@ -256,13 +318,13 @@ export default function InscriptionPage() {
           <Rocket className="w-8 h-8" />
         </motion.div>
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
-          {t('inscription.title_prefix')} <br className="hidden md:block" />
+          {c('title_prefix', 'inscription.title_prefix')} <br className="hidden md:block" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-            {t('inscription.title_highlight')}
+            {c('title_highlight', 'inscription.title_highlight')}
           </span>
         </h1>
         <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          {t('inscription.subtitle_prefix')} <span className="text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded">{t('inscription.subtitle_highlight')}</span> {t('inscription.subtitle_suffix')}
+          {c('subtitle_prefix', 'inscription.subtitle_prefix')} <span className="text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded">{c('subtitle_highlight', 'inscription.subtitle_highlight')}</span> {c('subtitle_suffix', 'inscription.subtitle_suffix')}
         </p>
       </div>
 
@@ -271,9 +333,9 @@ export default function InscriptionPage() {
           <Info className="w-6 h-6 text-blue-600" />
         </div>
         <div>
-          <h3 className="font-bold text-slate-900 text-lg mb-1">{t('inscription.info_box.title')}</h3>
-          <p className="text-slate-600 leading-relaxed">
-            {t('inscription.info_box.text')}
+          <h3 className="font-bold text-slate-900 text-lg mb-1">{c('info_box_title', 'inscription.info_box.title')}</h3>
+          <p className="text-slate-600 leading-relaxed whitespace-pre-line">
+            {c('info_box_text', 'inscription.info_box.text')}
           </p>
         </div>
       </div>
@@ -281,13 +343,15 @@ export default function InscriptionPage() {
       {/* --- Pricing & Payment Section --- */}
       <section className="mb-10 space-y-6">
         <h2 className="text-xl font-bold bg-slate-100 px-4 py-2 rounded-lg border-l-4 border-blue-500 text-slate-800">
-          {t('inscription.pricing.title')}
+          {c('pricing_title', 'inscription.pricing.title')}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {(pricing?.tiers || []).map((tier, idx) => {
-            const label = tier.label[i18n.language as keyof typeof tier.label] || tier.label.ca;
-            const note = tier.note?.[i18n.language as keyof typeof tier.note] || tier.note?.ca;
+            const label = tier.label[lang] || tier.label.ca;
+            const note = tier.note?.[lang] || tier.note?.ca;
+            const memberLabel = tier.member_price_label?.[lang] || tier.member_price_label?.ca || t('inscription.pricing.socis');
+            const nonMemberLabel = tier.non_member_price_label?.[lang] || tier.non_member_price_label?.ca || t('inscription.pricing.no_socis');
             const isHighlighted = idx > 0;
             return (
               <div key={tier.id} className={`${isHighlighted ? 'bg-indigo-50 border-indigo-100' : 'bg-white border-slate-200'} border p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden`}>
@@ -295,8 +359,8 @@ export default function InscriptionPage() {
                 <h4 className={`font-bold mb-1 ${isHighlighted ? 'text-indigo-900' : 'text-slate-900'}`}>{label}</h4>
                 <p className={`text-xs mb-3 ${isHighlighted ? 'text-indigo-500' : 'text-slate-500'}`}>{tier.schedule}</p>
                 <div className="space-y-1">
-                  <p><span className={`font-bold ${isHighlighted ? 'text-indigo-600' : 'text-blue-600'}`}>{tier.member_price}€</span> <span className={`text-sm ${isHighlighted ? 'text-indigo-700' : 'text-slate-600'}`}>{t('inscription.pricing.socis')}</span></p>
-                  <p><span className={`font-bold ${isHighlighted ? 'text-indigo-400' : 'text-slate-400'}`}>{tier.non_member_price}€</span> <span className={`text-sm ${isHighlighted ? 'text-indigo-700' : 'text-slate-600'}`}>{t('inscription.pricing.no_socis')}</span></p>
+                  <p><span className={`font-bold ${isHighlighted ? 'text-indigo-600' : 'text-blue-600'}`}>{tier.member_price}€</span> <span className={`text-sm ${isHighlighted ? 'text-indigo-700' : 'text-slate-600'}`}>{memberLabel}</span></p>
+                  <p><span className={`font-bold ${isHighlighted ? 'text-indigo-400' : 'text-slate-400'}`}>{tier.non_member_price}€</span> <span className={`text-sm ${isHighlighted ? 'text-indigo-700' : 'text-slate-600'}`}>{nonMemberLabel}</span></p>
                 </div>
                 {note && (
                   <div className="mt-3 text-[10px] bg-indigo-100/50 p-2 rounded border border-indigo-200 text-indigo-700">
@@ -315,8 +379,8 @@ export default function InscriptionPage() {
         <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex gap-4 items-start shadow-sm">
           <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-bold text-red-800 mb-1">{t('inscription.pricing.english_warning_title')}</p>
-            <p className="text-red-700 leading-relaxed italic">{t('inscription.pricing.english_warning_body')}</p>
+            <p className="font-bold text-red-800 mb-1">{c('english_warning_title', 'inscription.pricing.english_warning_title')}</p>
+            <p className="text-red-700 leading-relaxed italic whitespace-pre-line">{c('english_warning_body', 'inscription.pricing.english_warning_body')}</p>
           </div>
         </div>
 
@@ -324,9 +388,9 @@ export default function InscriptionPage() {
         <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl shadow-sm">
           <h4 className="font-bold text-emerald-900 mb-4 flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-emerald-600" />
-            {t('inscription.pricing.payment_method_title')}
+            {c('payment_method_title', 'inscription.pricing.payment_method_title')}
           </h4>
-          <p className="text-sm text-emerald-800 mb-4">{t('inscription.pricing.payment_method_body')}</p>
+          <p className="text-sm text-emerald-800 mb-4 whitespace-pre-line">{c('payment_method_body', 'inscription.pricing.payment_method_body')}</p>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-emerald-200/50">
             <code className="text-sm font-mono text-slate-700 bg-slate-50 px-3 py-1.5 rounded-lg flex-grow block w-full text-center sm:text-left">
@@ -344,7 +408,7 @@ export default function InscriptionPage() {
             </button>
           </div>
           <p className="text-[10px] text-emerald-600 font-bold mt-3 text-center sm:text-left uppercase tracking-tight">
-            {t('inscription.pricing.iban_hint')}
+            {c('iban_hint', 'inscription.pricing.iban_hint')}
           </p>
         </div>
       </section>
@@ -360,7 +424,7 @@ export default function InscriptionPage() {
 
         {/* --- Students Section --- */}
         <section className="space-y-6">
-          <h2 className="text-xl font-semibold border-b pb-2">{t('inscription.form.student_section')}</h2>
+          <h2 className="text-xl font-semibold border-b pb-2">{c('student_section', 'inscription.form.student_section')}</h2>
 
           {students.map((student, index) => {
             const activities = student.course ? getAvailableActivities(student.course) : [];
@@ -466,33 +530,39 @@ export default function InscriptionPage() {
 
         {/* --- Parent Section --- */}
         <section className="space-y-6">
-          <h2 className="text-xl font-semibold border-b pb-2">{t('inscription.form.parent_section')}</h2>
+          <h2 className="text-xl font-semibold border-b pb-2">{c('parent_section', 'inscription.form.parent_section')}</h2>
           <div className="bg-white border rounded-lg shadow-sm p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">{t('inscription.form.name')} <span className="text-red-500">*</span></label>
                 <input className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.name} onChange={e => setParentInfo({ ...parentInfo, name: e.target.value })} required />
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">{t('inscription.form.dni')} <span className="text-red-500">*</span></label>
-                <input className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.dni} onChange={e => setParentInfo({ ...parentInfo, dni: e.target.value })} required />
-              </div>
+              {isFieldOn('parent_dni') && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">{fieldLabel('parent_dni', 'inscription.form.dni')} {isFieldReq('parent_dni') && <span className="text-red-500">*</span>}</label>
+                  <input className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.dni} onChange={e => setParentInfo({ ...parentInfo, dni: e.target.value })} required={isFieldReq('parent_dni')} />
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">{t('inscription.form.phone_1')} <span className="text-red-500">*</span></label>
                 <input type="tel" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.phone1} onChange={e => setParentInfo({ ...parentInfo, phone1: e.target.value })} required />
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">{t('inscription.form.phone_2')}</label>
-                <input type="tel" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.phone2} onChange={e => setParentInfo({ ...parentInfo, phone2: e.target.value })} />
-              </div>
+              {isFieldOn('parent_phone_2') && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">{fieldLabel('parent_phone_2', 'inscription.form.phone_2')} {isFieldReq('parent_phone_2') && <span className="text-red-500">*</span>}</label>
+                  <input type="tel" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.phone2} onChange={e => setParentInfo({ ...parentInfo, phone2: e.target.value })} required={isFieldReq('parent_phone_2')} />
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">{t('inscription.form.email_1')} <span className="text-red-500">*</span></label>
                 <input type="email" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.email1} onChange={e => setParentInfo({ ...parentInfo, email1: e.target.value })} required />
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">{t('inscription.form.email_2')}</label>
-                <input type="email" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.email2} onChange={e => setParentInfo({ ...parentInfo, email2: e.target.value })} />
-              </div>
+              {isFieldOn('parent_email_2') && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">{fieldLabel('parent_email_2', 'inscription.form.email_2')} {isFieldReq('parent_email_2') && <span className="text-red-500">*</span>}</label>
+                  <input type="email" className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" value={parentInfo.email2} onChange={e => setParentInfo({ ...parentInfo, email2: e.target.value })} required={isFieldReq('parent_email_2')} />
+                </div>
+              )}
               <div className="md:col-span-2 space-y-3">
                 <label className="block text-sm font-medium text-gray-700">{t('inscription.form.is_member')} <span className="text-red-500">*</span></label>
                 <div className="flex space-x-6">
@@ -512,20 +582,24 @@ export default function InscriptionPage() {
 
         {/* --- Additional Info Section --- */}
         <section className="space-y-6">
-          <h2 className="text-xl font-semibold border-b pb-2">{t('inscription.form.additional_section')}</h2>
+          <h2 className="text-xl font-semibold border-b pb-2">{c('additional_section', 'inscription.form.additional_section')}</h2>
           <div className="bg-white border rounded-lg shadow-sm p-6 space-y-6">
+            {isFieldOn('health_info') && (
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">{t('inscription.form.health_info')}</label>
+              <label className="block text-sm font-medium text-gray-700">{fieldLabel('health_info', 'inscription.form.health_info')} {isFieldReq('health_info') && <span className="text-red-500">*</span>}</label>
               <input
                 className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                 value={additionalInfo.healthInfo}
                 onChange={e => setAdditionalInfo({ ...additionalInfo, healthInfo: e.target.value })}
                 placeholder={t('inscription.form.health_placeholder')}
+                required={isFieldReq('health_info')}
               />
             </div>
+            )}
 
+            {isFieldOn('image_rights') && (
             <div className="space-y-3">
-              <label className="block text-sm font-medium text-gray-700">{t('inscription.form.image_rights')} <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">{fieldLabel('image_rights', 'inscription.form.image_rights')} <span className="text-red-500">*</span></label>
               <p className="text-xs text-gray-500">
                 {t('inscription.form.image_text')}
               </p>
@@ -540,9 +614,11 @@ export default function InscriptionPage() {
                 </label>
               </div>
             </div>
+            )}
 
+            {isFieldOn('leave_alone') && (<>
             <div className="space-y-3">
-              <label className="block text-sm font-medium text-gray-700">{t('inscription.form.leave_alone')} <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700">{fieldLabel('leave_alone', 'inscription.form.leave_alone')} <span className="text-red-500">*</span></label>
               <p className="text-xs text-gray-500">{t('inscription.form.leave_alone_text')}</p>
               <div className="flex space-x-6">
                 <label className="flex items-center space-x-2 cursor-pointer">
@@ -567,6 +643,44 @@ export default function InscriptionPage() {
                 />
               </div>
             )}
+            </>)}
+
+            {/* Admin-defined custom questions */}
+            {customQuestions.map(q => {
+              const qLabel = q.label[lang] || q.key;
+              const qPlaceholder = q.placeholder?.[lang] || '';
+              const val = extraAnswers[q.key] || '';
+              const setVal = (v: string) => setExtraAnswers(prev => ({ ...prev, [q.key]: v }));
+              return (
+                <div key={q.key} className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">{qLabel} {q.required && <span className="text-red-500">*</span>}</label>
+                  {q.type === 'long_text' ? (
+                    <textarea
+                      className="flex min-h-[80px] w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                      value={val} placeholder={qPlaceholder} required={q.required}
+                      onChange={e => setVal(e.target.value)}
+                    />
+                  ) : q.type === 'select' ? (
+                    <select
+                      className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                      value={val} required={q.required}
+                      onChange={e => setVal(e.target.value)}
+                    >
+                      <option value="" disabled>{t('inscription.form.select_course')}</option>
+                      {(q.options || []).map((opt, i) => (
+                        <option key={i} value={opt.es || opt[lang]}>{opt[lang] || opt.es}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                      value={val} placeholder={qPlaceholder} required={q.required}
+                      onChange={e => setVal(e.target.value)}
+                    />
+                  )}
+                </div>
+              );
+            })}
 
             <div className="pt-4 border-t">
               <div className="flex items-center space-x-2">
@@ -578,7 +692,7 @@ export default function InscriptionPage() {
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor="terms" className="text-sm text-gray-700 cursor-pointer select-none">
-                  {t('inscription.form.terms_accept')} <a href="#" className="text-blue-600 underline hover:text-blue-800">{t('inscription.form.terms_link')}</a>. <span className="text-red-500">*</span>
+                  {c('terms_accept', 'inscription.form.terms_accept')} <a href={c('terms_url', '') || '#'} target={content?.terms_url ? '_blank' : undefined} rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">{c('terms_link', 'inscription.form.terms_link')}</a>. <span className="text-red-500">*</span>
                 </label>
               </div>
             </div>
@@ -591,10 +705,10 @@ export default function InscriptionPage() {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-4 rounded-lg shadow-md hover:shadow-lg transition-all flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed"
             disabled={loading}
           >
-            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : t('inscription.form.submit_btn')}
+            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : c('submit_btn', 'inscription.form.submit_btn')}
           </button>
           <p className="text-center text-xs text-gray-500 mt-4">
-            {t('inscription.form.privacy_note')}
+            {c('privacy_note', 'inscription.form.privacy_note')}
           </p>
         </div>
 

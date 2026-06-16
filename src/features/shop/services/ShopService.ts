@@ -15,6 +15,7 @@ function transformOrder(order: unknown): ShopOrder {
         delivery_status: (o.delivery_status as OrderDeliveryStatus) || (o.status === 'completed' ? 'delivered' : 'pending'),
         user_id: o.user_id as string | undefined,
         is_member: (o.is_member as boolean) ?? false,
+        academic_year: o.academic_year as string | undefined,
         items: o.items as ShopOrderItem[]
     };
 }
@@ -111,8 +112,8 @@ export const ShopService = {
     if (error) throw error;
   },
 
-  async getOrders(): Promise<ShopOrder[]> {
-    const { data, error } = await supabase
+  async getOrders(academicYear?: string): Promise<ShopOrder[]> {
+    let query = supabase
       .from('shop_orders')
       .select(`
         *,
@@ -125,9 +126,19 @@ export const ShopService = {
         )
       `)
       .order('created_at', { ascending: false });
+    if (academicYear) query = query.eq('academic_year', academicYear);
+    const { data, error } = await query;
 
     if (error) throw error;
     return (data || []).map(transformOrder);
+  },
+
+  async getOrderAcademicYears(): Promise<string[]> {
+    const { data, error } = await supabase.from('shop_orders').select('academic_year');
+    if (error) throw error;
+    const years = new Set<string>();
+    for (const r of data || []) if (r.academic_year) years.add(r.academic_year as string);
+    return Array.from(years).sort().reverse();
   },
 
   async createComplexOrder(payload: {
