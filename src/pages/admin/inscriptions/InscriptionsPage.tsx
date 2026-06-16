@@ -16,6 +16,8 @@ export default function InscriptionsPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [academicYear, setAcademicYear] = useState('');
+  const [years, setYears] = useState<string[]>([]);
 
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -23,8 +25,20 @@ export default function InscriptionsPage() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [customLabels, setCustomLabels] = useState<Record<string, string>>({});
 
+  // Init: resolve the available course cohorts and default to the active season.
   useEffect(() => {
-    fetchInscriptions();
+    (async () => {
+      const [list, season] = await Promise.all([
+        AdminInscriptionsService.getAcademicYears(),
+        ConfigService.getSeasonConfig(),
+      ]);
+      setYears(list);
+      const preferred = season?.active_year && list.includes(season.active_year)
+        ? season.active_year
+        : (list[0] || '');
+      setAcademicYear(preferred);
+    })();
+
     ConfigService.getInscriptionFormConfig().then(cfg => {
       if (!cfg) return;
       const m: Record<string, string> = {};
@@ -33,12 +47,17 @@ export default function InscriptionsPage() {
     });
   }, []);
 
+  // Reload whenever the selected cohort changes (and on first run).
+  useEffect(() => {
+    fetchInscriptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [academicYear]);
+
   const fetchInscriptions = async () => {
     try {
       setLoading(true);
       setLoadError(null);
-      const data = await AdminInscriptionsService.getInscriptions();
-      console.log('Inscriptions loaded:', data.length);
+      const data = await AdminInscriptionsService.getInscriptions(academicYear || undefined);
       setInscriptions(data);
     } catch (error) {
       console.error('Error fetching inscriptions:', error);
@@ -133,6 +152,17 @@ export default function InscriptionsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <select
+          className="flex h-9 w-[150px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+          value={academicYear}
+          onChange={(e) => setAcademicYear(e.target.value)}
+          title="Curs"
+        >
+          <option value="">Tots els cursos</option>
+          {years.map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
         <select
           className="flex h-9 w-[180px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
           value={statusFilter}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { ConfigService } from '../../../services/ConfigService';
 import { useTranslation } from 'react-i18next';
 import { Search, Plus, CheckCircle, XCircle, Download, Edit, Trash2 } from 'lucide-react';
 import { EditPaymentModal } from '../../../components/admin/EditPaymentModal';
@@ -13,22 +14,44 @@ export function PaymentsPage() {
   const [filterText, setFilterText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [monthFilter, setMonthFilter] = useState('all');
+  const [academicYear, setAcademicYear] = useState('');
+  const [years, setYears] = useState<string[]>([]);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | undefined>(undefined);
 
+  // Init: resolve cohorts present in payments, default to the active season.
+  useEffect(() => {
+    (async () => {
+      const [{ data }, season] = await Promise.all([
+        supabase.from('payments').select('academic_year'),
+        ConfigService.getSeasonConfig(),
+      ]);
+      const list = [...new Set((data || []).map(r => r.academic_year).filter(Boolean) as string[])].sort().reverse();
+      setYears(list);
+      const preferred = season?.active_year && list.includes(season.active_year)
+        ? season.active_year
+        : (list[0] || '');
+      setAcademicYear(preferred);
+    })();
+  }, []);
+
+  // Reload whenever the selected cohort changes (and on first run).
   useEffect(() => {
     fetchPayments();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [academicYear]);
 
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('payments')
         .select('*')
         .order('due_date', { ascending: false });
+      if (academicYear) query = query.eq('academic_year', academicYear);
+      const { data, error } = await query;
 
       if (error) throw error;
       setPayments(data || []);
@@ -193,6 +216,18 @@ export function PaymentsPage() {
             onChange={e => setFilterText(e.target.value)}
           />
         </div>
+
+        <select
+          className="px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
+          value={academicYear}
+          onChange={e => setAcademicYear(e.target.value)}
+          title="Curs"
+        >
+          <option value="">Tots els cursos</option>
+          {years.map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
 
         <select
           className="px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary outline-none bg-white font-medium"
