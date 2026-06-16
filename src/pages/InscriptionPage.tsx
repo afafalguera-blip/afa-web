@@ -17,6 +17,9 @@ interface Student {
   surname: string;
   course: string;
   activities: string[];
+  healthInfo: string;
+  imageRights: string;    // "si" | "no"
+  canLeaveAlone: string;  // "true" | "false"
 }
 
 interface ParentInfo {
@@ -30,12 +33,14 @@ interface ParentInfo {
 }
 
 interface AdditionalInfo {
-  healthInfo: string;
-  imageRights: string; // "si" | "no"
-  canLeaveAlone: string; // "true" | "false"
   authorizedPickup: string;
   termsAccepted: boolean;
 }
+
+const emptyStudent = (): Student => ({
+  name: '', surname: '', course: '', activities: [],
+  healthInfo: '', imageRights: 'si', canLeaveAlone: 'false',
+});
 
 export default function InscriptionPage() {
   const { t, i18n } = useTranslation();
@@ -138,22 +143,20 @@ export default function InscriptionPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Form State
-  const [students, setStudents] = useState<Student[]>([
-    { name: '', surname: '', course: '', activities: [] }
-  ]);
+  const [students, setStudents] = useState<Student[]>([emptyStudent()]);
 
   const [parentInfo, setParentInfo] = useState<ParentInfo>({
     name: '', dni: '', phone1: '', phone2: '', email1: '', email2: '', isAfaMember: ''
   });
 
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalInfo>({
-    healthInfo: '', imageRights: 'si', canLeaveAlone: 'false', authorizedPickup: '', termsAccepted: false
+    authorizedPickup: '', termsAccepted: false
   });
 
   // Handlers
   const addStudent = () => {
     if (students.length < homepageConfig.max_students_per_inscription) {
-      setStudents([...students, { name: '', surname: '', course: '', activities: [] }]);
+      setStudents([...students, emptyStudent()]);
     }
   };
 
@@ -214,6 +217,13 @@ export default function InscriptionPage() {
       return;
     }
 
+    // Per-child health info, when enabled and required
+    if (isFieldOn('health_info') && isFieldReq('health_info') && students.some(s => !s.healthInfo.trim())) {
+      setError(fieldLabel('health_info', 'inscription.form.health_info'));
+      setLoading(false);
+      return;
+    }
+
     // Required custom questions
     const missingCustom = customQuestions.find(q => q.required && !(extraAnswers[q.key] || '').trim());
     if (missingCustom) {
@@ -235,11 +245,11 @@ export default function InscriptionPage() {
           name: s.name,
           surname: s.surname,
           course: s.course,
-          activities: s.activities
+          activities: s.activities,
+          health_info: isFieldOn('health_info') ? (s.healthInfo || null) : null,
+          image_auth_consent: isFieldOn('image_rights') ? s.imageRights : null,
+          can_leave_alone: isFieldOn('leave_alone') ? s.canLeaveAlone === 'true' : null,
         })),
-        health_info: additionalInfo.healthInfo || null,
-        image_auth_consent: additionalInfo.imageRights,
-        can_leave_alone: additionalInfo.canLeaveAlone === 'true',
         authorized_pickup: additionalInfo.authorizedPickup || null,
         conditions_accepted: true,
         extra_answers: extraAnswers,
@@ -512,6 +522,58 @@ export default function InscriptionPage() {
                       {student.activities.length === 0 && <p className="text-xs text-red-500 mt-2">{t('inscription.form.must_select_activity')}</p>}
                     </div>
                   )}
+
+                  {/* Per-child additional info */}
+                  {(isFieldOn('health_info') || isFieldOn('image_rights') || isFieldOn('leave_alone')) && (
+                    <div className="space-y-5 pt-2 border-t border-slate-100">
+                      {isFieldOn('health_info') && (
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">{fieldLabel('health_info', 'inscription.form.health_info')} {isFieldReq('health_info') && <span className="text-red-500">*</span>}</label>
+                          <input
+                            className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                            value={student.healthInfo}
+                            onChange={e => updateStudent(index, 'healthInfo', e.target.value)}
+                            placeholder={t('inscription.form.health_placeholder')}
+                            required={isFieldReq('health_info')}
+                          />
+                        </div>
+                      )}
+
+                      {isFieldOn('image_rights') && (
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">{fieldLabel('image_rights', 'inscription.form.image_rights')} <span className="text-red-500">*</span></label>
+                          <p className="text-xs text-gray-500">{t('inscription.form.image_text')}</p>
+                          <div className="flex flex-col space-y-2">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input type="radio" name={`img_rights_${index}`} value="si" checked={student.imageRights === 'si'} onChange={() => updateStudent(index, 'imageRights', 'si')} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                              <span>{t('inscription.form.image_yes')}</span>
+                            </label>
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input type="radio" name={`img_rights_${index}`} value="no" checked={student.imageRights === 'no'} onChange={() => updateStudent(index, 'imageRights', 'no')} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                              <span>{t('inscription.form.image_no')}</span>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {isFieldOn('leave_alone') && (
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700">{fieldLabel('leave_alone', 'inscription.form.leave_alone')} <span className="text-red-500">*</span></label>
+                          <p className="text-xs text-gray-500">{t('inscription.form.leave_alone_text')}</p>
+                          <div className="flex space-x-6">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input type="radio" name={`leave_alone_${index}`} value="true" checked={student.canLeaveAlone === 'true'} onChange={() => updateStudent(index, 'canLeaveAlone', 'true')} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                              <span>{t('inscription.form.yes')}</span>
+                            </label>
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input type="radio" name={`leave_alone_${index}`} value="false" checked={student.canLeaveAlone === 'false'} onChange={() => updateStudent(index, 'canLeaveAlone', 'false')} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                              <span>{t('inscription.form.no')}</span>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -584,55 +646,9 @@ export default function InscriptionPage() {
         <section className="space-y-6">
           <h2 className="text-xl font-semibold border-b pb-2">{c('additional_section', 'inscription.form.additional_section')}</h2>
           <div className="bg-white border rounded-lg shadow-sm p-6 space-y-6">
-            {isFieldOn('health_info') && (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">{fieldLabel('health_info', 'inscription.form.health_info')} {isFieldReq('health_info') && <span className="text-red-500">*</span>}</label>
-              <input
-                className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                value={additionalInfo.healthInfo}
-                onChange={e => setAdditionalInfo({ ...additionalInfo, healthInfo: e.target.value })}
-                placeholder={t('inscription.form.health_placeholder')}
-                required={isFieldReq('health_info')}
-              />
-            </div>
-            )}
-
-            {isFieldOn('image_rights') && (
-            <div className="space-y-3">
-              <label className="block text-sm font-medium text-gray-700">{fieldLabel('image_rights', 'inscription.form.image_rights')} <span className="text-red-500">*</span></label>
-              <p className="text-xs text-gray-500">
-                {t('inscription.form.image_text')}
-              </p>
-              <div className="flex flex-col space-y-2">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="radio" name="img_rights" value="si" checked={additionalInfo.imageRights === 'si'} onChange={() => setAdditionalInfo({ ...additionalInfo, imageRights: 'si' })} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                  <span>{t('inscription.form.image_yes')}</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="radio" name="img_rights" value="no" checked={additionalInfo.imageRights === 'no'} onChange={() => setAdditionalInfo({ ...additionalInfo, imageRights: 'no' })} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                  <span>{t('inscription.form.image_no')}</span>
-                </label>
-              </div>
-            </div>
-            )}
-
-            {isFieldOn('leave_alone') && (<>
-            <div className="space-y-3">
-              <label className="block text-sm font-medium text-gray-700">{fieldLabel('leave_alone', 'inscription.form.leave_alone')} <span className="text-red-500">*</span></label>
-              <p className="text-xs text-gray-500">{t('inscription.form.leave_alone_text')}</p>
-              <div className="flex space-x-6">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="radio" name="leave_alone" value="true" checked={additionalInfo.canLeaveAlone === 'true'} onChange={() => setAdditionalInfo({ ...additionalInfo, canLeaveAlone: 'true' })} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                  <span>{t('inscription.form.yes')}</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="radio" name="leave_alone" value="false" checked={additionalInfo.canLeaveAlone === 'false'} onChange={() => setAdditionalInfo({ ...additionalInfo, canLeaveAlone: 'false' })} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
-                  <span>{t('inscription.form.no')}</span>
-                </label>
-              </div>
-            </div>
-
-            {additionalInfo.canLeaveAlone === 'false' && (
+            {/* Salud, derechos de imagen y "puede irse solo" ahora son por alumno
+                (dentro de cada bloque de alumno). Aquí queda lo común a la familia. */}
+            {isFieldOn('leave_alone') && students.some(s => s.canLeaveAlone === 'false') && (
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">{t('inscription.form.authorized_pickup')}</label>
                 <textarea
@@ -643,7 +659,6 @@ export default function InscriptionPage() {
                 />
               </div>
             )}
-            </>)}
 
             {/* Admin-defined custom questions */}
             {customQuestions.map(q => {

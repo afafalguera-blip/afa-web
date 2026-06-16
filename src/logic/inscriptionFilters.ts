@@ -42,6 +42,10 @@ export function flattenInscriptions(inscriptions: (Inscription | InscriptionRaw)
         activities: Array.isArray(student.activities) ? student.activities : [],
         status: normalizedStatus,
         suspended: student.suspended ?? false,
+        // Per-child fields; fall back to inscription-level for legacy rows.
+        health_info: student.health_info ?? (item as InscriptionRaw).health_info,
+        image_auth_consent: student.image_auth_consent ?? (item as InscriptionRaw).image_auth_consent,
+        can_leave_alone: student.can_leave_alone ?? (item as InscriptionRaw).can_leave_alone,
       }));
     }
 
@@ -59,6 +63,9 @@ export function flattenInscriptions(inscriptions: (Inscription | InscriptionRaw)
       activities: Array.isArray(legacy.selected_activities) ? legacy.selected_activities : [],
       status: (legacy.status ?? INSCRIPTION_STATUS.ACTIVE) as InscriptionFlat['status'],
       suspended: legacy.suspended ?? false,
+      health_info: legacy.health_info,
+      image_auth_consent: legacy.image_auth_consent,
+      can_leave_alone: legacy.can_leave_alone,
     }];
   });
 }

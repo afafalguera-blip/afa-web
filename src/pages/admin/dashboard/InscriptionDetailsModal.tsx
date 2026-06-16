@@ -133,6 +133,31 @@ export function InscriptionDetailsModal({ inscription, onClose }: InscriptionDet
             </div>
           </div>
 
+          {/* Per-child additional info */}
+          <div>
+            <h4 className="font-semibold text-neutral-900 border-b border-neutral-100 pb-2 mb-4">
+              Informació addicional de l'alumne
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="text-neutral-500 block mb-1">Salut / Al·lèrgies</span>
+                <p className="font-medium text-neutral-900 whitespace-pre-line">{inscription.health_info?.trim() || '—'}</p>
+              </div>
+              <div>
+                <span className="text-neutral-500 block mb-1">Autorització imatge</span>
+                <p className="font-medium text-neutral-900">
+                  {inscription.image_auth_consent == null ? '—' : inscription.image_auth_consent === 'si' ? 'Sí' : 'No'}
+                </p>
+              </div>
+              <div>
+                <span className="text-neutral-500 block mb-1">Pot marxar sol/a</span>
+                <p className="font-medium text-neutral-900">
+                  {inscription.can_leave_alone == null ? '—' : inscription.can_leave_alone ? 'Sí' : 'No'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Metadata */}
           <div className="bg-neutral-50 rounded-lg p-4 grid grid-cols-2 gap-4 text-sm">
             <div>

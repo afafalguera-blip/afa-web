@@ -20,6 +20,10 @@ interface FlattenedInscriptionRow {
   activities: string[];
   suspended: boolean;
   single_activity: string;
+  // Per-child additional info (falls back to parent-level for legacy rows).
+  health_info?: string;
+  image_auth_consent?: string;
+  can_leave_alone?: boolean;
   parent: {
     id: string | number;
     created_at?: string;
@@ -68,16 +72,25 @@ export const ExportService = {
           surname: (ins as InscriptionFlat).surname || '',
           course: (ins as InscriptionFlat).course || '',
           activities: (ins as InscriptionFlat).activities || [],
-          suspended: (ins as InscriptionFlat).suspended || false
+          suspended: (ins as InscriptionFlat).suspended || false,
+          health_info: (ins as InscriptionFlat).health_info,
+          image_auth_consent: (ins as InscriptionFlat).image_auth_consent,
+          can_leave_alone: (ins as InscriptionFlat).can_leave_alone,
         }];
 
       students.forEach((student) => {
         const activities = student.activities || [];
+        const perChild = {
+          health_info: student.health_info,
+          image_auth_consent: student.image_auth_consent,
+          can_leave_alone: student.can_leave_alone,
+        };
 
         if (shouldSort && activities.length > 0) {
           activities.forEach((activity: string) => {
             rows.push({
               ...student,
+              ...perChild,
               suspended: !!student.suspended,
               activities: activities,
               single_activity: activity,
@@ -87,6 +100,7 @@ export const ExportService = {
         } else {
           rows.push({
             ...student,
+            ...perChild,
             suspended: !!student.suspended,
             activities: activities,
             single_activity: activities.join(', '),
@@ -151,9 +165,9 @@ export const ExportService = {
         'Email 1': String(r.parent.parent_email_1 || ''),
         'Email 2': String(r.parent.parent_email_2 || ''),
         'Socio AFA': r.parent.afa_member ? 'Sí' : 'No',
-        'Salud/Alergias': String(r.parent.health_info || ''),
-        'Autorización Imagen': String(r.parent.image_auth_consent || 'No'),
-        'Sale Solo': r.parent.can_leave_alone ? 'Sí' : 'No',
+        'Salud/Alergias': String(r.health_info ?? r.parent.health_info ?? ''),
+        'Autorización Imagen': String(r.image_auth_consent ?? r.parent.image_auth_consent ?? 'No'),
+        'Sale Solo': (r.can_leave_alone ?? r.parent.can_leave_alone) ? 'Sí' : 'No',
         'Autorizados Recogida': String(r.parent.authorized_pickup || '')
       }));
     }
@@ -193,7 +207,7 @@ export const ExportService = {
         r.parent.parent_phone_1 || '',
         r.parent.parent_email_1 || '',
         r.parent.afa_member ? 'Sí' : 'No',
-        r.parent.health_info || ''
+        r.health_info ?? r.parent.health_info ?? ''
       ]);
 
       autoTable(doc, {

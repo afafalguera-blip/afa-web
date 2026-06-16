@@ -4,6 +4,10 @@ export interface InscriptionStudent {
   course: string;
   activities: string[];
   suspended?: boolean;
+  // Per-child additional info (moved out of the global inscription level).
+  health_info?: string;
+  image_auth_consent?: string; // 'si' | 'no'
+  can_leave_alone?: boolean;
 }
 
 export type InscriptionStatus = 'active' | 'alta' | 'pending' | 'baja' | 'suspended';
@@ -87,6 +91,10 @@ export interface InscriptionFlat {
   activities: string[];
   status: InscriptionStatus;
   suspended: boolean;
+  // Per-child additional info (carried through for exports).
+  health_info?: string;
+  image_auth_consent?: string;
+  can_leave_alone?: boolean;
 }
 
 // Filters for dashboard
