@@ -7,6 +7,7 @@ import { useContentTranslation } from '../hooks/useContentTranslation';
 import { SEO } from '../components/common/SEO';
 import { LazyImage } from '../components/common/LazyImage';
 import { activityPath, slugify } from '../utils/slug';
+import { RichActivityDescription } from '../components/public/extraescolars/RichActivityDescription';
 
 export default function ActivityDetailPage() {
   const { id, slug } = useParams<{ id: string; slug?: string }>();
@@ -164,10 +165,14 @@ export default function ActivityDetailPage() {
 
         {/* Description */}
         <div className="mb-8">
-          <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-3">{t('inscription.activity_modal.about')}</h3>
-          <p className="text-[#4b5563] dark:text-gray-300 text-base leading-relaxed font-light">
-            {tContent(activity, 'description') || t('inscription.activity_modal.default_description')}
-          </p>
+          <h3 className="text-lg font-bold text-[#111813] dark:text-white mb-4">{t('inscription.activity_modal.about')}</h3>
+          {tContent(activity, 'description') ? (
+            <RichActivityDescription text={tContent(activity, 'description')} />
+          ) : (
+            <p className="text-[#4b5563] dark:text-gray-300 text-base leading-relaxed font-light">
+              {t('inscription.activity_modal.default_description')}
+            </p>
+          )}
         </div>
 
         {/* Schedule */}
