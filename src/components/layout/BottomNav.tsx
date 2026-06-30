@@ -56,7 +56,10 @@ const SERVICES_PATHS = ['/acollida', '/menjador'];
 const MORE_PATHS = ['/sobre-afa', '/historia', '/noticies', '/documents', '/contacte'];
 
 export function BottomNav() {
-  const { t } = useTranslation();
+  // i18next types t() to literal keys only; this nav uses dynamic keys and
+  // passes t to child components typed as (key, fallback) => string.
+  const { t: tStrict } = useTranslation();
+  const t = tStrict as unknown as (key: string, fallback?: string) => string;
   const location = useLocation();
   const [openSheet, setOpenSheet] = useState<SheetKey>(null);
 

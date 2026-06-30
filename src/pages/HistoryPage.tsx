@@ -31,7 +31,9 @@ const MILESTONES: Milestone[] = [
 ];
 
 export default function HistoryPage() {
-  const { t } = useTranslation();
+  // i18next types t() to literal keys only; this page resolves keys dynamically.
+  const { t: tStrict } = useTranslation();
+  const t = tStrict as unknown as (key: string, fallback?: string) => string;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12">

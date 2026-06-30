@@ -305,7 +305,7 @@ export default function BoardManager() {
     }
   };
 
-  const setConfigField = (lang: Lang, field: keyof NonNullable<BoardSectionConfig['translations']>['es'], value: string) => {
+  const setConfigField = (lang: Lang, field: keyof NonNullable<NonNullable<BoardSectionConfig['translations']>['es']>, value: string) => {
     setConfig(c => ({
       ...c,
       translations: {

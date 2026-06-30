@@ -60,7 +60,9 @@ interface TextosTabProps {
 }
 
 export function TextosTab({ content, setContent, activeLang, setActiveLang }: TextosTabProps) {
-  const { t } = useTranslation();
+  // i18next types t() to literal keys only; field hints resolve keys dynamically.
+  const { t: tStrict } = useTranslation();
+  const t = tStrict as unknown as (key: string, fallback?: string) => string;
   const [translating, setTranslating] = useState(false);
   const [translateError, setTranslateError] = useState<string | null>(null);
 

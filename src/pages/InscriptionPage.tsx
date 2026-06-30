@@ -43,7 +43,10 @@ const emptyStudent = (): Student => ({
 });
 
 export default function InscriptionPage() {
-  const { t, i18n } = useTranslation();
+  // i18next types t() to literal keys only; this page resolves keys dynamically
+  // and passes t to resolvers typed as (key, fallback) => string.
+  const { t: tStrict, i18n } = useTranslation();
+  const t = tStrict as unknown as (key: string, fallback?: string) => string;
   const navigate = useNavigate();
   const homepageConfig = useHomepageConfig();
   const [fees, setFees] = useState<FeesConfig | null>(null);
