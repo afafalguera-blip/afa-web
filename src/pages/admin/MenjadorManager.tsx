@@ -41,7 +41,7 @@ export default function MenjadorManager() {
     <div className="p-2 md:p-6 max-w-6xl mx-auto space-y-6">
       <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-800 flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-800 flex items-center gap-2">
             <Utensils className="w-7 h-7 text-amber-600" /> Gestión Menjador
           </h1>
           <p className="text-neutral-500">Información del servicio, tarifas y menús mensuales.</p>

@@ -57,7 +57,7 @@ export default function ActivitiesManager() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <ActivityAdminHeader onCreate={handleCreate} />
 
       {error && (

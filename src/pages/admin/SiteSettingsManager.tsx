@@ -168,10 +168,10 @@ export default function SiteSettingsManager() {
     }
 
     return (
-        <div className="p-6 max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-800 dark:text-white flex items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-white flex items-center gap-3">
                         <Settings className="text-primary w-8 h-8" />
                         Configuració del Lloc
                     </h1>

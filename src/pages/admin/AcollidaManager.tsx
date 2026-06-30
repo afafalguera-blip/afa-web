@@ -99,18 +99,18 @@ export default function AcollidaManager() {
     };
 
     return (
-        <div className="p-6 max-w-5xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
+        <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 sm:mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-800 dark:text-white">Gestión de Acogida</h1>
-                    <p className="text-neutral-500">Configura los horarios y precios del servicio de acogida.</p>
+                    <h1 className="text-xl sm:text-3xl font-bold text-neutral-800 dark:text-white">Gestión de Acogida</h1>
+                    <p className="text-sm sm:text-base text-neutral-500">Configura los horarios y precios del servicio de acogida.</p>
                 </div>
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-lg font-bold shadow-sm shadow-primary/30 flex items-center gap-2 transition-all disabled:opacity-50"
+                    className="w-full sm:w-auto shrink-0 bg-primary hover:bg-primary/90 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-bold text-sm sm:text-base shadow-sm shadow-primary/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                 >
-                    {saving ? 'Guardando...' : <><Save className="w-5 h-5" /> Guardar Cambios</>}
+                    {saving ? 'Guardando...' : <><Save className="w-4 h-4 sm:w-5 sm:h-5" /> Guardar Cambios</>}
                 </button>
             </div>
 
@@ -140,7 +140,7 @@ export default function AcollidaManager() {
                             <tbody className="divide-y divide-neutral-50 dark:divide-neutral-800">
                                 {rates.map((rate, index) => (
                                     <tr key={index} className="group">
-                                        <td className="py-4 px-2">
+                                        <td className="py-3 sm:py-4 px-2">
                                             <div className="relative">
                                                 <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
                                                 <input
@@ -152,43 +152,43 @@ export default function AcollidaManager() {
                                                 />
                                             </div>
                                         </td>
-                                        <td className="py-4 px-2">
+                                        <td className="py-3 sm:py-4 px-2">
                                             <div className="flex gap-2">
                                                 <input
                                                     type="text"
                                                     value={rate.preu_soci_mes}
                                                     onChange={(e) => handleChange(index, 'preu_soci_mes', e.target.value)}
                                                     placeholder="Mes (64€)"
-                                                    className="w-24 px-3 py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
+                                                    className="w-20 sm:w-24 px-2 sm:px-3 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={rate.preu_soci_ocasional || ''}
                                                     onChange={(e) => handleChange(index, 'preu_soci_ocasional', e.target.value)}
                                                     placeholder="Oc. (10€)"
-                                                    className="w-24 px-3 py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
+                                                    className="w-20 sm:w-24 px-2 sm:px-3 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
                                                 />
                                             </div>
                                         </td>
-                                        <td className="py-4 px-2">
+                                        <td className="py-3 sm:py-4 px-2">
                                             <div className="flex gap-2">
                                                 <input
                                                     type="text"
                                                     value={rate.preu_no_soci_mes}
                                                     onChange={(e) => handleChange(index, 'preu_no_soci_mes', e.target.value)}
                                                     placeholder="Mes (68€)"
-                                                    className="w-24 px-3 py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
+                                                    className="w-20 sm:w-24 px-2 sm:px-3 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={rate.preu_no_soci_ocasional || ''}
                                                     onChange={(e) => handleChange(index, 'preu_no_soci_ocasional', e.target.value)}
                                                     placeholder="Oc. (14€)"
-                                                    className="w-24 px-3 py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
+                                                    className="w-20 sm:w-24 px-2 sm:px-3 py-1.5 sm:py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
                                                 />
                                             </div>
                                         </td>
-                                        <td className="py-4 px-2">
+                                        <td className="py-3 sm:py-4 px-2">
                                             <button
                                                 onClick={() => handleRemoveRate(index)}
                                                 className="p-2 text-neutral-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
@@ -203,7 +203,7 @@ export default function AcollidaManager() {
 
                         <button
                             onClick={handleAddRate}
-                            className="mt-6 w-full py-4 border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-400 font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+                            className="mt-4 sm:mt-6 w-full py-3 sm:py-4 border-2 border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-400 text-sm sm:text-base font-bold hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
                         >
                             <Plus size={20} />
                             {t('admin.acollidaManager.addRate')}
@@ -212,7 +212,7 @@ export default function AcollidaManager() {
                 </div>
             )}
 
-            <div className="mt-8 bg-blue-50 dark:bg-blue-900/10 p-6 rounded-3xl border border-blue-100 dark:border-blue-900/20">
+            <div className="mt-6 sm:mt-8 bg-blue-50 dark:bg-blue-900/10 p-4 sm:p-6 rounded-3xl border border-blue-100 dark:border-blue-900/20">
                 <h3 className="font-bold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
                     <AlertCircle size={20} /> {t('admin.acollidaManager.adminNote.title')}
                 </h3>

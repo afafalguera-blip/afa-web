@@ -165,7 +165,7 @@ export function PaymentsPage() {
   if (loading) return <div className="p-8 text-center">{t('admin.payments.loading')}</div>;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">{t('admin.payments.title')}</h1>
@@ -191,16 +191,16 @@ export function PaymentsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
           <div className="text-sm font-medium text-neutral-500">{t('admin.payments.stats.total')}</div>
-          <div className="text-3xl font-bold text-neutral-900 mt-2">{totalAmount.toFixed(2)}€</div>
+          <div className="text-2xl sm:text-3xl font-bold text-neutral-900 mt-2">{totalAmount.toFixed(2)}€</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
           <div className="text-sm font-medium text-neutral-500">{t('admin.payments.stats.paid')}</div>
-          <div className="text-3xl font-bold text-green-600 mt-2">{paidAmount.toFixed(2)}€</div>
+          <div className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">{paidAmount.toFixed(2)}€</div>
           <div className="text-xs text-neutral-400 mt-1">{t('admin.payments.stats.percentage_hint', { percentage: ((paidAmount / totalAmount || 0) * 100).toFixed(0) })}</div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
           <div className="text-sm font-medium text-neutral-500">{t('admin.payments.stats.pending')}</div>
-          <div className="text-3xl font-bold text-amber-600 mt-2">{pendingAmount.toFixed(2)}€</div>
+          <div className="text-2xl sm:text-3xl font-bold text-amber-600 mt-2">{pendingAmount.toFixed(2)}€</div>
         </div>
       </div>
 

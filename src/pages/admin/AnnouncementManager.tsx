@@ -132,10 +132,10 @@ export default function AnnouncementManager() {
     const previewMessage = announcement.translations?.[activeLang] || announcement.message;
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-800 dark:text-white">Banner d'Anuncis</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-white">Banner d'Anuncis</h1>
                     <p className="text-neutral-500 text-sm mt-1">Configura missatges globals a la part superior de la web.</p>
                 </div>
                 <button

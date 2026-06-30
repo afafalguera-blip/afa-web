@@ -108,9 +108,9 @@ export default function InscriptionConfigPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-800 dark:text-white flex items-center gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-white flex items-center gap-3">
           <ClipboardList className="text-primary w-8 h-8" /> Configuració d'Inscripcions
         </h1>
         <p className="text-neutral-500 text-sm mt-1">Obre/tanca el període, edita els textos i els camps del formulari públic.</p>
