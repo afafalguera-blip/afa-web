@@ -9,7 +9,8 @@ import {
     Clock,
     User,
     MessageSquare,
-    ChevronRight
+    ChevronRight,
+    ChevronLeft
 } from "lucide-react";
 
 export default function ContactManager() {
@@ -80,12 +81,12 @@ export default function ContactManager() {
 
     return (
         <div className="h-[calc(100vh-10rem)] flex flex-col gap-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-800 dark:text-white">Missatges de Contacte</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-white">Missatges de Contacte</h1>
                     <p className="text-neutral-500">Gestiona les consultes rebudes a través de la web.</p>
                 </div>
-                <div className="flex-1 max-w-md ml-8">
+                <div className="w-full sm:flex-1 sm:max-w-md sm:ml-8">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
                         <input
@@ -99,9 +100,9 @@ export default function ContactManager() {
                 </div>
             </div>
 
-            <div className="flex-1 flex gap-6 overflow-hidden">
-                {/* List Section */}
-                <div className="w-1/3 bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 overflow-hidden flex flex-col shadow-sm">
+            <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden">
+                {/* List Section — on mobile, hidden once a message is selected (master/detail) */}
+                <div className={`w-full lg:w-1/3 bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 overflow-hidden flex-col shadow-sm ${selectedMessage ? 'hidden lg:flex' : 'flex'}`}>
                     <div className="p-4 border-b border-neutral-100 dark:border-neutral-700 bg-neutral-50/50 dark:bg-neutral-800/50 flex justify-between items-center">
                         <span className="text-xs font-bold uppercase tracking-wider text-neutral-500">Bústia d'entrada</span>
                         <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">
@@ -154,12 +155,19 @@ export default function ContactManager() {
                     </div>
                 </div>
 
-                {/* Detail Section */}
-                <div className="flex-1 bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 shadow-sm overflow-hidden flex flex-col">
+                {/* Detail Section — on mobile, hidden until a message is selected */}
+                <div className={`flex-1 bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-100 dark:border-neutral-700 shadow-sm overflow-hidden flex-col ${selectedMessage ? 'flex' : 'hidden lg:flex'}`}>
                     {selectedMessage ? (
                         <>
-                            <div className="p-6 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center bg-neutral-50/30 dark:bg-neutral-800/30">
-                                <div className="flex items-center gap-4">
+                            <div className="p-4 sm:p-6 border-b border-neutral-100 dark:border-neutral-700 flex justify-between items-center bg-neutral-50/30 dark:bg-neutral-800/30">
+                                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                    <button
+                                        onClick={() => setSelectedMessage(null)}
+                                        className="lg:hidden p-2 -ml-1 text-neutral-500 hover:text-neutral-800 dark:hover:text-white shrink-0"
+                                        title="Tornar"
+                                    >
+                                        <ChevronLeft size={22} />
+                                    </button>
                                     <div className="w-12 h-12 bg-primary text-white rounded-lg flex items-center justify-center shadow-sm shadow-primary/20">
                                         <Mail size={24} />
                                     </div>
@@ -185,9 +193,9 @@ export default function ContactManager() {
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                                <div className="flex items-start gap-12">
-                                    <div className="space-y-4 w-1/3">
+                            <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8">
+                                <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-12">
+                                    <div className="space-y-4 w-full lg:w-1/3">
                                         <div>
                                             <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Remitent</label>
                                             <p className="font-bold text-neutral-900 dark:text-white flex items-center gap-2">

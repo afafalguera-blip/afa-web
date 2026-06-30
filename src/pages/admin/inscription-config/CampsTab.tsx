@@ -175,12 +175,12 @@ export function CampsTab({ fields, setFields, customQuestions, setCustomQuestion
           const locked = lockedKeys.has(q.key) && q.key !== '';
           return (
             <div key={idx} className="p-5 bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-100 dark:border-neutral-700 space-y-3">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <input type="text" value={q.key} disabled={locked}
                   onChange={e => updateQuestion(idx, { key: slugify(e.target.value) })}
                   onBlur={() => { if (!q.key && q.label.es) updateQuestion(idx, { key: slugify(q.label.es) }); }}
                   placeholder="clau (ex: talla_samarreta)"
-                  className="font-mono text-xs px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 disabled:opacity-60 w-56" />
+                  className="font-mono text-xs px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 disabled:opacity-60 w-full sm:w-56" />
                 <select value={q.type} onChange={e => updateQuestion(idx, { type: e.target.value as CustomQuestion['type'] })}
                   className="text-xs px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800">
                   <option value="text">Text curt</option>

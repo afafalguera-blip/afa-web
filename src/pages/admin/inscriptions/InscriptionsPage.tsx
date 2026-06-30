@@ -141,7 +141,7 @@ export default function InscriptionsPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 bg-white p-4 rounded-lg border shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white p-4 rounded-lg border shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <input
@@ -153,7 +153,7 @@ export default function InscriptionsPage() {
           />
         </div>
         <select
-          className="flex h-9 w-[150px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex h-9 w-full sm:w-[150px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
           value={academicYear}
           onChange={(e) => setAcademicYear(e.target.value)}
           title="Curs"
@@ -164,7 +164,7 @@ export default function InscriptionsPage() {
           ))}
         </select>
         <select
-          className="flex h-9 w-[180px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex h-9 w-full sm:w-[180px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >

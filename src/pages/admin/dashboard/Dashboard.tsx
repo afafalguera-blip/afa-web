@@ -75,7 +75,7 @@ export function Dashboard() {
           <p className="text-neutral-500">{t('admin.dashboard.subtitle')}</p>
         </div>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           <select
             value={academicYear}
             onChange={(e) => setAcademicYear(e.target.value)}

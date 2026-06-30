@@ -146,7 +146,7 @@ export function FeesSettings({ fees, setFees, pricing, setPricing, activeLang, s
                                     <Trash2 size={14} />
                                 </button>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-neutral-400 uppercase">Preu Soci (€)</label>
                                     <input

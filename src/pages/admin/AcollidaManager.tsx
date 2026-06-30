@@ -127,8 +127,8 @@ export default function AcollidaManager() {
                 </div>
             ) : (
                 <div className="bg-white dark:bg-neutral-800 rounded-3xl border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm">
-                    <div className="p-6">
-                        <table className="w-full">
+                    <div className="p-3 sm:p-6 overflow-x-auto">
+                        <table className="w-full min-w-[480px]">
                             <thead>
                                 <tr className="text-left text-xs font-bold text-neutral-400 uppercase tracking-wider border-b border-neutral-100 dark:border-neutral-700">
                                     <th className="pb-4 px-2">Horario</th>

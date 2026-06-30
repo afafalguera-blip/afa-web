@@ -158,7 +158,7 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
                                         <Trash2 size={16} />
                                     </button>
                                 </div>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     {(['ca', 'es', 'en'] as const).map(lang => (
                                         <div key={lang} className="space-y-1">
                                             <label className="text-[10px] font-bold text-neutral-400 uppercase">{lang.toUpperCase()}</label>
