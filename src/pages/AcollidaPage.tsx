@@ -178,23 +178,17 @@ export default function AcollidaPage() {
                         </div>
                     </section>
 
-                    {/* Special periods: jornada intensiva + final de curs */}
+                    {/* Special period: final de curs (dies amb horari reduït) */}
                     <section className="space-y-5">
                         <div>
                             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                                {t('acollida_page.special.title', 'Jornada intensiva i final de curs')}
+                                {t('acollida_page.special.title', 'Servei en dies especials')}
                             </h2>
                             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                                 {t('acollida_page.special.subtitle', "El servei d'acollida també cobreix els dies amb horari reduït.")}
                             </p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <InfoCard
-                                icon={<Sun className="w-5 h-5" />}
-                                title={t('acollida_page.special.intensive.title', 'Jornada intensiva')}
-                                body={t('acollida_page.special.intensive.body', "Durant els períodes de jornada intensiva (setembre i juny), l'acollida s'adapta al nou horari escolar, al matí abans d'entrar i en sortir. Consulta les franges i tarifes disponibles més amunt.")}
-                                accent="indigo"
-                            />
+                        <div className="grid grid-cols-1 gap-4">
                             <InfoCard
                                 icon={<Calendar className="w-5 h-5" />}
                                 title={t('acollida_page.special.endyear.title', 'Final de curs')}

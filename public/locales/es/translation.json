@@ -108,12 +108,8 @@
     "occasional": "ocasional",
     "note": "Los precios ocasionales se aplican a días puntuales. Para inscripciones o más información, contacta con el AFA.",
     "special": {
-      "title": "Jornada intensiva y final de curso",
+      "title": "Servicio en días especiales",
       "subtitle": "El servicio de acogida también cubre los días con horario reducido.",
-      "intensive": {
-        "title": "Jornada intensiva",
-        "body": "Durante los periodos de jornada intensiva (septiembre y junio), la acogida se adapta al nuevo horario escolar, por la mañana antes de entrar y al salir. Consulta las franjas y tarifas disponibles más arriba."
-      },
       "endyear": {
         "title": "Final de curso",
         "body": "Los últimos días del curso mantenemos el servicio para que ninguna familia se quede sin cobertura mientras terminan las clases. Plazas limitadas; es necesaria inscripción previa."

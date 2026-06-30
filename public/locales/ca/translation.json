@@ -108,12 +108,8 @@
     "occasional": "ocasional",
     "note": "Els preus ocasionals s'apliquen a dies puntuals. Per a inscripcions o més informació, contacta amb l'AFA.",
     "special": {
-      "title": "Jornada intensiva i final de curs",
+      "title": "Servei en dies especials",
       "subtitle": "El servei d'acollida també cobreix els dies amb horari reduït.",
-      "intensive": {
-        "title": "Jornada intensiva",
-        "body": "Durant els períodes de jornada intensiva (setembre i juny), l'acollida s'adapta al nou horari escolar, al matí abans d'entrar i en sortir. Consulta les franges i tarifes disponibles més amunt."
-      },
       "endyear": {
         "title": "Final de curs",
         "body": "Els darrers dies del curs mantenim el servei perquè cap família es quedi sense cobertura mentre s'acaben les classes. Places limitades; cal inscripció prèvia."

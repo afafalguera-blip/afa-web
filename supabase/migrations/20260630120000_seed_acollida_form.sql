@@ -4,8 +4,8 @@
 -- Public URL: /f/acollida  (folder: Acollida)
 -- Source lang = es (top-level columns). ca/en in translations.
 -- Idempotent: ON CONFLICT (slug) DO NOTHING.
--- Captures jornada intensiva / final de curso via the "periode" field,
--- and supports monthly or occasional use. No conditional logic on
+-- Captures final de curso (dias con horario reducido) via the "periode"
+-- field, and supports monthly or occasional use. No conditional logic on
 -- purpose: logic.value matches the source (es) option string and would
 -- break when the visitor switches to ca/en.
 -- ============================================================
@@ -13,7 +13,7 @@
 INSERT INTO public.forms (title, description, slug, folder, is_active, fields_schema, translations)
 VALUES (
   'Inscripción · Servicio de Acogida',
-  'Rellena este formulario para solicitar el servicio de acogida (mensual u ocasional), incluida la jornada intensiva y el final de curso. El AFA se pondrá en contacto para confirmar plaza y tarifa.',
+  'Rellena este formulario para solicitar el servicio de acogida (mensual u ocasional), incluido el final de curso. El AFA se pondrá en contacto para confirmar plaza y tarifa.',
   'acollida',
   'Acollida',
   true,
@@ -24,7 +24,7 @@ VALUES (
       "options": ["P3", "P4", "P5", "1º", "2º", "3º", "4º", "5º", "6º"] },
     { "id": "sec_servei", "type": "section_header", "label": "Servicio solicitado", "required": false },
     { "id": "periode", "type": "select", "label": "Periodo", "required": true,
-      "options": ["Curso ordinario", "Jornada intensiva (junio y septiembre)", "Final de curso"] },
+      "options": ["Curso ordinario", "Final de curso"] },
     { "id": "modalitat", "type": "radio", "label": "Modalidad", "required": true,
       "options": ["Mensual", "Ocasional (días puntuales)"] },
     { "id": "franja", "type": "select", "label": "Franja horaria", "required": true,
@@ -46,13 +46,13 @@ VALUES (
   $json${
     "ca": {
       "title": "Inscripció · Servei d'Acollida",
-      "description": "Omple aquest formulari per sol·licitar el servei d'acollida (mensual o ocasional), inclosos la jornada intensiva i el final de curs. L'AFA es posarà en contacte per confirmar plaça i tarifa.",
+      "description": "Omple aquest formulari per sol·licitar el servei d'acollida (mensual o ocasional), inclòs el final de curs. L'AFA es posarà en contacte per confirmar plaça i tarifa.",
       "fields": {
         "sec_infant": { "label": "Dades de l'infant" },
         "infant_nom": { "label": "Nom i cognoms de l'infant" },
         "infant_curs": { "label": "Curs", "options": ["P3", "P4", "P5", "1r", "2n", "3r", "4t", "5è", "6è"] },
         "sec_servei": { "label": "Servei sol·licitat" },
-        "periode": { "label": "Període", "options": ["Curs ordinari", "Jornada intensiva (juny i setembre)", "Final de curs"] },
+        "periode": { "label": "Període", "options": ["Curs ordinari", "Final de curs"] },
         "modalitat": { "label": "Modalitat", "options": ["Mensual", "Ocasional (dies puntuals)"] },
         "franja": { "label": "Franja horària", "options": ["Matí (abans de classe)", "Tarda (en sortir)", "Matí i tarda"] },
         "dies": { "label": "Dies de la setmana (si és mensual)", "options": ["Dilluns", "Dimarts", "Dimecres", "Dijous", "Divendres"] },
@@ -68,13 +68,13 @@ VALUES (
     },
     "en": {
       "title": "Sign-up · Drop-off Care",
-      "description": "Fill in this form to request the drop-off care service (monthly or occasional), including the intensive timetable and end of school year. AFA will get in touch to confirm your place and rate.",
+      "description": "Fill in this form to request the drop-off care service (monthly or occasional), including the end of school year. AFA will get in touch to confirm your place and rate.",
       "fields": {
         "sec_infant": { "label": "Child's details" },
         "infant_nom": { "label": "Child's full name" },
         "infant_curs": { "label": "Year", "options": ["P3", "P4", "P5", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "Year 6"] },
         "sec_servei": { "label": "Service requested" },
-        "periode": { "label": "Period", "options": ["Regular term", "Intensive timetable (June & September)", "End of school year"] },
+        "periode": { "label": "Period", "options": ["Regular term", "End of school year"] },
         "modalitat": { "label": "Type", "options": ["Monthly", "Occasional (specific days)"] },
         "franja": { "label": "Time slot", "options": ["Morning (before class)", "Afternoon (after school)", "Morning and afternoon"] },
         "dies": { "label": "Days of the week (if monthly)", "options": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
