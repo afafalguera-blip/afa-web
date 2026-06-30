@@ -120,7 +120,8 @@
       "title": "¿Necesitas más información?",
       "desc": "Si tienes dudas o quieres apuntarte al servicio, escríbenos y te ayudamos con todos los detalles.",
       "button": "Contacta con el AFA"
-    }
+    },
+    "request_cta": "Solicita el servicio de acogida"
   },
   "history": {
     "title": "Nuestra historia",

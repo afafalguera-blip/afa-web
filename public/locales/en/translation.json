@@ -120,7 +120,8 @@
       "title": "Need more information?",
       "desc": "If you have questions or want to sign up for the service, write to us and we'll help you with all the details.",
       "button": "Contact AFA"
-    }
+    },
+    "request_cta": "Request the drop-off care service"
   },
   "history": {
     "title": "Our history",

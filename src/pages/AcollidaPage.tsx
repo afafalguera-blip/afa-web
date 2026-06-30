@@ -77,6 +77,15 @@ export default function AcollidaPage() {
                             <p className="text-white/90 text-lg leading-relaxed">
                                 {t('acollida_page.intro', "Espai segur i acompanyat abans i després de l'horari escolar perquè les famílies puguin conciliar amb tranquil·litat.")}
                             </p>
+                            <div className="mt-7">
+                                <Link
+                                    to="/f/acollida"
+                                    className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-2xl font-bold hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 shadow-lg"
+                                >
+                                    <ClipboardList className="w-5 h-5" />
+                                    {t('acollida_page.request_cta', "Sol·licita el servei d'acollida")}
+                                </Link>
+                            </div>
                         </div>
                     </div>
 

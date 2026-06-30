@@ -120,7 +120,8 @@
       "title": "Necessites més informació?",
       "desc": "Si tens dubtes o vols apuntar-te al servei, escriu-nos i t'ajudem amb tots els detalls.",
       "button": "Contacta amb l'AFA"
-    }
+    },
+    "request_cta": "Sol·licita el servei d'acollida"
   },
   "history": {
     "title": "La nostra història",
