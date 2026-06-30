@@ -107,6 +107,19 @@
     "per_month": "mes",
     "occasional": "ocasional",
     "note": "Els preus ocasionals s'apliquen a dies puntuals. Per a inscripcions o més informació, contacta amb l'AFA.",
+    "special": {
+      "title": "Jornada intensiva i final de curs",
+      "subtitle": "El servei d'acollida també cobreix els dies amb horari reduït.",
+      "intensive": {
+        "title": "Jornada intensiva",
+        "body": "Durant els períodes de jornada intensiva (setembre i juny), l'acollida s'adapta al nou horari escolar, al matí abans d'entrar i en sortir. Consulta les franges i tarifes disponibles més amunt."
+      },
+      "endyear": {
+        "title": "Final de curs",
+        "body": "Els darrers dies del curs mantenim el servei perquè cap família es quedi sense cobertura mentre s'acaben les classes. Places limitades; cal inscripció prèvia."
+      },
+      "cta": "Sol·licita el servei d'acollida"
+    },
     "cta": {
       "title": "Necessites més informació?",
       "desc": "Si tens dubtes o vols apuntar-te al servei, escriu-nos i t'ajudem amb tots els detalls.",
@@ -141,9 +154,6 @@
       "p2": "L'escola va arribar a tenir més de 1.000 alumnes i 38 mestres. Tanta vida no cabia en un sol espai obert i amb el temps es van haver d'aixecar parets per crear aules tradicionals."
     },
     "timeline": {
-      "eyebrow": "Línia del temps",
-      "title": "Moments que ens han fet",
-      "intro": "Cinc dècades en un cop d'ull.",
       "1971": {
         "title": "Comença la construcció",
         "desc": "L'Ajuntament cedeix els terrenys darrere del Palau Falguera per fer una escola pública nova."
@@ -175,7 +185,10 @@
       "2022": {
         "title": "50 anys d'escola",
         "desc": "Mig segle de comunitat educativa al barri de Falguera."
-      }
+      },
+      "eyebrow": "Línia del temps",
+      "title": "Moments que ens han fet",
+      "intro": "Cinc dècades en un cop d'ull."
     },
     "name": {
       "eyebrow": "1988 · Un nom propi",
@@ -309,7 +322,10 @@
     "schedule_mon": "Dilluns de 9:00 a 9:30h",
     "email_demand": "Recordeu que cal enviar un correu electrònic abans per concertar la cita.",
     "schedule_appointment_mobile": "Per a qualsevol altre dia, cal sol·licitar cita prèvia a través del formulari.",
-    "other_ways": "Altres vies"
+    "other_ways": "Altres vies",
+    "form_error": "Hi ha hagut un error en enviar el missatge. Si us plau, torna-ho a intentar.",
+    "form_success_desc": "Ens posarem en contacte amb tu el més aviat possible.",
+    "send_another": "Enviar un altre missatge"
   },
   "calendar": {
     "title": "Calendari d'Activitats",
@@ -323,7 +339,8 @@
     "close": "Tancar",
     "location": "Lloc",
     "time": "Hora",
-    "description": "Descripció"
+    "description": "Descripció",
+    "view_agenda": "Agenda"
   },
   "assemblea": {
     "title": "Assemblea General",
@@ -494,7 +511,11 @@
     "menus_title": "Menús",
     "menus_subtitle": "Descarrega els menús mensuals en PDF.",
     "no_menus": "Encara no hi ha menús publicats.",
-    "no_period": "Sense període"
+    "no_period": "Sense període",
+    "no_info": "Sense informació configurada.",
+    "tab_info": "Informació",
+    "tab_menus": "Menús",
+    "tab_prices": "Preus"
   },
   "months": {
     "january": "gener",
@@ -664,7 +685,9 @@
       "note_label": "Nota important:",
       "signup_btn": "Inscriure's ara",
       "per_month": "per mes",
-      "stem_approved": "Aprovat STEM"
+      "stem_approved": "Aprovat STEM",
+      "back": "Tornar a Extraescolars",
+      "not_found": "Activitat no trobada"
     },
     "days": {
       "tue": "Dimarts",
@@ -915,7 +938,10 @@
         "fri": "Divendres",
         "sat": "Dissabte",
         "sun": "Diumenge"
-      }
+      },
+      "edit_product": "Editar Producte",
+      "new_product": "Nou Producte",
+      "product_name": "Nom del Producte"
     },
     "news": {
       "title": "Gestió de Notícies",
@@ -1063,6 +1089,50 @@
       "field_active": "Visible",
       "hide": "Amaga",
       "show": "Mostra"
+    },
+    "documents": {
+      "choose_file": "Seleccionar fitxer",
+      "delete_confirm": "Segur que vols eliminar aquest document?",
+      "error_delete": "Error eliminant el document.",
+      "error_upload": "Error pujant el document. Torna-ho a intentar.",
+      "field_category": "Categoria",
+      "field_description": "Descripció (Opcional)",
+      "field_file": "Fitxer",
+      "field_title": "Títol",
+      "new_document": "Nou Document",
+      "no_documents": "No hi ha documents.",
+      "search_placeholder": "Cercar per títol o categoria...",
+      "subtitle": "Puja actes, normatives i altres documents públics.",
+      "title": "Gestió de Documents",
+      "title_placeholder": "Nom del document",
+      "upload_btn": "Pujar Document",
+      "upload_title": "Pujar Document"
+    },
+    "finances": {
+      "amount": "Import (€)",
+      "attachment": "Adjuntar Factura/Rebut (PDF/Img)",
+      "cat_grant": "Subvenció",
+      "cat_invoice": "Factura",
+      "cat_payments": "Mensualitats",
+      "cat_shop": "Botiga",
+      "cat_supplies": "Material",
+      "category": "Categoria",
+      "date": "Data",
+      "description": "Descripció",
+      "description_label": "Descripció",
+      "document": "Doc",
+      "expenses": "Despeses",
+      "income": "Ingressos",
+      "new_transaction": "Nova Transacció",
+      "new_transaction_title": "Nova Transacció",
+      "no_results": "No s'han trobat transaccions.",
+      "search_placeholder": "Cerca per descripció o categoria...",
+      "subtitle": "Gestió econòmica i historial de transaccions",
+      "title": "Finances",
+      "total_balance": "Balanç Total",
+      "type": "Tipus",
+      "upload_hint": "Fes clic o arrossega un arxiu",
+      "view_document": "Veure document"
     }
   },
   "common": {
@@ -1086,14 +1156,20 @@
     "read_more": "Llegir més",
     "loading": "Carregant...",
     "no_activities": "Sense activitats",
+    "no_events": "No hi ha esdeveniments propers",
     "share": "Compartir",
-    "quote": "Citeu"
+    "quote": "Citeu",
+    "error": "S'ha produït un error",
+    "no_news": "No hi ha notícies",
+    "uploading": "Pujant..."
   },
   "news_detail": {
     "not_found": "Notícia no trobada",
     "back_to_news": "Tornar a Notícies",
     "read_original": "Llegir notícia original",
-    "download_pdf": "Descarregar PDF"
+    "download_pdf": "Descarregar PDF",
+    "download_attachment": "Descarregar adjunt",
+    "download_image": "Descarregar imatge"
   },
   "footer": {
     "all_rights_reserved": "Tots els drets reservats."
@@ -1286,7 +1362,12 @@
       "load_error": "No s'han pogut carregar les respostes",
       "date_col": "Data",
       "actions_col": "Accions",
-      "exported_on": "Exportat {{date}}"
+      "exported_on": "Exportat {{date}}",
+      "columns_btn": "Columnes",
+      "columns_picker_title": "Trieu les columnes a exportar",
+      "columns_to_export": "Columnes a exportar",
+      "select_all": "Totes",
+      "select_none": "Cap"
     }
   },
   "faq": {

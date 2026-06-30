@@ -150,8 +150,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
       onClose();
     } catch (error) {
       console.error("Failed to delete product", error);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      alert(t('common.error' as any) || 'Error al eliminar el producte');
+      alert(t('common.error') || 'Error al eliminar el producte');
     } finally {
       setLoading(false);
     }

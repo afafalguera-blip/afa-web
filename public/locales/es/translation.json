@@ -107,6 +107,19 @@
     "per_month": "mes",
     "occasional": "ocasional",
     "note": "Los precios ocasionales se aplican a días puntuales. Para inscripciones o más información, contacta con el AFA.",
+    "special": {
+      "title": "Jornada intensiva y final de curso",
+      "subtitle": "El servicio de acogida también cubre los días con horario reducido.",
+      "intensive": {
+        "title": "Jornada intensiva",
+        "body": "Durante los periodos de jornada intensiva (septiembre y junio), la acogida se adapta al nuevo horario escolar, por la mañana antes de entrar y al salir. Consulta las franjas y tarifas disponibles más arriba."
+      },
+      "endyear": {
+        "title": "Final de curso",
+        "body": "Los últimos días del curso mantenemos el servicio para que ninguna familia se quede sin cobertura mientras terminan las clases. Plazas limitadas; es necesaria inscripción previa."
+      },
+      "cta": "Solicita el servicio de acogida"
+    },
     "cta": {
       "title": "¿Necesitas más información?",
       "desc": "Si tienes dudas o quieres apuntarte al servicio, escríbenos y te ayudamos con todos los detalles.",
@@ -141,9 +154,6 @@
       "p2": "La escuela llegó a tener más de 1.000 alumnos y 38 maestros. Tanta vida no cabía en un solo espacio abierto y con el tiempo hubo que levantar paredes para crear aulas tradicionales."
     },
     "timeline": {
-      "eyebrow": "Línea del tiempo",
-      "title": "Momentos que nos han hecho",
-      "intro": "Cinco décadas de un vistazo.",
       "1971": {
         "title": "Empieza la construcción",
         "desc": "El Ayuntamiento cede los terrenos detrás del Palau Falguera para hacer una nueva escuela pública."
@@ -175,7 +185,10 @@
       "2022": {
         "title": "50 años de escuela",
         "desc": "Medio siglo de comunidad educativa en el barrio de Falguera."
-      }
+      },
+      "eyebrow": "Línea del tiempo",
+      "title": "Momentos que nos han hecho",
+      "intro": "Cinco décadas de un vistazo."
     },
     "name": {
       "eyebrow": "1988 · Un nombre propio",
@@ -288,7 +301,9 @@
       "title": "¿Quieres hablar con nosotros?",
       "description": "Atención presencial en el espacio AFA los lunes (9:00-9:30), siempre bajo demanda enviando un email previo.",
       "button": "Formulario de Contacto"
-    }
+    },
+    "member_active": "Curso 2024-2025 Activo",
+    "member_status": "Estatus de Socio"
   },
   "contact_page": {
     "title": "Contacto",
@@ -307,7 +322,10 @@
     "schedule_mon": "Lunes de 9:00 a 9:30h",
     "email_demand": "Recuerda que es necesario enviar un correo electrónico antes para concertar la cita.",
     "schedule_appointment_mobile": "Para cualquier otro día, es necesario solicitar cita previa a través del formulario.",
-    "other_ways": "Otras vías"
+    "other_ways": "Otras vías",
+    "form_error": "Ha habido un error al enviar el mensaje. Por favor, inténtalo de nuevo.",
+    "form_success_desc": "Nos pondremos en contacto contigo lo antes posible.",
+    "send_another": "Enviar otro mensaje"
   },
   "calendar": {
     "title": "Calendario de Actividades",
@@ -321,7 +339,8 @@
     "close": "Cerrar",
     "location": "Lugar",
     "time": "Hora",
-    "description": "Descripción"
+    "description": "Descripción",
+    "view_agenda": "Agenda"
   },
   "assemblea": {
     "title": "Asamblea General",
@@ -492,7 +511,11 @@
     "menus_title": "Menús",
     "menus_subtitle": "Descarga los menús mensuales en PDF.",
     "no_menus": "Aún no hay menús publicados.",
-    "no_period": "Sin período"
+    "no_period": "Sin período",
+    "no_info": "Sin información configurada.",
+    "tab_info": "Información",
+    "tab_menus": "Menús",
+    "tab_prices": "Precios"
   },
   "months": {
     "january": "enero",
@@ -661,7 +684,10 @@
       "schedule_title": "Horarios y Grupos",
       "note_label": "Nota importante:",
       "signup_btn": "Inscribirse ahora",
-      "stem_approved": "Aprobado STEM"
+      "per_month": "al mes",
+      "stem_approved": "Aprobado STEM",
+      "back": "Volver a Extraescolares",
+      "not_found": "Actividad no encontrada"
     },
     "days": {
       "tue": "Martes",
@@ -1063,6 +1089,50 @@
       "field_active": "Visible",
       "hide": "Ocultar",
       "show": "Mostrar"
+    },
+    "documents": {
+      "choose_file": "Seleccionar archivo",
+      "delete_confirm": "¿Seguro que quieres eliminar este documento?",
+      "error_delete": "Error al eliminar el documento.",
+      "error_upload": "Error al subir el documento. Inténtalo de nuevo.",
+      "field_category": "Categoría",
+      "field_description": "Descripción (Opcional)",
+      "field_file": "Archivo",
+      "field_title": "Título",
+      "new_document": "Nuevo Documento",
+      "no_documents": "No hay documentos.",
+      "search_placeholder": "Buscar por título o categoría...",
+      "subtitle": "Sube actas, normativas y otros documentos públicos.",
+      "title": "Gestión de Documentos",
+      "title_placeholder": "Nombre del documento",
+      "upload_btn": "Subir Documento",
+      "upload_title": "Subir Documento"
+    },
+    "finances": {
+      "amount": "Importe (€)",
+      "attachment": "Adjuntar Factura/Recibo (PDF/Img)",
+      "cat_grant": "Subvención",
+      "cat_invoice": "Factura",
+      "cat_payments": "Mensualidades",
+      "cat_shop": "Tienda",
+      "cat_supplies": "Material",
+      "category": "Categoría",
+      "date": "Fecha",
+      "description": "Descripción",
+      "description_label": "Descripción",
+      "document": "Doc",
+      "expenses": "Gastos",
+      "income": "Ingresos",
+      "new_transaction": "Nueva Transacción",
+      "new_transaction_title": "Nueva Transacción",
+      "no_results": "No se han encontrado transacciones.",
+      "search_placeholder": "Buscar por descripción o categoría...",
+      "subtitle": "Gestión económica e historial de transacciones",
+      "title": "Finanzas",
+      "total_balance": "Balance Total",
+      "type": "Tipo",
+      "upload_hint": "Haz clic o arrastra un archivo",
+      "view_document": "Ver documento"
     }
   },
   "common": {
@@ -1086,14 +1156,20 @@
     "read_more": "Leer más",
     "loading": "Cargando...",
     "no_activities": "No hay actividades",
+    "no_events": "No hay eventos próximos",
     "share": "Compartir",
-    "quote": "Citar"
+    "quote": "Citar",
+    "error": "Se ha producido un error",
+    "no_news": "No hay noticias",
+    "uploading": "Subiendo..."
   },
   "news_detail": {
     "not_found": "Noticia no encontrada",
     "back_to_news": "Volver a noticias",
     "read_original": "Leer noticia original",
-    "download_pdf": "Descargar PDF"
+    "download_pdf": "Descargar PDF",
+    "download_attachment": "Descargar adjunto",
+    "download_image": "Descargar imagen"
   },
   "footer": {
     "all_rights_reserved": "Todos los derechos reservados."
@@ -1286,7 +1362,12 @@
       "load_error": "No se pudieron cargar las respuestas",
       "date_col": "Fecha",
       "actions_col": "Acciones",
-      "exported_on": "Exportado {{date}}"
+      "exported_on": "Exportado {{date}}",
+      "columns_btn": "Columnas",
+      "columns_picker_title": "Elegir columnas a exportar",
+      "columns_to_export": "Columnas a exportar",
+      "select_all": "Todas",
+      "select_none": "Ninguna"
     }
   },
   "faq": {

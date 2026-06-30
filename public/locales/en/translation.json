@@ -107,6 +107,19 @@
     "per_month": "month",
     "occasional": "occasional",
     "note": "Occasional rates apply to specific days. For sign-ups or more information, contact AFA.",
+    "special": {
+      "title": "Intensive timetable and end of school year",
+      "subtitle": "The drop-off care service also covers days with a reduced timetable.",
+      "intensive": {
+        "title": "Intensive timetable",
+        "body": "During the intensive-timetable periods (September and June), drop-off care adapts to the new school hours, in the morning before class and after school. Check the available time slots and rates above."
+      },
+      "endyear": {
+        "title": "End of school year",
+        "body": "On the last days of the school year we keep the service running so no family is left without cover while classes wind down. Limited places; prior sign-up required."
+      },
+      "cta": "Request the drop-off care service"
+    },
     "cta": {
       "title": "Need more information?",
       "desc": "If you have questions or want to sign up for the service, write to us and we'll help you with all the details.",
@@ -141,9 +154,6 @@
       "p2": "The school grew to over 1,000 students and 38 teachers. So much life couldn't fit in one open space, and over time walls were added to create traditional classrooms."
     },
     "timeline": {
-      "eyebrow": "Timeline",
-      "title": "Moments that shaped us",
-      "intro": "Five decades at a glance.",
       "1971": {
         "title": "Construction begins",
         "desc": "The City Council grants the land behind Palau Falguera to build a new public school."
@@ -175,7 +185,10 @@
       "2022": {
         "title": "50 years of school",
         "desc": "Half a century of educational community in the Falguera neighbourhood."
-      }
+      },
+      "eyebrow": "Timeline",
+      "title": "Moments that shaped us",
+      "intro": "Five decades at a glance."
     },
     "name": {
       "eyebrow": "1988 · A name of our own",
@@ -288,7 +301,9 @@
       "title": "Want to talk to us?",
       "description": "In-person assistance at the office on Mondays (9:00-9:30), always on demand by prior email.",
       "button": "Contact Form"
-    }
+    },
+    "member_active": "2024-2025 Year Active",
+    "member_status": "Member Status"
   },
   "contact_page": {
     "title": "Contact",
@@ -307,7 +322,10 @@
     "schedule_mon": "Mondays from 9:00 to 9:30 AM",
     "email_demand": "Remember that you must send an email beforehand to schedule the appointment.",
     "schedule_appointment_mobile": "For any other day, an appointment must be requested through the form.",
-    "other_ways": "Other ways"
+    "other_ways": "Other ways",
+    "form_error": "There was an error sending the message. Please try again.",
+    "form_success_desc": "We will get in touch with you as soon as possible.",
+    "send_another": "Send another message"
   },
   "calendar": {
     "title": "Activities Calendar",
@@ -321,7 +339,8 @@
     "close": "Close",
     "location": "Location",
     "time": "Time",
-    "description": "Description"
+    "description": "Description",
+    "view_agenda": "Agenda"
   },
   "assemblea": {
     "title": "General Assembly",
@@ -392,7 +411,8 @@
             "School garden",
             "Infant shade",
             "Book bench"
-          ]
+          ],
+          "desc": "Projects and improvements successfully carried out during the last year."
         },
         "future": {
           "title": "Next (25-26)",
@@ -401,7 +421,8 @@
             "Inclusive patio",
             "Own kitchen",
             "Multipurpose room"
-          ]
+          ],
+          "desc": "New challenges and initiatives planned for the coming year."
         }
       },
       "board_change": {
@@ -415,7 +436,31 @@
       "contact": {
         "contact_us": "Contact Us",
         "instagram": "Instagram"
+      },
+      "importance": {
+        "reason1": "Your voice counts in the school's key decisions.",
+        "reason2": "You help prioritise the school's investments and improvements.",
+        "reason3": "We foster a stronger and more transparent school community.",
+        "title": "Why is it important to take part?"
       }
+    },
+    "cards": {
+      "decisions": {
+        "desc": "Vote on the initiatives and projects you want to see carried out at the school.",
+        "title": "We decide together"
+      },
+      "meetings": {
+        "desc": "Participatory spaces to debate and decide the school's future together.",
+        "title": "Open Assemblies"
+      },
+      "members": {
+        "desc": "We are a strong network committed to our children's education.",
+        "title": "Over 400 families"
+      }
+    },
+    "hero": {
+      "subtitle": "Discover how your ideas and participation transform the school every day.",
+      "title": "The Assembly: The heart of our community"
     }
   },
   "fees_page": {
@@ -465,7 +510,11 @@
     "menus_title": "Menus",
     "menus_subtitle": "Download the monthly menus in PDF.",
     "no_menus": "No menus published yet.",
-    "no_period": "No period"
+    "no_period": "No period",
+    "no_info": "No information configured.",
+    "tab_info": "Information",
+    "tab_menus": "Menus",
+    "tab_prices": "Prices"
   },
   "months": {
     "january": "January",
@@ -635,7 +684,9 @@
       "note_label": "Important note:",
       "signup_btn": "Sign up now",
       "per_month": "per month",
-      "stem_approved": "STEM Approved"
+      "stem_approved": "STEM Approved",
+      "back": "Back to Activities",
+      "not_found": "Activity not found"
     },
     "days": {
       "tue": "Tuesday",
@@ -709,7 +760,12 @@
       "observability": "Auditing",
       "logout": "Logout",
       "faq": "FAQ",
-      "inscription_config": "Inscription config"
+      "inscription_config": "Inscription config",
+      "banner": "Announcements Banner",
+      "communication": "Communication",
+      "contact_messages": "Web Messages",
+      "notifications": "Notifications",
+      "system": "System"
     },
     "acollidaManager": {
       "addRate": "Add New Rate",
@@ -759,7 +815,13 @@
         "fri": "Friday",
         "sat": "Saturday",
         "sun": "Sunday"
-      }
+      },
+      "change_image": "Change Image",
+      "edit_product": "Edit Product",
+      "error_invalid_file": "The selected file is not a valid image.",
+      "image_too_large": "The image is too large. Maximum 2MB.",
+      "new_product": "New Product",
+      "product_name": "Product Name"
     },
     "tasks": {
       "title": "AFA Tasks",
@@ -832,7 +894,245 @@
       "field_active": "Visible",
       "hide": "Hide",
       "show": "Show"
-    }
+    },
+    "documents": {
+      "choose_file": "Choose file",
+      "delete_confirm": "Are you sure you want to delete this document?",
+      "error_delete": "Error deleting the document.",
+      "error_upload": "Error uploading the document. Please try again.",
+      "field_category": "Category",
+      "field_description": "Description (Optional)",
+      "field_file": "File",
+      "field_title": "Title",
+      "new_document": "New Document",
+      "no_documents": "No documents.",
+      "search_placeholder": "Search by title or category...",
+      "subtitle": "Upload minutes, regulations and other public documents.",
+      "title": "Document Management",
+      "title_placeholder": "Document name",
+      "upload_btn": "Upload Document",
+      "upload_title": "Upload Document"
+    },
+    "finances": {
+      "amount": "Amount (€)",
+      "attachment": "Attach Invoice/Receipt (PDF/Img)",
+      "cat_grant": "Grant",
+      "cat_invoice": "Invoice",
+      "cat_payments": "Monthly fees",
+      "cat_shop": "Shop",
+      "cat_supplies": "Supplies",
+      "category": "Category",
+      "date": "Date",
+      "description": "Description",
+      "description_label": "Description",
+      "document": "Doc",
+      "expenses": "Expenses",
+      "income": "Income",
+      "new_transaction": "New Transaction",
+      "new_transaction_title": "New Transaction",
+      "no_results": "No transactions found.",
+      "search_placeholder": "Search by description or category...",
+      "subtitle": "Financial management and transaction history",
+      "title": "Finances",
+      "total_balance": "Total Balance",
+      "type": "Type",
+      "upload_hint": "Click or drag a file",
+      "view_document": "View document"
+    },
+    "access_denied": "Access denied: Administrators only.",
+    "activities": {
+      "delete_confirm": "Are you sure you want to delete this activity?",
+      "edit": "Edit",
+      "error_load": "Could not load activities. Make sure the database is configured.",
+      "grades": "Grades",
+      "new_activity": "New Activity",
+      "spots": "Spots",
+      "subtitle": "Manage all activities, prices and spots.",
+      "title": "Activity Management"
+    },
+    "calendar": {
+      "all_day": "All day",
+      "delete_confirm": "Are you sure you want to delete this event?",
+      "edit_event": "Edit Event",
+      "field_color": "Color",
+      "field_date": "Date",
+      "field_description": "Description",
+      "field_end_time": "End time",
+      "field_location": "Location",
+      "field_start_time": "Start time",
+      "field_title": "Title",
+      "field_type": "Type",
+      "new_event": "New Event",
+      "no_events": "No events this month.",
+      "required_fields": "Title and date are required",
+      "search_placeholder": "Search event...",
+      "subtitle": "Manage the AFA general calendar.",
+      "title": "Events Calendar"
+    },
+    "dashboard": {
+      "export_excel": "Export to Excel",
+      "export_pdf": "Export to PDF",
+      "filters": {
+        "all_activities": "All activities",
+        "all_courses": "All grades",
+        "all_statuses": "All statuses",
+        "search_placeholder": "Search student...",
+        "status_active": "Active",
+        "status_baja": "Withdrawn",
+        "status_suspended": "Suspended"
+      },
+      "stats": {
+        "active": "Enrolled (active)",
+        "afa_members": "AFA Members",
+        "bajas": "Withdrawals",
+        "financial": {
+          "income": "Income",
+          "income_subtitle": "of {{total}}€ expected",
+          "pending": "Pending Collection",
+          "pending_subtitle": "Pending fees",
+          "shop_orders": "Shop: Orders",
+          "shop_orders_subtitle": "{{pending}} pending",
+          "shop_revenue": "Shop: Revenue",
+          "shop_revenue_subtitle": "Total sales"
+        },
+        "popular": "Popular"
+      },
+      "subtitle": "Management of activity sign-ups",
+      "title": "Sign-ups",
+      "update": "Refresh"
+    },
+    "inscriptions": {
+      "delete_confirm": "Are you sure you want to delete this sign-up? This action cannot be undone.",
+      "delete_error": "Error deleting the sign-up",
+      "export_button": "Export",
+      "member_badge": "AFA Member",
+      "reload_tooltip": "Reload data",
+      "search_placeholder": "Search by name, ID, email...",
+      "status": {
+        "alta": "Active",
+        "baja": "Withdrawn",
+        "pending": "Pending"
+      },
+      "status_all": "All statuses",
+      "subtitle": "Management of activity sign-ups.",
+      "suspended_badge": "Suspended",
+      "table": {
+        "actions": "Actions",
+        "contact": "Contact",
+        "date": "Date",
+        "loading": "Loading...",
+        "no_results": "No sign-ups found.",
+        "parent": "Parent/Guardian",
+        "status": "Status",
+        "students": "Students"
+      },
+      "title": "Sign-ups",
+      "update_error": "Error saving changes",
+      "update_success": "Sign-up updated successfully"
+    },
+    "news": {
+      "content_placeholder": "Write the news content...",
+      "date_from": "From",
+      "date_to": "To",
+      "delete_confirm": "Are you sure you want to delete this article?",
+      "edit_article": "Edit Article",
+      "excerpt_placeholder": "Short summary for the preview...",
+      "field_content": "Content",
+      "field_event_date": "Event date",
+      "field_excerpt": "Excerpt",
+      "field_image_url": "Image URL",
+      "field_news_url": "External link",
+      "field_sources": "Sources/Citations",
+      "field_title": "Title",
+      "fill_source_first": "Please complete the title in the current language before translating",
+      "new_article": "New Article",
+      "no_articles": "No news yet. Create the first one.",
+      "no_results": "No news found.",
+      "publish": "Publish",
+      "published_at": "Published on",
+      "search_placeholder": "Search article...",
+      "status_draft": "Draft",
+      "status_published": "Published",
+      "subtitle": "Publish and manage news for the website.",
+      "title": "News Management",
+      "title_placeholder": "Article title",
+      "title_required": "The title is required",
+      "unpublish": "Unpublish"
+    },
+    "observability": {
+      "loading": "Loading logs...",
+      "subtitle": "Log of all changes made to the system.",
+      "system_user": "System / External User",
+      "table": {
+        "action": "Action",
+        "date": "Date and Time",
+        "id": "Record ID",
+        "no_results": "No audit logs found.",
+        "table_name": "Table",
+        "user": "User"
+      },
+      "title": "Observability and Auditing"
+    },
+    "payments": {
+      "all_months": "All months",
+      "delete_confirm": "Are you sure you want to delete this payment?",
+      "delete_error": "Error deleting",
+      "loading": "Loading payments...",
+      "register_button": "Register Payment",
+      "search_placeholder": "Search student...",
+      "stats": {
+        "paid": "Collected",
+        "pending": "Pending",
+        "percentage_hint": "{{percentage}}% of total",
+        "total": "Total Expected"
+      },
+      "status": {
+        "overdue": "Overdue",
+        "paid": "Paid",
+        "pending": "Pending"
+      },
+      "status_all": "All statuses",
+      "subtitle": "Management of fees and receipts.",
+      "table": {
+        "actions": "Actions",
+        "amount": "Amount",
+        "concept": "Concept",
+        "due_date": "Due date",
+        "no_results": "No payments found.",
+        "status": "Status",
+        "student": "Student"
+      },
+      "title": "Payments",
+      "update_error": "Error updating the payment status"
+    },
+    "projects": {
+      "archive": "Archive",
+      "delete_confirm": "Are you sure you want to delete this project?",
+      "description_placeholder": "Describe the project...",
+      "details_placeholder": "Full project description, objectives, methodology... (Markdown supported)",
+      "edit_project": "Edit Project",
+      "field_description": "Description",
+      "field_details": "Detailed Content",
+      "field_image_url": "Image URL",
+      "field_impact": "Direct Impact",
+      "field_participants": "Participants",
+      "field_title": "Title",
+      "impact_placeholder": "E.g.: +450 students, playground improvement...",
+      "new_project": "New Project",
+      "no_projects": "No projects. Create the first one.",
+      "no_results": "No projects found.",
+      "participants_placeholder": "E.g.: Families, Students, Teachers...",
+      "search_placeholder": "Search project...",
+      "status_active": "Active",
+      "status_all": "All statuses",
+      "status_archived": "Archived",
+      "subtitle": "Manage AFA projects and initiatives.",
+      "title": "Project Management",
+      "title_placeholder": "Project title",
+      "title_required": "The title is required",
+      "unarchive": "Restore"
+    },
+    "title": "AFA Admin"
   },
   "common": {
     "all_day": "All Day",
@@ -854,14 +1154,21 @@
     "read_more": "Read more",
     "loading": "Loading...",
     "no_activities": "No activities",
+    "no_events": "No upcoming events",
     "share": "Share",
-    "quote": "Quote"
+    "quote": "Quote",
+    "error": "An error occurred",
+    "no_news": "No news",
+    "uploading": "Uploading...",
+    "error_translation": "An error occurred during automatic translation"
   },
   "news_detail": {
     "not_found": "News not found",
     "back_to_news": "Back to news",
     "read_original": "Read original news",
-    "download_pdf": "Download PDF"
+    "download_pdf": "Download PDF",
+    "download_attachment": "Download attachment",
+    "download_image": "Download image"
   },
   "footer": {
     "all_rights_reserved": "All rights reserved."
@@ -1054,7 +1361,12 @@
       "load_error": "Could not load responses",
       "date_col": "Date",
       "actions_col": "Actions",
-      "exported_on": "Exported {{date}}"
+      "exported_on": "Exported {{date}}",
+      "columns_btn": "Columns",
+      "columns_picker_title": "Choose columns to export",
+      "columns_to_export": "Columns to export",
+      "select_all": "All",
+      "select_none": "None"
     }
   },
   "faq": {
