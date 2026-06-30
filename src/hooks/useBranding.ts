@@ -35,25 +35,29 @@ export function useBranding(): BrandingConfig {
     const [branding, setBranding] = useState<BrandingConfig>(cachedBranding || DEFAULT_BRANDING);
 
     useEffect(() => {
-        if (cachedBranding) {
-            setBranding(cachedBranding);
-            return;
-        }
+        let cancelled = false;
+
+        // Show cached value instantly, but ALWAYS revalidate in the background.
+        // Without this, a stale localStorage branding (e.g. an old hero/logo URL
+        // pointing to a file that no longer exists) stays pinned forever.
+        if (cachedBranding) setBranding(cachedBranding);
+
         if (!fetchPromise) {
-            fetchPromise = ConfigService.getBrandingConfig();
+            fetchPromise = ConfigService.getBrandingConfig().finally(() => { fetchPromise = null; });
         }
         fetchPromise.then((data) => {
-            if (data) {
-                const proxied = {
-                    ...data,
-                    logo_url: proxyStorageUrl(data.logo_url) || DEFAULT_BRANDING.logo_url,
-                    default_hero_url: proxyStorageUrl(data.default_hero_url) || DEFAULT_BRANDING.default_hero_url,
-                };
-                cachedBranding = proxied;
-                setBranding(proxied);
-                try { localStorage.setItem(BRANDING_LS_KEY, JSON.stringify(proxied)); } catch { /* ignore */ }
-            }
+            if (cancelled || !data) return;
+            const proxied = {
+                ...data,
+                logo_url: proxyStorageUrl(data.logo_url) || DEFAULT_BRANDING.logo_url,
+                default_hero_url: proxyStorageUrl(data.default_hero_url) || DEFAULT_BRANDING.default_hero_url,
+            };
+            cachedBranding = proxied;
+            setBranding(proxied);
+            try { localStorage.setItem(BRANDING_LS_KEY, JSON.stringify(proxied)); } catch { /* ignore */ }
         });
+
+        return () => { cancelled = true; };
     }, []);
 
     return branding;

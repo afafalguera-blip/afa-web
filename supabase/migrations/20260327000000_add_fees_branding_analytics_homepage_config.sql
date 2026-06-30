@@ -44,7 +44,7 @@ INSERT INTO site_config (key, value, updated_at)
 SELECT 'branding', '{
   "site_name": "AFA Escola Falguera",
   "logo_url": "https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/Imagenes/logo.png",
-  "default_hero_url": "https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/Imagenes/hero_escuela.png",
+  "default_hero_url": "https://zaxbtnjkidqwzqsehvld.supabase.co/storage/v1/object/public/Imagenes/hero.png",
   "default_placeholder_url": "https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop",
   "default_seo_description": {
     "ca": "Web oficial de l''AFA de l''Escola Falguera. Informació sobre activitats extraescolars, serveis d''acollida, projectes i últimes notícies.",

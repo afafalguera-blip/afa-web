@@ -67,32 +67,50 @@ function jsonResponse(body: unknown, status: number, extraHeaders: Record<string
   });
 }
 
+// Gemini occasionally wraps JSON in ```json ... ``` fences despite responseMimeType.
+function stripFences(s: string): string {
+  const t = s.trim();
+  const m = t.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+  return m ? m[1].trim() : t;
+}
+
 async function callGemini(systemPrompt: string, userContent: string): Promise<string> {
   const apiKey = await resolveGeminiKey();
   if (!apiKey) throw new Error("GEMINI_API_KEY not configured (set it from /admin/settings)");
 
-  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ role: "user", parts: [{ text: userContent }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-      },
-    }),
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    contents: [{ role: "user", parts: [{ text: userContent }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      temperature: 0.3,
+    },
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini API error ${res.status}: ${err}`);
-  }
+  let lastErr = "";
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
 
-  const data = await res.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini returned empty content");
-  return text;
+    if (res.ok) {
+      const data = await res.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error("Gemini returned empty content");
+      return text;
+    }
+
+    lastErr = await res.text();
+    // Retry transient failures (rate limit / overloaded / 5xx); fail fast otherwise.
+    if (res.status === 429 || res.status >= 500) {
+      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+      continue;
+    }
+    throw new Error(`Gemini API error ${res.status}: ${lastErr}`);
+  }
+  throw new Error(`Gemini API unavailable after retries: ${lastErr}`);
 }
 
 // Bulk: translate multiple fields to multiple languages in one LLM call.
@@ -116,7 +134,11 @@ Rules:
 { "<langCode>": { <same keys as input, translated values> }, ... }`;
 
   const raw = await callGemini(systemPrompt, JSON.stringify(fields));
-  return JSON.parse(raw) as Record<string, Record<string, string>>;
+  try {
+    return JSON.parse(stripFences(raw)) as Record<string, Record<string, string>>;
+  } catch {
+    throw new Error("Gemini returned non-JSON output");
+  }
 }
 
 // Single text translation (backward compat).
