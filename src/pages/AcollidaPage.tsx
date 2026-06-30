@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Clock, Users, Sparkles, Calendar, Info, Mail } from 'lucide-react';
+import { Sun, Moon, Clock, Users, Sparkles, Calendar, Info, Mail, ClipboardList } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEO } from '../components/common/SEO';
 import { supabase } from '../lib/supabase';
@@ -175,6 +175,41 @@ export default function AcollidaPage() {
                             <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">
                                 {t('acollida_page.note', "Els preus ocasionals s'apliquen a dies puntuals. Per a inscripcions o més informació, contacta amb l'AFA.")}
                             </p>
+                        </div>
+                    </section>
+
+                    {/* Special periods: jornada intensiva + final de curs */}
+                    <section className="space-y-5">
+                        <div>
+                            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                                {t('acollida_page.special.title', 'Jornada intensiva i final de curs')}
+                            </h2>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                                {t('acollida_page.special.subtitle', "El servei d'acollida també cobreix els dies amb horari reduït.")}
+                            </p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <InfoCard
+                                icon={<Sun className="w-5 h-5" />}
+                                title={t('acollida_page.special.intensive.title', 'Jornada intensiva')}
+                                body={t('acollida_page.special.intensive.body', "Durant els períodes de jornada intensiva (setembre i juny), l'acollida s'adapta al nou horari escolar, al matí abans d'entrar i en sortir. Consulta les franges i tarifes disponibles més amunt.")}
+                                accent="indigo"
+                            />
+                            <InfoCard
+                                icon={<Calendar className="w-5 h-5" />}
+                                title={t('acollida_page.special.endyear.title', 'Final de curs')}
+                                body={t('acollida_page.special.endyear.body', "Els darrers dies del curs mantenim el servei perquè cap família es quedi sense cobertura mentre s'acaben les classes. Places limitades; cal inscripció prèvia.")}
+                                accent="violet"
+                            />
+                        </div>
+                        <div className="pt-1">
+                            <Link
+                                to="/f/acollida"
+                                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/30"
+                            >
+                                <ClipboardList className="w-5 h-5" />
+                                {t('acollida_page.special.cta', "Sol·licita el servei d'acollida")}
+                            </Link>
                         </div>
                     </section>
 
