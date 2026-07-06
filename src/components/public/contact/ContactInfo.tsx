@@ -50,11 +50,11 @@ export function ContactInfo({ contact, social }: ContactInfoProps) {
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
                     <a
-                        href={`mailto:${contact?.email || 'ampafalguera@hotmail.es'}`}
+                        href={`mailto:${contact?.email || 'afa@falguera.org'}`}
                         className="flex items-center gap-3 text-primary hover:underline font-medium text-sm md:text-base"
                     >
                         <Mail size={16} />
-                        <span className="truncate">{contact?.email || 'ampafalguera@hotmail.es'}</span>
+                        <span className="truncate">{contact?.email || 'afa@falguera.org'}</span>
                     </a>
                     {social?.instagram && (
                         <a
