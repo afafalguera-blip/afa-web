@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ConfigService, type ContactConfig, type SocialConfig, type AboutConfig, type LegalConfig, type ShopConfig, type FeesConfig, type PricingConfig, type BrandingConfig, type AnalyticsConfig, type HomepageConfig } from "../../services/ConfigService";
+import { ConfigService, type ContactConfig, type SocialConfig, type AboutConfig, type LegalConfig, type ShopConfig, type FeesConfig, type PricingConfig, type BrandingConfig, type AnalyticsConfig, type HomepageConfig, type HeroConfig } from "../../services/ConfigService";
 import {
     Save,
     Settings,
@@ -51,6 +51,7 @@ export default function SiteSettingsManager() {
     const [branding, setBranding] = useState<BrandingConfig | null>(null);
     const [analytics, setAnalytics] = useState<AnalyticsConfig | null>(null);
     const [homepage, setHomepage] = useState<HomepageConfig | null>(null);
+    const [hero, setHero] = useState<HeroConfig | null>(null);
 
 
     const [activeLang, setActiveLang] = useState<LangType>('ca');
@@ -67,7 +68,7 @@ export default function SiteSettingsManager() {
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const [contactData, socialData, aboutData, privacyData, cookiesData, shopData, feesData, pricingData, brandingData, analyticsData, homepageData] = await Promise.all([
+            const [contactData, socialData, aboutData, privacyData, cookiesData, shopData, feesData, pricingData, brandingData, analyticsData, homepageData, heroData] = await Promise.all([
                 ConfigService.getContactConfig(),
                 ConfigService.getSocialConfig(),
                 ConfigService.getAboutConfig(),
@@ -78,7 +79,8 @@ export default function SiteSettingsManager() {
                 ConfigService.getPricingConfig(),
                 ConfigService.getBrandingConfig(),
                 ConfigService.getAnalyticsConfig(),
-                ConfigService.getHomepageConfig()
+                ConfigService.getHomepageConfig(),
+                ConfigService.getHeroConfig()
             ]);
 
             if (contactData) setContact(contactData);
@@ -106,6 +108,7 @@ export default function SiteSettingsManager() {
             if (brandingData) setBranding(brandingData);
             if (analyticsData) setAnalytics(analyticsData);
             if (homepageData) setHomepage(homepageData);
+            if (heroData) setHero(heroData);
 
         } catch (err) {
             console.error(err);
@@ -143,7 +146,10 @@ export default function SiteSettingsManager() {
                 await ConfigService.updateBrandingConfig(branding);
                 invalidateBrandingCache();
             } else if (activeTab === 'homepage' && homepage) {
-                await ConfigService.updateHomepageConfig(homepage);
+                await Promise.all([
+                    ConfigService.updateHomepageConfig(homepage),
+                    ...(hero ? [ConfigService.updateHeroConfig(hero)] : [])
+                ]);
                 invalidateHomepageCache();
             } else if (activeTab === 'analytics' && analytics) {
                 await ConfigService.updateAnalyticsConfig(analytics);
@@ -281,6 +287,8 @@ export default function SiteSettingsManager() {
                     <HomepageSettings
                         homepage={homepage}
                         setHomepage={setHomepage}
+                        hero={hero}
+                        setHero={setHero}
                     />
                 )}
 
