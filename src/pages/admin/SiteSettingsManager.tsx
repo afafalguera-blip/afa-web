@@ -18,7 +18,8 @@ import {
     BarChart3,
     KeyRound,
     CalendarRange,
-    Coins
+    Coins,
+    BookOpen
 } from "lucide-react";
 import { ContactSettings } from "./settings/ContactSettings";
 import { SocialSettings } from "./settings/SocialSettings";
@@ -32,10 +33,11 @@ import { AnalyticsSettings } from "./settings/AnalyticsSettings";
 import AiKeysSettings from "./settings/AiKeysSettings";
 import SeasonSettings from "./settings/SeasonSettings";
 import FeeRulesSettings from "./settings/FeeRulesSettings";
+import BooksSettings from "./settings/BooksSettings";
 import { invalidateBrandingCache } from "../../hooks/useBranding";
 import { invalidateHomepageCache } from "../../hooks/useHomepageConfig";
 
-type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics' | 'ai-keys' | 'season' | 'fee-rules';
+type TabType = 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'branding' | 'homepage' | 'analytics' | 'ai-keys' | 'season' | 'fee-rules' | 'books';
 type LangType = 'ca' | 'es' | 'en';
 
 export default function SiteSettingsManager() {
@@ -190,6 +192,7 @@ export default function SiteSettingsManager() {
                 {([
                     { id: 'season' as TabType, icon: CalendarRange, label: 'Curs' },
                     { id: 'fee-rules' as TabType, icon: Coins, label: 'Quotes auto' },
+                    { id: 'books' as TabType, icon: BookOpen, label: 'Llibres' },
                     { id: 'contact' as TabType, icon: Mail, label: 'Contacte' },
                     { id: 'social' as TabType, icon: Instagram, label: 'Xarxes' },
                     { id: 'about' as TabType, icon: Info, label: "Sobre l'AFA" },
@@ -311,23 +314,27 @@ export default function SiteSettingsManager() {
                     <FeeRulesSettings />
                 )}
 
-                {/* Feedback Messages — hidden in self-managed tabs (ai-keys, season, fee-rules) */}
-                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && error && (
+                {activeTab === 'books' && (
+                    <BooksSettings />
+                )}
+
+                {/* Feedback Messages — hidden in self-managed tabs (ai-keys, season, fee-rules, books) */}
+                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && activeTab !== 'books' && error && (
                     <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg animate-shake">
                         <AlertCircle size={20} />
                         <p className="font-medium text-sm">{error}</p>
                     </div>
                 )}
 
-                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && success && (
+                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && activeTab !== 'books' && success && (
                     <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-200 text-green-700 rounded-lg animate-in fade-in slide-in-from-top-2">
                         <CheckCircle2 size={20} />
                         <p className="font-medium text-sm">Configuració guardada correctament!</p>
                     </div>
                 )}
 
-                {/* Action Buttons — ai-keys, season and fee-rules use their own buttons */}
-                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && (
+                {/* Action Buttons — ai-keys, season, fee-rules and books use their own buttons */}
+                {activeTab !== 'ai-keys' && activeTab !== 'season' && activeTab !== 'fee-rules' && activeTab !== 'books' && (
                 <div className="flex gap-4 items-center pt-4">
                     <button
                         disabled={saving}

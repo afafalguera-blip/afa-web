@@ -127,6 +127,13 @@ export interface SeasonConfig {
   close_at: string | null;      // ISO date, informational
 }
 
+// Socialization-book prices per course code (I3..6PRI). `default` applies to
+// any course not present in `map`. A price of 0 skips that course on generation.
+export interface BookPricesConfig {
+  default: number;
+  map: Record<string, number>;
+}
+
 // Configurable monthly-fee rules applied on top of per-activity prices.
 export interface FeeRulesConfig {
   // Activity titles NOT billed by the AFA (e.g. English → external academy).
@@ -230,7 +237,7 @@ function setCachedConfig<T>(key: string, value: T): void {
 }
 
 export const ConfigService = {
-  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules'): Promise<T | null> {
+  async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules' | 'book_prices'): Promise<T | null> {
     // Return cached value if fresh
     const cached = getCachedConfig<T>(key);
     if (cached !== null) return cached;
@@ -250,7 +257,7 @@ export const ConfigService = {
     return data.value as T;
   },
 
-  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules', config: T): Promise<void> {
+  async updateConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules' | 'book_prices', config: T): Promise<void> {
     const { error } = await supabase
       .from('site_config')
       .update({ value: config, updated_at: new Date().toISOString() })
@@ -390,6 +397,18 @@ export const ConfigService = {
       .upsert({ key: 'season', value: config, updated_at: new Date().toISOString() }, { onConflict: 'key' });
     if (error) throw error;
     try { localStorage.removeItem(CONFIG_CACHE_PREFIX + 'season'); } catch { /* ignore */ }
+  },
+
+  async getBookPricesConfig(): Promise<BookPricesConfig | null> {
+    return this.getConfig<BookPricesConfig>('book_prices');
+  },
+
+  async updateBookPricesConfig(config: BookPricesConfig): Promise<void> {
+    const { error } = await supabase
+      .from('site_config')
+      .upsert({ key: 'book_prices', value: config, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+    try { localStorage.removeItem(CONFIG_CACHE_PREFIX + 'book_prices'); } catch { /* ignore */ }
   },
 
   async getFeeRulesConfig(): Promise<FeeRulesConfig | null> {

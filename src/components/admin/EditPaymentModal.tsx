@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { InscriptionStudent } from '../../types/inscription';
 import { getRegionalLanguageTag } from '../../utils/locale';
+import { PAYMENT_CONCEPTS, type PaymentConcept } from '../../types/payment';
 
 interface Payment {
   id?: string;
@@ -17,6 +18,7 @@ interface Payment {
   status: 'paid' | 'pending' | 'overdue';
   payment_month?: number;
   payment_year?: number;
+  concept?: PaymentConcept;
   notes?: string;
   bank_reference?: string;
 }
@@ -26,9 +28,11 @@ interface EditPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (payment: Payment) => Promise<void>;
+  // Concept preselected for new payments (e.g. the active tab in PaymentsPage).
+  defaultConcept?: PaymentConcept;
 }
 
-export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPaymentModalProps) {
+export function EditPaymentModal({ payment, isOpen, onClose, onSave, defaultConcept = 'extraescolar' }: EditPaymentModalProps) {
   const nativeDateLocale = getRegionalLanguageTag(
     typeof document !== 'undefined' ? document.documentElement.lang : undefined
   );
@@ -39,7 +43,8 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
     activities: [],
     amount: 0,
     due_date: new Date().toISOString().split('T')[0],
-    status: 'pending'
+    status: 'pending',
+    concept: 'extraescolar'
   });
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState<InscriptionStudent[]>([]); // For search
@@ -71,6 +76,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
     if (payment) {
       setFormData({
         ...payment,
+        concept: payment.concept ?? 'extraescolar',
         payment_date: payment.payment_date
           ? new Date(payment.payment_date).toISOString().split('T')[0]
           : '',
@@ -88,6 +94,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
         amount: 0,
         due_date: new Date().toISOString().split('T')[0],
         status: 'pending',
+        concept: defaultConcept,
         payment_month: new Date().getMonth() + 1,
         payment_year: new Date().getFullYear()
       });
@@ -96,7 +103,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
         fetchStudents();
       }
     }
-  }, [payment, isOpen, students.length]);
+  }, [payment, isOpen, students.length, defaultConcept]);
 
   const handleStudentSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const idx = Number(e.target.value);
@@ -141,6 +148,20 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-6">
+
+          {/* Concept */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Concepte</label>
+            <select
+              value={formData.concept ?? 'extraescolar'}
+              onChange={e => setFormData({ ...formData, concept: e.target.value as PaymentConcept })}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+            >
+              {PAYMENT_CONCEPTS.map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
 
           {/* Student Selection (Only if Creating) */}
           {!payment && (
@@ -246,13 +267,17 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave }: EditPayme
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Activitats (separades per coma)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {formData.concept === 'extraescolar'
+                ? 'Activitats (separades per coma)'
+                : 'Concepte / Detall (separat per coma)'}
+            </label>
             <input
               type="text"
               value={formData.activities.join(', ')}
               onChange={e => setFormData({ ...formData, activities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
               className="w-full px-3 py-2 border rounded-lg focus:ring-blue-500 outline-none text-sm"
-              placeholder="Ex: Futbol, Anglès"
+              placeholder={formData.concept === 'acollida' ? 'Ex: Acollida matí' : formData.concept === 'llibres' ? 'Ex: Llibres socialització' : 'Ex: Futbol, Anglès'}
             />
           </div>
 
