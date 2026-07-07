@@ -3,8 +3,9 @@ import { supabase } from '../../../lib/supabase';
 import { ConfigService } from '../../../services/ConfigService';
 import { AdminPaymentsService, type GenerateResult } from '../../../services/admin/AdminPaymentsService';
 import { useTranslation } from 'react-i18next';
-import { Search, Plus, CheckCircle, XCircle, Download, Edit, Trash2, Sparkles, ChevronDown, Loader2 } from 'lucide-react';
+import { Search, Plus, CheckCircle, XCircle, Download, Edit, Trash2, Sparkles, ChevronDown, Loader2, UploadCloud } from 'lucide-react';
 import { EditPaymentModal } from '../../../components/admin/EditPaymentModal';
+import { BankImportModal } from '../../../components/admin/BankImportModal';
 import { ExportService } from '../../../services/ExportService';
 import { PAYMENT_CONCEPTS, PAYMENT_CONCEPT_LABELS, type Payment, type PaymentConcept } from '../../../types/payment';
 
@@ -41,6 +42,7 @@ export function PaymentsPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | undefined>(undefined);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Generation State
   const [genOpen, setGenOpen] = useState(false);          // dropdown
@@ -299,6 +301,12 @@ export function PaymentsPage() {
             )}
           </div>
           <button
+            onClick={() => setIsImportOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors shadow-sm"
+          >
+            <UploadCloud className="w-4 h-4" /> Importar extracto
+          </button>
+          <button
             onClick={() => ExportService.exportPaymentsCSV(filteredPayments, 'pagaments')}
             className="flex items-center gap-2 px-3 py-2 bg-white border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors text-sm font-medium"
           >
@@ -488,6 +496,12 @@ export function PaymentsPage() {
         onSave={handleSavePayment}
         payment={editingPayment}
         defaultConcept={conceptFilter === 'all' ? 'extraescolar' : conceptFilter}
+      />
+
+      <BankImportModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onApplied={fetchPayments}
       />
 
       {/* Generation month-picker modal (extraescolar / acollida) */}

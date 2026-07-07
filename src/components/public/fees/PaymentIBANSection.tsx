@@ -59,6 +59,14 @@ export function PaymentIBANSection() {
                             <p className="text-amber-800 dark:text-amber-300 text-sm leading-relaxed">
                                 {t('fees_page.important_text', 'Recordeu incloure el nom de l\'alumne com a concepte.')}
                             </p>
+                            <div className="flex items-center gap-2 flex-wrap pt-1">
+                                <span className="text-amber-700 dark:text-amber-400 text-xs font-semibold uppercase tracking-wide">
+                                    {t('fees_page.important_example_label', 'Exemple:')}
+                                </span>
+                                <code className="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 font-mono text-sm font-bold px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                                    {t('fees_page.important_example', 'AFA Joan López 2nA')}
+                                </code>
+                            </div>
                         </div>
                     </div>
                 </div>

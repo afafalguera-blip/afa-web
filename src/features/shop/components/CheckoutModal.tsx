@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Trash2, Mail, User, Loader2, Phone } from 'lucide-react';
+import { X, Check, Trash2, Mail, User, Loader2, Phone, AlertTriangle } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../../../hooks/useAuth';
 import { ConfigService, type ShopConfig } from '../../../services/ConfigService';
@@ -26,6 +26,8 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
     const [shopConfig, setShopConfig] = useState<ShopConfig | null>(null);
 
     const currentLang = (i18n.language || 'ca') as 'ca' | 'es' | 'en';
+
+    const hasOutOfStock = items.some(item => Number(item.variant.stock) < item.quantity);
 
     useEffect(() => {
         if (profile?.full_name) setCustomerName(profile.full_name);
@@ -223,6 +225,13 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                         <p className="text-[11px] text-slate-400 mt-0.5">Aplica el preu de soci</p>
                                     </div>
                                 </label>
+
+                                {hasOutOfStock && (
+                                    <div className="flex items-start gap-2.5 text-amber-700 dark:text-amber-400 text-xs font-bold bg-amber-50 dark:bg-amber-500/10 p-4 rounded-xl border border-amber-100 dark:border-amber-500/20">
+                                        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500" />
+                                        <span>{t('shop_page.stock_warning')}</span>
+                                    </div>
+                                )}
 
                                 {errorMsg && (
                                     <p className="text-red-500 text-xs font-bold bg-red-50 dark:bg-red-500/10 p-4 rounded-xl border border-red-100 dark:border-red-500/20">{errorMsg}</p>
