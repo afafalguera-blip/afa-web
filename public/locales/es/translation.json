@@ -647,6 +647,7 @@
       "preselected_activity": "Te estás inscribiendo a:",
       "preselected_activity_hint": "Selecciona el curso del alumno para confirmar la actividad.",
       "activity_not_for_course": "no está disponible para este curso. Elige otra actividad de la lista.",
+      "load_error": "No hemos podido cargar las actividades. Comprueba tu conexión y recarga la página.",
       "parent_section": "Datos del Padre/Madre/Tutor",
       "dni": "DNI/NIE",
       "phone_1": "Teléfono 1",

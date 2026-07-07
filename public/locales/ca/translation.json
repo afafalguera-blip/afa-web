@@ -647,6 +647,7 @@
       "preselected_activity": "T'estàs inscrivint a:",
       "preselected_activity_hint": "Selecciona el curs de l'infant per confirmar l'activitat.",
       "activity_not_for_course": "no està disponible per a aquest curs. Tria una altra activitat de la llista.",
+      "load_error": "No hem pogut carregar les activitats. Comprova la connexió i torna a carregar la pàgina.",
       "parent_section": "Dades del Pare/Mare/Tutor",
       "dni": "DNI/NIE",
       "phone_1": "Telèfon 1",

@@ -72,8 +72,14 @@ export default function InscriptionPage() {
       setSeason(s);
       setFormCfg(fc);
       setConfigLoaded(true);
+    }).catch((err) => {
+      // Transient gateway failure (e.g. Cloudflare 522) even after retries:
+      // surface it instead of silently showing a form with no activities.
+      console.error('Error loading inscription config:', err);
+      setError(t('inscription.form.load_error'));
+      setConfigLoaded(true);
     });
-  }, []);
+  }, [t]);
 
   // Inscriptions are open by default unless admin has explicitly closed them
   // (or the season config row is missing on older databases).

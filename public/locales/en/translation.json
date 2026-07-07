@@ -646,6 +646,7 @@
       "preselected_activity": "You are signing up for:",
       "preselected_activity_hint": "Select the student's grade to confirm the activity.",
       "activity_not_for_course": "is not available for this grade. Choose another activity from the list.",
+      "load_error": "We couldn't load the activities. Check your connection and reload the page.",
       "parent_section": "Parent/Guardian Details",
       "dni": "ID/Passport",
       "phone_1": "Phone 1",
