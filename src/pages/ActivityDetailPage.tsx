@@ -228,7 +228,7 @@ export default function ActivityDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 p-6 pb-10 bg-white/80 dark:bg-[#1e3e29]/90 backdrop-blur-xl border-t border-black/5 dark:border-white/5 z-30">
         <div className="flex gap-4 items-center max-w-3xl mx-auto">
           <button
-            onClick={() => navigate('/extraescolars/inscripcio')}
+            onClick={() => navigate(`/extraescolars/inscripcio?activity=${activity.id}`)}
             className="flex h-14 w-full items-center justify-center rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-primary/30 active:scale-95 transition-transform"
           >
             {t('inscription.activity_modal.signup_btn')}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Loader2, CheckCircle2, AlertCircle, Rocket, Info, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -48,6 +48,7 @@ export default function InscriptionPage() {
   const { t: tStrict, i18n } = useTranslation();
   const t = tStrict as unknown as (key: string, fallback?: string) => string;
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const homepageConfig = useHomepageConfig();
   const [fees, setFees] = useState<FeesConfig | null>(null);
   const [pricing, setPricing] = useState<PricingConfig | null>(null);
@@ -115,7 +116,7 @@ export default function InscriptionPage() {
   // Build activity options from DB: each schedule group is offered only to its own
   // course stage (infantil / primaria1 / primaria2), classified from the group label.
   const ALL_ACTIVITIES = useMemo(() => {
-    const grouped: Record<string, { value: string; label: string }[]> = {};
+    const grouped: Record<string, { value: string; label: string; day: number }[]> = {};
     const lang = i18n.language as 'ca' | 'es' | 'en';
 
     for (const act of dbActivities) {
@@ -128,19 +129,37 @@ export default function InscriptionPage() {
         if (!stage) continue;
         if (!grouped[stage]) grouped[stage] = [];
 
-        const days = (detail.sessions || [])
+        const sessions = detail.sessions || [];
+        // Earliest weekday of this group's sessions, used to sort options Mon→Sun.
+        const day = sessions.length ? Math.min(...sessions.map(s => s.day)) : 99;
+        const days = sessions
           .map(s => DAY_KEYS[s.day] ? t(`admin.editor.days.${DAY_KEYS[s.day]}`) : '')
           .filter(Boolean)
           .join(' / ');
         const value = `${act.title} (${detail.group})`;
         const label = days ? `${title} (${days})` : title;
         if (!grouped[stage].some(a => a.value === value)) {
-          grouped[stage].push({ value, label });
+          grouped[stage].push({ value, label, day });
         }
       }
     }
+    // Sort each stage's options by weekday, then alphabetically.
+    for (const stage of Object.keys(grouped)) {
+      grouped[stage].sort((a, b) => a.day - b.day || a.label.localeCompare(b.label));
+    }
     return grouped;
   }, [dbActivities, i18n.language, t]);
+
+  // Activity the user came from (ActivityDetailPage "sign up" button adds ?activity=<id>).
+  // Used to auto-check it once a matching course is picked.
+  const preselectActivity = useMemo(() => {
+    const pid = Number(searchParams.get('activity'));
+    return pid ? dbActivities.find(a => a.id === pid) ?? null : null;
+  }, [searchParams, dbActivities]);
+  const preselectTitle = preselectActivity
+    ? ((preselectActivity[`title_${lang}` as keyof Activity] as string) || preselectActivity.title)
+    : '';
+
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -175,6 +194,13 @@ export default function InscriptionPage() {
 
     if (field === 'course') {
       newStudents[index].activities = [];
+      // If the user arrived from an activity page, auto-check it for the chosen
+      // course (only when that activity is actually offered to this stage).
+      if (preselectActivity) {
+        const stage = COURSES.find(c => c.value === value)?.type;
+        const detail = (preselectActivity.schedule_details || []).find(d => classifyGroup(d.group) === stage);
+        if (detail) newStudents[index].activities = [`${preselectActivity.title} (${detail.group})`];
+      }
     }
     setStudents(newStudents);
   };
@@ -439,6 +465,13 @@ export default function InscriptionPage() {
         <section className="space-y-6">
           <h2 className="text-xl font-semibold border-b pb-2">{c('student_section', 'inscription.form.student_section')}</h2>
 
+          {preselectActivity && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3 text-sm text-blue-900">
+              <Info className="w-5 h-5 text-blue-600 shrink-0" />
+              <span>{t('inscription.form.preselected_activity')} <strong>{preselectTitle}</strong>. {t('inscription.form.preselected_activity_hint')}</span>
+            </div>
+          )}
+
           {students.map((student, index) => {
             const activities = student.course ? getAvailableActivities(student.course) : [];
             return (
@@ -489,6 +522,11 @@ export default function InscriptionPage() {
                       <h4 className="text-sm font-semibold text-blue-900 mb-3 uppercase tracking-wide">
                         {t('inscription.form.available_activities')} {COURSES.find(c => c.value === student.course)?.label}
                       </h4>
+                      {preselectActivity && !activities.some(a => a.value.startsWith(preselectActivity.title + ' (')) && (
+                        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md p-2 mb-3">
+                          <strong>{preselectTitle}</strong> {t('inscription.form.activity_not_for_course')}
+                        </p>
+                      )}
                       {activities.length === 0 ? (
                         <p className="text-sm text-gray-500">{t('inscription.form.no_activities')}</p>
                       ) : (
@@ -524,6 +562,12 @@ export default function InscriptionPage() {
                       )}
                       {student.activities.length === 0 && <p className="text-xs text-red-500 mt-2">{t('inscription.form.must_select_activity')}</p>}
                     </div>
+                  )}
+
+                  {!student.course && (
+                    <p className="text-sm text-gray-500 italic bg-slate-50 border border-dashed border-slate-300 rounded-lg p-3">
+                      {t('inscription.form.select_course_first')}
+                    </p>
                   )}
 
                   {/* Per-child additional info */}
