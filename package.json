@@ -12,6 +12,24 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
+  "overrides": {
+    "ajv": "6.15.0",
+    "flatted": "3.4.2",
+    "js-yaml": "4.2.0",
+    "linkify-it": "5.0.2",
+    "markdown-it": "14.3.0",
+    "ws": "8.21.0",
+    "yaml": "2.9.0",
+    "eslint": {
+      "minimatch": {
+        ".": "3.1.5",
+        "brace-expansion": "1.1.13"
+      }
+    },
+    "eslint-plugin-react-hooks": {
+      "@babel/core": "7.29.7"
+    }
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.93.1",
