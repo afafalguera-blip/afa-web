@@ -30,6 +30,8 @@ interface UseInscriptionsReturn {
   setAcademicYear: (year: string) => void;
   /** Available academic years across all inscriptions */
   academicYears: string[];
+  /** Distinct activity labels across the loaded cohort (for the activity filter) */
+  activityOptions: string[];
   /** Reload inscriptions from API */
   reload: () => Promise<void>;
   /** Delete an inscription by ID */
@@ -126,6 +128,21 @@ export function useInscriptions(): UseInscriptionsReturn {
   }, [inscriptions, filters]);
 
   /**
+   * Distinct activity labels present in the loaded cohort.
+   * Derived from all inscriptions (not the filtered set) so the option list
+   * stays stable while filtering.
+   */
+  const activityOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const row of flattenInscriptions(inscriptions)) {
+      for (const activity of row.activities) {
+        if (activity) set.add(activity);
+      }
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'ca'));
+  }, [inscriptions]);
+
+  /**
    * Delete an inscription
    * @returns true if successful, false otherwise
    */
@@ -174,6 +191,7 @@ export function useInscriptions(): UseInscriptionsReturn {
     academicYear,
     setAcademicYear,
     academicYears,
+    activityOptions,
     reload: loadInscriptions,
     handleDelete,
     handleStatusChange,

@@ -35,7 +35,7 @@ const DEFAULT_SHOP_STATS: ShopStats = {
  * Hook for managing financial and shop statistics
  * Encapsulates all stats-related API calls and state
  */
-export function useFinancialStats(): UseFinancialStatsReturn {
+export function useFinancialStats(academicYear?: string): UseFinancialStatsReturn {
   const [financialStats, setFinancialStats] = useState<FinancialStats>(DEFAULT_FINANCIAL_STATS);
   const [shopStats, setShopStats] = useState<ShopStats>(DEFAULT_SHOP_STATS);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,11 +44,11 @@ export function useFinancialStats(): UseFinancialStatsReturn {
   const loadStats = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const [fin, shop] = await Promise.all([
-        StatsService.getFinancialStats(),
-        StatsService.getShopStats(),
+        StatsService.getFinancialStats(academicYear || undefined),
+        StatsService.getShopStats(academicYear || undefined),
       ]);
       setFinancialStats(fin);
       setShopStats(shop);
@@ -59,7 +59,7 @@ export function useFinancialStats(): UseFinancialStatsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [academicYear]);
 
   useEffect(() => {
     loadStats();

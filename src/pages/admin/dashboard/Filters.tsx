@@ -6,6 +6,7 @@ interface FiltersProps {
   setCourse: (value: string) => void;
   activity: string;
   setActivity: (value: string) => void;
+  activityOptions: string[];
   status: string;
   setStatus: (value: string) => void;
   search: string;
@@ -17,6 +18,7 @@ export function Filters({
   setCourse,
   activity,
   setActivity,
+  activityOptions,
   status,
   setStatus,
   search,
@@ -45,7 +47,9 @@ export function Filters({
         className="px-3 py-2 border border-neutral-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <option value="">{t('admin.dashboard.filters.all_activities')}</option>
-        {/* Placeholder for activities, should be populated dynamically */}
+        {activityOptions.map((a) => (
+          <option key={a} value={a}>{a}</option>
+        ))}
       </select>
 
       <select

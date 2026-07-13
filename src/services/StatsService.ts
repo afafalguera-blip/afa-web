@@ -23,10 +23,12 @@ interface RawOrder {
 }
 
 export const StatsService = {
-  async getFinancialStats(): Promise<FinancialStats> {
-    const { data: payments, error } = await supabase
+  async getFinancialStats(academicYear?: string): Promise<FinancialStats> {
+    let query = supabase
       .from('payments')
       .select('amount, status');
+    if (academicYear) query = query.eq('academic_year', academicYear);
+    const { data: payments, error } = await query;
 
     if (error) throw error;
     
@@ -41,11 +43,13 @@ export const StatsService = {
     };
   },
 
-  async getShopStats(): Promise<ShopStats> {
-    const { data: orders, error } = await supabase
+  async getShopStats(academicYear?: string): Promise<ShopStats> {
+    let query = supabase
       .from('shop_orders')
       .select('total_amount, status');
-      
+    if (academicYear) query = query.eq('academic_year', academicYear);
+    const { data: orders, error } = await query;
+
     if (error) throw error;
 
     const rawOrders = (orders || []) as RawOrder[];

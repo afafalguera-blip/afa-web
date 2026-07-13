@@ -37,17 +37,18 @@ export function Dashboard() {
     academicYear,
     setAcademicYear,
     academicYears,
+    activityOptions,
     reload,
     handleDelete,
     handleStatusChange,
   } = useInscriptions();
 
-  // Stats logic extracted to custom hook
+  // Stats logic extracted to custom hook, scoped to the selected cohort
   const {
     financialStats,
     shopStats,
     reload: reloadStats,
-  } = useFinancialStats();
+  } = useFinancialStats(academicYear);
 
   // Modal state (kept in component as it's UI-specific)
   const [selectedInscription, setSelectedInscription] = useState<InscriptionFlat | null>(null);
@@ -126,6 +127,7 @@ export function Dashboard() {
           setCourse={(value: string) => setFilter('course', value)}
           activity={filters.activity}
           setActivity={(value: string) => setFilter('activity', value)}
+          activityOptions={activityOptions}
           status={filters.status}
           setStatus={(value: string) => setFilter('status', value)}
           search={filters.search}
