@@ -4,6 +4,8 @@ import { Layout } from './components/layout/Layout';
 import { AuthProvider } from './core/contexts/AuthContext';
 import { CartProvider } from './features/shop/contexts/CartContext';
 import { GoogleAnalytics } from './components/common/GoogleAnalytics';
+import { ToastProvider } from './components/common/Toast';
+import { ConfirmProvider } from './components/common/ConfirmDialog';
 
 // Shared loading fallback
 const Loading = () => (
@@ -66,71 +68,75 @@ const FormsAdminPage = lazy(() => import('./features/forms/pages/FormsAdminPage'
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <GoogleAnalytics />
-          <Suspense fallback={<Loading />}>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
+      <ToastProvider>
+        <ConfirmProvider>
+          <CartProvider>
+            <BrowserRouter>
+              <GoogleAnalytics />
+              <Suspense fallback={<Loading />}>
+                <Routes>
+                  <Route path="/login" element={<LoginPage />} />
 
-              <Route path="/f/:slug" element={<PublicFormPage />} />
+                  <Route path="/f/:slug" element={<PublicFormPage />} />
 
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="extraescolars" element={<Extraescolars />} />
-                <Route path="noticies" element={<NewsPage />} />
-                <Route path="noticies/:slug" element={<NewsDetailPage />} />
-                <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
-                <Route path="extraescolars/:id" element={<ActivityDetailPage />} />
-                <Route path="extraescolars/:id/:slug" element={<ActivityDetailPage />} />
-                <Route path="botiga" element={<ShopLanding />} />
-                <Route path="quotes" element={<FeesPage />} />
-                <Route path="calendari" element={<GeneralCalendarPage />} />
-                <Route path="documents" element={<DocumentsPage />} />
-                <Route path="contacte" element={<ContactPage />} />
-                <Route path="privacitat" element={<PrivacyPolicy />} />
-                <Route path="cookies" element={<CookiesPolicy />} />
-                <Route path="especial/sant-jordi" element={<SantJordiIdeasPage />} />
-                <Route path="sobre-afa" element={<AboutAfaPage />} />
-                <Route path="historia" element={<HistoryPage />} />
-                <Route path="assemblea" element={<AssembleaPage />} />
-                <Route path="menjador" element={<MenjadorPage />} />
-                <Route path="acollida" element={<AcollidaPage />} />
-              </Route>
+                  <Route path="/" element={<Layout />}>
+                    <Route index element={<Home />} />
+                    <Route path="extraescolars" element={<Extraescolars />} />
+                    <Route path="noticies" element={<NewsPage />} />
+                    <Route path="noticies/:slug" element={<NewsDetailPage />} />
+                    <Route path="extraescolars/inscripcio" element={<InscriptionPage />} />
+                    <Route path="extraescolars/:id" element={<ActivityDetailPage />} />
+                    <Route path="extraescolars/:id/:slug" element={<ActivityDetailPage />} />
+                    <Route path="botiga" element={<ShopLanding />} />
+                    <Route path="quotes" element={<FeesPage />} />
+                    <Route path="calendari" element={<GeneralCalendarPage />} />
+                    <Route path="documents" element={<DocumentsPage />} />
+                    <Route path="contacte" element={<ContactPage />} />
+                    <Route path="privacitat" element={<PrivacyPolicy />} />
+                    <Route path="cookies" element={<CookiesPolicy />} />
+                    <Route path="especial/sant-jordi" element={<SantJordiIdeasPage />} />
+                    <Route path="sobre-afa" element={<AboutAfaPage />} />
+                    <Route path="historia" element={<HistoryPage />} />
+                    <Route path="assemblea" element={<AssembleaPage />} />
+                    <Route path="menjador" element={<MenjadorPage />} />
+                    <Route path="acollida" element={<AcollidaPage />} />
+                  </Route>
 
-              <Route path="/admin/login" element={<Navigate to="/login" replace />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="inscriptions" element={<InscriptionsPage />} />
-                <Route path="inscription-config" element={<InscriptionConfigPage />} />
-                <Route path="payments" element={<PaymentsPage />} />
-                <Route path="finances" element={<FinanceDashboard />} />
-                <Route path="shop/inventory" element={<InventoryPage />} />
-                <Route path="shop/orders" element={<OrdersPage />} />
-                <Route path="activities" element={<ActivitiesManager />} />
-                <Route path="faq" element={<FaqManager />} />
-                <Route path="news" element={<NewsManager />} />
-                <Route path="news/:id" element={<NewsEditorPage />} />
-                <Route path="projects" element={<ProjectsManager />} />
-                <Route path="calendar" element={<EventsManager />} />
-                <Route path="tasks" element={<TasksManager />} />
-                <Route path="short-links" element={<ShortLinksManager />} />
-                <Route path="documents" element={<DocumentsManager />} />
-                <Route path="notifications" element={<NotificationManager />} />
-                <Route path="acollida" element={<AcollidaManager />} />
-                <Route path="menjador" element={<MenjadorManager />} />
-                <Route path="banner" element={<AnnouncementManager />} />
-                <Route path="contactes" element={<ContactManager />} />
-                <Route path="settings" element={<SiteSettingsManager />} />
-                <Route path="board" element={<BoardManager />} />
-                <Route path="forms" element={<FormsAdminPage />} />
-                <Route path="observability" element={<AdminObservability />} />
-              </Route>
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </CartProvider>
+                  <Route path="/admin/login" element={<Navigate to="/login" replace />} />
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="inscriptions" element={<InscriptionsPage />} />
+                    <Route path="inscription-config" element={<InscriptionConfigPage />} />
+                    <Route path="payments" element={<PaymentsPage />} />
+                    <Route path="finances" element={<FinanceDashboard />} />
+                    <Route path="shop/inventory" element={<InventoryPage />} />
+                    <Route path="shop/orders" element={<OrdersPage />} />
+                    <Route path="activities" element={<ActivitiesManager />} />
+                    <Route path="faq" element={<FaqManager />} />
+                    <Route path="news" element={<NewsManager />} />
+                    <Route path="news/:id" element={<NewsEditorPage />} />
+                    <Route path="projects" element={<ProjectsManager />} />
+                    <Route path="calendar" element={<EventsManager />} />
+                    <Route path="tasks" element={<TasksManager />} />
+                    <Route path="short-links" element={<ShortLinksManager />} />
+                    <Route path="documents" element={<DocumentsManager />} />
+                    <Route path="notifications" element={<NotificationManager />} />
+                    <Route path="acollida" element={<AcollidaManager />} />
+                    <Route path="menjador" element={<MenjadorManager />} />
+                    <Route path="banner" element={<AnnouncementManager />} />
+                    <Route path="contactes" element={<ContactManager />} />
+                    <Route path="settings" element={<SiteSettingsManager />} />
+                    <Route path="board" element={<BoardManager />} />
+                    <Route path="forms" element={<FormsAdminPage />} />
+                    <Route path="observability" element={<AdminObservability />} />
+                  </Route>
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </CartProvider>
+        </ConfirmProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

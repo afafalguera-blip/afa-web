@@ -822,7 +822,11 @@
       "observability": "Auditoría",
       "logout": "Cerrar Sesión",
       "faq": "FAQ",
-      "inscription_config": "Config. Inscripciones"
+      "inscription_config": "Config. Inscripciones",
+      "short_links": "Enlaces cortos",
+      "documents": "Documentos",
+      "board": "Sobre AFA / Junta",
+      "settings": "Configuración General"
     },
     "acollidaManager": {
       "addRate": "Añadir Nueva Tarifa",

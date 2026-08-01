@@ -819,7 +819,11 @@
       "communication": "Communication",
       "contact_messages": "Web Messages",
       "notifications": "Notifications",
-      "system": "System"
+      "system": "System",
+      "short_links": "Short links",
+      "documents": "Documents",
+      "board": "About AFA / Board",
+      "settings": "General Settings"
     },
     "acollidaManager": {
       "addRate": "Add New Rate",

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, NavLink, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../common/Toast';
+import { restorePublicLanguage, setAdminLanguageOverride } from '../../core/i18n/i18n';
 import {
   LayoutDashboard,
   Users,
@@ -41,29 +43,29 @@ const sectionLabel = 'px-3 text-[11px] font-semibold text-neutral-500 uppercase 
 const sectionWrap = 'pt-4 mt-4 border-t border-neutral-800';
 
 export function AdminLayout() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, profile, loading, signOut } = useAuth();
+  const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Admin is Spanish-only; restore the visitor's public language on the way out
+  // so /admin does not leak 'es' into the public site through the i18n cache.
   useEffect(() => {
-    // Force Spanish in Admin
-    if (i18n.language !== 'es') {
-      i18n.changeLanguage('es');
-    }
-  }, [i18n]);
+    setAdminLanguageOverride('es');
+    return () => restorePublicLanguage();
+  }, []);
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
         navigate('/login', { state: { from: window.location.pathname } });
       } else if (profile && profile.role !== 'admin') {
-        // Optionally show unauthorised page or redirect to /botiga
-        alert(t('admin.access_denied'));
+        toast.error(t('admin.access_denied'));
         navigate('/botiga');
       }
     }
-  }, [user, profile, loading, navigate, t]);
+  }, [user, profile, loading, navigate, t, toast]);
 
   const handleLogout = async () => {
     await signOut();
@@ -194,7 +196,7 @@ export function AdminLayout() {
             </NavLink>
             <NavLink to="/admin/short-links" onClick={closeSidebar} className={navClass}>
               <Link2 className="w-[18px] h-[18px]" />
-              Enlaces cortos
+              {t('admin.sidebar.short_links')}
             </NavLink>
             <NavLink to="/admin/acollida" onClick={closeSidebar} className={navClass}>
               <Users className="w-[18px] h-[18px]" />
@@ -206,7 +208,7 @@ export function AdminLayout() {
             </NavLink>
             <NavLink to="/admin/documents" onClick={closeSidebar} className={navClass}>
               <FolderHeart className="w-[18px] h-[18px]" />
-              Documentos
+              {t('admin.sidebar.documents')}
             </NavLink>
             <NavLink to="/admin/forms" onClick={closeSidebar} className={navClass}>
               <FileText className="w-[18px] h-[18px]" />
@@ -218,11 +220,11 @@ export function AdminLayout() {
             <p className={sectionLabel}>{t('admin.sidebar.system')}</p>
             <NavLink to="/admin/board" onClick={closeSidebar} className={navClass}>
               <UserSquare2 className="w-[18px] h-[18px]" />
-              Sobre AFA / Junta
+              {t('admin.sidebar.board')}
             </NavLink>
             <NavLink to="/admin/settings" onClick={closeSidebar} className={navClass}>
               <Settings className="w-[18px] h-[18px]" />
-              Configuració General
+              {t('admin.sidebar.settings')}
             </NavLink>
             <NavLink to="/admin/observability" onClick={closeSidebar} className={navClass}>
               <HistoryIcon className="w-[18px] h-[18px]" />
