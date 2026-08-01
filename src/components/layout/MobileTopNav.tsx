@@ -18,10 +18,10 @@ export function MobileTopNav() {
     <div className="fixed top-0 left-0 right-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 z-50 flex items-center justify-between px-4 lg:hidden">
       {/* Left: Branding & Greeting */}
       <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
-        <div className="w-10 h-10 rounded-full border border-slate-100 dark:border-slate-700 overflow-hidden bg-white shadow-sm shrink-0">
+        <div className="w-10 h-10 rounded-lg border border-slate-100 dark:border-slate-700 overflow-hidden bg-white shadow-sm shrink-0 flex items-center justify-center p-1">
           <img
             alt="AFA Logo"
-            className="w-full h-full object-cover p-0.5"
+            className="max-w-full max-h-full object-contain"
             src={branding.logo_url}
           />
         </div>

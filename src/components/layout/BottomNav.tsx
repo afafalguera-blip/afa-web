@@ -13,6 +13,7 @@ import {
   Sun,
   UtensilsCrossed,
   Info,
+  Users,
   BookOpen,
   Newspaper,
   FileText,
@@ -44,6 +45,7 @@ const SERVICES_ITEMS: SheetItem[] = [
 
 const MORE_ITEMS: SheetItem[] = [
   { icon: Info, labelKey: 'nav.about_afa', fallback: 'Sobre l\'AFA', path: '/sobre-afa', accent: 'bg-blue-500 text-white' },
+  { icon: Users, labelKey: 'assemblea.title', fallback: 'Assemblea', path: '/assemblea', accent: 'bg-indigo-500 text-white' },
   { icon: BookOpen, labelKey: 'history.title', fallback: 'Història', path: '/historia', accent: 'bg-rose-500 text-white' },
   { icon: Newspaper, labelKey: 'nav.news', fallback: 'Notícies', path: '/noticies', accent: 'bg-emerald-500 text-white' },
   { icon: FileText, labelKey: 'nav.documents', fallback: 'Documents', path: '/documents', accent: 'bg-slate-500 text-white' },
@@ -53,7 +55,7 @@ const MORE_ITEMS: SheetItem[] = [
 
 const ACTIVITIES_PATHS = ['/extraescolars', '/quotes', '/calendari'];
 const SERVICES_PATHS = ['/acollida', '/menjador'];
-const MORE_PATHS = ['/sobre-afa', '/historia', '/noticies', '/documents', '/contacte'];
+const MORE_PATHS = ['/sobre-afa', '/assemblea', '/historia', '/noticies', '/documents', '/contacte'];
 
 export function BottomNav() {
   // i18next types t() to literal keys only; this nav uses dynamic keys and

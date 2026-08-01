@@ -32,6 +32,7 @@
     "acollida_desc": "Hours and rates",
     "menjador_desc": "Menus, prices and info",
     "about_desc": "Who we are and the Board",
+    "assemblea_desc": "Resolutions and accounts",
     "history_desc": "Half a century of school",
     "news_desc": "Latest AFA updates",
     "documents_desc": "Resources and downloads",
@@ -341,123 +342,167 @@
   },
   "assemblea": {
     "title": "General Assembly",
-    "course": "Year 2025-2026",
-    "subtitle": "Summary of points discussed, financial status, and new AFA School Falguera projects.",
-    "sections": {
-      "agenda": {
-        "title": "Agenda",
-        "items": [
-          "Financial Status",
-          "Completed Projects",
-          "AFA Board Change",
-          "Open Question Time"
-        ]
-      },
-      "economics": {
-        "title": "Economic Situation",
-        "items": [
-          "Positive balance and safety savings.",
-          "No debts or pending payments.",
-          "Increased revenue thanks to high participation.",
-          "Reserve fund destined for future investments.",
-          "Transparent and audited management."
-        ]
-      },
-      "investments": {
-        "title": "Investments and Forecasts",
-        "items": [
-          "Improvements to the infant and primary playground.",
-          "Purchase of digital material (e-readers and tablets).",
-          "Renovation of sports equipment.",
-          "Subsidy for colonies and excursions.",
-          "Solidarity fund for families."
-        ]
-      },
-      "functions": {
-        "title": "AFA Functions",
-        "items": [
-          "Management of extracurriculars",
-          "Organization of festivals",
-          "Fundraising",
-          "Family-school intermediation",
-          "Improvement of facilities",
-          "Book socialization",
-          "Support for families"
-        ]
-      },
-      "quota": {
-        "title": "What is the fee used for?",
-        "items": [
-          "Collective school material",
-          "Traditional festivals (Castanyada, etc.)",
-          "Educational talks",
-          "School digitalization",
-          "School aid fund"
-        ]
-      },
-      "projects": {
-        "title": "Projects and Improvements",
-        "commissions": {
-          "title": "Family Commissions",
-          "desc": "Active groups of families working to improve the school and energize the educational community."
-        },
-        "done": {
-          "title": "Done (24-25)",
-          "items": [
-            "Track painting",
-            "School garden",
-            "Infant shade",
-            "Book bench"
-          ],
-          "desc": "Projects and improvements successfully carried out during the last year."
-        },
-        "future": {
-          "title": "Next (25-26)",
-          "items": [
-            "Library renovation",
-            "Inclusive patio",
-            "Own kitchen",
-            "Multipurpose room"
-          ],
-          "desc": "New challenges and initiatives planned for the coming year."
-        }
-      },
-      "board_change": {
-        "title": "AFA Board Change",
-        "desc": "Renewal of positions and new additions.",
-        "important_title": "IMPORTANT",
-        "important_desc": "It is vital to work together to keep moving forward.",
-        "call_to_action_title": "WE NEED YOU!",
-        "call_to_action_desc": "The AFA needs family involvement to continue improving our children's school."
-      },
-      "contact": {
-        "contact_us": "Contact Us",
-        "instagram": "Instagram"
-      },
-      "importance": {
-        "reason1": "Your voice counts in the school's key decisions.",
-        "reason2": "You help prioritise the school's investments and improvements.",
-        "reason3": "We foster a stronger and more transparent school community.",
-        "title": "Why is it important to take part?"
-      }
-    },
-    "cards": {
-      "decisions": {
-        "desc": "Vote on the initiatives and projects you want to see carried out at the school.",
-        "title": "We decide together"
-      },
-      "meetings": {
-        "desc": "Participatory spaces to debate and decide the school's future together.",
-        "title": "Open Assemblies"
-      },
-      "members": {
-        "desc": "We are a strong network committed to our children's education.",
-        "title": "Over 400 families"
-      }
-    },
+    "course": "School year 2025-2026",
+    "subtitle": "Summary of the Ordinary General Assembly held on 29 June 2026: accounts, project review and the new Board.",
     "hero": {
-      "subtitle": "Discover how your ideas and participation transform the school every day.",
-      "title": "The Assembly: The heart of our community"
+      "badge": "Ordinary General Assembly",
+      "title": "General Assembly 2025-2026",
+      "subtitle": "Everything discussed on 29 June 2026: year-end accounts, a review of the outgoing Board's four years and the vote on the new Board.",
+      "acta_cta": "Read the full minutes"
+    },
+    "meta": {
+      "date_label": "Date",
+      "date_value": "Monday, 29 June 2026",
+      "time_label": "Time",
+      "time_value": "6:00 pm to 7:00 pm",
+      "place_label": "Venue",
+      "place_value": "Escola Falguera — Sant Feliu de Llobregat",
+      "mode_label": "Format",
+      "mode_value": "In person and by video call"
+    },
+    "agenda": {
+      "title": "Agenda",
+      "items": [
+        "Accounts for the 2025-2026 school year",
+        "Review of the outgoing Board's projects",
+        "Presentation and vote on the new Board",
+        "Open questions"
+      ]
+    },
+    "accounts": {
+      "title": "Accounts 2025-2026",
+      "intro": "The outgoing Board ends its term with AFA fully solvent, all suppliers paid and enough funds for the new Board to start comfortably.",
+      "stats": [
+        {
+          "value": "100 %",
+          "label": "Solvency",
+          "desc": "No debts and no outstanding payments to suppliers."
+        },
+        {
+          "value": "€6,300",
+          "label": "1st part of the grant",
+          "desc": "Received days before the assembly. The second part (about €2,500) will not arrive before September."
+        },
+        {
+          "value": "€6,500+",
+          "label": "Study support and Library",
+          "desc": "Main item of the municipal grant, with a single supplier."
+        },
+        {
+          "value": "~€450",
+          "label": "Free allocation",
+          "desc": "Decided together with the school: robotics, Year 6 drums or games, depending on the year."
+        }
+      ],
+      "items": [
+        "AFA pays suppliers upfront until the municipal grant arrives, which since the pandemic is received close to the end of the year. That is why a financial cushion is needed.",
+        "The Agenda 21 allocation is small and goes to items such as soil for the school garden or books, depending on the year.",
+        "With this year's margin, giant wooden games were bought outside the grant to liven up spaces such as the dining hall. The school has integrated them into daily life and a new allocation for games is planned.",
+        "Payments for after-school activities and morning care were settled that same week: overpayments are refunded and outstanding amounts claimed.",
+        "Membership fees went from under 20 % of families to almost all of them; only two primary families chose not to join (P3, P4 and P5 are not included as they do not use reusable books)."
+      ],
+      "thanks": {
+        "title": "Acknowledgements",
+        "desc": "During the first year of the term, the Falguera Neighbours' Association and the AFA of Escola Salvador Espriu were key to overcoming the deficit: at several charity events, the funds raised by Escola Falguera were given entirely to AFA."
+      }
+    },
+    "projects": {
+      "title": "Term review",
+      "intro": "Main projects from the outgoing Board's four years.",
+      "items": [
+        {
+          "title": "Presence in the neighbourhood",
+          "desc": "AFA is part of the Falguera Neighbours' Association and takes part in local projects and festivals."
+        },
+        {
+          "title": "Giant and big-head figures",
+          "desc": "The original head of the giant was preserved and a new one was built. Families voted to portray Valentina Tereshkova, and AFA added a big-head figure, «la fada de la natura». Bringing back the drummers is still pending."
+        },
+        {
+          "title": "School parking",
+          "desc": "Around five drop-off spaces were secured at the entrance. Families should report any misuse to AFA."
+        },
+        {
+          "title": "Facade painting",
+          "desc": "A joint project with Institut Olorda: art students designed the proposal, with green and robotics motifs. It is approved by the school and the city council and is expected to be finished before September."
+        },
+        {
+          "title": "Festivals and events",
+          "desc": "Castanya Week, the second-hand market, the chocolate party and Enric Falguera, among others."
+        },
+        {
+          "title": "DANA relief drive",
+          "desc": "Together with AFA Gaudí, a town-wide donation drive filled a trailer with clothes, medicine and supplies in just a few days."
+        },
+        {
+          "title": "AFA website",
+          "desc": "afafalguera.com, built during this transition year as a communication channel beyond WhatsApp and to digitalise bookings and after-school registrations."
+        },
+        {
+          "title": "School camps",
+          "desc": "In 2024 AFA ran its own weekend camps open to several year groups to keep prices down. This year, for the first time in many years, all three planned year groups went on camp."
+        }
+      ]
+    },
+    "board": {
+      "title": "New Board",
+      "intro": "Presented at the assembly and approved by vote of those present.",
+      "members": [
+        {
+          "role": "President",
+          "name": "Adela Montes Segarra"
+        },
+        {
+          "role": "Treasurer",
+          "name": "Mónica Palma Gil"
+        },
+        {
+          "role": "Secretary",
+          "name": "Alberto Ruiz Castillo"
+        },
+        {
+          "role": "Member",
+          "name": "María Ascensión Castillo Rosales"
+        }
+      ],
+      "note": "The new Board wants to build on the work done and add improvements, and invites more families to join, either with a role or through the committees."
+    },
+    "qa": {
+      "title": "Open questions",
+      "items": [
+        {
+          "title": "Books and supplies",
+          "desc": "The school has emailed each year group with amounts and dates. Supplies are paid to the school; AFA collects reusable books and the membership fee. The payment deadline is 31 August."
+        },
+        {
+          "title": "Bookshops",
+          "desc": "AFA usually works with the Ginger Blau bookshop, which offers flexibility (combining non-nominal book vouchers or buying for several siblings at once), but books can be bought anywhere."
+        },
+        {
+          "title": "Field trips",
+          "desc": "Managed directly by the school (contact Ramón) and normally split into three payments."
+        },
+        {
+          "title": "Summer activities",
+          "desc": "Registration is already open."
+        }
+      ]
+    },
+    "agreements": {
+      "title": "Resolutions",
+      "items": [
+        "The 2025-2026 year-end accounts are approved and AFA is recorded as fully solvent.",
+        "The new Board is formally constituted with the composition above.",
+        "The 31 August deadline for supplies, books and membership fee payments is confirmed."
+      ],
+      "signature": "Minutes signed by the secretary, Alberto Ruiz Castillo, approved by the president, Adela Montes Segarra."
+    },
+    "cta": {
+      "title": "WE NEED YOU!",
+      "desc": "AFA needs families to get involved to keep improving our children's school.",
+      "contact_us": "Contact us",
+      "instagram": "Instagram",
+      "documents": "Documents and minutes"
     }
   },
   "fees_page": {

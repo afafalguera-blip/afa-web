@@ -32,6 +32,7 @@
     "acollida_desc": "Horaris i tarifes",
     "menjador_desc": "Menús, preus i info",
     "about_desc": "Qui som i la Junta",
+    "assemblea_desc": "Acords i comptes del curs",
     "history_desc": "Mig segle d'escola",
     "news_desc": "Última hora de l'AFA",
     "documents_desc": "Recursos i descàrregues",
@@ -342,122 +343,166 @@
   "assemblea": {
     "title": "Assemblea General",
     "course": "Curs 2025-2026",
-    "subtitle": "Resum dels punts tractats, estat de comptes i nous projectes de l'AFA Escola Falguera.",
+    "subtitle": "Resum de l'Assemblea General Ordinària del 29 de juny de 2026: estat de comptes, balanç de projectes i renovació de la Junta.",
     "hero": {
-      "title": "L'Assemblea: El cor de la nostra comunitat",
-      "subtitle": "Descobreix com les teves idees i participació transformen l'escola cada dia."
+      "badge": "Assemblea General Ordinària",
+      "title": "Assemblea General 2025-2026",
+      "subtitle": "Tot el que es va tractar el 29 de juny de 2026: tancament econòmic del curs, balanç dels quatre anys de la Junta sortint i votació de la nova Junta.",
+      "acta_cta": "Consulta l'acta completa"
     },
-    "cards": {
-      "members": {
-        "title": "Més de 400 famílies",
-        "desc": "Som una xarxa forta compromesa amb l'educació dels nostres fills."
-      },
-      "meetings": {
-        "title": "Assemblees Obertes",
-        "desc": "Espais participatius per debatre i decidir junts el futur del centre."
-      },
-      "decisions": {
-        "title": "Decidim entre tots",
-        "desc": "Vota les iniciatives i projectes que vols veure realitzats a l'escola."
-      }
+    "meta": {
+      "date_label": "Data",
+      "date_value": "Dilluns, 29 de juny de 2026",
+      "time_label": "Hora",
+      "time_value": "De 18:00 a 19:00 h",
+      "place_label": "Lloc",
+      "place_value": "Escola Falguera — Sant Feliu de Llobregat",
+      "mode_label": "Modalitat",
+      "mode_value": "Presencial i per videotrucada"
     },
-    "sections": {
-      "agenda": {
-        "title": "Ordre del Dia",
-        "items": [
-          "Estat de Comptes",
-          "Projectes Realitzats",
-          "Canvi de Junta de l'AFA",
-          "Torn Obert de Preguntes"
-        ]
-      },
-      "economics": {
-        "title": "Situació Econòmica",
-        "items": [
-          "Saldo positiu i estalvi de seguretat.",
-          "Sense deutes ni pagaments pendents.",
-          "Increment de la recaptació gràcies a l'alta participació.",
-          "Fons de reserva destinat a futures inversions.",
-          "Gestió transparent i auditada."
-        ]
-      },
-      "investments": {
-        "title": "Inversions i Previsions",
-        "items": [
-          "Millores al pati infantil i primària.",
-          "Compra de material digital (e-readers i tablets).",
-          "Renovació de material esportiu.",
-          "Subvenció per a colònies i excursions.",
-          "Fons solidari per a famílies."
-        ]
-      },
-      "functions": {
-        "title": "Funcions de l'AFA",
-        "items": [
-          "Gestió d'extraescolars",
-          "Organització de festes",
-          "Recaptació de fons",
-          "Intermediació famílies-escola",
-          "Millora d'instal·lacions",
-          "Socialització de llibres",
-          "Suport a famílies"
-        ]
-      },
-      "quota": {
-        "title": "A què destinem la quota?",
-        "items": [
-          "Material escolar col·lectiu",
-          "Festes tradicionales (Castanyada, etc.)",
-          "Xerrades educatives",
-          "Digitalització de l'escola",
-          "Fons d'ajuda escolar"
-        ]
-      },
-      "importance": {
-        "title": "Per què és important participar?",
-        "reason1": "La teva veu compta en les decisions clau de l'escola.",
-        "reason2": "Ajudes a prioritzar les inversions i millores del centre.",
-        "reason3": "Fomentem una comunitat escolar més forta i transparent."
-      },
-      "projects": {
-        "title": "Projectes i Millores",
-        "commissions": {
-          "title": "Comissions de Famílies",
-          "desc": "Grups actius de famílies que treballen per millorar l'escola i dinamitzar la comunitat educativa."
+    "agenda": {
+      "title": "Ordre del dia",
+      "items": [
+        "Estat de comptes del curs 2025-2026",
+        "Balanç dels projectes de la Junta sortint",
+        "Presentació i votació de la nova Junta",
+        "Precs i preguntes"
+      ]
+    },
+    "accounts": {
+      "title": "Estat de comptes 2025-2026",
+      "intro": "La Junta sortint tanca el mandat amb l'AFA 100 % solvent, amb tots els proveïdors pagats i amb fons suficients perquè la nova Junta pugui començar amb tranquil·litat.",
+      "stats": [
+        {
+          "value": "100 %",
+          "label": "Solvència",
+          "desc": "Sense deutes ni pagaments pendents amb proveïdors."
         },
-        "done": {
-          "title": "Fet (24-25)",
-          "desc": "Projectes i millores executades amb èxit durant el darrer curs.",
-          "items": [
-            "Pintura pista",
-            "Hort escolar",
-            "Ombra infantil",
-            "Banc de llibres"
-          ]
+        {
+          "value": "6.300 €",
+          "label": "1a part de la subvenció",
+          "desc": "Cobrada pocs dies abans de l'assemblea. La segona part (uns 2.500 €) no arribarà fins al setembre."
         },
-        "future": {
-          "title": "Propera (25-26)",
-          "desc": "Nous reptes i iniciatives planificades per al curs vinent.",
-          "items": [
-            "Renovació biblioteca",
-            "Pati inclusiu",
-            "Cuina pròpia",
-            "Aula polivalent"
-          ]
+        {
+          "value": "+6.500 €",
+          "label": "Estudi Assistit i Biblioteca",
+          "desc": "Partida principal de la subvenció municipal, amb un únic proveïdor."
+        },
+        {
+          "value": "~450 €",
+          "label": "Partida lliure",
+          "desc": "Es decideix conjuntament amb l'escola: robòtica, timbals de 6è o jocs, segons l'any."
         }
-      },
-      "board_change": {
-        "title": "Canvi Junta AFA",
-        "desc": "Renovación de càrrecs i noves incorporacions.",
-        "important_title": "IMPORTANT",
-        "important_desc": "És vital treballar junts per seguir endavant.",
-        "call_to_action_title": "ET NECESSITEM A TU!",
-        "call_to_action_desc": "L'AFA necessita implicació de les famílies per seguir millorant l'escola dels nostres fills i filles."
-      },
-      "contact": {
-        "contact_us": "Contactar",
-        "instagram": "Instagram"
+      ],
+      "items": [
+        "L'AFA avança el pagament als proveïdors fins que arriba la subvenció municipal, que des de la pandèmia es cobra gairebé a final de curs. Per això cal mantenir un coixí econòmic.",
+        "La partida d'Agenda 21 és de quantia reduïda i es destina a coses com terra per a l'hort o llibres, segons l'any.",
+        "Amb el marge d'aquest curs es van comprar jocs gegants de fusta al marge de la subvenció, pensats per dinamitzar espais com el menjador. L'escola els ha integrat al dia a dia i es preveu una nova partida per a jocs.",
+        "Els pagaments d'extraescolars i acollides es van tancar durant la mateixa setmana: es retornen els imports pagats de més i es reclamen les quantitats pendents.",
+        "La quota de soci ha passat de menys del 20 % de les famílies a pràcticament totes; només dues famílies de tota primària han decidit no associar-se (I3, I4 i I5 no hi entren perquè no fan servir llibres reutilitzables)."
+      ],
+      "thanks": {
+        "title": "Agraïments",
+        "desc": "Durant el primer any de mandat, l'Associació de Veïns de la Falguera i l'AFA de l'Escola Salvador Espriu van ser clau per sortir del dèficit: en diverses festes solidàries, la recaptació generada per l'Escola Falguera es va cedir íntegrament a l'AFA."
       }
+    },
+    "projects": {
+      "title": "Balanç del mandat",
+      "intro": "Principals projectes dels quatre anys de gestió de la Junta sortint.",
+      "items": [
+        {
+          "title": "Visibilitat al barri",
+          "desc": "L'AFA forma part de l'Associació de Veïns de la Falguera i participa en els projectes i festes del barri."
+        },
+        {
+          "title": "Gegant i capgròs",
+          "desc": "Es va conservar el cap original de la geganta i se'n va construir una de nova. En una votació oberta a les famílies es va escollir la figura de Valentina Tereshkova i, com a AFA, s'hi va afegir un capgròs, «la fada de la natura». Queda pendent recuperar els timbalers."
+        },
+        {
+          "title": "Aparcament escolar",
+          "desc": "Es van aconseguir unes cinc places a l'entrada per deixar els infants. Cal avisar l'AFA de qualsevol ús indegut per poder reclamar-ne el control."
+        },
+        {
+          "title": "Pintura de la façana",
+          "desc": "Projecte en xarxa amb l'Institut Olorda: l'alumnat de la branca artística va dissenyar la proposta, amb motius verds i de robòtica. Ja està aprovat per l'escola i l'Ajuntament i s'espera tenir-lo enllestit abans del setembre."
+        },
+        {
+          "title": "Festes i dinamitzacions",
+          "desc": "La Castanya Week, el mercat de segona mà, la xocolatada i l'Enric Falguera, entre altres."
+        },
+        {
+          "title": "Mobilització per la DANA",
+          "desc": "Amb l'AFA Gaudí es va impulsar una recollida solidària a escala de poble que en pocs dies va omplir un tràiler de roba, medicines i material."
+        },
+        {
+          "title": "Web de l'AFA",
+          "desc": "afafalguera.com, creada durant aquest curs de transició com a canal de comunicació amb les famílies més enllà del WhatsApp i per digitalitzar reserves i inscripcions d'extraescolars."
+        },
+        {
+          "title": "Colònies",
+          "desc": "El 2024 l'AFA va organitzar colònies pròpies de cap de setmana obertes a diversos cursos per ajustar-ne el preu. Aquest curs, per primera vegada en molts anys, han pogut sortir de colònies els tres cursos previstos."
+        }
+      ]
+    },
+    "board": {
+      "title": "Nova Junta",
+      "intro": "Presentada a l'assemblea i aprovada per votació dels assistents.",
+      "members": [
+        {
+          "role": "Presidenta",
+          "name": "Adela Montes Segarra"
+        },
+        {
+          "role": "Tresorera",
+          "name": "Mónica Palma Gil"
+        },
+        {
+          "role": "Secretari",
+          "name": "Alberto Ruiz Castillo"
+        },
+        {
+          "role": "Vocal",
+          "name": "María Ascensión Castillo Rosales"
+        }
+      ],
+      "note": "La nova Junta vol donar continuïtat a la feina feta i sumar-hi millores, i fa una crida a incorporar més famílies, amb càrrec o a través de les comissions."
+    },
+    "qa": {
+      "title": "Precs i preguntes",
+      "items": [
+        {
+          "title": "Llibres i material",
+          "desc": "L'escola ha enviat un correu específic per a cada curs amb els imports i les dates. El material es paga a l'escola; l'AFA cobra els llibres reutilitzables i la quota de soci. El termini de pagament és el 31 d'agost."
+        },
+        {
+          "title": "Llibreries",
+          "desc": "Habitualment es treballa amb la llibreria Ginger Blau, que dona facilitats (unir vals de llibres no nominatius o fer la compra de diversos germans alhora), però els llibres es poden comprar a qualsevol establiment."
+        },
+        {
+          "title": "Excursions",
+          "desc": "Les gestiona directament l'escola (cal adreçar-se a en Ramón) i normalment es fraccionen en tres pagaments."
+        },
+        {
+          "title": "Activitats d'estiu",
+          "desc": "Es va recordar que la inscripció ja és oberta."
+        }
+      ]
+    },
+    "agreements": {
+      "title": "Acords",
+      "items": [
+        "S'aprova el tancament econòmic del curs 2025-2026 i es deixa constància que l'AFA és plenament solvent.",
+        "Queda constituïda la nova Junta amb la composició indicada.",
+        "Es recorda el termini del 31 d'agost per als pagaments de material, llibres i quota de soci."
+      ],
+      "signature": "Acta signada pel secretari, Alberto Ruiz Castillo, amb el vistiplau de la presidenta, Adela Montes Segarra."
+    },
+    "cta": {
+      "title": "ET NECESSITEM A TU!",
+      "desc": "L'AFA necessita la implicació de les famílies per seguir millorant l'escola dels nostres fills i filles.",
+      "contact_us": "Contactar",
+      "instagram": "Instagram",
+      "documents": "Documents i actes"
     }
   },
   "fees_page": {
