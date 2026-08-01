@@ -28,6 +28,7 @@ const CookiesPolicy = lazy(() => import('./pages/Legal/CookiesPolicy'));
 const SantJordiIdeasPage = lazy(() => import('./pages/SantJordiIdeasPage'));
 const AboutAfaPage = lazy(() => import('./pages/AboutAfaPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const AssembleaPage = lazy(() => import('./pages/AssembleaPage'));
 const MenjadorPage = lazy(() => import('./pages/MenjadorPage'));
 const AcollidaPage = lazy(() => import('./pages/AcollidaPage'));
 const ShopLanding = lazy(() => import('./features/shop/pages/ShopLanding').then(m => ({ default: m.ShopLanding })));
@@ -92,6 +93,7 @@ function App() {
                 <Route path="especial/sant-jordi" element={<SantJordiIdeasPage />} />
                 <Route path="sobre-afa" element={<AboutAfaPage />} />
                 <Route path="historia" element={<HistoryPage />} />
+                <Route path="assemblea" element={<AssembleaPage />} />
                 <Route path="menjador" element={<MenjadorPage />} />
                 <Route path="acollida" element={<AcollidaPage />} />
               </Route>

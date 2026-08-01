@@ -32,6 +32,7 @@
     "acollida_desc": "Horarios y tarifas",
     "menjador_desc": "Menús, precios e info",
     "about_desc": "Quiénes somos y la Junta",
+    "assemblea_desc": "Acuerdos y cuentas del curso",
     "history_desc": "Medio siglo de escuela",
     "news_desc": "Última hora del AFA",
     "documents_desc": "Recursos y descargas",
@@ -342,122 +343,166 @@
   "assemblea": {
     "title": "Asamblea General",
     "course": "Curso 2025-2026",
-    "subtitle": "Resumen de los puntos tratados, estado de cuentas y nuevos proyectos del AFA Escola Falguera.",
+    "subtitle": "Resumen de la Asamblea General Ordinaria del 29 de junio de 2026: estado de cuentas, balance de proyectos y renovación de la Junta.",
     "hero": {
-      "title": "La Asamblea: El corazón de nuestra comunidad",
-      "subtitle": "Descubre cómo tus ideas y participación transforman la escuela cada día."
+      "badge": "Asamblea General Ordinaria",
+      "title": "Asamblea General 2025-2026",
+      "subtitle": "Todo lo que se trató el 29 de junio de 2026: cierre económico del curso, balance de los cuatro años de la Junta saliente y votación de la nueva Junta.",
+      "acta_cta": "Consulta el acta completa"
     },
-    "cards": {
-      "members": {
-        "title": "Más de 400 familias",
-        "desc": "Somos una red fuerte comprometida con la educación de nuestros hijos."
-      },
-      "meetings": {
-        "title": "Asambleas Abiertas",
-        "desc": "Espacios participativos para debatir y decidir juntos el futuro del centro."
-      },
-      "decisions": {
-        "title": "Decidimos entre todos",
-        "desc": "Vota las iniciativas y proyectos que quieres ver realizados en la escuela."
-      }
+    "meta": {
+      "date_label": "Fecha",
+      "date_value": "Lunes, 29 de junio de 2026",
+      "time_label": "Hora",
+      "time_value": "De 18:00 a 19:00 h",
+      "place_label": "Lugar",
+      "place_value": "Escola Falguera — Sant Feliu de Llobregat",
+      "mode_label": "Modalidad",
+      "mode_value": "Presencial y por videollamada"
     },
-    "sections": {
-      "agenda": {
-        "title": "Orden del Día",
-        "items": [
-          "Estado de Cuentas",
-          "Proyectos Realizados",
-          "Cambio de Junta del AFA",
-          "Turno Abierto de Preguntas"
-        ]
-      },
-      "economics": {
-        "title": "Situación Económica",
-        "items": [
-          "Saldo positivo y ahorro de seguridad.",
-          "Sin deudas ni pagos pendientes.",
-          "Incremento de la recaudación gracias a la alta participación.",
-          "Fondo de reserva destinado a futuras inversiones.",
-          "Gestión transparente y auditada."
-        ]
-      },
-      "investments": {
-        "title": "Inversiones y Previsiones",
-        "items": [
-          "Mejoras en el patio infantil y primaria.",
-          "Compra de material digital (e-readers y tablets).",
-          "Renovación de material deportivo.",
-          "Subvención para colonias y excursiones.",
-          "Fondo solidario para familias."
-        ]
-      },
-      "functions": {
-        "title": "Funciones del AFA",
-        "items": [
-          "Gestión de extraescolares",
-          "Organización de fiestas",
-          "Recaudación de fondos",
-          "Intermediación familias-escuela",
-          "Mejora de instalaciones",
-          "Socialización de libros",
-          "Apoyo a familias"
-        ]
-      },
-      "quota": {
-        "title": "¿A qué destinamos la cuota?",
-        "items": [
-          "Material escolar colectivo",
-          "Fiestas tradicionales (Castañada, etc.)",
-          "Charlas educativas",
-          "Digitalización de la escuela",
-          "Fondo de ayuda escolar"
-        ]
-      },
-      "importance": {
-        "title": "¿Por qué es importante participar?",
-        "reason1": "Tu voz cuenta en las decisiones clave de la escuela.",
-        "reason2": "Ayudas a priorizar las inversiones y mejoras del centro.",
-        "reason3": "Fomentamos una comunidad escolar más fuerte y transparente."
-      },
-      "projects": {
-        "title": "Proyectos y Mejoras",
-        "commissions": {
-          "title": "Comisiones de Familias",
-          "desc": "Grupos activos de familias que trabajan para mejorar la escuela y dinamizar la comunidad educativa."
+    "agenda": {
+      "title": "Orden del día",
+      "items": [
+        "Estado de cuentas del curso 2025-2026",
+        "Balance de los proyectos de la Junta saliente",
+        "Presentación y votación de la nueva Junta",
+        "Ruegos y preguntas"
+      ]
+    },
+    "accounts": {
+      "title": "Estado de cuentas 2025-2026",
+      "intro": "La Junta saliente cierra el mandato con el AFA 100 % solvente, con todos los proveedores pagados y con fondos suficientes para que la nueva Junta pueda empezar con tranquilidad.",
+      "stats": [
+        {
+          "value": "100 %",
+          "label": "Solvencia",
+          "desc": "Sin deudas ni pagos pendientes con proveedores."
         },
-        "done": {
-          "title": "Hecho (24-25)",
-          "desc": "Proyectos y mejoras ejecutadas con éxito durante el último curso.",
-          "items": [
-            "Pintura pista",
-            "Huerto escolar",
-            "Sombra infantil",
-            "Banco de libros"
-          ]
+        {
+          "value": "6.300 €",
+          "label": "1.ª parte de la subvención",
+          "desc": "Cobrada pocos días antes de la asamblea. La segunda parte (unos 2.500 €) no llegará hasta septiembre."
         },
-        "future": {
-          "title": "Próximo (25-26)",
-          "desc": "Nuevos retos e iniciativas planificadas para el curso que viene.",
-          "items": [
-            "Renovación biblioteca",
-            "Patio inclusivo",
-            "Cocina propia",
-            "Aula polivalente"
-          ]
+        {
+          "value": "+6.500 €",
+          "label": "Estudi Assistit y Biblioteca",
+          "desc": "Partida principal de la subvención municipal, con un único proveedor."
+        },
+        {
+          "value": "~450 €",
+          "label": "Partida libre",
+          "desc": "Se decide conjuntamente con la escuela: robótica, tambores de 6.º o juegos, según el año."
         }
-      },
-      "board_change": {
-        "title": "Cambio Junta AFA",
-        "desc": "Renovación de cargos y nuevas incorporaciones.",
-        "important_title": "IMPORTANTE",
-        "important_desc": "Es vital trabajar juntos para seguir adelante.",
-        "call_to_action_title": "¡TE NECESITAMOS A TI!",
-        "call_to_action_desc": "El AFA necesita implicación de las familias para seguir mejorando la escuela de nuestros hijos e hijas."
-      },
-      "contact": {
-        "contact_us": "Contactar",
-        "instagram": "Instagram"
+      ],
+      "items": [
+        "El AFA adelanta el pago a los proveedores hasta que llega la subvención municipal, que desde la pandemia se cobra casi a final de curso. Por eso hay que mantener un colchón económico.",
+        "La partida de Agenda 21 es de cuantía reducida y se destina a cosas como tierra para el huerto o libros, según el año.",
+        "Aprovechando el margen de este curso se compraron juegos gigantes de madera al margen de la subvención, pensados para dinamizar espacios como el comedor. La escuela los ha integrado en su actividad diaria y se prevé una nueva partida para juegos.",
+        "Los pagos de extraescolares y acogidas se cerraron durante la misma semana: se devuelven los importes pagados de más y se reclaman las cantidades pendientes.",
+        "La cuota de socio ha pasado de menos del 20 % de las familias a prácticamente todas; solo dos familias de toda primaria han decidido no asociarse (I3, I4 e I5 no entran porque no usan libros reutilizables)."
+      ],
+      "thanks": {
+        "title": "Agradecimientos",
+        "desc": "Durante el primer año de mandato, la Asociación de Vecinos de la Falguera y el AFA de la Escola Salvador Espriu fueron clave para salir del déficit: en varias fiestas solidarias, la recaudación generada por la Escola Falguera se cedió íntegramente al AFA."
       }
+    },
+    "projects": {
+      "title": "Balance del mandato",
+      "intro": "Principales proyectos de los cuatro años de gestión de la Junta saliente.",
+      "items": [
+        {
+          "title": "Visibilidad en el barrio",
+          "desc": "El AFA forma parte de la Asociación de Vecinos de la Falguera y participa en los proyectos y fiestas del barrio."
+        },
+        {
+          "title": "Gegant y capgròs",
+          "desc": "Se conservó la cabeza original de la giganta y se construyó una nueva. En una votación abierta a las familias se eligió la figura de Valentina Tereshkova y, como AFA, se añadió un capgròs, «la fada de la natura». Queda pendiente recuperar los timbalers."
+        },
+        {
+          "title": "Aparcamiento escolar",
+          "desc": "Se consiguieron unas cinco plazas en la entrada para dejar a los niños. Hay que avisar al AFA de cualquier uso indebido para poder reclamar su control."
+        },
+        {
+          "title": "Pintura de la fachada",
+          "desc": "Proyecto en red con el Institut Olorda: el alumnado de la rama artística diseñó la propuesta, con motivos verdes y de robótica. Ya está aprobado por la escuela y el Ayuntamiento y se espera tenerlo terminado antes de septiembre."
+        },
+        {
+          "title": "Fiestas y dinamizaciones",
+          "desc": "La Castanya Week, el mercado de segunda mano, la chocolatada y el Enric Falguera, entre otras."
+        },
+        {
+          "title": "Movilización por la DANA",
+          "desc": "Junto al AFA Gaudí se impulsó una recogida solidaria a escala de pueblo que en pocos días llenó un tráiler de ropa, medicinas y material."
+        },
+        {
+          "title": "Web del AFA",
+          "desc": "afafalguera.com, creada durante este curso de transición como canal de comunicación con las familias más allá del WhatsApp y para digitalizar reservas e inscripciones de extraescolares."
+        },
+        {
+          "title": "Colonias",
+          "desc": "En 2024 el AFA organizó unas colonias propias de fin de semana abiertas a varios cursos para ajustar su precio. Este curso, por primera vez en muchos años, han podido salir de colonias los tres cursos previstos."
+        }
+      ]
+    },
+    "board": {
+      "title": "Nueva Junta",
+      "intro": "Presentada en la asamblea y aprobada por votación de los asistentes.",
+      "members": [
+        {
+          "role": "Presidenta",
+          "name": "Adela Montes Segarra"
+        },
+        {
+          "role": "Tesorera",
+          "name": "Mónica Palma Gil"
+        },
+        {
+          "role": "Secretario",
+          "name": "Alberto Ruiz Castillo"
+        },
+        {
+          "role": "Vocal",
+          "name": "María Ascensión Castillo Rosales"
+        }
+      ],
+      "note": "La nueva Junta quiere dar continuidad al trabajo hecho y sumar mejoras, y hace un llamamiento a incorporar a más familias, con cargo o a través de las comisiones."
+    },
+    "qa": {
+      "title": "Ruegos y preguntas",
+      "items": [
+        {
+          "title": "Libros y material",
+          "desc": "La escuela ha enviado un correo específico para cada curso con los importes y las fechas. El material se paga a la escuela; el AFA cobra los libros reutilizables y la cuota de socio. El plazo de pago es hasta el 31 de agosto."
+        },
+        {
+          "title": "Librerías",
+          "desc": "Habitualmente se trabaja con la librería Ginger Blau, que da facilidades (unir vales de libros no nominativos o hacer la compra de varios hermanos a la vez), pero los libros se pueden comprar en cualquier establecimiento."
+        },
+        {
+          "title": "Excursiones",
+          "desc": "Las gestiona directamente la escuela (hay que dirigirse a Ramón) y normalmente se fraccionan en tres pagos."
+        },
+        {
+          "title": "Actividades de verano",
+          "desc": "Se recordó que la inscripción ya está abierta."
+        }
+      ]
+    },
+    "agreements": {
+      "title": "Acuerdos",
+      "items": [
+        "Se aprueba el cierre económico del curso 2025-2026 y se deja constancia de que el AFA es plenamente solvente.",
+        "Queda constituida la nueva Junta con la composición indicada.",
+        "Se recuerda el plazo del 31 de agosto para los pagos de material, libros y cuota de socio."
+      ],
+      "signature": "Acta firmada por el secretario, Alberto Ruiz Castillo, con el visto bueno de la presidenta, Adela Montes Segarra."
+    },
+    "cta": {
+      "title": "¡TE NECESITAMOS!",
+      "desc": "El AFA necesita la implicación de las familias para seguir mejorando la escuela de nuestros hijos e hijas.",
+      "contact_us": "Contactar",
+      "instagram": "Instagram",
+      "documents": "Documentos y actas"
     }
   },
   "fees_page": {

@@ -13,6 +13,7 @@ import {
   Sun,
   UtensilsCrossed,
   Info,
+  Users,
   BookOpen,
   Newspaper,
   FileText,
@@ -52,6 +53,7 @@ const SERVICES_ITEMS: MenuItem[] = [
 
 const MORE_ITEMS: MenuItem[] = [
   { icon: Info, labelKey: 'nav.about_afa', fallback: 'Sobre l\'AFA', descKey: 'nav_menu.about_desc', descFallback: 'Qui som i la Junta', path: '/sobre-afa', iconBg: 'bg-blue-500 text-white' },
+  { icon: Users, labelKey: 'assemblea.title', fallback: 'Assemblea', descKey: 'nav_menu.assemblea_desc', descFallback: 'Acords i comptes del curs', path: '/assemblea', iconBg: 'bg-indigo-500 text-white' },
   { icon: BookOpen, labelKey: 'history.title', fallback: 'Història', descKey: 'nav_menu.history_desc', descFallback: 'Mig segle d\'escola', path: '/historia', iconBg: 'bg-rose-500 text-white' },
   { icon: Newspaper, labelKey: 'nav.news', fallback: 'Notícies', descKey: 'nav_menu.news_desc', descFallback: 'Última hora de l\'AFA', path: '/noticies', iconBg: 'bg-emerald-500 text-white' },
   { icon: FileText, labelKey: 'nav.documents', fallback: 'Documents', descKey: 'nav_menu.documents_desc', descFallback: 'Recursos i descàrregues', path: '/documents', iconBg: 'bg-slate-500 text-white' },
@@ -61,7 +63,7 @@ const MORE_ITEMS: MenuItem[] = [
 
 const ACTIVITIES_PATHS = ['/extraescolars', '/quotes', '/calendari'];
 const SERVICES_PATHS = ['/acollida', '/menjador'];
-const MORE_PATHS = ['/sobre-afa', '/historia', '/noticies', '/documents', '/contacte'];
+const MORE_PATHS = ['/sobre-afa', '/assemblea', '/historia', '/noticies', '/documents', '/contacte'];
 
 export function DesktopNav() {
   // i18next types t() to literal keys only; this nav uses dynamic keys and
@@ -107,8 +109,8 @@ export function DesktopNav() {
   return (
     <nav className="hidden lg:flex items-center justify-between px-8 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-white/10 sticky top-0 z-50">
       <NavLink to="/" className="flex items-center gap-4 group">
-        <div className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700 overflow-hidden bg-white transition-transform group-hover:scale-110 shadow-sm">
-          <img alt="AFA Escola Logo" className="w-full h-full object-cover p-0.5" src={branding.logo_url} />
+        <div className="w-10 h-10 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden bg-white transition-transform group-hover:scale-110 shadow-sm shrink-0 flex items-center justify-center p-1">
+          <img alt="AFA Escola Logo" className="max-w-full max-h-full object-contain" src={branding.logo_url} />
         </div>
         <span className="font-bold text-lg text-slate-800 dark:text-white">{branding.site_name}</span>
       </NavLink>

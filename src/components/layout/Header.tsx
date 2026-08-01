@@ -12,10 +12,10 @@ export function Header() {
   return (
     <header className="px-6 py-4 flex items-center justify-between lg:hidden">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full border-2 border-primary/20 overflow-hidden bg-white shadow-sm">
-          <img 
-            alt="AFA Escola Logo" 
-            className="w-full h-full object-cover" 
+        <div className="w-12 h-12 rounded-xl border border-primary/20 overflow-hidden bg-white shadow-sm shrink-0 flex items-center justify-center p-1">
+          <img
+            alt="AFA Escola Logo"
+            className="max-w-full max-h-full object-contain"
             src={branding.logo_url}
           />
         </div>
