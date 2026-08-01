@@ -35,7 +35,6 @@ const LoginPage = lazy(() => import('./pages/auth/LoginPage').then(m => ({ defau
 const PublicFormPage = lazy(() => import('./features/forms/pages/PublicFormPage'));
 
 // Admin pages
-const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout').then(m => ({ default: m.AdminLayout })));
 const Dashboard = lazy(() => import('./pages/admin/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
 const InventoryPage = lazy(() => import('./pages/admin/shop/InventoryPage').then(m => ({ default: m.InventoryPage })));
@@ -97,7 +96,7 @@ function App() {
                 <Route path="acollida" element={<AcollidaPage />} />
               </Route>
 
-              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/login" element={<Navigate to="/login" replace />} />
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
