@@ -1,0 +1,1 @@
+function e(e){return(e||``).normalize(`NFD`).replace(/[̀-ͯ]/g,``).toLowerCase().trim().replace(/[^a-z0-9]+/g,`-`).replace(/^-+|-+$/g,``)}function t(t){let n=e(t.title||``);return n?`/extraescolars/${t.id}/${n}`:`/extraescolars/${t.id}`}export{e as n,t};
