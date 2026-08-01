@@ -5,7 +5,10 @@ const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") || "https://afafalguera
 const FALLBACK_GEMINI_KEY = Deno.env.get("GEMINI_API_KEY") || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
 const GEMINI_MODEL = "gemini-2.5-flash";
+const MAX_TEXT_CHARS = 16000;
+const MAX_BULK_FIELDS = 40;
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 /**
@@ -48,10 +51,39 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// This proxy burns a shared Gemini quota, so it is admin-only: the caller must
+// present a real user JWT (not the public anon key) belonging to an admin.
+async function requireAdmin(req: Request): Promise<{ status: number; error: string } | null> {
+  const authHeader = req.headers.get("Authorization") || "";
+  if (!authHeader.toLowerCase().startsWith("bearer ")) {
+    return { status: 401, error: "Missing Authorization header" };
+  }
+  if (!SUPABASE_URL || !ANON_KEY) {
+    return { status: 500, error: "Auth not configured" };
+  }
+
+  const sb = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data: userData, error: userError } = await sb.auth.getUser();
+  if (userError || !userData?.user) {
+    return { status: 401, error: "Invalid or missing user session" };
+  }
+
+  const { data: isAdmin, error: rpcError } = await sb.rpc("is_admin");
+  if (!rpcError && isAdmin === true) return null;
+
+  const { data: profile } = await sb
+    .from("profiles")
+    .select("role")
+    .eq("id", userData.user.id)
+    .maybeSingle();
+  if (profile?.role === "admin" || profile?.role === "coordinator") return null;
+
+  return { status: 403, error: "Admin privileges required" };
+}
 
 function normalizeLang(value: string | undefined, fallback: string): string {
   const raw = (value || fallback).toLowerCase().trim();
@@ -60,10 +92,10 @@ function normalizeLang(value: string | undefined, fallback: string): string {
   return fallback;
 }
 
-function jsonResponse(body: unknown, status: number, extraHeaders: Record<string, string> = {}) {
+function jsonResponse(req: Request, body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json", ...extraHeaders },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
@@ -153,12 +185,15 @@ Deno.serve(async (req: Request) => {
   }
 
   if (req.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405);
+    return jsonResponse(req, { error: "Method not allowed" }, 405);
   }
 
-  const cors = getCorsHeaders(req);
-
   try {
+    const denied = await requireAdmin(req);
+    if (denied) {
+      return jsonResponse(req, { error: denied.error }, denied.status);
+    }
+
     const payload = await req.json() as Record<string, unknown>;
 
     // --- Bulk mode ---
@@ -167,35 +202,44 @@ Deno.serve(async (req: Request) => {
       const sourceLang = normalizeLang(payload.sourceLang as string | undefined, "es");
       const targetLangs = (payload.targetLangs as string[]).map((l) => normalizeLang(l, "ca"));
 
-      if (!Object.keys(fields).length) {
-        return new Response(JSON.stringify({ error: "fields is empty" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      const fieldKeys = Object.keys(fields);
+      if (!fieldKeys.length) {
+        return jsonResponse(req, { error: "fields is empty" }, 400);
+      }
+      if (fieldKeys.length > MAX_BULK_FIELDS) {
+        return jsonResponse(req, { error: `Too many fields (max ${MAX_BULK_FIELDS})` }, 413);
+      }
+
+      const totalChars = fieldKeys.reduce((sum, key) => sum + String(fields[key] ?? "").length, 0);
+      if (totalChars > MAX_TEXT_CHARS) {
+        return jsonResponse(req, { error: `Payload too long (max ${MAX_TEXT_CHARS} chars)` }, 413);
       }
 
       const translations = await translateBulk(fields, sourceLang, targetLangs);
-      return new Response(JSON.stringify({ translations }), { status: 200, headers: { ...cors, "Content-Type": "application/json" } });
+      return jsonResponse(req, { translations }, 200);
     }
 
     // --- Single mode (backward compat) ---
     const text = ((payload.text as string) || "").trim();
     if (!text) {
-      return new Response(JSON.stringify({ error: "Missing text" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      return jsonResponse(req, { error: "Missing text" }, 400);
     }
-    if (text.length > 16000) {
-      return new Response(JSON.stringify({ error: "Text too long" }), { status: 413, headers: { ...cors, "Content-Type": "application/json" } });
+    if (text.length > MAX_TEXT_CHARS) {
+      return jsonResponse(req, { error: "Text too long" }, 413);
     }
 
     const sourceLang = normalizeLang(payload.sourceLang as string | undefined, "auto");
     const targetLang = normalizeLang(payload.targetLang as string | undefined, "es");
 
     if (targetLang === "auto") {
-      return new Response(JSON.stringify({ error: "Invalid targetLang" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      return jsonResponse(req, { error: "Invalid targetLang" }, 400);
     }
 
     const translatedText = await translateSingle(text, sourceLang === "auto" ? "es" : sourceLang, targetLang);
-    return new Response(JSON.stringify({ translatedText, sourceLang, targetLang }), { status: 200, headers: { ...cors, "Content-Type": "application/json" } });
+    return jsonResponse(req, { translatedText, sourceLang, targetLang }, 200);
 
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
-    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { ...cors, "Content-Type": "application/json" } });
+    return jsonResponse(req, { error: message }, 500);
   }
 });

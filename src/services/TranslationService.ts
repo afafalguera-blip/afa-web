@@ -1,3 +1,5 @@
+import { supabase } from '../lib/supabase';
+
 export interface TranslationResult {
   title: string;
   content?: string;
@@ -47,12 +49,16 @@ function writeCache(key: string, value: string): void {
   }
 }
 
-function proxyHeaders(): Record<string, string> {
+// El proxy solo acepta administradores: hay que mandar el access token de la
+// sesion, no la anon key (que es publica y no identifica a ningun usuario).
+async function proxyHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (SUPABASE_ANON_KEY) {
-    headers.apikey = SUPABASE_ANON_KEY;
-    headers.Authorization = `Bearer ${SUPABASE_ANON_KEY}`;
-  }
+  if (SUPABASE_ANON_KEY) headers.apikey = SUPABASE_ANON_KEY;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Translation proxy requires an authenticated admin session');
+  headers.Authorization = `Bearer ${session.access_token}`;
+
   return headers;
 }
 
@@ -76,7 +82,7 @@ async function translateBulkViaProxy(
 
   const response = await fetchWithTimeout(TRANSLATION_PROXY_URL, {
     method: 'POST',
-    headers: proxyHeaders(),
+    headers: await proxyHeaders(),
     body: JSON.stringify({ fields, sourceLang, targetLangs }),
   });
 
@@ -94,7 +100,7 @@ async function translateViaProxy(text: string, sourceLang: string, targetLang: s
 
   const response = await fetchWithTimeout(TRANSLATION_PROXY_URL, {
     method: 'POST',
-    headers: proxyHeaders(),
+    headers: await proxyHeaders(),
     body: JSON.stringify({ text, sourceLang, targetLang }),
   });
 

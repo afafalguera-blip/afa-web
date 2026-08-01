@@ -78,6 +78,14 @@ export function InscriptionDetailsModal({ inscription, onClose }: InscriptionDet
                   <label className="text-xs font-medium text-neutral-500 uppercase">Curs</label>
                   <p className="text-neutral-900">{inscription.course}</p>
                 </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 uppercase">Escola</label>
+                  <p className="text-neutral-900">
+                    {inscription.is_falguera === false
+                      ? (inscription.external_school?.trim() || 'Extern (sense especificar)')
+                      : 'Escola Falguera'}
+                  </p>
+                </div>
               </div>
             </div>
 

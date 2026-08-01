@@ -20,6 +20,8 @@ interface Student {
   healthInfo: string;
   imageRights: string;    // "si" | "no"
   canLeaveAlone: string;  // "true" | "false"
+  isFalguera: string;     // "true" | "false" — pertenece a la Escola Falguera
+  externalSchool: string; // escuela de procedencia si es externo
 }
 
 interface ParentInfo {
@@ -40,6 +42,7 @@ interface AdditionalInfo {
 const emptyStudent = (): Student => ({
   name: '', surname: '', course: '', activities: [],
   healthInfo: '', imageRights: 'si', canLeaveAlone: 'false',
+  isFalguera: 'true', externalSchool: '',
 });
 
 export default function InscriptionPage() {
@@ -245,6 +248,12 @@ export default function InscriptionPage() {
       return;
     }
 
+    if (students.some(s => s.isFalguera === 'false' && !s.externalSchool.trim())) {
+      setError(t('inscription.form.error_external_school'));
+      setLoading(false);
+      return;
+    }
+
     // Required enabled optional field: DNI (others are free-text/optional or radios)
     if (isFieldOn('parent_dni') && isFieldReq('parent_dni') && !parentInfo.dni.trim()) {
       setError(fieldLabel('parent_dni', 'inscription.form.dni'));
@@ -281,6 +290,8 @@ export default function InscriptionPage() {
           surname: s.surname,
           course: s.course,
           activities: s.activities,
+          is_falguera: s.isFalguera === 'true',
+          external_school: s.isFalguera === 'false' ? (s.externalSchool.trim() || null) : null,
           health_info: isFieldOn('health_info') ? (s.healthInfo || null) : null,
           image_auth_consent: isFieldOn('image_rights') ? s.imageRights : null,
           can_leave_alone: isFieldOn('leave_alone') ? s.canLeaveAlone === 'true' : null,
@@ -520,6 +531,33 @@ export default function InscriptionPage() {
                         {COURSES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                       </select>
                     </div>
+                  </div>
+
+                  {/* School: Falguera pupil or external */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">{t('inscription.form.school_question')} <span className="text-red-500">*</span></label>
+                    <div className="flex space-x-6">
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" name={`school_${index}`} value="true" checked={student.isFalguera === 'true'} onChange={() => updateStudent(index, 'isFalguera', 'true')} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                        <span>{t('inscription.form.yes')}</span>
+                      </label>
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input type="radio" name={`school_${index}`} value="false" checked={student.isFalguera === 'false'} onChange={() => updateStudent(index, 'isFalguera', 'false')} className="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                        <span>{t('inscription.form.no')}</span>
+                      </label>
+                    </div>
+                    {student.isFalguera === 'false' && (
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">{t('inscription.form.external_school_label')} <span className="text-red-500">*</span></label>
+                        <input
+                          className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                          value={student.externalSchool}
+                          onChange={e => updateStudent(index, 'externalSchool', e.target.value)}
+                          placeholder={t('inscription.form.external_school_placeholder')}
+                          required
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Activities Selection */}

@@ -20,7 +20,11 @@ export function Home() {
   const { isAdmin } = useAuth();
   const homepageConfig = useHomepageConfig();
   const [aboutExpanded, setAboutExpanded] = useState(false);
-  const [heroConfig, setHeroConfig] = useState<HeroConfig | null>(null);
+  // El hero se hidrata de la cache en el primer render: si no, el primer paint
+  // usa la imagen por defecto y luego salta a la real (parpadeo visible).
+  const [cachedHero] = useState(() => ConfigService.getCachedConfigSync<HeroConfig>('hero'));
+  const [heroConfig, setHeroConfig] = useState<HeroConfig | null>(cachedHero);
+  const [heroResolved, setHeroResolved] = useState(cachedHero !== null || MAINTENANCE_MODE);
   const [aboutConfig, setAboutConfig] = useState<AboutConfig | null>(null);
   const [contactConfig, setContactConfig] = useState<ContactConfig | null>(null);
   const [isHeroModalOpen, setIsHeroModalOpen] = useState(false);
@@ -29,14 +33,18 @@ export function Home() {
   useEffect(() => {
     if (MAINTENANCE_MODE) return;
     const fetchConfigs = async () => {
-      const [hero, about, contact] = await Promise.all([
-        ConfigService.getHeroConfig(),
-        ConfigService.getAboutConfig(),
-        ConfigService.getContactConfig()
-      ]);
-      if (hero) setHeroConfig(hero);
-      if (about) setAboutConfig(about);
-      if (contact) setContactConfig(contact);
+      try {
+        const [hero, about, contact] = await Promise.all([
+          ConfigService.getHeroConfig(),
+          ConfigService.getAboutConfig(),
+          ConfigService.getContactConfig()
+        ]);
+        if (hero) setHeroConfig(hero);
+        if (about) setAboutConfig(about);
+        if (contact) setContactConfig(contact);
+      } finally {
+        setHeroResolved(true);
+      }
     };
     fetchConfigs();
   }, []);
@@ -88,6 +96,7 @@ export function Home() {
       <HomeHero
         isAdmin={isAdmin}
         heroConfig={heroConfig}
+        heroResolved={heroResolved}
         onOpenModal={() => setIsHeroModalOpen(true)}
       />
 

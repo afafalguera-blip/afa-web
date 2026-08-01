@@ -8,20 +8,30 @@ import { useBranding } from '../../hooks/useBranding';
 interface HomeHeroProps {
     isAdmin: boolean;
     heroConfig: HeroConfig | null;
+    heroResolved: boolean;
     onOpenModal: () => void;
 }
 
-export const HomeHero: React.FC<HomeHeroProps> = ({ isAdmin, heroConfig, onOpenModal }) => {
+export const HomeHero: React.FC<HomeHeroProps> = ({ isAdmin, heroConfig, heroResolved, onOpenModal }) => {
     const { t } = useTranslation();
     const branding = useBranding();
 
+    // Mientras no se sepa cual es el hero configurado no se pinta la imagen por
+    // defecto: apunta a otro fichero distinto y el cambio se ve como un salto.
+    const heroSrc = heroConfig?.image_url || (heroResolved ? branding.default_hero_url : null);
+
     return (
         <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none group">
-            <LazyImage
-                src={heroConfig?.image_url || branding.default_hero_url}
-                alt="Escola Hero"
-                className="w-full h-full object-cover bg-slate-200"
-            />
+            {heroSrc ? (
+                <LazyImage
+                    src={heroSrc}
+                    alt="Escola Hero"
+                    className="w-full h-full object-cover bg-slate-200"
+                    loading="eager"
+                />
+            ) : (
+                <div className="w-full h-full bg-slate-200 animate-pulse" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 lg:p-8">
                 <h1 className="text-2xl lg:text-4xl font-bold text-white drop-shadow-md leading-tight">
                     {heroConfig?.title || t('home.welcome_title') || "Benvinguts a l'AFA Falguera"}

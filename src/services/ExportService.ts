@@ -24,6 +24,8 @@ interface FlattenedInscriptionRow {
   health_info?: string;
   image_auth_consent?: string;
   can_leave_alone?: boolean;
+  is_falguera?: boolean;
+  external_school?: string | null;
   parent: {
     id: string | number;
     created_at?: string;
@@ -76,6 +78,8 @@ export const ExportService = {
           health_info: (ins as InscriptionFlat).health_info,
           image_auth_consent: (ins as InscriptionFlat).image_auth_consent,
           can_leave_alone: (ins as InscriptionFlat).can_leave_alone,
+          is_falguera: (ins as InscriptionFlat).is_falguera,
+          external_school: (ins as InscriptionFlat).external_school,
         }];
 
       students.forEach((student) => {
@@ -84,6 +88,8 @@ export const ExportService = {
           health_info: student.health_info,
           image_auth_consent: student.image_auth_consent,
           can_leave_alone: student.can_leave_alone,
+          is_falguera: student.is_falguera,
+          external_school: student.external_school,
         };
 
         if (shouldSort && activities.length > 0) {
@@ -145,6 +151,7 @@ export const ExportService = {
       exportData = rows.map(r => ({
         'Actividad': r.single_activity,
         'Curso': r.course,
+        'Escuela': r.is_falguera === false ? (r.external_school?.trim() || 'Externo') : 'Falguera',
         'Nombre': r.name,
         'Apellidos': r.surname,
         'Socio AFA': r.parent.afa_member ? 'Sí' : 'No',
@@ -156,6 +163,7 @@ export const ExportService = {
         'Fecha': r.parent.created_at ? new Date(r.parent.created_at).toLocaleDateString('es-ES') : '',
         'Actividad': r.single_activity,
         'Curso': r.course,
+        'Escuela': r.is_falguera === false ? (r.external_school?.trim() || 'Externo') : 'Falguera',
         'Nombre Alumno': r.name,
         'Apellidos Alumno': r.surname,
         'Padre/Madre/Tutor': String(r.parent.parent_name || ''),

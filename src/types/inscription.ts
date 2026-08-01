@@ -8,6 +8,8 @@ export interface InscriptionStudent {
   health_info?: string;
   image_auth_consent?: string; // 'si' | 'no'
   can_leave_alone?: boolean;
+  is_falguera?: boolean;       // pertenece a la Escola Falguera (false = externo)
+  external_school?: string | null; // escuela de procedencia si es externo
 }
 
 export type InscriptionStatus = 'active' | 'alta' | 'pending' | 'baja' | 'suspended';
@@ -95,6 +97,8 @@ export interface InscriptionFlat {
   health_info?: string;
   image_auth_consent?: string;
   can_leave_alone?: boolean;
+  is_falguera?: boolean;
+  external_school?: string | null;
 }
 
 // Filters for dashboard
