@@ -10,7 +10,6 @@ export function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState(''); // Only for sign in
     const [loading, setLoading] = useState(false);
-    const [isSignUp, setIsSignUp] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
     const location = useLocation();
@@ -31,17 +30,6 @@ export function LoginPage() {
         setErrorMsg('');
 
         try {
-            if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                });
-                if (error) throw error;
-                alert('Revisa el teu correu per confirmar el registre!');
-                setLoading(false);
-                return;
-            }
-
             const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
@@ -89,7 +77,7 @@ export function LoginPage() {
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md relative z-10">
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-bold text-primary mb-2">Benvinguts a l'AFA</h1>
-                    <p className="text-slate-500">{isSignUp ? 'Crea un compte' : 'Inicia sessió'}</p>
+                    <p className="text-slate-500">Inicia sessió</p>
                 </div>
 
                 {errorMsg && (
@@ -125,7 +113,7 @@ export function LoginPage() {
                         disabled={loading}
                         className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors"
                     >
-                        {loading ? 'Carregant...' : isSignUp ? 'Registrar-se' : 'Iniciar Sessió'}
+                        {loading ? 'Carregant...' : 'Iniciar Sessió'}
                     </button>
                 </form>
 
@@ -144,13 +132,7 @@ export function LoginPage() {
                 </button>
 
                 <p className="mt-8 text-center text-sm text-slate-500">
-                    {isSignUp ? 'Ja tens compte?' : 'No tens compte?'}
-                    <button
-                        onClick={() => setIsSignUp(!isSignUp)}
-                        className="ml-1 text-primary font-bold hover:underline"
-                    >
-                        {isSignUp ? 'Inicia Sessió' : 'Registra\'t'}
-                    </button>
+                    El registre està tancat. Si necessites accés, contacta amb l'AFA.
                 </p>
             </div>
         </div>
