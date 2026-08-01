@@ -46,6 +46,8 @@ export function flattenInscriptions(inscriptions: (Inscription | InscriptionRaw)
         health_info: student.health_info ?? (item as InscriptionRaw).health_info,
         image_auth_consent: student.image_auth_consent ?? (item as InscriptionRaw).image_auth_consent,
         can_leave_alone: student.can_leave_alone ?? (item as InscriptionRaw).can_leave_alone,
+        is_falguera: student.is_falguera,
+        external_school: student.external_school,
       }));
     }
 

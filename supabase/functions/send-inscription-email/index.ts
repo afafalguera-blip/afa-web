@@ -29,6 +29,7 @@ const getTranslations = (lang: string) => {
       summaryTitle: "Resumen de la inscripción",
       studentLabel: "Alumno/a",
       courseLabel: "Curso",
+      schoolLabel: "Escuela",
       activitiesLabel: "Actividades",
       nextTitle: "🔔 ¿Y ahora qué?",
       nextBody: "Tu plaza queda pendiente de confirmación. Para formalizar la inscripción recuerda hacer el pago por transferencia según las instrucciones de la web. Nos pondremos en contacto contigo si necesitamos algún dato más.",
@@ -41,6 +42,7 @@ const getTranslations = (lang: string) => {
       summaryTitle: "Resum de la inscripció",
       studentLabel: "Alumne/a",
       courseLabel: "Curs",
+      schoolLabel: "Escola",
       activitiesLabel: "Activitats",
       nextTitle: "🔔 I ara què?",
       nextBody: "La teva plaça queda pendent de confirmació. Per formalitzar la inscripció recorda fer el pagament per transferència segons les instruccions del web. Ens posarem en contacte amb tu si necessitem alguna dada més.",
@@ -53,6 +55,7 @@ const getTranslations = (lang: string) => {
       summaryTitle: "Enrolment summary",
       studentLabel: "Student",
       courseLabel: "Grade",
+      schoolLabel: "School",
       activitiesLabel: "Activities",
       nextTitle: "🔔 What's next?",
       nextBody: "Your place is pending confirmation. To complete the enrolment, remember to pay by bank transfer following the instructions on the website. We will contact you if we need any further details.",
@@ -67,6 +70,8 @@ interface Student {
   surname?: string;
   course?: string;
   activities?: string[];
+  is_falguera?: boolean;
+  external_school?: string | null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -96,6 +101,9 @@ Deno.serve(async (req: Request) => {
     const studentsHtml = students.map((s) => {
       const fullName = [s.name, s.surname].filter(Boolean).join(" ") || "-";
       const course = s.course ? (COURSE_LABELS[s.course] || s.course) : "-";
+      const schoolLine = s.is_falguera === false
+        ? `<p style="margin:0 0 8px 0;color:#64748b;font-size:13px;">${t.schoolLabel}: <strong style="color:#334155;">${s.external_school || "-"}</strong></p>`
+        : "";
       const acts = (s.activities && s.activities.length)
         ? s.activities.map((a) => `<li style="margin: 2px 0;">${a}</li>`).join("")
         : `<li style="margin: 2px 0; color:#94a3b8;">-</li>`;
@@ -103,6 +111,7 @@ Deno.serve(async (req: Request) => {
         <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:16px;margin-bottom:12px;">
           <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${fullName}</p>
           <p style="margin:4px 0 8px 0;color:#64748b;font-size:13px;">${t.courseLabel}: <strong style="color:#334155;">${course}</strong></p>
+          ${schoolLine}
           <p style="margin:0 0 4px 0;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">${t.activitiesLabel}</p>
           <ul style="margin:0;padding-left:18px;color:#1e293b;font-size:14px;">${acts}</ul>
         </div>`;
