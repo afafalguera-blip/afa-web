@@ -45,7 +45,7 @@ const getTranslations = (lang: string) => {
       schoolLabel: "Escuela",
       activitiesLabel: "Actividades",
       nextTitle: "🔔 ¿Y ahora qué?",
-      nextBody: "Tu plaza queda pendiente de confirmación. Para formalizar la inscripción recuerda hacer el pago por transferencia según las instrucciones de la web. Nos pondremos en contacto contigo si necesitamos algún dato más.",
+      nextBody: "Tu plaza queda pendiente de confirmación. <strong>De momento no hay que hacer ningún pago.</strong> Hasta que no tengamos todas las preinscripciones no sabremos qué extraescolares saldrán adelante: cuando estén confirmadas, os informaremos de las actividades definitivas y del plazo para hacer el pago. Nos pondremos en contacto contigo si necesitamos algún dato más.",
       footer: "Este correo se ha enviado automáticamente desde el sistema de gestión del AFA. Si no reconoces esta inscripción, responde a este correo.",
     },
     ca: {
@@ -58,7 +58,7 @@ const getTranslations = (lang: string) => {
       schoolLabel: "Escola",
       activitiesLabel: "Activitats",
       nextTitle: "🔔 I ara què?",
-      nextBody: "La teva plaça queda pendent de confirmació. Per formalitzar la inscripció recorda fer el pagament per transferència segons les instruccions del web. Ens posarem en contacte amb tu si necessitem alguna dada més.",
+      nextBody: "La teva plaça queda pendent de confirmació. <strong>De moment no cal fer cap pagament.</strong> Fins que no tinguem totes les preinscripcions no sabrem quines extraescolars tiraran endavant: quan estiguin confirmades, us informarem de les activitats definitives i del termini per fer el pagament. Ens posarem en contacte amb tu si necessitem alguna dada més.",
       footer: "Aquest correu s'ha enviat automàticament des del sistema de gestió de l'AFA. Si no reconeixes aquesta inscripció, respon a aquest correu.",
     },
     en: {
@@ -71,7 +71,7 @@ const getTranslations = (lang: string) => {
       schoolLabel: "School",
       activitiesLabel: "Activities",
       nextTitle: "🔔 What's next?",
-      nextBody: "Your place is pending confirmation. To complete the enrolment, remember to pay by bank transfer following the instructions on the website. We will contact you if we need any further details.",
+      nextBody: "Your place is pending confirmation. <strong>No payment is needed yet.</strong> Until all pre-registrations are in we will not know which after-school activities go ahead: once confirmed, we will let you know the final activities and the payment deadline. We will contact you if we need any further details.",
       footer: "This email was sent automatically from the AFA management system. If you do not recognise this enrolment, please reply to this email.",
     },
   };
