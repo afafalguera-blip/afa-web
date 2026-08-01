@@ -45,11 +45,11 @@ export function FinancialStatsCards({ financial, shop }: Props) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       {cards.map((card, i) => (
-        <div key={i} className="bg-white p-6 rounded-lg shadow-sm border border-neutral-100 flex items-center gap-4">
+        <div key={i} className="bg-white p-6 rounded-lg border border-neutral-200 flex items-center gap-4">
           <div className={`p-3 rounded-lg ${card.bg}`}>
-            <card.icon className={`w-6 h-6 ${card.color}`} />
+            <card.icon className={`w-6 h-6 ${card.color}`} aria-hidden="true" />
           </div>
           <div>
             <p className="text-sm font-medium text-neutral-500">{card.title}</p>

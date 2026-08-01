@@ -135,9 +135,16 @@ export interface BookPricesConfig {
 }
 
 // Configurable monthly-fee rules applied on top of per-activity prices.
+// Consumed by the SQL generators: get_fee_rules() → is_activity_excluded() →
+// student_monthly_fee() → generate_monthly_payments[_only_active]().
 export interface FeeRulesConfig {
-  // Activity titles NOT billed by the AFA (e.g. English → external academy).
-  exclude_titles: string[];
+  // Activities NOT billed by the AFA (e.g. English → external academy),
+  // referenced by stable `activities.id`. Canonical since migration
+  // 20260801130000: renaming an activity no longer breaks fee generation.
+  exclude_activity_ids: number[];
+  // Legacy title-based exclusions. The SQL still falls back to these while
+  // `exclude_activity_ids` is empty, so pre-migration configs keep working.
+  exclude_titles?: string[];
   // Flat combined price when a pupil takes >= min_activities billable activities.
   multiactivity: {
     min_activities: number;

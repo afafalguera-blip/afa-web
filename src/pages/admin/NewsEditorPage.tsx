@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Save, ChevronLeft, Wand2, Eye, EyeOff } from 'lucide-react';
+import { Save, ChevronLeft, Wand2, Eye, EyeOff, Newspaper } from 'lucide-react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -20,6 +20,9 @@ import {
   normalizeTranslations,
   type NewsFormData
 } from '../../services/admin/AdminNewsEditorService';
+import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
+import { useToast } from '../../components/common/Toast';
+import { useDirtyGuard } from '../../hooks/useDirtyGuard';
 import { EditorToolbar } from '../../components/admin/news/EditorToolbar';
 import { NewsEditorSidebar } from '../../components/admin/news/NewsEditorSidebar';
 import { NewsPreview } from '../../components/admin/news/NewsPreview';
@@ -35,6 +38,7 @@ export default function NewsEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
 
   const [loading, setLoading] = useState(id !== 'new');
   const [saving, setSaving] = useState(false);
@@ -79,6 +83,9 @@ export default function NewsEditorPage() {
   const metrics = useMemo(() => getReadabilityMetrics(activeContent), [activeContent]);
   const previewHtml = useMemo(() => sanitizeRichTextHtml(activeContent), [activeContent]);
 
+  // Shared guard: registers beforeunload and exposes the in-app confirmation.
+  const { confirmDiscard } = useDirtyGuard(isDirty && !loading);
+
   // Load article data
   useEffect(() => {
     const loadData = async () => {
@@ -108,7 +115,7 @@ export default function NewsEditorPage() {
         setInitialSnapshot(JSON.stringify(data));
       } catch (error) {
         console.error('Error fetching article:', error);
-        alert('Error cargando la noticia');
+        toast.error(t('admin.news.load_error', 'No s\'ha pogut carregar la notícia'));
         navigate('/admin/news');
       } finally {
         setLoading(false);
@@ -116,6 +123,8 @@ export default function NewsEditorPage() {
     };
 
     loadData();
+    // toast is stable enough for this one-shot loader; re-running on it would refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, navigate, draftKey]);
 
   // Sync editor content on language change
@@ -136,17 +145,6 @@ export default function NewsEditorPage() {
     return () => window.clearTimeout(timer);
   }, [draftKey, formData, loading]);
 
-  // Warn on unsaved changes
-  useEffect(() => {
-    const handler = (event: BeforeUnloadEvent) => {
-      if (!isDirty) return;
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [isDirty]);
-
   const updateTranslationField = (lang: Lang, field: TranslationField, value: string) => {
     setFormData((prev) => {
       const next: NewsFormData = {
@@ -162,7 +160,10 @@ export default function NewsEditorPage() {
 
   const handleAutoTranslate = async () => {
     const sourceContent = formData.translations[activeLang];
-    if (!sourceContent.title.trim()) { alert(t('admin.news.fill_source_first')); return; }
+    if (!sourceContent.title.trim()) {
+      toast.error(t('admin.news.fill_source_first'));
+      return;
+    }
 
     setIsTranslating(true);
     try {
@@ -174,16 +175,17 @@ export default function NewsEditorPage() {
         updatedTranslations[lang] = { title: translated.title || '', excerpt: translated.excerpt || '', content: translated.content || '' };
       }
       setFormData((prev) => ({ ...prev, translations: updatedTranslations }));
+      toast.success(t('admin.news.translated', 'Traduccions generades'));
     } catch (error) {
       console.error('Translation error:', error);
-      alert(t('common.error_translation'));
+      toast.error(t('common.error_translation'));
     } finally {
       setIsTranslating(false);
     }
   };
 
-  const handleBack = () => {
-    if (isDirty && !window.confirm('Hay cambios sin guardar. ¿Quieres salir igualmente?')) return;
+  const handleBack = async () => {
+    if (!(await confirmDiscard())) return;
     navigate('/admin/news');
   };
 
@@ -195,9 +197,9 @@ export default function NewsEditorPage() {
       // Treat a target lang as needing translation if its title is empty OR identical to source title
       // (legacy data was saved with the source content duplicated across all languages).
       const isUntranslated = (lang: Lang) => {
-        const t = formData.translations[lang];
-        if (!t?.title?.trim()) return true;
-        return t.title.trim() === sourceContent.title.trim();
+        const translation = formData.translations[lang];
+        if (!translation?.title?.trim()) return true;
+        return translation.title.trim() === sourceContent.title.trim();
       };
       const langsToTranslate = otherLangs.filter(isUntranslated);
 
@@ -221,7 +223,7 @@ export default function NewsEditorPage() {
           setFormData(prev => ({ ...prev, translations: updatedTranslations }));
         } catch (err) {
           console.error('Auto-translate failed, saving without translations:', err);
-          alert(t('common.error_translation'));
+          toast.error(t('common.error_translation'));
         } finally {
           setIsTranslating(false);
         }
@@ -231,15 +233,17 @@ export default function NewsEditorPage() {
       }
 
       localStorage.removeItem(draftKey);
+      setInitialSnapshot(JSON.stringify(formData));
+      toast.success(t('admin.news.saved', 'Notícia desada'));
       navigate('/admin/news');
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === 'TITLE_REQUIRED') { alert(t('admin.news.title_required')); return; }
-        if (error.message === 'SLUG_REQUIRED') { alert('El slug es obligatorio'); return; }
-        if (error.message === 'SLUG_DUPLICATE') { alert('Ya existe una noticia con ese slug'); return; }
+        if (error.message === 'TITLE_REQUIRED') { toast.error(t('admin.news.title_required')); return; }
+        if (error.message === 'SLUG_REQUIRED') { toast.error(t('admin.news.slug_required', 'El slug és obligatori')); return; }
+        if (error.message === 'SLUG_DUPLICATE') { toast.error(t('admin.news.slug_duplicate', 'Ja existeix una notícia amb aquest slug')); return; }
       }
       console.error('Error saving article:', error);
-      alert('Error al guardar');
+      toast.error(t('common.error_save'));
     } finally {
       setSaving(false);
     }
@@ -248,76 +252,113 @@ export default function NewsEditorPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px] pt-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto pb-20">
-      {/* Header */}
-      <div className="flex flex-col gap-4 mb-8 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          <button type="button" onClick={handleBack} className="p-3 bg-white hover:bg-neutral-50 rounded-lg border border-neutral-200 shadow-sm transition-all text-neutral-500 active:scale-95">
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-black text-neutral-900 leading-none mb-1">
-              {id === 'new' ? 'Nova Notícia' : 'Editar Notícia'}
-            </h1>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">URL:</span>
-              <code className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-lg">/noticies/{formData.slug || '...'}</code>
-            </div>
-          </div>
-        </div>
+    <div className="max-w-7xl mx-auto pb-20 space-y-8">
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={handleBack}
+          aria-label={t('common.back', 'Tornar')}
+          title={t('common.back', 'Tornar')}
+          className="mt-1 p-2 rounded-md border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100 transition-colors"
+        >
+          <ChevronLeft className="w-[18px] h-[18px]" />
+        </button>
 
-        <div className="flex gap-3 w-full md:w-auto">
-          <button type="button" onClick={() => setShowPreview((prev) => !prev)} className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-neutral-200 bg-white text-neutral-700 font-black text-xs uppercase tracking-wider">
-            {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {showPreview ? 'Ocultar Preview' : 'Ver Preview'}
-          </button>
-          <button type="button" onClick={handleSave} disabled={saving} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-lg font-black shadow-sm shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50">
-            <Save className="w-5 h-5" />
-            {saving ? t('common.saving') : t('common.save')}
-          </button>
+        <div className="flex-1 min-w-0">
+          <AdminPageHeader
+            title={id === 'new' ? t('admin.news.new_article') : t('admin.news.edit_article')}
+            subtitle={`/noticies/${formData.slug || '...'}`}
+            icon={Newspaper}
+            actions={
+              <button
+                type="button"
+                onClick={() => setShowPreview((prev) => !prev)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-md border border-neutral-200 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+              >
+                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPreview ? t('admin.news.hide_preview', 'Amagar vista prèvia') : t('admin.news.show_preview', 'Vista prèvia')}
+              </button>
+            }
+            onCreate={handleSave}
+            createLabel={saving ? t('common.saving') : t('common.save')}
+            createIcon={Save}
+          />
         </div>
       </div>
 
       {/* Content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-[2.5rem] border border-neutral-200 shadow-sm overflow-hidden border-b-4 border-b-neutral-100">
+          <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
             {/* Language switcher + translate */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-neutral-100 bg-neutral-50/50">
-              <div className="flex bg-white p-1 rounded-lg border border-neutral-200 shadow-inner">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 border-b border-neutral-200 bg-neutral-50">
+              <div className="flex bg-white p-1 rounded-md border border-neutral-200">
                 {AVAILABLE_LANGS.map((lang) => (
-                  <button key={lang} type="button" onClick={() => setActiveLang(lang)} className={`px-5 py-2 rounded-lg text-xs font-black transition-all ${activeLang === lang ? 'bg-blue-600 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}>
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setActiveLang(lang)}
+                    aria-pressed={activeLang === lang}
+                    className={`px-4 py-1.5 rounded text-xs font-semibold transition-colors ${
+                      activeLang === lang ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900'
+                    }`}
+                  >
                     {lang.toUpperCase()}
                   </button>
                 ))}
               </div>
-              <button type="button" onClick={handleAutoTranslate} disabled={isTranslating} className="flex items-center gap-2 px-6 py-2 bg-amber-500 text-white rounded-lg text-xs font-black hover:bg-amber-600 transition-all shadow-sm shadow-amber-100 disabled:opacity-50">
+              <button
+                type="button"
+                onClick={handleAutoTranslate}
+                disabled={isTranslating}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-md border border-neutral-200 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors disabled:opacity-50"
+              >
                 <Wand2 className={`w-4 h-4 ${isTranslating ? 'animate-pulse' : ''}`} />
-                {isTranslating ? 'Traduint...' : 'Auto-traduir'}
+                {isTranslating ? t('admin.news.translating', 'Traduint...') : t('admin.news.auto_translate', 'Auto-traduir')}
               </button>
             </div>
 
             {/* Title, excerpt, body */}
-            <div className="p-8 sm:p-12 space-y-8">
+            <div className="p-6 sm:p-8 space-y-8">
               <div>
-                <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-3">Títol de la notícia ({activeLang})</label>
-                <input type="text" value={formData.translations[activeLang]?.title || ''} onChange={(e) => updateTranslationField(activeLang, 'title', e.target.value)} className="w-full px-0 text-4xl sm:text-5xl font-black text-neutral-900 border-none focus:ring-0 placeholder:text-neutral-200 bg-transparent leading-tight" placeholder="Escriu un títol impactant..." />
+                <label htmlFor="news-title" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                  {t('admin.news.field_title')} ({activeLang.toUpperCase()})
+                </label>
+                <input
+                  id="news-title"
+                  type="text"
+                  value={formData.translations[activeLang]?.title || ''}
+                  onChange={(e) => updateTranslationField(activeLang, 'title', e.target.value)}
+                  className="w-full px-0 text-3xl sm:text-4xl font-bold text-neutral-900 border-none focus:ring-0 placeholder:text-neutral-300 bg-transparent leading-tight outline-none"
+                  placeholder={t('admin.news.title_placeholder')}
+                />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-3">Resum o entradilla</label>
-                <textarea value={formData.translations[activeLang]?.excerpt || ''} onChange={(e) => updateTranslationField(activeLang, 'excerpt', e.target.value)} className="w-full px-6 py-5 bg-neutral-50 border-2 border-neutral-100 rounded-3xl focus:ring-0 focus:border-blue-200 outline-none transition-all resize-none text-lg text-neutral-600 font-medium leading-relaxed italic" rows={3} placeholder="Un breu resum que convidi a llegir més..." />
+                <label htmlFor="news-excerpt" className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                  {t('admin.news.field_excerpt')}
+                </label>
+                <textarea
+                  id="news-excerpt"
+                  value={formData.translations[activeLang]?.excerpt || ''}
+                  onChange={(e) => updateTranslationField(activeLang, 'excerpt', e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-md focus:ring-2 focus:ring-neutral-300 outline-none transition-colors resize-none text-[15px] text-neutral-700 leading-relaxed"
+                  rows={3}
+                  placeholder={t('admin.news.excerpt_placeholder')}
+                />
               </div>
 
-              <div className="space-y-4">
-                <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-1">Cos de la notícia</label>
-                <div className="rounded-3xl border-2 border-neutral-100 overflow-hidden">
+              <div className="space-y-2">
+                <span className="block text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+                  {t('admin.news.field_content')}
+                </span>
+                <div className="rounded-md border border-neutral-200 overflow-hidden">
                   <EditorToolbar editor={editor} />
                   <EditorContent editor={editor} />
                 </div>

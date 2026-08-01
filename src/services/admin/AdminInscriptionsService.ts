@@ -1,14 +1,67 @@
 import { supabase } from '../../lib/supabase';
-import type { Inscription, InscriptionStatus, InscriptionStudent } from '../../types/inscription';
+import {
+  collectActivityOptions,
+  filterInscriptionList,
+  normalizeInscriptions,
+} from '../../logic/inscriptionFilters';
+import { STATUS_FILTER } from '../../constants/status';
+import type { Inscription, InscriptionRaw, InscriptionStatus } from '../../types/inscription';
 
-export type AdminUpdatePayload = Partial<Inscription> & {
-    name?: string;
-    surname?: string;
-    course?: string;
-    activities?: string[];
-    parent_phone?: string;
-    parent_email?: string;
-};
+export interface GetInscriptionsParams {
+  academicYear?: string;
+  /** 1-based. */
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  /** 'all' (default) or an `InscriptionStatus`. */
+  status?: string;
+  activity?: string;
+  course?: string;
+}
+
+export interface GetInscriptionsResult {
+  rows: Inscription[];
+  total: number;
+  /**
+   * True when the page was produced in memory because a client-only filter was
+   * active (see CLIENT-SIDE FILTERS below). Exposed so the UI can explain the
+   * slower path if it ever needs to.
+   */
+  clientFiltered: boolean;
+}
+
+/**
+ * CLIENT-SIDE FILTERS — documented limitation.
+ *
+ * `academic_year` and `status` are plain columns, so they are pushed to
+ * Postgres together with `.range()` + `count: 'exact'`: the default listing
+ * never downloads more than one page.
+ *
+ * `course`, `activity` and the free-text `search` are NOT: courses and
+ * activities live inside the `students` JSONB array, and PostgREST cannot run
+ * `ilike` over the elements of a JSON array (no cast is allowed in filters and
+ * `cs.` only does exact containment). Restricting the search to the parent
+ * columns would silently drop "search by child name", which the admin relies
+ * on.
+ *
+ * So when any of those three is active we fetch the cohort ONCE with the
+ * server-side filters applied, filter in memory and slice the page here. The
+ * reported `total` is the post-filter count, so the pagination footer is never
+ * out of sync with the rows on screen.
+ */
+const usesClientFilters = (params: GetInscriptionsParams): boolean =>
+  Boolean(params.search?.trim() || params.activity || params.course);
+
+export interface InscriptionStats {
+  /** Number of `inscripcions` rows (families), not children. */
+  totalInscriptions: number;
+  activeStudents: number;
+  bajaStudents: number;
+  afaMemberStudents: number;
+  topActivity: { name: string; count: number } | null;
+}
+
+const DEFAULT_PAGE_SIZE = 25;
 
 type InscriptionsTableName = 'inscripcions' | 'inscriptions';
 let detectedTable: InscriptionsTableName | null = null;
@@ -44,34 +97,134 @@ const runWithTableFallback = async <T>(
   throw lastError;
 };
 
+/** Columns Postgres can filter on directly (everything else lives in JSONB). */
+const serverFilterColumns = (params: GetInscriptionsParams): Record<string, string> => {
+  const columns: Record<string, string> = {};
+  if (params.academicYear) columns.academic_year = params.academicYear;
+  if (params.status && params.status !== STATUS_FILTER.ALL) columns.status = params.status;
+  return columns;
+};
+
 export const AdminInscriptionsService = {
-  async getInscriptions(academicYear?: string): Promise<Inscription[]> {
-    const fetchTable = async (table: InscriptionsTableName) => {
-      let query = supabase
-        .from(table)
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (academicYear) query = query.eq('academic_year', academicYear);
-      const result = await query;
+  /**
+   * Paginated listing. Returns `{ rows, total }`; `total` always matches the
+   * filters actually applied (server-side or in memory).
+   */
+  async getInscriptions(params: GetInscriptionsParams = {}): Promise<GetInscriptionsResult> {
+    const page = Math.max(1, params.page ?? 1);
+    const pageSize = Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE);
 
-      return { data: (result.data || []) as Inscription[], error: result.error };
-    };
-
-    if (detectedTable) {
-      const detectedResult = await fetchTable(detectedTable);
-      if (!detectedResult.error) {
-        return detectedResult.data;
-      }
-
-      if (!isMissingRelationError(detectedResult.error)) {
-        throw detectedResult.error;
-      }
-
-      detectedTable = null;
+    if (usesClientFilters(params)) {
+      const all = await this.getAllInscriptions(params);
+      const from = (page - 1) * pageSize;
+      return { rows: all.slice(from, from + pageSize), total: all.length, clientFiltered: true };
     }
 
-    const data = await runWithTableFallback<Inscription[]>(fetchTable);
-    return data;
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const result = await runWithTableFallback<{ rows: InscriptionRaw[]; count: number }>(
+      async (table) => {
+        let query = supabase.from(table).select('*', { count: 'exact' });
+        for (const [column, value] of Object.entries(serverFilterColumns(params))) {
+          query = query.eq(column, value);
+        }
+
+        const response = await query.order('created_at', { ascending: false }).range(from, to);
+        return {
+          data: { rows: (response.data || []) as InscriptionRaw[], count: response.count ?? 0 },
+          error: response.error,
+        };
+      }
+    );
+
+    return {
+      rows: normalizeInscriptions(result.rows),
+      total: result.count,
+      clientFiltered: false,
+    };
+  },
+
+  /**
+   * Full result set for the active filters (no pagination). Used by the export
+   * modal — the admin expects the export to cover every filtered record, not
+   * just the visible page.
+   */
+  async getAllInscriptions(params: GetInscriptionsParams = {}): Promise<Inscription[]> {
+    const rows = await runWithTableFallback<InscriptionRaw[]>(async (table) => {
+      let query = supabase.from(table).select('*');
+      for (const [column, value] of Object.entries(serverFilterColumns(params))) {
+        query = query.eq(column, value);
+      }
+      const response = await query.order('created_at', { ascending: false });
+      return { data: (response.data || []) as InscriptionRaw[], error: response.error };
+    });
+
+    const inscriptions = normalizeInscriptions(rows);
+    return filterInscriptionList(inscriptions, {
+      course: params.course ?? '',
+      activity: params.activity ?? '',
+      status: STATUS_FILTER.ALL, // already applied server-side
+      search: params.search ?? '',
+    });
+  },
+
+  /**
+   * Distinct activity labels of a cohort, for the activity filter dropdown.
+   * Selects only the `students` column so it stays far cheaper than a full
+   * `select('*')` scan.
+   */
+  async getActivityOptions(academicYear?: string): Promise<string[]> {
+    const rows = await runWithTableFallback<InscriptionRaw[]>(async (table) => {
+      let query = supabase.from(table).select('students');
+      if (academicYear) query = query.eq('academic_year', academicYear);
+      const response = await query;
+      return { data: (response.data || []) as InscriptionRaw[], error: response.error };
+    });
+    return collectActivityOptions(normalizeInscriptions(rows));
+  },
+
+  /**
+   * Aggregated counters for the dashboard. Selects only the three columns it
+   * needs so the dashboard no longer downloads every inscription just to count.
+   */
+  async getInscriptionStats(academicYear?: string): Promise<InscriptionStats> {
+    const rows = await runWithTableFallback<InscriptionRaw[]>(async (table) => {
+      let query = supabase.from(table).select('students, status, afa_member');
+      if (academicYear) query = query.eq('academic_year', academicYear);
+      const response = await query;
+      return { data: (response.data || []) as InscriptionRaw[], error: response.error };
+    });
+
+    const stats: InscriptionStats = {
+      totalInscriptions: rows.length,
+      activeStudents: 0,
+      bajaStudents: 0,
+      afaMemberStudents: 0,
+      topActivity: null,
+    };
+    const activityCount = new Map<string, number>();
+
+    for (const inscription of normalizeInscriptions(rows)) {
+      const studentCount = inscription.students.length;
+      if (inscription.status === 'baja') {
+        stats.bajaStudents += studentCount;
+        continue;
+      }
+      stats.activeStudents += studentCount;
+      if (inscription.afa_member) stats.afaMemberStudents += studentCount;
+      for (const student of inscription.students) {
+        for (const activity of student.activities || []) {
+          if (activity) activityCount.set(activity, (activityCount.get(activity) ?? 0) + 1);
+        }
+      }
+    }
+
+    for (const [name, count] of activityCount) {
+      if (!stats.topActivity || count > stats.topActivity.count) stats.topActivity = { name, count };
+    }
+
+    return stats;
   },
 
   async getAcademicYears(): Promise<string[]> {
@@ -84,101 +237,66 @@ export const AdminInscriptionsService = {
     return Array.from(years).sort().reverse();
   },
 
-  async deleteInscription(id: number | string) {
+  async deleteInscription(id: string) {
     await runWithTableFallback<null>(async (table) => {
-      const { error } = await supabase
-        .from(table)
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from(table).delete().eq('id', id);
       return { data: null, error };
     });
     return true;
   },
 
-  async updateStatus(id: number | string, status: InscriptionStatus) {
+  async updateStatus(id: string, status: InscriptionStatus) {
     await runWithTableFallback<null>(async (table) => {
-      const { error } = await supabase
-        .from(table)
-        .update({ status })
-        .eq('id', id);
-
+      const { error } = await supabase.from(table).update({ status }).eq('id', id);
       return { data: null, error };
     });
     return true;
   },
 
-  async updateInscription(id: number | string, updates: AdminUpdatePayload, studentIndex?: number) {
-    if (studentIndex !== undefined && studentIndex >= 0) {
-      // Handle JSON array update
-      const currentData = await runWithTableFallback<{ students?: InscriptionStudent[] } | null>(async (table) => {
-        const { data, error } = await supabase
-          .from(table)
-          .select('students')
-          .eq('id', id)
-          .single();
+  /**
+   * Updates an inscription. Only whitelisted columns are written, so passing a
+   * whole `Inscription` (as the edit modal does) never tries to write `id` or
+   * `created_at`.
+   */
+  async updateInscription(id: string, updates: Partial<Inscription>) {
+    const UPDATABLE: (keyof Inscription)[] = [
+      'parent_name',
+      'parent_dni',
+      'parent_phone_1',
+      'parent_email_1',
+      'parent_phone_2',
+      'parent_email_2',
+      'status',
+      'students',
+      'afa_member',
+      'image_auth_consent',
+      'can_leave_alone',
+      'authorized_pickup',
+      'health_info',
+      'extra_answers',
+    ];
 
-        return { data: data as { students?: InscriptionStudent[] } | null, error };
-      });
-      
-      const students = (currentData?.students || []) as InscriptionStudent[];
-      if (students[studentIndex]) {
-        students[studentIndex] = { ...students[studentIndex], ...updates as Partial<InscriptionStudent> };
-      }
-
-      await runWithTableFallback<null>(async (table) => {
-        const { error } = await supabase
-          .from(table)
-          .update({ students: students as unknown })
-          .eq('id', id);
-
-        return { data: null, error };
-      });
-    } else {
-      // Handle legacy flat data update
-      const legacyUpdates: Record<string, unknown> = {};
-      if (updates.name) legacyUpdates.student_name = updates.name;
-      if (updates.surname) legacyUpdates.student_surname = updates.surname;
-      if (updates.course) legacyUpdates.student_course = updates.course;
-      if (updates.activities) legacyUpdates.selected_activities = updates.activities;
-      if (updates.parent_phone) legacyUpdates.parent_phone = updates.parent_phone;
-      if (updates.parent_email) legacyUpdates.parent_email = updates.parent_email;
-      if (updates.afa_member !== undefined) legacyUpdates.afa_member = updates.afa_member;
-      if (updates.status) legacyUpdates.status = updates.status;
-
-      const directFields: (keyof Inscription)[] = [
-        'parent_name', 'parent_dni', 'parent_phone_1', 'parent_email_1',
-        'parent_phone_2', 'parent_email_2', 'image_auth_consent',
-        'can_leave_alone', 'authorized_pickup', 'health_info'
-      ];
-      
-      directFields.forEach(field => {
-        if (updates[field] !== undefined) {
-          legacyUpdates[field] = updates[field];
-        }
-      });
-
-      await runWithTableFallback<null>(async (table) => {
-        const { error } = await supabase
-          .from(table)
-          .update(legacyUpdates)
-          .eq('id', id);
-
-        return { data: null, error };
-      });
+    const payload: Record<string, unknown> = {};
+    for (const field of UPDATABLE) {
+      if (updates[field] !== undefined) payload[field] = updates[field];
     }
+    if (Object.keys(payload).length === 0) return true;
+
+    await runWithTableFallback<null>(async (table) => {
+      const { error } = await supabase.from(table).update(payload).eq('id', id);
+      return { data: null, error };
+    });
     return true;
   },
 
-  async toggleAfaMember(id: number | string, currentStatus: boolean) {
+  async toggleAfaMember(id: string, currentStatus: boolean) {
     await runWithTableFallback<null>(async (table) => {
       const { error } = await supabase
         .from(table)
         .update({ afa_member: !currentStatus })
         .eq('id', id);
-
       return { data: null, error };
     });
     return true;
-  }
+  },
 };

@@ -1,5 +1,6 @@
 import { Globe } from "lucide-react";
 import type { LegalConfig } from "../../../services/ConfigService";
+import { useSettingsT } from "./useSettingsT";
 
 interface LegalSettingsProps {
     title: string;
@@ -9,24 +10,30 @@ interface LegalSettingsProps {
     setActiveLang: (lang: 'ca' | 'es' | 'en') => void;
 }
 
-export function LegalSettings({ title, config, setConfig, activeLang, setActiveLang }: LegalSettingsProps) {
-    return (
-        <div className="bg-white dark:bg-neutral-800 rounded-3xl p-8 shadow-sm border border-neutral-100 dark:border-neutral-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-50 dark:border-neutral-700 pb-4 mb-6">
-                <h3 className="text-xl font-bold text-neutral-800 dark:text-white">
-                    {title}
-                </h3>
+const LANG_NAMES: Record<'ca' | 'es' | 'en', { key: string; fallback: string }> = {
+    ca: { key: 'admin.settings.lang.ca', fallback: 'Català' },
+    es: { key: 'admin.settings.lang.es', fallback: 'Castellà' },
+    en: { key: 'admin.settings.lang.en', fallback: 'Anglès' }
+};
 
-                {/* Language Switcher */}
-                <div className="flex p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg w-fit">
+export function LegalSettings({ title, config, setConfig, activeLang, setActiveLang }: LegalSettingsProps) {
+    const t = useSettingsT();
+    const langName = t(LANG_NAMES[activeLang].key, LANG_NAMES[activeLang].fallback);
+
+    return (
+        <div className="bg-white rounded-xl p-6 border border-neutral-200 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
+                <h3 className="text-lg font-bold text-neutral-900">{title}</h3>
+
+                <div className="flex p-1 bg-neutral-100 rounded-lg w-fit">
                     {(['ca', 'es', 'en'] as const).map((lang) => (
                         <button
                             key={lang}
                             type="button"
                             onClick={() => setActiveLang(lang)}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
-                                ? 'bg-white dark:bg-neutral-700 text-primary shadow-sm'
-                                : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
+                            className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${activeLang === lang
+                                ? 'bg-white text-neutral-900 shadow-sm'
+                                : 'text-neutral-400 hover:text-neutral-600'
                                 }`}
                         >
                             {lang.toUpperCase()}
@@ -36,22 +43,26 @@ export function LegalSettings({ title, config, setConfig, activeLang, setActiveL
             </div>
 
             <div className="space-y-4">
-                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20 mb-4">
-                    <Globe size={18} />
-                    <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
+                <div className="flex items-center gap-2 text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-100">
+                    <Globe size={18} aria-hidden="true" />
+                    <p className="text-xs font-medium">
+                        {t('admin.settings.editing_lang', 'Estàs editant la versió en')}{' '}
+                        <span className="font-bold underline">{langName}</span>
+                    </p>
                 </div>
 
                 <textarea
                     required
+                    aria-label={title}
                     value={config[activeLang] || ''}
                     onChange={(e) => setConfig({ ...config, [activeLang]: e.target.value })}
                     rows={15}
-                    className="w-full px-4 py-4 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed font-mono"
-                    placeholder={`Escriu aquí el text en ${activeLang === 'ca' ? 'català' : activeLang === 'es' ? 'castellà' : 'anglès'}...`}
+                    className="w-full px-4 py-4 rounded-lg border border-neutral-200 bg-neutral-50 focus:ring-2 focus:ring-neutral-300 outline-none transition-all text-sm leading-relaxed font-mono"
+                    placeholder={`${t('admin.settings.legal.placeholder', 'Escriu aquí el text en')} ${langName.toLowerCase()}...`}
                 />
 
                 <p className="text-[10px] text-neutral-400 italic">
-                    * Pots fer servir salts de línia per separar paràgrafs. El contingut s'actualitzarà a la web quan l'usuari canviï d'idioma.
+                    {t('admin.settings.legal.hint', "Pots fer servir salts de línia per separar paràgrafs. El contingut s'actualitzarà a la web quan l'usuari canviï d'idioma.")}
                 </p>
             </div>
         </div>

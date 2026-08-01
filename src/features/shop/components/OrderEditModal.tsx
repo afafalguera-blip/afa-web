@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Save, ShoppingBag, User, Mail, Phone, BadgeCheck } from 'lucide-react';
+import { useCallback, useState, useEffect } from 'react';
+import { Plus, Trash2, Save, User, Mail, Phone, BadgeCheck } from 'lucide-react';
 import { ShopService } from '../services/ShopService';
-import { supabase } from '../../../lib/supabase';
 import type { ShopProduct, ShopOrder, ShopOrderItem, ShopVariant } from '../types/shop';
 import { sortSizes } from '../../../utils/productUtils';
+import { Modal } from '../../../components/common/Modal';
+import { useToast } from '../../../components/common/Toast';
+import { useConfirm } from '../../../components/common/ConfirmDialog';
+import { useDirtyGuard } from '../../../hooks/useDirtyGuard';
 
 interface OrderEditModalProps {
   order: ShopOrder;
@@ -12,6 +15,8 @@ interface OrderEditModalProps {
 }
 
 export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: OrderEditModalProps) {
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const [order, setOrder] = useState(initialOrder);
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [loading, setLoading] = useState(false);
@@ -21,49 +26,51 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
   const [selectedProductId, setSelectedProductId] = useState('');
   const [selectedVariantId, setSelectedVariantId] = useState('');
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  // Every other edit is persisted immediately; only the inline name field can
+  // hold an unsaved change.
+  const { confirmDiscard } = useDirtyGuard(editingName && customerName !== order.customer_name);
 
-  async function fetchProducts() {
+  useEffect(() => {
+    ShopService.getProductsWithVariants()
+      .then(setProducts)
+      .catch((error) => {
+        toast.error(error instanceof Error ? error.message : 'Error carregant els productes');
+      });
+  }, [toast]);
+
+  const refreshOrder = useCallback(async () => {
+    onUpdate();
     try {
-      const data = await ShopService.getProductsWithVariants();
-      setProducts(data);
+      setOrder(await ShopService.getOrder(order.id));
     } catch (error) {
-      console.error('Error fetching products:', error);
+      toast.error(error instanceof Error ? error.message : 'Error refrescant la comanda');
     }
-  }
+  }, [onUpdate, order.id, toast]);
+
+  const requestClose = useCallback(async () => {
+    if (await confirmDiscard()) onClose();
+  }, [confirmDiscard, onClose]);
 
   const handleUpdateName = async () => {
     try {
-      await supabase.from('shop_orders').update({ customer_name: customerName }).eq('id', order.id);
+      await ShopService.updateOrderCustomerName(order.id, customerName);
       setEditingName(false);
-      onUpdate();
-    } catch {
-      alert('Error actualitzant el nom');
+      toast.success('Nom actualitzat');
+      await refreshOrder();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error actualitzant el nom');
     }
   };
 
   const handleToggleMember = async (value: boolean) => {
+    setLoading(true);
     try {
-      const items = order.items ?? [];
-      let newTotal = 0;
-
-      for (const item of items) {
-        if (!item.variant) continue;
-        const newPrice = value ? item.variant.price_member : item.variant.price_non_member;
-        await supabase.from('shop_order_items').update({ price_at_time: newPrice }).eq('id', item.id);
-        newTotal += newPrice * item.quantity;
-      }
-
-      await supabase.from('shop_orders')
-        .update({ is_member: value, ...(items.length > 0 ? { total_amount: newTotal } : {}) })
-        .eq('id', order.id);
-
-      refreshOrder();
-      onUpdate();
-    } catch {
-      alert('Error actualitzant l\'estat de soci');
+      await ShopService.setOrderMember(order, value);
+      await refreshOrder();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error actualitzant l\'estat de soci');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,22 +78,29 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
     setLoading(true);
     try {
       await ShopService.updateOrderItem(itemId, variantId, quantity, price);
-      refreshOrder();
-    } catch {
-      alert('Error actualitzant l\'article');
+      await refreshOrder();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error actualitzant l\'article');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteItem = async (itemId: string) => {
-    if (!confirm('Segur que vols eliminar aquest article?')) return;
+  const handleDeleteItem = async (item: ShopOrderItem) => {
+    const ok = await confirm({
+      title: 'Eliminar article',
+      itemName: `${item.quantity}x ${item.variant?.product?.name ?? 'Article'} · T-${item.variant?.size ?? '—'}`,
+      destructive: true,
+    });
+    if (!ok) return;
+
     setLoading(true);
     try {
-      await ShopService.deleteOrderItem(itemId);
-      refreshOrder();
-    } catch {
-      alert('Error eliminant l\'article');
+      await ShopService.deleteOrderItem(item.id);
+      toast.success('Article eliminat');
+      await refreshOrder();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error eliminant l\'article');
     } finally {
       setLoading(false);
     }
@@ -99,83 +113,89 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
 
     setLoading(true);
     try {
-      await ShopService.addOrderItem(order.id, selectedVariantId, 1, variant.price_member);
+      const price = order.is_member ? variant.price_member : variant.price_non_member;
+      await ShopService.addOrderItem(order.id, selectedVariantId, 1, price);
       setShowAddProduct(false);
       setSelectedProductId('');
       setSelectedVariantId('');
-      refreshOrder();
-    } catch {
-      alert('Error afegint l\'article');
+      toast.success('Article afegit');
+      await refreshOrder();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Error afegint l\'article');
     } finally {
       setLoading(false);
     }
   };
 
-  async function refreshOrder() {
-    // We simply fetch all orders again via onUpdate to keep it simple and consistent
-    onUpdate();
-    // But we also need to update the local 'order' view if we want to stay in the modal
-    const { data } = await supabase.from('shop_orders').select('*, items:shop_order_items(*, variant:shop_variants(*, product:shop_products(name)))').eq('id', order.id).single();
-    if (data) setOrder(data);
-  }
-
   const selectedProduct = products.find(p => p.id === selectedProductId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col border border-white/10">
-
-        {/* Header */}
-        <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-              <ShoppingBag className="w-5 h-5" />
-            </div>
+    <>
+      <Modal
+        open
+        onClose={requestClose}
+        title={`Gestionar Comanda #${order.id.slice(0, 8)}`}
+        size="lg"
+        closeOnBackdrop={false}
+        footer={
+          <div className="flex flex-1 items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Gestionar Comanda</h2>
-              <span className="text-xs font-mono text-slate-400">ID: {order.id.slice(0, 8)}</span>
+              <p className="text-[10px] text-neutral-400 uppercase font-black tracking-widest">Total Comanda</p>
+              <p className="text-xl font-black text-neutral-900">{Number(order.total_amount || 0).toFixed(2)}€</p>
             </div>
+            <button
+              type="button"
+              onClick={requestClose}
+              className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors"
+            >
+              Tancar
+            </button>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors">
-            <X className="w-5 h-5 text-slate-500" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
-
+        }
+      >
+        <div className="space-y-8">
           {/* Customer Info */}
-          <section className="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 border border-slate-100 dark:border-white/5">
+          <section className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
                 <User className="w-4 h-4" /> Client
               </h3>
               {!editingName && (
-                <button onClick={() => setEditingName(true)} className="text-xs text-primary font-bold hover:underline">Editar</button>
+                <button type="button" onClick={() => setEditingName(true)} className="text-xs text-neutral-700 font-bold hover:underline">
+                  Editar
+                </button>
               )}
             </div>
 
             {editingName ? (
               <div className="flex gap-2">
+                <label className="sr-only" htmlFor="order-customer-name">Nom del client</label>
                 <input
+                  id="order-customer-name"
                   type="text"
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg text-sm"
+                  className="flex-1 px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-neutral-900/10"
                 />
-                <button onClick={handleUpdateName} className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                <button
+                  type="button"
+                  onClick={handleUpdateName}
+                  aria-label="Desar nom"
+                  className="p-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+                >
                   <Save className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <div className="space-y-1">
-                <p className="text-lg font-bold text-slate-800 dark:text-white">{order.customer_name}</p>
+                <p className="text-lg font-bold text-neutral-900">{order.customer_name}</p>
                 {order.customer_email && (
-                  <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                  <p className="text-sm text-neutral-500 flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5" /> {order.customer_email}
                   </p>
                 )}
                 {order.customer_phone && (
-                  <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                  <p className="text-sm text-neutral-500 flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5" /> {order.customer_phone}
                   </p>
                 )}
@@ -183,36 +203,38 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
             )}
 
             {/* Member toggle */}
-            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/5">
+            <div className="mt-3 pt-3 border-t border-neutral-200">
               <label className="flex items-center gap-3 cursor-pointer select-none">
                 <div className="relative flex-shrink-0">
                   <input
                     type="checkbox"
                     checked={order.is_member ?? false}
+                    disabled={loading}
                     onChange={e => handleToggleMember(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer-checked:bg-primary transition-colors"></div>
+                  <div className="w-9 h-5 bg-neutral-200 rounded-full peer-checked:bg-neutral-900 transition-colors"></div>
                   <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <BadgeCheck className={`w-4 h-4 ${order.is_member ? 'text-primary' : 'text-slate-300'}`} />
-                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Soci</span>
+                  <BadgeCheck className={`w-4 h-4 ${order.is_member ? 'text-neutral-900' : 'text-neutral-300'}`} />
+                  <span className="text-sm font-bold text-neutral-700">Soci</span>
                   {order.is_member && (
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full">Preu soci aplicat</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-neutral-900 text-white px-2 py-0.5 rounded-full">Preu soci aplicat</span>
                   )}
                 </div>
               </label>
             </div>
           </section>
 
-          {/* Items Table */}
+          {/* Items */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Articles</h3>
+              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Articles</h3>
               <button
+                type="button"
                 onClick={() => setShowAddProduct(true)}
-                className="flex items-center gap-1.5 text-xs font-bold bg-primary text-white px-3 py-1.5 rounded-full hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20"
+                className="flex items-center gap-1.5 text-[13px] font-medium bg-neutral-900 text-white px-3 py-1.5 rounded-md hover:bg-neutral-800 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" /> Afegir Producte
               </button>
@@ -220,38 +242,46 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
 
             <div className="space-y-3">
               {order.items?.map((item: ShopOrderItem) => (
-                <div key={item.id} className="group bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-primary/30 transition-all">
-                  <div className="flex-1">
-                    <p className="font-bold text-slate-800 dark:text-white leading-tight">{item.variant?.product?.name}</p>
+                <div key={item.id} className="bg-white border border-neutral-200 rounded-lg p-4 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-neutral-900 leading-tight truncate">{item.variant?.product?.name}</p>
                     <div className="flex items-center gap-3 mt-1">
+                      <label className="sr-only" htmlFor={`item-variant-${item.id}`}>Talla</label>
                       <select
+                        id={`item-variant-${item.id}`}
                         value={item.variant_id}
                         onChange={(e) => handleUpdateItem(item.id, e.target.value, item.quantity, item.price_at_time)}
-                        className="text-xs bg-slate-100 dark:bg-slate-800 border-none rounded py-0.5 px-2 outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                        className="text-xs bg-neutral-100 border-none rounded py-1 px-2 outline-none focus:ring-1 focus:ring-neutral-900 cursor-pointer"
                       >
                         {sortSizes(products.find(p => p.name === item.variant?.product?.name)?.variants || []).map((v: ShopVariant) => (
                           <option key={v.id} value={v.id}>Talla {v.size} ({v.stock} disp.)</option>
                         ))}
                       </select>
-                      <span className="text-xs text-slate-400 font-mono">{item.price_at_time}€</span>
+                      <span className="text-xs text-neutral-400 font-mono">{item.price_at_time}€</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                    <div className="flex items-center gap-2 bg-neutral-100 rounded-lg p-1">
                       <button
+                        type="button"
+                        aria-label="Restar unitat"
                         onClick={() => handleUpdateItem(item.id, item.variant_id, Math.max(1, item.quantity - 1), item.price_at_time)}
-                        className="w-6 h-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 transition-colors"
+                        className="w-6 h-6 flex items-center justify-center hover:bg-white rounded text-neutral-500 transition-colors"
                       >-</button>
                       <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
                       <button
+                        type="button"
+                        aria-label="Sumar unitat"
                         onClick={() => handleUpdateItem(item.id, item.variant_id, item.quantity + 1, item.price_at_time)}
-                        className="w-6 h-6 flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 rounded text-slate-500 transition-colors"
+                        className="w-6 h-6 flex items-center justify-center hover:bg-white rounded text-neutral-500 transition-colors"
                       >+</button>
                     </div>
                     <button
-                      onClick={() => handleDeleteItem(item.id)}
-                      className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
+                      type="button"
+                      aria-label="Eliminar article"
+                      onClick={() => handleDeleteItem(item)}
+                      className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -260,83 +290,71 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
               ))}
 
               {(!order.items || order.items.length === 0) && (
-                <div className="text-center py-12 text-slate-400 border-2 border-dashed border-slate-100 dark:border-white/5 rounded-2xl uppercase text-[10px] tracking-widest font-bold">
+                <div className="text-center py-12 text-neutral-400 border-2 border-dashed border-neutral-200 rounded-lg uppercase text-[10px] tracking-widest font-bold">
                   Comanda buida
                 </div>
               )}
             </div>
           </section>
         </div>
+      </Modal>
 
-        {/* Footer */}
-        <div className="p-6 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-slate-400 uppercase font-black tracking-widest mb-0.5">Total Comanda</p>
-            <p className="text-2xl font-black text-slate-900 dark:text-white uppercase">{order.total_amount?.toFixed(2)}€</p>
-          </div>
+      {/* Add Product nested dialog */}
+      <Modal
+        open={showAddProduct}
+        onClose={() => setShowAddProduct(false)}
+        title="Afegir Article"
+        size="md"
+        footer={
           <button
-            onClick={onClose}
-            className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold shadow-xl hover:scale-105 transition-all"
+            type="button"
+            disabled={!selectedVariantId || loading}
+            onClick={handleAddItem}
+            className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
-            Tancar
+            {loading ? 'Processant...' : 'Confirmar i Afegir'}
           </button>
-        </div>
-
-        {/* Add Product Sub-Modal */}
-        {showAddProduct && (
-          <div className="absolute inset-0 z-20 bg-white dark:bg-slate-900 flex flex-col animate-in slide-in-from-bottom duration-300">
-            <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
-              <h3 className="font-bold">Afegir Article</h3>
-              <button onClick={() => setShowAddProduct(false)} className="p-2"><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-6 space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Producte</label>
-                <select
-                  value={selectedProductId}
-                  onChange={e => {
-                    setSelectedProductId(e.target.value);
-                    setSelectedVariantId('');
-                  }}
-                  className="w-full p-4 bg-slate-100 dark:bg-white/5 rounded-2xl border-none outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Selecciona producte...</option>
-                  {products.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedProduct && (
-                <div>
-                  <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Talla</label>
-                  <div className="flex flex-wrap gap-2">
-                    {sortSizes(selectedProduct.variants || []).map((v: ShopVariant) => (
-                      <button
-                        key={v.id}
-                        onClick={() => setSelectedVariantId(v.id)}
-                        className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all ${selectedVariantId === v.id ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10'} `}
-                      >
-                        {v.size} ({v.stock} disp.)
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="mt-auto p-6 border-t border-slate-100 dark:border-white/5">
-              <button
-                disabled={!selectedVariantId || loading}
-                onClick={handleAddItem}
-                className="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 disabled:opacity-50"
-              >
-                {loading ? 'Processant...' : 'Confirmar i Afegir'}
-              </button>
-            </div>
+        }
+      >
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2" htmlFor="add-item-product">Producte</label>
+            <select
+              id="add-item-product"
+              value={selectedProductId}
+              onChange={e => {
+                setSelectedProductId(e.target.value);
+                setSelectedVariantId('');
+              }}
+              className="w-full px-4 py-2.5 bg-white border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 transition-colors"
+            >
+              <option value="">Selecciona producte...</option>
+              {products.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
           </div>
-        )}
 
-      </div>
-    </div>
+          {selectedProduct && (
+            <div>
+              <span className="block text-sm font-medium text-neutral-700 mb-2">Talla</span>
+              <div className="flex flex-wrap gap-2">
+                {sortSizes(selectedProduct.variants || []).map((v: ShopVariant) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => setSelectedVariantId(v.id)}
+                    aria-pressed={selectedVariantId === v.id}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold border transition-colors ${selectedVariantId === v.id ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-400'}`}
+                  >
+                    {v.size} ({v.stock} disp.)
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+    </>
   );
 }

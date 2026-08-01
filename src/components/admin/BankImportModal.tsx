@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
-import { X, UploadCloud, Loader2, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
+import { UploadCloud, Loader2, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
+import { Modal } from '../common/Modal';
+import { useToast } from '../common/Toast';
 import { parseN43, type N43Movement } from '../../utils/n43';
 import {
   BankReconciliationService as Recon,
@@ -23,6 +25,7 @@ const payLabel = (p: PendingPayment) =>
   `${(p.parent_name || '—')} · ${p.student_name} ${p.student_surname} · ${conceptLabel(p.concept)} · ${money(p.amount)}`;
 
 export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
+  const { toast } = useToast();
   const fileInput = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +78,9 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
       setMovIncome(movements.filter(m => m.isIncome).length);
       setStage('review');
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const message = e instanceof Error ? e.message : String(e);
+      setError(message);
+      toast.error(message);
       setStage('idle');
     }
   };
@@ -112,14 +117,15 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
       });
       setAppliedCount(applied);
       setStage('done');
+      toast.success(`${applied} rebuts marcats com a pagats`);
       onApplied();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const message = e instanceof Error ? e.message : String(e);
+      setError(message);
+      toast.error(message);
       setStage('review');
     }
   };
-
-  if (!isOpen) return null;
 
   const highN = rows.filter(r => r.confidence === 'high').length;
   const medN = rows.filter(r => r.confidence === 'medium').length;
@@ -136,17 +142,43 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl flex flex-col max-h-[92vh]">
-        <div className="p-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-lg z-10">
-          <div>
-            <h2 className="text-xl font-bold text-neutral-900">Importar extracto (Norma 43)</h2>
-            <p className="text-sm text-neutral-500">Concilia transferencias recibidas con los recibos pendientes.</p>
+    <Modal
+      open={isOpen}
+      onClose={close}
+      title="Importar extracto (Norma 43)"
+      size="xl"
+      closeOnBackdrop={false}
+      footer={
+        <div className="flex flex-1 justify-between items-center gap-3">
+          <div className="text-[13px] text-neutral-500">
+            {stage === 'review' && `${selectedTotal} recibos seleccionados`}
           </div>
-          <button onClick={close} className="text-neutral-400 hover:text-neutral-600"><X className="w-6 h-6" /></button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={close}
+              className="px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+            >
+              {stage === 'done' ? 'Cerrar' : 'Cancelar'}
+            </button>
+            {(stage === 'review' || stage === 'applying') && (
+              <button
+                type="button"
+                onClick={apply}
+                disabled={stage === 'applying' || selectedTotal === 0}
+                className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {stage === 'applying' && <Loader2 className="w-4 h-4 animate-spin" />}
+                Marcar {selectedTotal} como pagados
+              </button>
+            )}
+          </div>
         </div>
-
-        <div className="p-5 overflow-y-auto flex-1">
+      }
+    >
+      <div>
+        <p className="text-sm text-neutral-500 mb-4">Concilia transferencias recibidas con los recibos pendientes.</p>
+        <div>
           {error && (
             <div className="mb-4 bg-red-50 text-red-800 border-l-4 border-red-500 p-3 rounded-r-lg flex items-center gap-2 text-sm">
               <AlertTriangle className="w-4 h-4 shrink-0" /> {error}
@@ -159,7 +191,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
                 type="button"
                 onClick={() => fileInput.current?.click()}
                 disabled={stage === 'loading'}
-                className="w-full border-2 border-dashed border-neutral-300 rounded-xl p-10 flex flex-col items-center gap-3 text-neutral-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors disabled:opacity-60"
+                className="w-full border-2 border-dashed border-neutral-300 rounded-xl p-10 flex flex-col items-center gap-3 text-neutral-600 hover:border-neutral-500 hover:text-neutral-900 transition-colors disabled:opacity-60"
               >
                 {stage === 'loading'
                   ? <><Loader2 className="w-8 h-8 animate-spin" /><span>Procesando {fileName}…</span></>
@@ -216,7 +248,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
                                   type="checkbox"
                                   checked={sel.includes(p.id)}
                                   onChange={() => togglePayment(idx, p.id)}
-                                  className="h-4 w-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+                                  className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900/20"
                                 />
                                 <span className={sel.includes(p.id) ? 'text-neutral-900' : 'text-neutral-600'}>
                                   {p.student_name} {p.student_surname} · {conceptLabel(p.concept)} · {String(p.payment_month).padStart(2, '0')}/{p.payment_year} · <strong>{money(p.amount)}</strong>
@@ -228,7 +260,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
                           <select
                             value={sel[0] || ''}
                             onChange={e => setSingle(idx, e.target.value)}
-                            className="w-full text-sm px-2 py-1.5 border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="w-full text-sm px-2 py-1.5 border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-neutral-900/10 outline-none"
                           >
                             <option value="">— Asignar manualmente (opcional) —</option>
                             {allPending.map(p => (
@@ -257,28 +289,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
             </div>
           )}
         </div>
-
-        <div className="p-4 border-t bg-neutral-50 rounded-b-lg flex justify-between items-center gap-3 sticky bottom-0">
-          <div className="text-sm text-neutral-500">
-            {stage === 'review' && `${selectedTotal} recibos seleccionados`}
-          </div>
-          <div className="flex gap-3">
-            <button onClick={close} className="px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded-lg transition-colors">
-              {stage === 'done' ? 'Cerrar' : 'Cancelar'}
-            </button>
-            {(stage === 'review' || stage === 'applying') && (
-              <button
-                onClick={apply}
-                disabled={stage === 'applying' || selectedTotal === 0}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {stage === 'applying' && <Loader2 className="w-4 h-4 animate-spin" />}
-                Marcar {selectedTotal} como pagados
-              </button>
-            )}
-          </div>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 }

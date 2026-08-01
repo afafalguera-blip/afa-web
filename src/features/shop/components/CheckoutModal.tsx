@@ -85,17 +85,17 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
     if (success) {
         return (
             <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-                <div className="bg-white dark:bg-card-dark rounded-3xl p-8 max-w-md w-full text-center shadow-2xl animate-in zoom-in-95">
+                <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl animate-in zoom-in-95">
                     <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Check className="w-10 h-10" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-3 text-slate-900 dark:text-white">{t('shop_page.success_title')}</h3>
+                    <h3 className="text-2xl font-bold mb-3 text-slate-900 ">{t('shop_page.success_title')}</h3>
                     <p className="text-slate-500 mb-8 leading-relaxed">
                         {shopConfig?.translations?.[currentLang] || t('shop_page.success_message')}
                     </p>
                     <button
                         onClick={onClose}
-                        className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-xl"
+                        className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl"
                     >
                         {t('common.close')}
                     </button>
@@ -106,13 +106,13 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in">
-            <div className="bg-white dark:bg-card-dark w-full h-full sm:h-auto max-w-2xl sm:max-h-[90vh] flex flex-col sm:rounded-3xl shadow-2xl relative overflow-hidden">
+            <div className="bg-white w-full h-full sm:h-auto max-w-2xl sm:max-h-[90vh] flex flex-col sm:rounded-3xl shadow-2xl relative overflow-hidden">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                         {t('shop_page.cart_title')} ({items.length})
                     </h2>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 :bg-white/5 rounded-full transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -128,14 +128,14 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                             {/* Items List */}
                             <div className="space-y-3">
                                 {items.map(item => (
-                                    <div key={item.id} className="flex gap-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-2xl group text-sm">
-                                        <div className="w-16 h-16 bg-slate-200 dark:bg-slate-800 rounded-xl overflow-hidden flex-shrink-0">
+                                    <div key={item.id} className="flex gap-4 p-3 bg-slate-50 rounded-2xl group text-sm">
+                                        <div className="w-16 h-16 bg-slate-200 rounded-xl overflow-hidden flex-shrink-0">
                                             {item.product.image_url && (
                                                 <img src={proxyStorageUrl(item.product.image_url)} alt={item.product.name} className="w-full h-full object-cover" />
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-slate-900 dark:text-white truncate uppercase tracking-tight">{item.product.name}</h4>
+                                            <h4 className="font-bold text-slate-900 truncate uppercase tracking-tight">{item.product.name}</h4>
                                             <p className="text-slate-500 text-xs mt-0.5">Talla: {item.variant.size} • Qt: {item.quantity}</p>
                                             <p className="text-primary font-black mt-1 text-[15px]">{(Number(isMemberLocal ? item.variant.price_member : item.variant.price_non_member) * item.quantity).toFixed(2)}€</p>
                                         </div>
@@ -155,7 +155,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                     <span>{t('shop_page.subtotal')}</span>
                                     <span>{total.toFixed(2)}€</span>
                                 </div>
-                                <div className="flex justify-between items-center text-xl font-black text-slate-900 dark:text-white border-t border-primary/10 pt-3 mt-1">
+                                <div className="flex justify-between items-center text-xl font-black text-slate-900 border-t border-primary/10 pt-3 mt-1">
                                     <span>{t('shop_page.total')}</span>
                                     <span className="text-primary">{total.toFixed(2)}€</span>
                                 </div>
@@ -164,7 +164,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
 
                             {/* Checkout Form */}
                             <form onSubmit={handleCheckout} className="space-y-4">
-                                <h3 className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-widest flex items-center gap-2">
+                                <h3 className="font-bold text-slate-900 text-xs uppercase tracking-widest flex items-center gap-2">
                                     <div className="h-4 w-1 bg-primary rounded-full"></div>
                                     {t('shop_page.contact_details')}
                                 </h3>
@@ -179,7 +179,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                             value={customerName}
                                             onChange={e => setCustomerName(e.target.value)}
                                             placeholder="Joan Garcia"
-                                            className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
+                                            className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -191,7 +191,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                             value={customerEmail}
                                             onChange={e => setCustomerEmail(e.target.value)}
                                             placeholder={t('shop_page.customer_email_placeholder')}
-                                            className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
+                                            className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -203,13 +203,13 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                             value={customerPhone}
                                             onChange={e => setCustomerPhone(e.target.value)}
                                             placeholder={t('shop_page.customer_phone_placeholder')}
-                                            className="w-full px-4 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
+                                            className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-primary transition-all text-sm font-medium"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Member toggle */}
-                                <label className="flex items-center gap-3 cursor-pointer select-none p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-primary/40 transition-all">
+                                <label className="flex items-center gap-3 cursor-pointer select-none p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:border-primary/40 transition-all">
                                     <div className="relative flex-shrink-0">
                                         <input
                                             type="checkbox"
@@ -217,29 +217,29 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                                             onChange={e => setIsMemberLocal(e.target.checked)}
                                             className="sr-only peer"
                                         />
-                                        <div className="w-10 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer-checked:bg-primary transition-colors"></div>
+                                        <div className="w-10 h-6 bg-slate-200 rounded-full peer-checked:bg-primary transition-colors"></div>
                                         <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-slate-800 dark:text-white">Soc soci/a de l'AFA</p>
+                                        <p className="text-sm font-bold text-slate-800 ">Soc soci/a de l'AFA</p>
                                         <p className="text-[11px] text-slate-400 mt-0.5">Aplica el preu de soci</p>
                                     </div>
                                 </label>
 
                                 {hasOutOfStock && (
-                                    <div className="flex items-start gap-2.5 text-amber-700 dark:text-amber-400 text-xs font-bold bg-amber-50 dark:bg-amber-500/10 p-4 rounded-xl border border-amber-100 dark:border-amber-500/20">
+                                    <div className="flex items-start gap-2.5 text-amber-700 text-xs font-bold bg-amber-50 p-4 rounded-xl border border-amber-100 ">
                                         <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500" />
                                         <span>{t('shop_page.stock_warning')}</span>
                                     </div>
                                 )}
 
                                 {errorMsg && (
-                                    <p className="text-red-500 text-xs font-bold bg-red-50 dark:bg-red-500/10 p-4 rounded-xl border border-red-100 dark:border-red-500/20">{errorMsg}</p>
+                                    <p className="text-red-500 text-xs font-bold bg-red-50 p-4 rounded-xl border border-red-100 ">{errorMsg}</p>
                                 )}
 
                                 <button
                                     disabled={loading || items.length === 0}
-                                    className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-2xl shadow-xl hover:shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
+                                    className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
                                 >
                                     {loading ? (
                                         <>

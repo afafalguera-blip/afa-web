@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../../../lib/supabase';
+import { ShopService } from '../services/ShopService';
 import type { ShopProduct } from '../types/shop';
 import { Search, ShoppingBag, ShoppingCart } from 'lucide-react'; // Retaining Search and ShoppingBag as they are used in the original code
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,7 @@ export function ShopLanding() {
   const [selectedProduct, setSelectedProduct] = useState<ShopProduct | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [shopConfig, setShopConfig] = useState<ShopConfig | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   const currentLang = (i18n.language || 'ca') as 'ca' | 'es' | 'en';
 
@@ -37,23 +38,20 @@ export function ShopLanding() {
   }, []);
 
   async function fetchConfig() {
-    const config = await ConfigService.getShopConfig();
-    if (config) setShopConfig(config);
+    try {
+      const config = await ConfigService.getShopConfig();
+      if (config) setShopConfig(config);
+    } catch {
+      // Falls back to the hardcoded category filters rendered below.
+    }
   }
 
   async function fetchProducts() {
     try {
-      const { data, error } = await supabase
-        .from('shop_products')
-        .select(`
-  *,
-  variants: shop_variants(*)
-        `);
-
-      if (error) throw error;
-      setProducts(calculateChandalStock(data || []));
-    } catch (error) {
-      console.error('Error fetching products:', error);
+      setLoadError(false);
+      setProducts(calculateChandalStock(await ShopService.getProductsWithVariants()));
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -72,16 +70,16 @@ export function ShopLanding() {
 
       <header className="mb-10 flex justify-between items-start pt-4">
         <div>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">{t('nav.shop')}</h1>
+          <h1 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">{t('nav.shop')}</h1>
           <p className="text-slate-500 text-sm max-w-md leading-relaxed">{t('shop_page.subtitle')}</p>
         </div>
 
         {/* Cart Floating Button Mobile / Desktop Header */}
         <button
           onClick={() => setIsCheckoutOpen(true)}
-          className="relative p-3 bg-white dark:bg-card-dark rounded-2xl shadow-sm ring-1 ring-slate-200 dark:ring-white/10 hover:ring-primary transition-all group active:scale-95"
+          className="relative p-3 bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 hover:ring-primary transition-all group active:scale-95"
         >
-          <ShoppingBag className="w-6 h-6 text-slate-700 dark:text-slate-200 group-hover:text-primary" />
+          <ShoppingBag className="w-6 h-6 text-slate-700 group-hover:text-primary" />
           {itemCount > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-in zoom-in">
               {itemCount}
@@ -97,14 +95,14 @@ export function ShopLanding() {
           <input
             type="text"
             placeholder={t('shop_page.search_placeholder')}
-            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-card-dark border-none rounded-2xl shadow-sm ring-1 ring-slate-200 dark:ring-white/10 focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-400 dark:text-white"
+            className="w-full pl-12 pr-4 py-4 bg-white border-none rounded-2xl shadow-sm ring-1 ring-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-400 "
           />
         </div>
 
         <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
           <button
             onClick={() => setCategory('all')}
-            className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
+            className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white ring-1 ring-slate-200 text-slate-600 hover:bg-slate-50'} `}
           >
             {t('shop_page.filter_all')}
           </button>
@@ -114,7 +112,7 @@ export function ShopLanding() {
               key={cat.id}
               /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
               onClick={() => setCategory(cat.id as any)}
-              className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
+              className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white ring-1 ring-slate-200 text-slate-600 hover:bg-slate-50'} `}
             >
               {cat.translations[currentLang] || cat.translations['ca']}
             </button>
@@ -124,13 +122,13 @@ export function ShopLanding() {
             <>
               <button
                 onClick={() => setCategory('uniforme')}
-                className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'uniforme' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
+                className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'uniforme' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white ring-1 ring-slate-200 text-slate-600 hover:bg-slate-50'} `}
               >
                 {t('shop_page.filter_uniform')}
               </button>
               <button
                 onClick={() => setCategory('accessoris')}
-                className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'accessoris' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white dark:bg-card-dark ring-1 ring-slate-200 dark:ring-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-50'} `}
+                className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${category === 'accessoris' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white ring-1 ring-slate-200 text-slate-600 hover:bg-slate-50'} `}
               >
                 {t('shop_page.filter_accessories')}
               </button>
@@ -145,15 +143,26 @@ export function ShopLanding() {
         <div className="flex justify-center py-24">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
+      ) : loadError ? (
+        <div role="alert" className="text-center py-24 text-slate-500">
+          <p className="font-semibold text-slate-700">{t('shop_page.load_error', 'No s\'han pogut carregar els productes.')}</p>
+          <button
+            type="button"
+            onClick={() => { setLoading(true); fetchProducts(); }}
+            className="mt-4 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors"
+          >
+            {t('common.retry', 'Tornar-ho a provar')}
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {filteredProducts.map(product => (
             <div
               key={product.id}
               onClick={() => setSelectedProduct(product)}
-              className="group bg-white dark:bg-card-dark rounded-3xl p-4 shadow-sm ring-1 ring-slate-100 dark:ring-white/5 flex flex-col cursor-pointer hover:shadow-xl hover:ring-primary/20 transition-all active:scale-95"
+              className="group bg-white rounded-3xl p-4 shadow-sm ring-1 ring-slate-100 flex flex-col cursor-pointer hover:shadow-xl hover:ring-primary/20 transition-all active:scale-95"
             >
-              <div className="aspect-square bg-slate-50 dark:bg-slate-800 rounded-2xl mb-4 overflow-hidden relative group-hover:scale-[1.02] transition-transform duration-500">
+              <div className="aspect-square bg-slate-50 rounded-2xl mb-4 overflow-hidden relative group-hover:scale-[1.02] transition-transform duration-500">
                 {product.image_url ? (
                   <LazyImage src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                 ) : (
@@ -162,12 +171,12 @@ export function ShopLanding() {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none flex items-center justify-center">
-                  <span className="bg-white/90 dark:bg-slate-900/90 py-2 px-4 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 duration-300 flex items-center gap-2">
+                  <span className="bg-white/90 py-2 px-4 rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 duration-300 flex items-center gap-2">
                     <ShoppingCart className="w-3 h-3" /> {t('shop_page.view_options')}
                   </span>
                 </div>
               </div>
-              <h3 className="font-bold text-slate-900 dark:text-white text-[15px] mb-2 line-clamp-2 px-1 group-hover:text-primary transition-colors">{tContent(product, 'name')}</h3>
+              <h3 className="font-bold text-slate-900 text-[15px] mb-2 line-clamp-2 px-1 group-hover:text-primary transition-colors">{tContent(product, 'name')}</h3>
 
               <div className="mt-auto px-1 pt-2">
                 {product.variants && product.variants.length > 0 && (

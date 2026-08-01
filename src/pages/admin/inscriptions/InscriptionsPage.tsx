@@ -1,314 +1,316 @@
-import { useEffect, useState } from 'react';
-import { AdminInscriptionsService } from '../../../services/admin/AdminInscriptionsService';
-import { ConfigService } from '../../../services/ConfigService';
-import { ExportService } from '../../../services/ExportService';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw, Search, Edit, Trash2, FileSpreadsheet } from 'lucide-react';
-import { EditInscriptionModal } from '../../../components/admin/EditInscriptionModal';
-import { ExportOptionsModal } from '../../../components/admin/ExportOptionsModal';
+import { Eye, FileSpreadsheet, Pencil, Trash2, Users } from 'lucide-react';
 
-import type { Inscription, InscriptionStudent } from '../../../types/inscription';
+import { AdminPageHeader } from '../../../components/admin/common/AdminPageHeader';
+import {
+  AdminTable,
+  AdminPagination,
+  type AdminTableColumn
+} from '../../../components/admin/common/AdminTable';
+import { useToast } from '../../../components/common/Toast';
+import { EditInscriptionModal } from '../../../components/admin/inscriptions/EditInscriptionModal';
+import { ExportOptionsModal, type ExportFormat, type ExportType } from '../../../components/admin/inscriptions/ExportOptionsModal';
+import { InscriptionDetailsModal } from '../../../components/admin/inscriptions/InscriptionDetailsModal';
+import { InscriptionsFilters } from './InscriptionsFilters';
+
+import { useInscriptions } from '../../../hooks/useInscriptions';
+import { ExportService } from '../../../services/ExportService';
+import { COURSE_BY_CODE, isCourseCode } from '../../../constants/courses';
+import type { Inscription, InscriptionStatus } from '../../../types/inscription';
+
+const STATUS_BADGE: Record<string, string> = {
+  alta: 'bg-green-100 text-green-800',
+  active: 'bg-green-100 text-green-800',
+  pending: 'bg-amber-100 text-amber-800',
+  suspended: 'bg-amber-100 text-amber-800',
+  baja: 'bg-red-100 text-red-800'
+};
+
+const courseLabel = (code?: string): string =>
+  code && isCourseCode(code) ? COURSE_BY_CODE[code].label : code || '';
 
 export default function InscriptionsPage() {
   const { t } = useTranslation();
-  const [inscriptions, setInscriptions] = useState<Inscription[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [academicYear, setAcademicYear] = useState('');
-  const [years, setYears] = useState<string[]>([]);
+  const { toast } = useToast();
 
-  // Edit Modal State
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingInscription, setEditingInscription] = useState<Inscription | null>(null);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [customLabels, setCustomLabels] = useState<Record<string, string>>({});
+  const {
+    inscriptions,
+    total,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    isLoading,
+    error,
+    filters,
+    setFilter,
+    resetFilters,
+    academicYear,
+    setAcademicYear,
+    academicYears,
+    activityOptions,
+    customLabels,
+    reload,
+    removeInscription,
+    saveInscription,
+    changeStatus,
+    fetchAllFiltered
+  } = useInscriptions();
 
-  // Init: resolve the available course cohorts and default to the active season.
-  useEffect(() => {
-    (async () => {
-      const [list, season] = await Promise.all([
-        AdminInscriptionsService.getAcademicYears(),
-        ConfigService.getSeasonConfig(),
-      ]);
-      setYears(list);
-      const preferred = season?.active_year && list.includes(season.active_year)
-        ? season.active_year
-        : (list[0] || '');
-      setAcademicYear(preferred);
-    })();
+  const [detailsTarget, setDetailsTarget] = useState<Inscription | null>(null);
+  const [editTarget, setEditTarget] = useState<Inscription | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
-    ConfigService.getInscriptionFormConfig().then(cfg => {
-      if (!cfg) return;
-      const m: Record<string, string> = {};
-      (cfg.customQuestions || []).forEach(q => { m[q.key] = q.label.es || q.label.ca || q.key; });
-      setCustomLabels(m);
-    });
-  }, []);
-
-  // Reload whenever the selected cohort changes (and on first run).
-  useEffect(() => {
-    fetchInscriptions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [academicYear]);
-
-  const fetchInscriptions = async () => {
+  const handleExport = async (format: ExportFormat, type: ExportType) => {
+    setExporting(true);
     try {
-      setLoading(true);
-      setLoadError(null);
-      const data = await AdminInscriptionsService.getInscriptions(academicYear || undefined);
-      setInscriptions(data);
-    } catch (error) {
-      console.error('Error fetching inscriptions:', error);
-      const message = error instanceof Error ? error.message : String(error);
-      setLoadError(message);
+      // The export must cover every filtered record, not just the visible page.
+      const rows = await fetchAllFiltered();
+      const fields = type === 'full' ? 'full' : 'basic';
+      if (format === 'excel') {
+        ExportService.exportInscriptionsExcel(rows, fields, 'Inscripcions_AFA');
+      } else {
+        ExportService.exportInscriptionsPDF(rows, fields, 'Inscripcions_AFA');
+      }
+      setExportOpen(false);
+    } catch (err) {
+      console.error('Error exporting inscriptions:', err);
+      toast.error(t('admin.inscriptions.export_error', "Error en generar l'exportació"));
     } finally {
-      setLoading(false);
+      setExporting(false);
     }
   };
 
-  const handleDelete = async (id: string | number) => {
-    if (!window.confirm(t('admin.inscriptions.delete_confirm'))) return;
-
-    try {
-      await AdminInscriptionsService.deleteInscription(id);
-      setInscriptions(prev => prev.filter(ins => ins.id !== id));
-    } catch (error) {
-      console.error('Error deleting:', error);
-      alert(t('admin.inscriptions.delete_error'));
-    }
-  };
-
-  const handleEditClick = (inscription: Inscription) => {
-    setEditingInscription(inscription);
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveEdit = async (id: string | number, updates: Partial<Inscription>) => {
-    try {
-      await AdminInscriptionsService.updateInscription(id, updates);
-
-      // Update local state without refetching if possible, but deep nested updates suggest refetch is safer or careful merge
-      setInscriptions(prev => prev.map(ins => ins.id === id ? { ...ins, ...updates } as Inscription : ins));
-      alert(t('admin.inscriptions.update_success'));
-    } catch (error) {
-      console.error('Error updating:', error);
-      alert(t('admin.inscriptions.update_error'));
-      throw error; // Re-throw for modal to handle
-    }
-  };
-
-  const filteredInscriptions = inscriptions.filter((ins: Inscription) => {
-    const searchString = searchTerm.toLowerCase();
-    const studentsStr = Array.isArray(ins.students)
-      ? JSON.stringify(ins.students).toLowerCase()
-      : '';
-
-    const matchesSearch =
-      ins.parent_name?.toLowerCase().includes(searchString) ||
-      ins.parent_dni?.toLowerCase().includes(searchString) ||
-      ins.parent_email_1?.toLowerCase().includes(searchString) ||
-      studentsStr.includes(searchString);
-
-    const matchesStatus = statusFilter === 'all' || ins.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
+  const columns = useMemo<AdminTableColumn<Inscription>[]>(
+    () => [
+      {
+        key: 'parent',
+        header: t('admin.inscriptions.table.parent', 'Família'),
+        render: (row) => (
+          <div className="min-w-0">
+            <div className="font-medium text-neutral-900">{row.parent_name || '—'}</div>
+            <div className="text-[12px] text-neutral-500">{row.parent_dni}</div>
+            {row.afa_member && (
+              <span className="inline-flex mt-1 px-2 py-0.5 rounded-full bg-neutral-900 text-white text-[10px] font-semibold uppercase">
+                {t('admin.inscriptions.member_badge', 'Soci AFA')}
+              </span>
+            )}
+          </div>
+        )
+      },
+      {
+        key: 'contact',
+        header: t('admin.inscriptions.table.contact', 'Contacte'),
+        render: (row) => (
+          <div className="text-[12px] text-neutral-600">
+            <div className="break-all">{row.parent_email_1}</div>
+            <div>{row.parent_phone_1}</div>
+          </div>
+        )
+      },
+      {
+        key: 'students',
+        header: t('admin.inscriptions.table.students', 'Alumnes'),
+        render: (row) => (
+          <div className="space-y-1.5">
+            {row.students.length === 0 && (
+              <span className="text-[12px] text-neutral-400">
+                {t('admin.inscriptions.no_students', 'Sense alumnes')}
+              </span>
+            )}
+            {row.students.map((student, idx) => (
+              <div key={idx} className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[13px] text-neutral-800">
+                    {student.name} {student.surname}
+                  </span>
+                  <span className="text-[11px] text-neutral-400">{courseLabel(student.course)}</span>
+                  {student.suspended && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">
+                      {t('admin.inscriptions.suspended_badge', 'Suspès')}
+                    </span>
+                  )}
+                </div>
+                {(student.activities || []).length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-0.5">
+                    {student.activities.map((activity) => (
+                      <span
+                        key={activity}
+                        className="px-1.5 py-0.5 rounded border border-neutral-200 bg-neutral-50 text-[10px] text-neutral-600"
+                      >
+                        {activity}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            {row.extra_answers && Object.keys(row.extra_answers).length > 0 && (
+              <div className="pt-1 border-t border-dashed border-neutral-200 space-y-0.5">
+                {Object.entries(row.extra_answers)
+                  .filter(([, value]) => value)
+                  .map(([key, value]) => (
+                    <p key={key} className="text-[10px] text-neutral-500">
+                      <span className="font-semibold">{customLabels[key] || key}:</span> {String(value)}
+                    </p>
+                  ))}
+              </div>
+            )}
+          </div>
+        )
+      },
+      {
+        key: 'status',
+        header: t('admin.inscriptions.table.status', 'Estat'),
+        render: (row) => (
+          <div className="flex flex-col gap-1">
+            <span
+              className={`inline-flex w-fit px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                STATUS_BADGE[row.status] ?? 'bg-neutral-100 text-neutral-700'
+              }`}
+            >
+              {t(`admin.inscriptions.status.${row.status}`, row.status)}
+            </span>
+            <select
+              value={row.status}
+              onChange={(event) => changeStatus(row.id, event.target.value as InscriptionStatus)}
+              aria-label={t('admin.inscriptions.change_status', "Canviar l'estat")}
+              className="h-7 rounded-md border border-neutral-200 bg-white px-1.5 text-[11px] text-neutral-600"
+            >
+              <option value="alta">{t('admin.inscriptions.status.alta', 'Alta')}</option>
+              <option value="pending">{t('admin.inscriptions.status.pending', 'Pendent')}</option>
+              <option value="baja">{t('admin.inscriptions.status.baja', 'Baixa')}</option>
+              {!['alta', 'pending', 'baja'].includes(row.status) && (
+                <option value={row.status}>{t(`admin.inscriptions.status.${row.status}`, row.status)}</option>
+              )}
+            </select>
+          </div>
+        )
+      },
+      {
+        key: 'created_at',
+        header: t('admin.inscriptions.table.date', 'Data'),
+        className: 'whitespace-nowrap',
+        render: (row) => (
+          <span className="text-[12px] text-neutral-500">
+            {row.created_at ? new Date(row.created_at).toLocaleDateString('ca-ES') : '—'}
+          </span>
+        )
+      },
+      {
+        key: 'actions',
+        header: t('admin.inscriptions.table.actions', 'Accions'),
+        className: 'text-right',
+        render: (row) => (
+          <div className="flex justify-end gap-1">
+            <button
+              type="button"
+              onClick={() => setDetailsTarget(row)}
+              title={t('admin.inscriptions.view_details', 'Veure detalls')}
+              aria-label={t('admin.inscriptions.view_details', 'Veure detalls')}
+              className="p-1.5 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditTarget(row)}
+              title={t('common.edit', 'Editar')}
+              aria-label={t('common.edit', 'Editar')}
+              className="p-1.5 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => removeInscription(row)}
+              title={t('common.delete', 'Eliminar')}
+              aria-label={t('common.delete', 'Eliminar')}
+              className="p-1.5 rounded-md text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )
+      }
+    ],
+    [changeStatus, customLabels, removeInscription, t]
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">{t('admin.inscriptions.title')}</h1>
-          <p className="text-sm text-gray-500">{t('admin.inscriptions.subtitle')}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <div className="max-w-7xl mx-auto space-y-6">
+      <AdminPageHeader
+        title={t('admin.inscriptions.title', 'Inscripcions')}
+        subtitle={t('admin.inscriptions.subtitle', 'Gestiona les inscripcions de les activitats')}
+        icon={Users}
+        loading={isLoading}
+        onRefresh={reload}
+        actions={
           <button
-            onClick={fetchInscriptions}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-white hover:bg-neutral-50 h-9 px-4 py-2 text-neutral-700"
-            title={t('admin.inscriptions.reload_tooltip')}
+            type="button"
+            onClick={() => setExportOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors"
           >
-            <RefreshCw className="h-4 w-4" />
+            <FileSpreadsheet className="w-4 h-4" />
+            {t('admin.inscriptions.export_button', 'Exportar')}
           </button>
+        }
+      />
 
-          <button
-            onClick={() => setIsExportModalOpen(true)}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 h-9 px-4 py-2 gap-2 shadow-sm"
-          >
-            <FileSpreadsheet className="h-4 w-4" /> {t('admin.inscriptions.export_button')}
-          </button>
-        </div>
-      </div>
+      <InscriptionsFilters
+        filters={filters}
+        setFilter={setFilter}
+        onReset={resetFilters}
+        academicYear={academicYear}
+        setAcademicYear={setAcademicYear}
+        academicYears={academicYears}
+        activityOptions={activityOptions}
+      />
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white p-4 rounded-lg border shadow-sm">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <input
-            type="text"
-            placeholder={t('admin.inscriptions.search_placeholder')}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm pl-9 outline-none focus:ring-2 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <select
-          className="flex h-9 w-full sm:w-[150px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
-          value={academicYear}
-          onChange={(e) => setAcademicYear(e.target.value)}
-          title="Curs"
-        >
-          <option value="">Tots els cursos</option>
-          {years.map((y) => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
-        <select
-          className="flex h-9 w-full sm:w-[180px] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-2 focus:ring-blue-500"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">{t('admin.inscriptions.status_all')}</option>
-          <option value="alta">{t('admin.inscriptions.status.alta')}</option>
-          <option value="pending">{t('admin.inscriptions.status.pending')}</option>
-          <option value="baja">{t('admin.inscriptions.status.baja')}</option>
-        </select>
-      </div>
-
-      <div className="rounded-md border bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 border-b text-gray-700 font-medium">
-              <tr>
-                <th className="px-4 py-3">{t('admin.inscriptions.table.parent')}</th>
-                <th className="px-4 py-3">{t('admin.inscriptions.table.contact')}</th>
-                <th className="px-4 py-3">{t('admin.inscriptions.table.students')}</th>
-                <th className="px-4 py-3">{t('admin.inscriptions.table.status')}</th>
-                <th className="px-4 py-3">{t('admin.inscriptions.table.date')}</th>
-                <th className="px-4 py-3 text-right">{t('admin.inscriptions.table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('admin.inscriptions.table.loading')}</td>
-                </tr>
-              ) : loadError ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-red-600">
-                    Error cargando inscripciones: {loadError}
-                  </td>
-                </tr>
-              ) : filteredInscriptions.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('admin.inscriptions.table.no_results')}</td>
-                </tr>
-              ) : (
-                filteredInscriptions.map((inscription) => (
-                  <tr key={inscription.id} className="hover:bg-gray-50/50">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{inscription.parent_name}</div>
-                      <div className="text-gray-500 text-xs">{inscription.parent_dni}</div>
-                      {inscription.afa_member && (
-                        <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-blue-100 text-blue-800 mt-1">
-                          {t('admin.inscriptions.member_badge')}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs">{inscription.parent_email_1}</span>
-                        <span className="text-xs">{inscription.parent_phone_1}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="space-y-2">
-                        {Array.isArray(inscription.students) && inscription.students.map((student: InscriptionStudent, idx: number) => (
-                          <div key={idx} className={`p-2 rounded border ${student.suspended ? 'bg-red-50 border-red-100' : 'bg-neutral-50 border-neutral-100'}`}>
-                            <p className="font-medium text-xs text-neutral-700 flex justify-between">
-                              <span>{student.name} {student.surname} <span className="text-neutral-400">({student.course})</span></span>
-                              {student.suspended && <span className="text-[10px] text-red-600 font-bold uppercase">{t('admin.inscriptions.suspended_badge')}</span>}
-                            </p>
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {student.activities && student.activities.map((act: string, k: number) => (
-                                <span key={k} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-white border border-neutral-200 text-neutral-600">
-                                  {act}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                        {inscription.extra_answers && Object.keys(inscription.extra_answers).length > 0 && (
-                          <div className="mt-1 space-y-0.5 border-t border-dashed border-neutral-200 pt-1">
-                            {Object.entries(inscription.extra_answers).filter(([, v]) => v).map(([k, v]) => (
-                              <p key={k} className="text-[10px] text-neutral-600">
-                                <span className="font-semibold">{customLabels[k] || k}:</span> {String(v)}
-                              </p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent
-                                ${inscription.status === 'alta' ? 'bg-green-100 text-green-800' :
-                          inscription.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'}`}>
-                        {inscription.status === 'alta' ? t('admin.inscriptions.status.alta') :
-                          inscription.status === 'pending' ? t('admin.inscriptions.status.pending') :
-                            inscription.status === 'baja' ? t('admin.inscriptions.status.baja') : inscription.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
-                      {new Date(inscription.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => handleEditClick(inscription)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(inscription.id)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {editingInscription && (
-        <EditInscriptionModal
-          inscription={editingInscription}
-          isOpen={isEditModalOpen}
-          onClose={() => { setIsEditModalOpen(false); setEditingInscription(null); }}
-          onSave={handleSaveEdit}
-        />
+      {error && (
+        <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+          {t('admin.inscriptions.load_error', 'Error carregant les inscripcions')}: {error}
+        </p>
       )}
 
+      <AdminTable
+        columns={columns}
+        rows={inscriptions}
+        keyExtractor={(row) => row.id}
+        loading={isLoading}
+        emptyMessage={t('admin.inscriptions.table.no_results', "No s'han trobat inscripcions")}
+        footer={
+          <AdminPagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
+        }
+      />
+
+      <InscriptionDetailsModal
+        inscription={detailsTarget}
+        onClose={() => setDetailsTarget(null)}
+        customLabels={customLabels}
+      />
+
+      <EditInscriptionModal
+        inscription={editTarget}
+        onClose={() => setEditTarget(null)}
+        onSave={saveInscription}
+        activityOptions={activityOptions}
+      />
+
       <ExportOptionsModal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        count={filteredInscriptions.length}
-        onExport={(format, type) => {
-          if (format === 'excel') {
-            ExportService.exportInscriptionsExcel(filteredInscriptions, type === 'full' ? 'full' : 'basic');
-          } else {
-            ExportService.exportInscriptionsPDF(filteredInscriptions, type === 'full' ? 'full' : 'basic');
-          }
-          setIsExportModalOpen(false);
-        }}
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        onExport={handleExport}
+        count={total}
+        exporting={exporting}
       />
     </div>
   );

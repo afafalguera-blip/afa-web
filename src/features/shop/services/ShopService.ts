@@ -20,6 +20,97 @@ function transformOrder(order: unknown): ShopOrder {
     };
 }
 
+/** Delivery statuses that move an order into the "Arxiu" tab. */
+const ARCHIVED_DELIVERY_STATUSES: OrderDeliveryStatus[] = ['delivered', 'not_picked_up'];
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const ORDER_SELECT = `
+        *,
+        items:shop_order_items(
+           *,
+           variant:shop_variants(
+              size,
+              stock,
+              price_member,
+              price_non_member,
+              product:shop_products(name)
+           )
+        )
+      `;
+
+export type OrdersView = 'active' | 'archived';
+
+export interface OrdersFilters {
+    academicYear?: string;
+    view?: OrdersView;
+    search?: string;
+}
+
+export interface OrdersQuery extends OrdersFilters {
+    /** 1-based. */
+    page: number;
+    pageSize: number;
+}
+
+export interface PaginatedOrders {
+    rows: ShopOrder[];
+    total: number;
+}
+
+export interface OrdersSummary {
+    pendingCount: number;
+    archivedCount: number;
+    totalRevenue: number;
+}
+
+/** PostgREST reserves , . : ( ) in filter values; strip them from user input. */
+function sanitizeSearch(term: string): string {
+    return term.replace(/[,.():*%\\]/g, ' ').trim();
+}
+
+interface FilterableQuery<T> {
+    eq(column: string, value: unknown): T;
+    or(filters: string): T;
+}
+
+/**
+ * Pushes the cohort, the active/archived tab and the search box to the server.
+ * Legacy rows may have a NULL delivery_status (the UI reads them as "pending"),
+ * hence the explicit null branch instead of a plain `not.in`.
+ */
+function applyOrderFilters<T extends FilterableQuery<T>>(query: T, filters: OrdersFilters): T {
+    let q = query;
+    const orGroups: string[] = [];
+
+    if (filters.academicYear) q = q.eq('academic_year', filters.academicYear);
+
+    const archived = `"${ARCHIVED_DELIVERY_STATUSES.join('","')}"`;
+    if (filters.view === 'archived') {
+        orGroups.push(`delivery_status.in.(${archived})`);
+    } else if (filters.view === 'active') {
+        orGroups.push(`delivery_status.is.null,delivery_status.not.in.(${archived})`);
+    }
+
+    const search = sanitizeSearch(filters.search ?? '');
+    if (search) {
+        // uuid columns have no ilike operator: only an exact id match is possible.
+        if (UUID_RE.test(search)) {
+            q = q.eq('id', search);
+        } else {
+            orGroups.push(
+                `customer_name.ilike.%${search}%,customer_email.ilike.%${search}%,customer_phone.ilike.%${search}%`,
+            );
+        }
+    }
+
+    if (orGroups.length === 1) q = q.or(orGroups[0]);
+    // PostgREST guarantees a single top-level `or`; nest the groups to AND them.
+    else if (orGroups.length > 1) q = q.or(`and(${orGroups.map((g) => `or(${g})`).join(',')})`);
+
+    return q;
+}
+
 export const ShopService = {
   async createProduct(product: Partial<ShopProduct>) {
     const { data, error } = await supabase
@@ -112,25 +203,99 @@ export const ShopService = {
     if (error) throw error;
   },
 
-  async getOrders(academicYear?: string): Promise<ShopOrder[]> {
-    let query = supabase
-      .from('shop_orders')
-      .select(`
-        *,
-        items:shop_order_items(
-           *,
-           variant:shop_variants(
-              size,
-              product:shop_products(name)
-           )
-        )
-      `)
-      .order('created_at', { ascending: false });
-    if (academicYear) query = query.eq('academic_year', academicYear);
-    const { data, error } = await query;
+  /** One page of orders plus the exact total for the same filters. */
+  async listOrders({ page, pageSize, ...filters }: OrdersQuery): Promise<PaginatedOrders> {
+    const from = Math.max(0, (page - 1) * pageSize);
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await applyOrderFilters(
+      supabase.from('shop_orders').select(ORDER_SELECT, { count: 'exact' }),
+      filters,
+    )
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
     if (error) throw error;
-    return (data || []).map(transformOrder);
+    return { rows: (data || []).map(transformOrder), total: count ?? 0 };
+  },
+
+  /** Single order with its items, used to refresh the editor in place. */
+  async getOrder(orderId: string): Promise<ShopOrder> {
+    const { data, error } = await supabase
+      .from('shop_orders')
+      .select(ORDER_SELECT)
+      .eq('id', orderId)
+      .single();
+    if (error) throw error;
+    return transformOrder(data);
+  },
+
+  /**
+   * Tab counters and revenue for the whole cohort. Revenue needs a SUM that
+   * PostgREST cannot do without an RPC, so it reads only `total_amount`.
+   */
+  async getOrdersSummary(academicYear?: string): Promise<OrdersSummary> {
+    const countQuery = (view: OrdersView) =>
+      applyOrderFilters(
+        supabase.from('shop_orders').select('id', { count: 'exact', head: true }),
+        { academicYear, view },
+      );
+
+    let revenueQuery = supabase
+      .from('shop_orders')
+      .select('total_amount')
+      .eq('payment_status', 'paid');
+    if (academicYear) revenueQuery = revenueQuery.eq('academic_year', academicYear);
+
+    const [active, archivedRes, revenue] = await Promise.all([
+      countQuery('active'),
+      countQuery('archived'),
+      revenueQuery,
+    ]);
+
+    if (active.error) throw active.error;
+    if (archivedRes.error) throw archivedRes.error;
+    if (revenue.error) throw revenue.error;
+
+    const totalRevenue = ((revenue.data || []) as { total_amount: number | string }[])
+      .reduce((acc, row) => acc + (Number(row.total_amount) || 0), 0);
+
+    return {
+      pendingCount: active.count ?? 0,
+      archivedCount: archivedRes.count ?? 0,
+      totalRevenue,
+    };
+  },
+
+  async updateOrderCustomerName(orderId: string, customerName: string) {
+    const { error } = await supabase
+      .from('shop_orders')
+      .update({ customer_name: customerName })
+      .eq('id', orderId);
+    if (error) throw error;
+  },
+
+  /** Flips the member flag and re-prices every line accordingly. */
+  async setOrderMember(order: ShopOrder, isMember: boolean) {
+    const items = order.items ?? [];
+    let newTotal = 0;
+
+    for (const item of items) {
+      if (!item.variant) continue;
+      const newPrice = isMember ? item.variant.price_member : item.variant.price_non_member;
+      const { error } = await supabase
+        .from('shop_order_items')
+        .update({ price_at_time: newPrice })
+        .eq('id', item.id);
+      if (error) throw error;
+      newTotal += newPrice * item.quantity;
+    }
+
+    const { error } = await supabase
+      .from('shop_orders')
+      .update({ is_member: isMember, ...(items.length > 0 ? { total_amount: newTotal } : {}) })
+      .eq('id', order.id);
+    if (error) throw error;
   },
 
   async getOrderAcademicYears(): Promise<string[]> {
@@ -205,13 +370,13 @@ export const ShopService = {
       return data;
   },
 
-  async getProductsWithVariants() {
+  async getProductsWithVariants(): Promise<ShopProduct[]> {
     const { data, error } = await supabase
       .from('shop_products')
       .select('*, variants:shop_variants(*)')
       .order('name');
     if (error) throw error;
-    return data;
+    return (data || []) as unknown as ShopProduct[];
   },
 
   async addOrderItem(orderId: string, variantId: string, quantity: number, price: number) {

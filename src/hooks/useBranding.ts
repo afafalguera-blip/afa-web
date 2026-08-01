@@ -32,15 +32,13 @@ export function invalidateBrandingCache() {
 }
 
 export function useBranding(): BrandingConfig {
-    const [branding, setBranding] = useState<BrandingConfig>(cachedBranding || DEFAULT_BRANDING);
+    // The lazy initialiser paints the cached value on the first render; the
+    // effect below ALWAYS revalidates in the background so a stale localStorage
+    // branding (e.g. a hero/logo URL whose file no longer exists) is replaced.
+    const [branding, setBranding] = useState<BrandingConfig>(() => cachedBranding || DEFAULT_BRANDING);
 
     useEffect(() => {
         let cancelled = false;
-
-        // Show cached value instantly, but ALWAYS revalidate in the background.
-        // Without this, a stale localStorage branding (e.g. an old hero/logo URL
-        // pointing to a file that no longer exists) stays pinned forever.
-        if (cachedBranding) setBranding(cachedBranding);
 
         if (!fetchPromise) {
             fetchPromise = ConfigService.getBrandingConfig().finally(() => { fetchPromise = null; });

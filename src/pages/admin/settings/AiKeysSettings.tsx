@@ -7,6 +7,8 @@ import {
   type AppSettingKey,
   type AppSettingMeta,
 } from '../../../services/admin/AdminAppSettingsService';
+import { useToast } from '../../../components/common/Toast';
+import { useConfirm } from '../../../components/common/ConfirmDialog';
 
 interface RowState {
   meta: AppSettingMeta | null;
@@ -16,7 +18,6 @@ interface RowState {
   removing: boolean;
   showDraft: boolean;
   error: string | null;
-  okMessage: string | null;
 }
 
 const emptyRow = (): RowState => ({
@@ -27,11 +28,12 @@ const emptyRow = (): RowState => ({
   removing: false,
   showDraft: false,
   error: null,
-  okMessage: null,
 });
 
 export default function AiKeysSettings() {
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const [rows, setRows] = useState<Record<AppSettingKey, RowState>>(
     () => Object.fromEntries(APP_SETTING_DEFINITIONS.map((d) => [d.key, emptyRow()])) as Record<AppSettingKey, RowState>,
   );
@@ -60,31 +62,39 @@ export default function AiKeysSettings() {
   const handleSave = async (key: AppSettingKey) => {
     const value = rows[key].draft.trim();
     if (!value) return;
-    patch(key, { saving: true, error: null, okMessage: null });
+    patch(key, { saving: true, error: null });
     try {
       await AppSettingsService.set(key, value);
-      patch(key, { saving: false, draft: '', okMessage: t('settings.ai_keys.saved_ok') });
+      patch(key, { saving: false, draft: '' });
+      toast.success(t('settings.ai_keys.saved_ok'));
       await loadOne(key);
     } catch (err: unknown) {
-      patch(key, {
-        saving: false,
-        error: err instanceof Error ? err.message : t('settings.ai_keys.save_error'),
-      });
+      const message = err instanceof Error ? err.message : t('settings.ai_keys.save_error');
+      patch(key, { saving: false, error: message });
+      toast.error(message);
     }
   };
 
   const handleDelete = async (key: AppSettingKey) => {
-    if (!window.confirm(t('settings.ai_keys.delete_confirm'))) return;
-    patch(key, { removing: true, error: null, okMessage: null });
+    const ok = await confirm({
+      title: t('settings.ai_keys.delete'),
+      message: t('settings.ai_keys.delete_confirm'),
+      itemName: key,
+      confirmLabel: t('settings.ai_keys.delete'),
+      destructive: true,
+    });
+    if (!ok) return;
+
+    patch(key, { removing: true, error: null });
     try {
       await AppSettingsService.remove(key);
-      patch(key, { removing: false, okMessage: t('settings.ai_keys.deleted_ok') });
+      patch(key, { removing: false });
+      toast.success(t('settings.ai_keys.deleted_ok'));
       await loadOne(key);
     } catch (err: unknown) {
-      patch(key, {
-        removing: false,
-        error: err instanceof Error ? err.message : t('settings.ai_keys.delete_error'),
-      });
+      const message = err instanceof Error ? err.message : t('settings.ai_keys.delete_error');
+      patch(key, { removing: false, error: message });
+      toast.error(message);
     }
   };
 
@@ -104,10 +114,10 @@ export default function AiKeysSettings() {
       {APP_SETTING_DEFINITIONS.map((def) => {
         const row = rows[def.key];
         return (
-          <div key={def.key} className="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-5 shadow-sm">
+          <div key={def.key} className="bg-white rounded-lg border border-neutral-200 p-5">
             <div className="flex items-center gap-2 mb-1">
               <KeyRound className="w-4 h-4 text-neutral-500" />
-              <code className="text-sm font-mono font-bold text-neutral-900 dark:text-neutral-100">{def.key}</code>
+              <code className="text-sm font-mono font-bold text-neutral-900">{def.key}</code>
             </div>
             <p className="text-xs text-neutral-500 mb-4">{def.description}</p>
 
@@ -155,9 +165,9 @@ export default function AiKeysSettings() {
                         type={row.showDraft ? 'text' : 'password'}
                         autoComplete="off"
                         value={row.draft}
-                        onChange={(e) => patch(def.key, { draft: e.target.value, okMessage: null })}
+                        onChange={(e) => patch(def.key, { draft: e.target.value })}
                         placeholder={t('settings.ai_keys.value_placeholder')}
-                        className="w-full pr-10 py-2 px-3 border border-neutral-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pr-10 py-2 px-3 border border-neutral-300 rounded-md text-sm font-mono focus:ring-2 focus:ring-neutral-300 focus:border-transparent"
                       />
                       <button
                         type="button"
@@ -172,7 +182,7 @@ export default function AiKeysSettings() {
                       type="button"
                       onClick={() => handleSave(def.key)}
                       disabled={row.saving || !row.draft.trim()}
-                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {row.saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       {row.saving ? t('settings.ai_keys.saving') : t('settings.ai_keys.save')}
@@ -183,11 +193,6 @@ export default function AiKeysSettings() {
                 {row.error && (
                   <div className="mt-3 p-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded">
                     {row.error}
-                  </div>
-                )}
-                {row.okMessage && !row.error && (
-                  <div className="mt-3 p-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded">
-                    {row.okMessage}
                   </div>
                 )}
               </>

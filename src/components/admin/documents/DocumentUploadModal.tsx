@@ -1,155 +1,189 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Loader2, FileUp } from 'lucide-react';
-import { CATEGORIES } from '../../../services/admin/AdminDocumentsService';
+import { Loader2, FileUp } from 'lucide-react';
+import { DEFAULT_DOCUMENT_CATEGORIES } from '../../../services/admin/AdminDocumentsService';
 import type { DocumentUploadData } from '../../../services/admin/AdminDocumentsService';
+import { Modal } from '../../common/Modal';
 
 interface DocumentUploadModalProps {
     isOpen: boolean;
     onClose: () => void;
     onUpload: (data: DocumentUploadData) => Promise<void>;
     uploading: boolean;
+    /** Categories in use, merged with the defaults. Falls back to the defaults. */
+    categories?: string[];
+    /** False when the deployed schema has no is_active column. */
+    canSetVisibility?: boolean;
 }
+
+const NEW_CATEGORY = '__new__';
+
+const EMPTY_FORM = {
+    title: '',
+    description: '',
+    category: 'general',
+    newCategory: '',
+    isActive: true,
+    file: null as File | null
+};
 
 export function DocumentUploadModal({
     isOpen,
     onClose,
     onUpload,
-    uploading
+    uploading,
+    categories,
+    canSetVisibility = true
 }: DocumentUploadModalProps) {
     const { t } = useTranslation();
+    // Mounted only while open (see DocumentsManager), so the form starts empty
+    // on every open without an effect re-syncing state.
+    const [formData, setFormData] = useState(EMPTY_FORM);
 
-    const [formData, setFormData] = React.useState({
-        title: '',
-        description: '',
-        category: 'general',
-        file: null as File | null
-    });
-
-    if (!isOpen) return null;
+    const options = categories?.length ? categories : [...DEFAULT_DOCUMENT_CATEGORIES];
+    const resolvedCategory =
+        formData.category === NEW_CATEGORY ? formData.newCategory.trim() : formData.category;
+    const canSubmit = !!formData.file && !!formData.title.trim() && !!resolvedCategory;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.file || !formData.title) return;
+        if (!formData.file || !canSubmit) return;
 
         await onUpload({
-            title: formData.title,
+            title: formData.title.trim(),
             description: formData.description,
-            category: formData.category,
-            file: formData.file
+            category: resolvedCategory,
+            file: formData.file,
+            is_active: canSetVisibility ? formData.isActive : undefined
         });
-
-        // Reset form on success is handled by parent closing modal
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFormData(prev => ({ ...prev, file: e.target.files![0] }));
-        }
+        const file = e.target.files?.[0] ?? null;
+        setFormData(prev => ({ ...prev, file }));
     };
 
     return (
-        <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-neutral-200 dark:border-neutral-800 animate-in zoom-in-95 duration-200">
-                <div className="flex justify-between items-center p-8 border-b border-neutral-100 dark:border-neutral-800">
-                    <h2 className="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
-                        {t('admin.documents.upload_title', 'Pujar Document')}
-                    </h2>
+        <Modal
+            open={isOpen}
+            onClose={uploading ? () => {} : onClose}
+            title={t('admin.documents.upload_title', 'Pujar Document')}
+            size="md"
+            closeOnBackdrop={!uploading}
+            footer={
+                <>
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
+                        disabled={uploading}
+                        className="px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-50 transition-colors"
                     >
-                        <X className="w-6 h-6 text-neutral-400" />
+                        {t('common.cancel', 'Cancel·lar')}
                     </button>
+                    <button
+                        type="submit"
+                        form="document-upload-form"
+                        disabled={uploading || !canSubmit}
+                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+                    >
+                        {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {uploading ? t('common.uploading', 'Pujant...') : t('admin.documents.upload_btn', 'Pujar Document')}
+                    </button>
+                </>
+            }
+        >
+            <form id="document-upload-form" onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label htmlFor="doc-title" className="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1">
+                        {t('admin.documents.field_title', 'Títol')} *
+                    </label>
+                    <input
+                        id="doc-title"
+                        type="text"
+                        required
+                        value={formData.title}
+                        onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-neutral-900/10 text-sm text-neutral-900"
+                        placeholder={t('admin.documents.title_placeholder', 'Nom del document')}
+                    />
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.documents.field_title', 'Títol')} *
-                        </label>
+                <div>
+                    <label htmlFor="doc-category" className="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1">
+                        {t('admin.documents.field_category', 'Categoria')}
+                    </label>
+                    <select
+                        id="doc-category"
+                        value={formData.category}
+                        onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-neutral-900/10 text-sm text-neutral-900 cursor-pointer"
+                    >
+                        {options.map(cat => (
+                            <option key={cat} value={cat} className="capitalize">{cat}</option>
+                        ))}
+                        <option value={NEW_CATEGORY}>{t('admin.documents.new_category', '➕ Nova categoria...')}</option>
+                    </select>
+                    {formData.category === NEW_CATEGORY && (
                         <input
                             type="text"
-                            required
-                            value={formData.title}
-                            onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner"
-                            placeholder={t('admin.documents.title_placeholder', 'Nom del document')}
+                            value={formData.newCategory}
+                            onChange={e => setFormData(prev => ({ ...prev, newCategory: e.target.value }))}
+                            placeholder={t('admin.documents.new_category_placeholder', 'Nom de la nova categoria')}
+                            aria-label={t('admin.documents.new_category_placeholder', 'Nom de la nova categoria')}
+                            className="mt-2 w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-neutral-900/10 text-sm text-neutral-900"
                         />
-                    </div>
+                    )}
+                </div>
 
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.documents.field_category', 'Categoria')}
-                        </label>
-                        <select
-                            value={formData.category}
-                            onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner appearance-none cursor-pointer"
-                        >
-                            {CATEGORIES.map(cat => (
-                                <option key={cat} value={cat} className="capitalize">{cat}</option>
-                            ))}
-                        </select>
-                    </div>
+                <div>
+                    <label htmlFor="doc-description" className="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1">
+                        {t('admin.documents.field_description', 'Descripció (Opcional)')}
+                    </label>
+                    <textarea
+                        id="doc-description"
+                        value={formData.description}
+                        onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-neutral-900/10 text-sm text-neutral-900 resize-none"
+                        rows={2}
+                    />
+                </div>
 
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.documents.field_description', 'Descripció (Opcional)')}
-                        </label>
-                        <textarea
-                            value={formData.description}
-                            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner resize-none"
-                            rows={2}
+                <div>
+                    <span className="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1">
+                        {t('admin.documents.field_file', 'Fitxer')} *
+                    </span>
+                    <input
+                        type="file"
+                        required
+                        onChange={handleFileChange}
+                        className="sr-only"
+                        id="file-upload"
+                    />
+                    <label
+                        htmlFor="file-upload"
+                        className="flex items-center gap-3 w-full px-4 py-3 bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-lg cursor-pointer hover:border-neutral-400 transition-colors"
+                    >
+                        <FileUp className="w-5 h-5 text-neutral-400" />
+                        <span className="text-sm font-medium text-neutral-600 truncate">
+                            {formData.file ? formData.file.name : t('admin.documents.choose_file', 'Seleccionar fitxer')}
+                        </span>
+                    </label>
+                </div>
+
+                {canSetVisibility && (
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={formData.isActive}
+                            onChange={e => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                            className="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
                         />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.documents.field_file', 'Fitxer')} *
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="file"
-                                required
-                                onChange={handleFileChange}
-                                className="hidden"
-                                id="file-upload"
-                            />
-                            <label
-                                htmlFor="file-upload"
-                                className="flex items-center gap-3 w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group"
-                            >
-                                <FileUp className="w-5 h-5 text-neutral-400 group-hover:text-primary" />
-                                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400 group-hover:text-primary truncate">
-                                    {formData.file ? formData.file.name : t('admin.documents.choose_file', 'Seleccionar fitxer')}
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="pt-4 flex justify-end gap-4">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-8 py-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-700 dark:text-neutral-300 font-bold hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all shadow-sm"
-                        >
-                            {t('common.cancel', 'Cancel·lar')}
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={uploading || !formData.file || !formData.title}
-                            className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-lg font-black hover:bg-primary/90 transition-all disabled:opacity-50 shadow-sm shadow-primary/20 active:scale-95"
-                        >
-                            {uploading && <Loader2 className="w-5 h-5 animate-spin" />}
-                            {uploading ? t('common.uploading', 'Pujant...') : t('admin.documents.upload_btn', 'Pujar Document')}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                        <span className="text-sm text-neutral-700">
+                            {t('admin.documents.publish_now', 'Publicar immediatament (visible al públic)')}
+                        </span>
+                    </label>
+                )}
+            </form>
+        </Modal>
     );
 }
-
-// Helper to use React in internal component
-import React from 'react';

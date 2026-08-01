@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { HelpCircle, Plus, RefreshCw, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
+import { HelpCircle, Pencil, Trash2, Eye, EyeOff, Search } from 'lucide-react';
 import { AdminFaqService, type Faq, type FaqFormData } from '../../services/admin/AdminFaqService';
 import { FaqFormModal } from '../../components/admin/faq/FaqFormModal';
+import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
+import { useToast } from '../../components/common/Toast';
+import { useConfirm } from '../../components/common/ConfirmDialog';
 
 const emptyTranslations = () => ({
   ca: { category: '', question: '', answer: '' },
@@ -19,6 +22,9 @@ const EMPTY_FORM: FaqFormData = {
 
 export default function FaqManager() {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const confirm = useConfirm();
+
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,9 +33,11 @@ export default function FaqManager() {
   const [activeLang, setActiveLang] = useState<'ca' | 'es' | 'en'>('es');
   const [isTranslating, setIsTranslating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetchFaqs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchFaqs = async () => {
@@ -38,6 +46,7 @@ export default function FaqManager() {
       setFaqs(await AdminFaqService.getFaqs());
     } catch (error) {
       console.error('Error fetching faqs:', error);
+      toast.error(t('admin.faq.error_load', 'Error carregant les FAQ'));
     } finally {
       setLoading(false);
     }
@@ -66,14 +75,21 @@ export default function FaqManager() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.faq.delete_confirm'))) return;
+  const handleDelete = async (faq: Faq) => {
+    const ok = await confirm({
+      title: t('admin.faq.delete_title', 'Eliminar FAQ'),
+      message: t('admin.faq.delete_confirm'),
+      itemName: faq.question,
+      destructive: true
+    });
+    if (!ok) return;
     try {
-      await AdminFaqService.deleteFaq(id);
-      setFaqs(prev => prev.filter(f => f.id !== id));
+      await AdminFaqService.deleteFaq(faq.id);
+      setFaqs(prev => prev.filter(f => f.id !== faq.id));
+      toast.success(t('admin.faq.deleted', 'FAQ eliminada'));
     } catch (error) {
       console.error('Error deleting faq:', error);
-      alert(t('common.error_delete'));
+      toast.error(t('common.error_delete'));
     }
   };
 
@@ -83,14 +99,14 @@ export default function FaqManager() {
       setFaqs(prev => prev.map(f => (f.id === faq.id ? { ...f, is_active: !f.is_active } : f)));
     } catch (error) {
       console.error('Error updating faq:', error);
-      alert(t('common.error_save'));
+      toast.error(t('common.error_save'));
     }
   };
 
   const handleSave = async () => {
     const es = formData.translations.es;
     if (!es.question.trim() || !es.answer.trim()) {
-      alert(t('admin.faq.required'));
+      toast.error(t('admin.faq.required'));
       return;
     }
     setSaving(true);
@@ -98,56 +114,68 @@ export default function FaqManager() {
       const maxOrder = faqs.reduce((max, f) => Math.max(max, f.sort_order), 0);
       await AdminFaqService.saveFaq(formData, maxOrder, editingFaq?.id);
       setIsModalOpen(false);
+      toast.success(editingFaq
+        ? t('admin.faq.updated', 'FAQ actualitzada')
+        : t('admin.faq.created', 'FAQ creada'));
       fetchFaqs();
     } catch (error) {
       console.error('Error saving faq:', error);
-      alert(t('common.error_save'));
+      toast.error(t('common.error_save'));
     } finally {
       setSaving(false);
     }
   };
 
+  const visibleFaqs = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return faqs;
+    return faqs.filter(faq => {
+      const translated = Object.values(faq.translations || {}).flatMap(tr => [tr.question, tr.answer, tr.category]);
+      return [faq.question, faq.answer, faq.category, ...translated]
+        .some(v => (v ?? '').toLowerCase().includes(term));
+    });
+  }, [faqs, search]);
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">{t('admin.faq.title')}</h1>
-          <p className="text-neutral-500">{t('admin.faq.subtitle')}</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={fetchFaqs}
-            className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-            title={t('common.refresh')}
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            {t('admin.faq.new')}
-          </button>
-        </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <AdminPageHeader
+        title={t('admin.faq.title')}
+        subtitle={t('admin.faq.subtitle')}
+        icon={HelpCircle}
+        loading={loading}
+        onRefresh={fetchFaqs}
+        onCreate={handleCreate}
+        createLabel={t('admin.faq.new')}
+      />
+
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder={t('admin.faq.search_placeholder', 'Cerca per pregunta, resposta o categoria...')}
+          aria-label={t('admin.faq.search_placeholder', 'Cerca per pregunta, resposta o categoria...')}
+          className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg bg-white text-[13px] outline-none focus:ring-2 focus:ring-neutral-900/10"
+        />
       </div>
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900"></div>
         </div>
-      ) : faqs.length === 0 ? (
+      ) : visibleFaqs.length === 0 ? (
         <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center text-neutral-500">
           <HelpCircle className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
-          {t('admin.faq.empty')}
+          {search ? t('common.no_results', 'Sense resultats') : t('admin.faq.empty')}
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-neutral-200 divide-y divide-neutral-100">
-          {faqs.map(faq => (
+          {visibleFaqs.map(faq => (
             <div key={faq.id} className="flex items-start gap-4 p-4">
               <span className="mt-0.5 text-xs font-mono text-neutral-400 w-6 shrink-0">{faq.sort_order}</span>
               <div className="flex-1 min-w-0">
-                <span className="inline-block text-[11px] font-bold uppercase tracking-wide text-blue-600 mb-1">
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wide text-neutral-500 mb-1">
                   {faq.translations?.es?.category || faq.category}
                 </span>
                 <p className={`font-medium truncate ${faq.is_active ? 'text-neutral-900' : 'text-neutral-400 line-through'}`}>
@@ -157,23 +185,29 @@ export default function FaqManager() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button
+                  type="button"
                   onClick={() => handleToggleActive(faq)}
                   className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg transition-colors"
                   title={faq.is_active ? t('admin.faq.hide') : t('admin.faq.show')}
+                  aria-label={faq.is_active ? t('admin.faq.hide') : t('admin.faq.show')}
                 >
                   {faq.is_active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleEdit(faq)}
                   className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg transition-colors"
                   title={t('common.edit')}
+                  aria-label={t('common.edit')}
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => handleDelete(faq.id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  type="button"
+                  onClick={() => handleDelete(faq)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   title={t('common.delete')}
+                  aria-label={t('common.delete')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -183,20 +217,19 @@ export default function FaqManager() {
         </div>
       )}
 
-      {isModalOpen && (
-        <FaqFormModal
-          isEditing={!!editingFaq}
-          formData={formData}
-          setFormData={setFormData}
-          activeLang={activeLang}
-          setActiveLang={setActiveLang}
-          isTranslating={isTranslating}
-          setIsTranslating={setIsTranslating}
-          saving={saving}
-          onSave={handleSave}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
+      <FaqFormModal
+        isOpen={isModalOpen}
+        isEditing={!!editingFaq}
+        formData={formData}
+        setFormData={setFormData}
+        activeLang={activeLang}
+        setActiveLang={setActiveLang}
+        isTranslating={isTranslating}
+        setIsTranslating={setIsTranslating}
+        saving={saving}
+        onSave={handleSave}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

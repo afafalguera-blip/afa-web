@@ -16,17 +16,62 @@ export interface FinanceTransaction {
     academic_year?: string;
 }
 
+export type FinanceTypeFilter = 'all' | 'income' | 'expense';
+
+export interface FinanceFilters {
+    academicYear?: string;
+    type?: FinanceTypeFilter;
+    search?: string;
+}
+
+export interface FinanceQuery extends FinanceFilters {
+    /** 1-based. */
+    page: number;
+    pageSize: number;
+}
+
+export interface PaginatedTransactions {
+    rows: FinanceTransaction[];
+    total: number;
+}
+
+/** PostgREST reserves , . : ( ) in filter values; strip them from user input. */
+function sanitizeSearch(term: string): string {
+    return term.replace(/[,.():*%\\]/g, ' ').trim();
+}
+
+interface FilterableQuery<T> {
+    eq(column: string, value: unknown): T;
+    or(filters: string): T;
+}
+
+function applyFinanceFilters<T extends FilterableQuery<T>>(query: T, filters: FinanceFilters): T {
+    let q = query;
+
+    if (filters.academicYear) q = q.eq('academic_year', filters.academicYear);
+    if (filters.type && filters.type !== 'all') q = q.eq('type', filters.type);
+
+    const search = sanitizeSearch(filters.search ?? '');
+    if (search) q = q.or(`description.ilike.%${search}%,category.ilike.%${search}%`);
+
+    return q;
+}
+
 export const FinanceService = {
-    async getTransactions(academicYear?: string) {
-        let query = supabase
-            .from('finance_transactions')
-            .select('*')
-            .order('date', { ascending: false });
-        if (academicYear) query = query.eq('academic_year', academicYear);
-        const { data, error } = await query;
+    /** One page of transactions plus the exact total for the same filters. */
+    async listTransactions({ page, pageSize, ...filters }: FinanceQuery): Promise<PaginatedTransactions> {
+        const from = Math.max(0, (page - 1) * pageSize);
+        const to = from + pageSize - 1;
+
+        const { data, error, count } = await applyFinanceFilters(
+            supabase.from('finance_transactions').select('*', { count: 'exact' }),
+            filters,
+        )
+            .order('date', { ascending: false })
+            .range(from, to);
 
         if (error) throw error;
-        return data || [];
+        return { rows: (data || []) as unknown as FinanceTransaction[], total: count ?? 0 };
     },
 
     async addTransaction(transaction: FinanceTransaction) {

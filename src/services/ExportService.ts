@@ -3,7 +3,13 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { sortSizes } from '../utils/productUtils';
-import type { Inscription, InscriptionFlat, InscriptionStudent } from '../types/inscription';
+import { toFlat } from '../logic/inscriptionFilters';
+import { COURSE_BY_CODE, isCourseCode } from '../constants/courses';
+import type { Inscription } from '../types/inscription';
+
+/** Human label for a persisted course code; unknown/legacy codes pass through. */
+const courseLabel = (code?: string): string =>
+  code && isCourseCode(code) ? COURSE_BY_CODE[code].label : code || '';
 import type { ShopProduct, ShopVariant } from '../features/shop/types/shop';
 import type { Payment } from '../types/payment';
 
@@ -27,7 +33,7 @@ interface FlattenedInscriptionRow {
   is_falguera?: boolean;
   external_school?: string | null;
   parent: {
-    id: string | number;
+    id: string;
     created_at?: string;
     parent_name?: string;
     parent_dni?: string;
@@ -44,47 +50,38 @@ interface FlattenedInscriptionRow {
 }
 
 export const ExportService = {
-  // Helper to flatten inscription data
-  getFlattenedData(inscriptions: (Inscription | InscriptionFlat)[], fields: 'basic' | 'full'): FlattenedInscriptionRow[] {
+  /**
+   * One row per child (and, in `basic` mode, per child × activity so the
+   * attendance lists can be grouped by activity).
+   */
+  getFlattenedData(inscriptions: Inscription[], fields: 'basic' | 'full'): FlattenedInscriptionRow[] {
     const rows: FlattenedInscriptionRow[] = [];
     const shouldSort = fields === 'basic';
 
     inscriptions.forEach(ins => {
-      // Normalize parent data
       const parentData = {
-        id: ('id' in ins) ? ins.id : ins.inscription_id,
+        id: ins.id,
         created_at: ins.created_at,
-        parent_name: ('parent_name' in ins) ? ins.parent_name : '',
-        parent_dni: ('parent_dni' in ins) ? ins.parent_dni : '',
-        parent_phone_1: ('parent_phone_1' in ins) ? ins.parent_phone_1 : ins.parent_phone || '',
-        parent_phone_2: ('parent_phone_2' in ins) ? ins.parent_phone_2 : '',
-        parent_email_1: ('parent_email_1' in ins) ? ins.parent_email_1 : ins.parent_email || '',
-        parent_email_2: ('parent_email_2' in ins) ? ins.parent_email_2 : '',
+        parent_name: ins.parent_name,
+        parent_dni: ins.parent_dni,
+        parent_phone_1: ins.parent_phone_1,
+        parent_phone_2: ins.parent_phone_2 || '',
+        parent_email_1: ins.parent_email_1,
+        parent_email_2: ins.parent_email_2 || '',
         afa_member: ins.afa_member,
-        health_info: ('health_info' in ins) ? ins.health_info : '',
-        image_auth_consent: ('image_auth_consent' in ins) ? ins.image_auth_consent : '',
-        can_leave_alone: ('can_leave_alone' in ins) ? ins.can_leave_alone : false,
-        authorized_pickup: ('authorized_pickup' in ins) ? ins.authorized_pickup : ''
+        health_info: ins.health_info || '',
+        image_auth_consent: ins.image_auth_consent || '',
+        can_leave_alone: ins.can_leave_alone ?? false,
+        authorized_pickup: ins.authorized_pickup || ''
       };
 
-      const students: InscriptionStudent[] = ('students' in ins && Array.isArray(ins.students)) ?
-        ins.students :
-        [{
-          name: (ins as InscriptionFlat).name || '',
-          surname: (ins as InscriptionFlat).surname || '',
-          course: (ins as InscriptionFlat).course || '',
-          activities: (ins as InscriptionFlat).activities || [],
-          suspended: (ins as InscriptionFlat).suspended || false,
-          health_info: (ins as InscriptionFlat).health_info,
-          image_auth_consent: (ins as InscriptionFlat).image_auth_consent,
-          can_leave_alone: (ins as InscriptionFlat).can_leave_alone,
-          is_falguera: (ins as InscriptionFlat).is_falguera,
-          external_school: (ins as InscriptionFlat).external_school,
-        }];
-
-      students.forEach((student) => {
+      toFlat([ins]).forEach((student) => {
         const activities = student.activities || [];
-        const perChild = {
+        const base = {
+          name: student.name,
+          surname: student.surname,
+          course: student.course,
+          suspended: student.suspended,
           health_info: student.health_info,
           image_auth_consent: student.image_auth_consent,
           can_leave_alone: student.can_leave_alone,
@@ -94,21 +91,12 @@ export const ExportService = {
 
         if (shouldSort && activities.length > 0) {
           activities.forEach((activity: string) => {
-            rows.push({
-              ...student,
-              ...perChild,
-              suspended: !!student.suspended,
-              activities: activities,
-              single_activity: activity,
-              parent: parentData
-            });
+            rows.push({ ...base, activities, single_activity: activity, parent: parentData });
           });
         } else {
           rows.push({
-            ...student,
-            ...perChild,
-            suspended: !!student.suspended,
-            activities: activities,
+            ...base,
+            activities,
             single_activity: activities.join(', '),
             parent: parentData
           });
@@ -139,7 +127,7 @@ export const ExportService = {
   },
 
   exportInscriptionsExcel(
-    inscriptions: (Inscription | InscriptionFlat)[],
+    inscriptions: Inscription[],
     fields: 'basic' | 'full' = 'full',
     filename: string = 'inscripcions'
   ) {
@@ -150,7 +138,7 @@ export const ExportService = {
     if (fields === 'basic') {
       exportData = rows.map(r => ({
         'Actividad': r.single_activity,
-        'Curso': r.course,
+        'Curso': courseLabel(r.course),
         'Escuela': r.is_falguera === false ? (r.external_school?.trim() || 'Externo') : 'Falguera',
         'Nombre': r.name,
         'Apellidos': r.surname,
@@ -162,7 +150,7 @@ export const ExportService = {
         'ID': String(r.parent.id),
         'Fecha': r.parent.created_at ? new Date(r.parent.created_at).toLocaleDateString('es-ES') : '',
         'Actividad': r.single_activity,
-        'Curso': r.course,
+        'Curso': courseLabel(r.course),
         'Escuela': r.is_falguera === false ? (r.external_school?.trim() || 'Externo') : 'Falguera',
         'Nombre Alumno': r.name,
         'Apellidos Alumno': r.surname,
@@ -186,7 +174,7 @@ export const ExportService = {
     XLSX.writeFile(workbook, `${filename}_${fields}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
   },
 
-  exportInscriptionsPDF(inscriptions: (Inscription | InscriptionFlat)[], fields: 'basic' | 'full' = 'full', filename: string = 'inscripcions') {
+  exportInscriptionsPDF(inscriptions: Inscription[], fields: 'basic' | 'full' = 'full', filename: string = 'inscripcions') {
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
     const rows = this.getFlattenedData(inscriptions, fields); // Explode by activity if list mode
 
@@ -205,10 +193,10 @@ export const ExportService = {
     let yPos = 35;
 
     if (fields === 'full') {
-      doc.text("Resum d'Inscripcions", 14, 15); // This line was added
-      const tableData = rows.map(r => [ // This tableData definition was changed
+      const tableData = rows.map((r, i) => [
+        String(i + 1),
         r.single_activity || '',
-        r.course || '',
+        courseLabel(r.course),
         `${r.name || ''} ${r.surname || ''}`,
         r.parent.parent_name || '',
         r.parent.parent_dni || '',
@@ -282,7 +270,7 @@ export const ExportService = {
           groupData.length + 1,
           r.name,
           r.surname,
-          r.course,
+          courseLabel(r.course),
           r.parent.parent_phone_1 || '',
           '' // Empty for notes
         ]);

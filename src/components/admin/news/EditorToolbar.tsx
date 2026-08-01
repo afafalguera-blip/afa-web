@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Editor } from '@tiptap/react';
+import { useToast } from '../../common/Toast';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   Heading1, Heading2, Heading3, List, ListOrdered, Quote,
@@ -21,10 +23,11 @@ function ToolbarButton({ title, active = false, disabled = false, onClick, icon 
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`h-9 w-9 rounded-lg border text-neutral-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+      aria-pressed={active}
+      className={`h-9 w-9 rounded-md border text-neutral-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
         active
-          ? 'border-blue-200 bg-blue-50 text-blue-700'
-          : 'border-neutral-200 bg-white hover:bg-neutral-50 hover:text-neutral-900'
+          ? 'border-neutral-900 bg-neutral-900 text-white'
+          : 'border-neutral-200 bg-white hover:bg-neutral-100 hover:text-neutral-900'
       }`}
     >
       <span className="flex items-center justify-center">{icon}</span>
@@ -41,7 +44,9 @@ function isSafeUrl(url: string): boolean {
   }
 }
 
-function setLink(editor: Editor) {
+type ReportInvalidUrl = (message: string) => void;
+
+function setLink(editor: Editor, reportInvalidUrl: ReportInvalidUrl, invalidLinkMessage: string) {
   const previous = editor.getAttributes('link').href as string | undefined;
   const url = window.prompt('URL del enlace', previous || 'https://');
   if (url === null) return;
@@ -52,19 +57,19 @@ function setLink(editor: Editor) {
   }
 
   if (!isSafeUrl(url.trim())) {
-    alert('URL no vàlida. Només es permeten enllaços http/https.');
+    reportInvalidUrl(invalidLinkMessage);
     return;
   }
 
   editor.chain().focus().setLink({ href: url.trim(), target: '_blank', rel: 'noopener noreferrer' }).run();
 }
 
-function addImage(editor: Editor) {
+function addImage(editor: Editor, reportInvalidUrl: ReportInvalidUrl, invalidImageMessage: string) {
   const imageUrl = window.prompt('URL de la imagen');
   if (!imageUrl || !imageUrl.trim()) return;
 
   if (!isSafeUrl(imageUrl.trim())) {
-    alert('URL no vàlida. Només es permeten imatges http/https.');
+    reportInvalidUrl(invalidImageMessage);
     return;
   }
 
@@ -76,6 +81,12 @@ interface EditorToolbarProps {
 }
 
 export function EditorToolbar({ editor }: EditorToolbarProps) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+
+  const invalidLinkMessage = t('admin.news.invalid_link_url', 'URL no vàlida. Només es permeten enllaços http/https.');
+  const invalidImageMessage = t('admin.news.invalid_image_url', 'URL no vàlida. Només es permeten imatges http/https.');
+
   return (
     <div className="flex flex-wrap gap-2 border-b border-neutral-100 bg-neutral-50 p-3">
       <ToolbarButton title="Negrita" active={editor?.isActive('bold')} disabled={!editor} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold className="w-4 h-4" />} />
@@ -88,8 +99,8 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       <ToolbarButton title="Lista" active={editor?.isActive('bulletList')} disabled={!editor} onClick={() => editor?.chain().focus().toggleBulletList().run()} icon={<List className="w-4 h-4" />} />
       <ToolbarButton title="Lista ordenada" active={editor?.isActive('orderedList')} disabled={!editor} onClick={() => editor?.chain().focus().toggleOrderedList().run()} icon={<ListOrdered className="w-4 h-4" />} />
       <ToolbarButton title="Cita" active={editor?.isActive('blockquote')} disabled={!editor} onClick={() => editor?.chain().focus().toggleBlockquote().run()} icon={<Quote className="w-4 h-4" />} />
-      <ToolbarButton title="Enlace" active={editor?.isActive('link')} disabled={!editor} onClick={() => { if (editor) setLink(editor); }} icon={<Link2 className="w-4 h-4" />} />
-      <ToolbarButton title="Imagen" disabled={!editor} onClick={() => { if (editor) addImage(editor); }} icon={<ImagePlus className="w-4 h-4" />} />
+      <ToolbarButton title="Enlace" active={editor?.isActive('link')} disabled={!editor} onClick={() => { if (editor) setLink(editor, toast.error, invalidLinkMessage); }} icon={<Link2 className="w-4 h-4" />} />
+      <ToolbarButton title="Imagen" disabled={!editor} onClick={() => { if (editor) addImage(editor, toast.error, invalidImageMessage); }} icon={<ImagePlus className="w-4 h-4" />} />
       <ToolbarButton title="Limpiar formato" disabled={!editor} onClick={() => editor?.chain().focus().unsetAllMarks().clearNodes().run()} icon={<Eraser className="w-4 h-4" />} />
     </div>
   );

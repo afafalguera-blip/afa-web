@@ -51,6 +51,17 @@ const toTemplate = (row: FormsRow): FormTemplate => ({
   updated_at: row.updated_at,
 });
 
+const toSubmission = (row: unknown): FormSubmission => {
+  const r = row as FormSubmissionRow;
+  return {
+    id: r.id,
+    form_id: r.form_id,
+    answers: (r.answers as Record<string, unknown>) ?? {},
+    submitted_by_user_id: r.submitted_by_user_id ?? undefined,
+    submitted_at: r.submitted_at,
+  };
+};
+
 export const formService = {
   // ==========================================
   // FORMS MANAGEMENT
@@ -197,16 +208,33 @@ export const formService = {
       .is('deleted_at', null)
       .order('submitted_at', { ascending: false });
     if (error) throw error;
-    return (data || []).map((row) => {
-      const r = row as FormSubmissionRow;
-      return {
-        id: r.id,
-        form_id: r.form_id,
-        answers: (r.answers as Record<string, unknown>) ?? {},
-        submitted_by_user_id: r.submitted_by_user_id ?? undefined,
-        submitted_at: r.submitted_at,
-      };
-    });
+    return (data || []).map(toSubmission);
+  },
+
+  /**
+   * Página server-side de respuestas. La búsqueda por contenido NO se puede
+   * hacer aquí: `answers` es JSONB con claves dinámicas y PostgREST no expone
+   * un ILIKE sobre el documento entero. El visor cae a `getSubmissionsByFormId`
+   * (fetch completo + filtrado en cliente) solo cuando hay término de búsqueda.
+   */
+  async getSubmissionsPage(
+    formId: string,
+    options: { page?: number; pageSize?: number; ascending?: boolean } = {},
+  ): Promise<{ rows: FormSubmission[]; total: number }> {
+    const page = Math.max(1, options.page ?? 1);
+    const pageSize = Math.max(1, options.pageSize ?? 25);
+    const from = (page - 1) * pageSize;
+
+    const { data, error, count } = await supabase
+      .from('form_submissions')
+      .select(FORM_SUBMISSIONS_COLUMNS, { count: 'exact' })
+      .eq('form_id', formId)
+      .is('deleted_at', null)
+      .order('submitted_at', { ascending: options.ascending ?? false })
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+
+    return { rows: (data || []).map(toSubmission), total: count ?? 0 };
   },
 
   async deleteSubmission(id: string): Promise<void> {

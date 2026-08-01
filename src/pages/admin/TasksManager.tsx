@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, Loader2, Plus, RefreshCw } from 'lucide-react';
+import { CheckCircle, ListTodo, Loader2 } from 'lucide-react';
 import {
   AdminTasksService,
   type AdminTask,
@@ -9,6 +9,10 @@ import {
   type TaskStatus
 } from '../../services/admin/AdminTasksService';
 import { getRegionalLanguageTag } from '../../utils/locale';
+import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
+import { useToast } from '../../components/common/Toast';
+import { useConfirm } from '../../components/common/ConfirmDialog';
+import { useDirtyGuard } from '../../hooks/useDirtyGuard';
 import { STATUS_ORDER, PRIORITY_ORDER, isTaskOverdue } from '../../components/admin/tasks/taskUtils';
 import { TaskStatsBar } from '../../components/admin/tasks/TaskStatsBar';
 import { TaskFilters } from '../../components/admin/tasks/TaskFilters';
@@ -28,6 +32,8 @@ const createDefaultFormData = (): TaskFormData => ({
 
 export default function TasksManager() {
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const nativeDateLocale = getRegionalLanguageTag(i18n.resolvedLanguage || i18n.language);
   const resolvedLanguage = (i18n.resolvedLanguage || i18n.language || '').toLowerCase();
 
@@ -38,10 +44,14 @@ export default function TasksManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<AdminTask | null>(null);
   const [formData, setFormData] = useState<TaskFormData>(createDefaultFormData());
+  const [formSnapshot, setFormSnapshot] = useState('');
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | TaskPriority>('all');
   const [assigneeFilter, setAssigneeFilter] = useState<'all' | string>('all');
+
+  const isDirty = isModalOpen && JSON.stringify(formData) !== formSnapshot;
+  const { confirmDiscard } = useDirtyGuard(isDirty);
 
   const getFallbackByLocale = useCallback(
     (ca: string, es: string, en: string) => {
@@ -82,23 +92,25 @@ export default function TasksManager() {
       setTasks(await AdminTasksService.getTasks());
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      alert(t('common.error_generic'));
+      toast.error(t('common.error_generic'));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, toast]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleCreate = () => {
-    setEditingTask(null);
-    setFormData(createDefaultFormData());
+  const openModal = (task: AdminTask | null, data: TaskFormData) => {
+    setEditingTask(task);
+    setFormData(data);
+    setFormSnapshot(JSON.stringify(data));
     setIsModalOpen(true);
   };
 
+  const handleCreate = () => openModal(null, createDefaultFormData());
+
   const handleEdit = (task: AdminTask) => {
-    setEditingTask(task);
-    setFormData({
+    openModal(task, {
       title: task.title,
       description: task.description || '',
       status: task.status,
@@ -108,33 +120,51 @@ export default function TasksManager() {
       tags: task.tags || [],
       subtasks: task.subtasks || []
     });
-    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = async () => {
+    if (!(await confirmDiscard())) return;
+    setIsModalOpen(false);
   };
 
   const handleSave = async () => {
-    if (!formData.title.trim()) { alert(t('admin.tasks.title_required')); return; }
+    if (!formData.title.trim()) {
+      toast.error(t('admin.tasks.title_required'));
+      return;
+    }
     setSaving(true);
     try {
       await AdminTasksService.saveTask(formData, editingTask?.id);
+      setFormSnapshot(JSON.stringify(formData));
       setIsModalOpen(false);
+      toast.success(t('admin.tasks.saved', 'Tasca desada'));
       await fetchData();
     } catch (error) {
       console.error('Error saving task:', error);
-      alert(t('common.error_save'));
+      toast.error(t('common.error_save'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (taskId: string) => {
-    if (!confirm(t('admin.tasks.delete_confirm'))) return;
+    const task = tasks.find((item) => item.id === taskId);
+    const accepted = await confirm({
+      title: t('admin.tasks.delete_confirm'),
+      itemName: task?.title,
+      confirmLabel: t('common.delete'),
+      destructive: true
+    });
+    if (!accepted) return;
+
     try {
       await AdminTasksService.deleteTask(taskId);
-      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+      setTasks((prev) => prev.filter((item) => item.id !== taskId));
       if (editingTask?.id === taskId) setIsModalOpen(false);
+      toast.success(t('admin.tasks.deleted', 'Tasca eliminada'));
     } catch (error) {
       console.error('Error deleting task:', error);
-      alert(t('common.error_delete'));
+      toast.error(t('common.error_delete'));
     }
   };
 
@@ -145,7 +175,7 @@ export default function TasksManager() {
       await fetchData();
     } catch (error) {
       console.error('Error updating task status:', error);
-      alert(t('common.error_save'));
+      toast.error(t('common.error_save'));
     } finally {
       setUpdatingTaskId(null);
     }
@@ -172,32 +202,27 @@ export default function TasksManager() {
   }, [assigneeFilter, priorityFilter, searchText, statusFilter, tasks]);
 
   const stats = useMemo(() => ({
-    open: tasks.filter((t) => t.status !== 'done').length,
-    inProgress: tasks.filter((t) => t.status === 'in_progress').length,
-    overdue: tasks.filter((t) => isTaskOverdue(t)).length,
-    completed: tasks.filter((t) => t.status === 'done').length
+    open: tasks.filter((task) => task.status !== 'done').length,
+    inProgress: tasks.filter((task) => task.status === 'in_progress').length,
+    overdue: tasks.filter((task) => isTaskOverdue(task)).length,
+    completed: tasks.filter((task) => task.status === 'done').length
   }), [tasks]);
 
   const assigneeOptions = useMemo(() =>
-    Array.from(new Set(tasks.map((t) => t.assignee_name?.trim() || '').filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    Array.from(new Set(tasks.map((task) => task.assignee_name?.trim() || '').filter(Boolean))).sort((a, b) => a.localeCompare(b)),
   [tasks]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">{t('admin.tasks.title')}</h1>
-          <p className="text-neutral-500">{t('admin.tasks.subtitle')}</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={fetchData} className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors" title={t('common.refresh')}>
-            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          <button onClick={handleCreate} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">
-            <Plus className="w-4 h-4" />{t('admin.tasks.new_task')}
-          </button>
-        </div>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <AdminPageHeader
+        title={t('admin.tasks.title')}
+        subtitle={t('admin.tasks.subtitle')}
+        icon={ListTodo}
+        loading={loading}
+        onRefresh={fetchData}
+        onCreate={handleCreate}
+        createLabel={t('admin.tasks.new_task')}
+      />
 
       <TaskStatsBar stats={stats} />
 
@@ -211,9 +236,9 @@ export default function TasksManager() {
       />
 
       {loading ? (
-        <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
+        <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-neutral-400" /></div>
       ) : filteredTasks.length === 0 ? (
-        <div className="bg-white rounded-lg border border-neutral-200 p-10 text-center text-neutral-500 shadow-sm">
+        <div className="bg-white rounded-lg border border-neutral-200 p-10 text-center text-neutral-500">
           <CheckCircle className="w-12 h-12 mx-auto mb-4 text-neutral-300" />
           {searchText || statusFilter !== 'all' || priorityFilter !== 'all' || assigneeFilter !== 'all' ? t('admin.tasks.no_results') : t('admin.tasks.no_tasks')}
         </div>
@@ -237,19 +262,18 @@ export default function TasksManager() {
         </div>
       )}
 
-      {isModalOpen && (
-        <TaskFormModal
-          isEditing={Boolean(editingTask)}
-          formData={formData}
-          setFormData={setFormData}
-          saving={saving}
-          nativeDateLocale={nativeDateLocale}
-          getStatusLabel={getStatusLabel}
-          getPriorityLabel={getPriorityLabel}
-          onSave={handleSave}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
+      <TaskFormModal
+        open={isModalOpen}
+        isEditing={Boolean(editingTask)}
+        formData={formData}
+        setFormData={setFormData}
+        saving={saving}
+        nativeDateLocale={nativeDateLocale}
+        getStatusLabel={getStatusLabel}
+        getPriorityLabel={getPriorityLabel}
+        onSave={handleSave}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

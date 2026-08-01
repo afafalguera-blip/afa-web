@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Calendar, Eye, EyeOff, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Edit, Trash2 } from 'lucide-react';
 import type { NewsArticle } from '../../../services/PublicNewsService';
 import { proxyStorageUrl } from '../../../utils/storageUrl';
+import { ContentStatusBadge, VisibilityToggleButton } from './ContentStatusBadge';
 
 interface NewsAdminCardProps {
     article: NewsArticle;
@@ -14,65 +15,57 @@ export function NewsAdminCard({ article, onTogglePublish, onEdit, onDelete }: Ne
     const { t } = useTranslation();
 
     return (
-        <div
-            className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden shadow-sm hover:shadow-sm hover:-translate-y-1 transition-all duration-300 rounded-[2rem]"
-        >
-            <div className="relative h-48 overflow-hidden">
+        <div className="group bg-white border border-neutral-200 rounded-lg overflow-hidden transition-shadow hover:shadow-sm">
+            <div className="relative h-44 overflow-hidden bg-neutral-100">
                 <img
                     src={proxyStorageUrl(article.image_url) || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}
                     alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute top-4 right-4 flex gap-2">
-                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${article.published
-                        ? 'bg-green-500 text-white'
-                        : 'bg-neutral-500 text-white'
-                        }`}>
-                        {article.published ? t('admin.news.status_published') : t('admin.news.status_draft')}
-                    </div>
-                </div>
             </div>
 
-            <div className="p-6">
-                <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(article.published_at || article.created_at).toLocaleDateString()}
+            <div className="p-5">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                    <ContentStatusBadge visible={article.published} hiddenKind="draft" />
+                    <span className="inline-flex items-center gap-1.5 text-xs text-neutral-400">
+                        <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+                        {new Date(article.published_at || article.created_at).toLocaleDateString()}
+                    </span>
                 </div>
 
-                <h3 className="font-bold text-lg text-neutral-900 dark:text-white line-clamp-2 mb-2 min-h-[3.5rem]">
+                <h3 className="font-semibold text-[15px] text-neutral-900 line-clamp-2 mb-2 min-h-[2.75rem]">
                     {article.title}
                 </h3>
 
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-3 mb-6 min-h-[4.5rem]">
+                <p className="text-[13px] text-neutral-500 line-clamp-3 mb-5 min-h-[3.75rem]">
                     {article.excerpt}
                 </p>
 
-                <div className="flex items-center justify-between border-t border-neutral-50 dark:border-neutral-800 pt-4">
-                    <button
-                        onClick={() => onTogglePublish(article)}
-                        className={`p-2 rounded-lg transition-all ${article.published
-                            ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100'
-                            : 'text-green-500 bg-green-50 dark:bg-green-950/30 hover:bg-green-100'
-                            }`}
-                        title={article.published ? t('admin.news.unpublish') : t('admin.news.publish')}
-                    >
-                        {article.published ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
+                <div className="flex items-center justify-between gap-2 border-t border-neutral-100 pt-4">
+                    <VisibilityToggleButton
+                        visible={article.published}
+                        hiddenKind="draft"
+                        onToggle={() => onTogglePublish(article)}
+                    />
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                         <button
+                            type="button"
                             onClick={() => onEdit(article.id)}
-                            className="p-2 text-white bg-primary rounded-lg hover:bg-primary/90 transition-all shadow-sm shadow-primary/10 active:scale-95"
+                            className="p-2 rounded-md text-neutral-600 hover:bg-neutral-100 transition-colors"
                             title={t('common.edit')}
+                            aria-label={t('common.edit')}
                         >
-                            <Edit className="w-5 h-5" />
+                            <Edit className="w-[18px] h-[18px]" />
                         </button>
                         <button
+                            type="button"
                             onClick={() => onDelete(article.id)}
-                            className="p-2 text-red-500 bg-red-50 dark:bg-red-950/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-all"
+                            className="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors"
                             title={t('common.delete')}
+                            aria-label={t('common.delete')}
                         >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-[18px] h-[18px]" />
                         </button>
                     </div>
                 </div>
