@@ -1,5 +1,6 @@
 import "edge-runtime";
 import { createClient } from "supabase";
+import { escapeHtml } from "../_shared/security.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
@@ -18,11 +19,6 @@ function getCorsHeaders(req: Request) {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   };
 }
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 const getTranslations = (lang: string) => {
   const translations: Record<string, Record<string, string>> = {
@@ -76,6 +72,8 @@ const getTranslations = (lang: string) => {
 };
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -87,12 +85,13 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload = await req.json();
-    console.log("Received payload:", JSON.stringify(payload));
 
     const record = payload.record;
     if (!record) {
       throw new Error("No record found in payload");
     }
+
+    console.log(`shop_orders ${payload.type ?? "event"} for id ${record.id}`);
 
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
@@ -132,7 +131,8 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Error fetching order or no items found after retries: ${orderError?.message || "Not found"}`);
     }
 
-    const t = getTranslations(record.language || 'ca');
+    const orderLanguage = order.language || 'ca';
+    const t = getTranslations(orderLanguage);
 
     // Fetch dynamic shop config
     let shopConfig = null;
@@ -147,26 +147,27 @@ Deno.serve(async (req: Request) => {
       console.error("Could not fetch shop config", e);
     }
 
-    const pickupBodyText = shopConfig?.translations?.[record.language || 'ca'] || shopConfig?.translations?.['ca'] || t.pickupBody;
+    const pickupBodyText = shopConfig?.translations?.[orderLanguage] || shopConfig?.translations?.['ca'] || t.pickupBody;
     const adminEmails = shopConfig?.admin_emails || ADMIN_EMAILS_DEFAULT;
-    const contactEmail = record.customer_email || order.customer_email || "";
-    const contactPhone = record.customer_phone || order.customer_phone || "";
+    const customerName = String(order.customer_name || "");
+    const contactEmail = String(order.customer_email || "");
+    const contactPhone = String(order.customer_phone || "");
 
     const itemsHtml = order.items && order.items.length > 0 
       ? order.items.map((item: { variant: { product: { name: string }, size: string }, quantity: number, price_at_time: number }) => `
         <tr>
-          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${item.variant?.product?.name || 'Producte'}</td>
-          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${item.variant?.size || '-'}</td>
-          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${item.quantity}</td>
-          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: right;">${item.price_at_time}€</td>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${escapeHtml(item.variant?.product?.name || 'Producte')}</td>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${escapeHtml(item.variant?.size || '-')}</td>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: center;">${escapeHtml(item.quantity)}</td>
+          <td style="padding: 12px 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; text-align: right;">${escapeHtml(item.price_at_time)}€</td>
         </tr>
       `).join("")
       : `<tr><td colspan="4" style="padding: 20px; text-align: center; color: #64748b; font-style: italic;">Sense productes</td></tr>`;
 
     // Determine recipients. Send to the customer and the admins.
     const recipients = [...adminEmails];
-    if (record.customer_email && record.customer_email.includes('@')) {
-      recipients.push(record.customer_email);
+    if (contactEmail.includes('@')) {
+      recipients.push(contactEmail);
     }
 
     // Try to get reply_to from admin emails or a fixed one
@@ -189,10 +190,10 @@ Deno.serve(async (req: Request) => {
           
           <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #f1f5f9;">
             <h3 style="margin: 0 0 12px 0; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">${t.customerContext}</h3>
-            <p style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 600;">${record.customer_name}</p>
-            ${contactEmail ? `<p style="margin: 6px 0 0 0; color: #334155; font-size: 14px;">Email: ${contactEmail}</p>` : ""}
-            ${contactPhone ? `<p style="margin: 4px 0 0 0; color: #334155; font-size: 14px;">Tel: ${contactPhone}</p>` : ""}
-            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">ID: <code style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${record.id.slice(0, 8)}</code></p>
+            <p style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 600;">${escapeHtml(customerName)}</p>
+            ${contactEmail ? `<p style="margin: 6px 0 0 0; color: #334155; font-size: 14px;">Email: ${escapeHtml(contactEmail)}</p>` : ""}
+            ${contactPhone ? `<p style="margin: 4px 0 0 0; color: #334155; font-size: 14px;">Tel: ${escapeHtml(contactPhone)}</p>` : ""}
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">ID: <code style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${escapeHtml(String(order.id).slice(0, 8))}</code></p>
           </div>
 
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
@@ -210,7 +211,7 @@ Deno.serve(async (req: Request) => {
             <tfoot>
               <tr>
                 <td colspan="3" style="padding: 24px 8px 8px 8px; text-align: right; font-size: 16px; color: #64748b;">${t.totalMsg}</td>
-                <td style="padding: 24px 8px 8px 8px; text-align: right; font-weight: 800; color: #2563eb; font-size: 24px;">${order.total_amount}€</td>
+                <td style="padding: 24px 8px 8px 8px; text-align: right; font-weight: 800; color: #2563eb; font-size: 24px;">${escapeHtml(order.total_amount)}€</td>
               </tr>
             </tfoot>
           </table>
@@ -239,10 +240,9 @@ Deno.serve(async (req: Request) => {
     });
 
     const data = await res.json();
-    console.log("Resend response status:", res.status);
-    console.log("Resend response body:", JSON.stringify(data));
+    console.log("Resend status:", res.status, "id:", data?.id ?? "none");
 
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify({ ok: res.ok, id: data?.id ?? null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: res.status, // Use the actual status from Resend
     });

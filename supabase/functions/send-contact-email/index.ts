@@ -1,5 +1,6 @@
 import "edge-runtime";
 import { createClient } from "supabase";
+import { escapeHtml } from "../_shared/security.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
@@ -19,13 +20,9 @@ function getCorsHeaders(req: Request) {
   };
 }
 
-// Backwards-compatible alias
-const corsHeaders = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -37,17 +34,17 @@ Deno.serve(async (req: Request) => {
     }
 
     const payload = await req.json();
-    console.log("Received payload:", JSON.stringify(payload));
 
     const record = payload.record;
     if (!record) {
       throw new Error("No record found in payload");
     }
 
+    console.log(`contact_messages ${payload.type ?? "event"} for id ${record.id}`);
+
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // Fetch full message data to be robust against partial payloads
-    console.log(`Fetching message data for ID: ${record.id}...`);
     const { data: messageData, error: fetchError } = await supabase
       .from("contact_messages")
       .select("*")
@@ -59,7 +56,11 @@ Deno.serve(async (req: Request) => {
     }
 
     const { name, email, subject, message, created_at } = messageData;
-    const dateFormatted = new Date(created_at).toLocaleString('ca-ES', { 
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeSubject = escapeHtml(subject);
+    const safeMessage = escapeHtml(message);
+    const dateFormatted = new Date(created_at).toLocaleString('ca-ES', {
       day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' 
     });
 
@@ -85,21 +86,21 @@ Deno.serve(async (req: Request) => {
             
             <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #f1f5f9;">
               <h3 style="margin: 0 0 12px 0; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800;">Dades del Remitent</h3>
-              <p style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 600;">${name}</p>
+              <p style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 600;">${safeName}</p>
               <p style="margin: 4px 0 0 0; color: #2563eb; font-size: 14px; font-weight: 500;">
-                <a href="mailto:${email}" style="color: #2563eb; text-decoration: none;">${email}</a>
+                <a href="mailto:${encodeURIComponent(String(email ?? ""))}" style="color: #2563eb; text-decoration: none;">${safeEmail}</a>
               </p>
               <p style="margin: 12px 0 0 0; color: #94a3b8; font-size: 12px;">Rebut el ${dateFormatted}</p>
             </div>
 
             <div style="margin-bottom: 24px;">
               <h3 style="margin: 0 0 8px 0; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800;">Assumpte</h3>
-              <p style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 700;">${subject}</p>
+              <p style="margin: 0; color: #0f172a; font-size: 16px; font-weight: 700;">${safeSubject}</p>
             </div>
 
             <div style="background: #ffffff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 24px;">
               <h3 style="margin: 0 0 12px 0; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800;">Missatge</h3>
-              <p style="margin: 0; color: #334155; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+              <p style="margin: 0; color: #334155; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${safeMessage}</p>
             </div>
 
             <div style="text-align: center;">
@@ -116,10 +117,9 @@ Deno.serve(async (req: Request) => {
     });
 
     const data = await res.json();
-    console.log("Resend response status:", res.status);
-    console.log("Resend response body:", JSON.stringify(data));
+    console.log("Resend status:", res.status, "id:", data?.id ?? "none");
 
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify({ ok: res.ok, id: data?.id ?? null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: res.status,
     });

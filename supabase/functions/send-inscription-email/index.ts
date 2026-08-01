@@ -1,18 +1,31 @@
 import "edge-runtime";
+import { createClient } from "supabase";
+import { escapeHtml, timingSafeEqual } from "../_shared/security.ts";
 
 // Sends a "we received your enrolment" confirmation to the parent's email
 // right after an inscription row is inserted. Triggered by a DB webhook on
 // public.inscripcions (INSERT) — payload shape is { type, table, record, ... }.
+// Only record.id is trusted from that payload: recipients and contents are
+// re-read from the database, otherwise this is an open mail relay.
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "onboarding@resend.dev";
 const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") || "afafalguera@gmail.com").split(",");
+const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET") || "";
+
+const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") || "https://afafalguera.com,https://www.afafalguera.com").split(",");
-const corsHeaders = {
-  "Access-Control-Allow-Origin": ALLOWED_ORIGINS[0],
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-webhook-secret",
+  };
+}
 
 const COURSE_LABELS: Record<string, string> = {
   I3: "I3", I4: "I4", I5: "I5",
@@ -75,19 +88,63 @@ interface Student {
 }
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    if (!WEBHOOK_SECRET) {
+      console.error("WEBHOOK_SECRET is not configured");
+      return new Response(JSON.stringify({ error: "Function not configured" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    if (!timingSafeEqual(req.headers.get("x-webhook-secret") || "", WEBHOOK_SECRET)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+
     if (!RESEND_API_KEY) throw new Error("Missing RESEND_API_KEY");
+    if (!supabaseUrl || !supabaseServiceRoleKey) throw new Error("Missing Supabase environment variables");
 
     const payload = await req.json();
-    const record = payload.record;
-    if (!record) throw new Error("No record found in payload");
+    const inscriptionId = payload?.record?.id;
+    if (!inscriptionId) throw new Error("No record id found in payload");
 
-    const parentEmail: string = record.parent_email_1 || "";
-    if (!parentEmail || !parentEmail.includes("@")) {
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    // The row may not be visible yet to a fresh connection when the trigger fires.
+    let record: Record<string, unknown> | null = null;
+    let fetchError: { message: string } | null = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { data, error } = await supabase
+        .from("inscripcions")
+        .select("*")
+        .eq("id", inscriptionId)
+        .single();
+
+      if (data) {
+        record = data;
+        break;
+      }
+      fetchError = error;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    if (!record) {
+      throw new Error(`Error fetching inscription: ${fetchError?.message || "Not found"}`);
+    }
+
+    const parentEmail = String(record.parent_email_1 || "");
+    if (!parentEmail.includes("@")) {
       // Nothing to send to — succeed quietly so the webhook doesn't retry.
       return new Response(JSON.stringify({ skipped: "no parent email" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -95,17 +152,17 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const t = getTranslations(record.form_language || "ca");
+    const t = getTranslations(String(record.form_language || "ca"));
     const students: Student[] = Array.isArray(record.students) ? record.students : [];
 
     const studentsHtml = students.map((s) => {
-      const fullName = [s.name, s.surname].filter(Boolean).join(" ") || "-";
-      const course = s.course ? (COURSE_LABELS[s.course] || s.course) : "-";
+      const fullName = escapeHtml([s.name, s.surname].filter(Boolean).join(" ") || "-");
+      const course = escapeHtml(s.course ? (COURSE_LABELS[s.course] || s.course) : "-");
       const schoolLine = s.is_falguera === false
-        ? `<p style="margin:0 0 8px 0;color:#64748b;font-size:13px;">${t.schoolLabel}: <strong style="color:#334155;">${s.external_school || "-"}</strong></p>`
+        ? `<p style="margin:0 0 8px 0;color:#64748b;font-size:13px;">${t.schoolLabel}: <strong style="color:#334155;">${escapeHtml(s.external_school || "-")}</strong></p>`
         : "";
       const acts = (s.activities && s.activities.length)
-        ? s.activities.map((a) => `<li style="margin: 2px 0;">${a}</li>`).join("")
+        ? s.activities.map((a) => `<li style="margin: 2px 0;">${escapeHtml(a)}</li>`).join("")
         : `<li style="margin: 2px 0; color:#94a3b8;">-</li>`;
       return `
         <div style="background:#f8fafc;border:1px solid #f1f5f9;border-radius:12px;padding:16px;margin-bottom:12px;">
@@ -118,8 +175,9 @@ Deno.serve(async (req: Request) => {
     }).join("");
 
     const recipients = [parentEmail];
-    if (record.parent_email_2 && record.parent_email_2.includes("@")) {
-      recipients.push(record.parent_email_2);
+    const parentEmail2 = String(record.parent_email_2 || "");
+    if (parentEmail2.includes("@")) {
+      recipients.push(parentEmail2);
     }
     const replyTo = ADMIN_EMAILS[0] || "afafalguera@gmail.com";
 
@@ -164,9 +222,9 @@ Deno.serve(async (req: Request) => {
     });
 
     const data = await res.json();
-    console.log("Resend status:", res.status, "body:", JSON.stringify(data));
+    console.log("Resend status:", res.status, "id:", data?.id ?? "none");
 
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify({ ok: res.ok, id: data?.id ?? null }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: res.status,
     });
