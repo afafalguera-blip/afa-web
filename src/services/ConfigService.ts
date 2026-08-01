@@ -236,7 +236,15 @@ function setCachedConfig<T>(key: string, value: T): void {
   } catch { /* localStorage full — ignore */ }
 }
 
+export type ConfigKey = 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules' | 'book_prices';
+
 export const ConfigService = {
+  // Lectura sincrona de la cache, para poder pintar el valor correcto en el
+  // primer render en vez de un placeholder que luego se sustituye.
+  getCachedConfigSync<T>(key: ConfigKey): T | null {
+    return getCachedConfig<T>(key);
+  },
+
   async getConfig<T>(key: 'hero' | 'contact' | 'social' | 'about' | 'privacy' | 'cookies' | 'shop' | 'fees' | 'pricing' | 'branding' | 'analytics' | 'homepage' | 'menjador_info' | 'season' | 'inscription_form' | 'fee_rules' | 'book_prices'): Promise<T | null> {
     // Return cached value if fresh
     const cached = getCachedConfig<T>(key);
