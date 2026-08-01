@@ -179,11 +179,14 @@ Deno.serve(async (req: Request) => {
     if (parentEmail2.includes("@")) {
       recipients.push(parentEmail2);
     }
-    const replyTo = ADMIN_EMAILS[0] || "afafalguera@gmail.com";
+    const replyTo = ADMIN_EMAILS[0] || "afa@falguera.org";
+    // AFA gets a blind copy of every enrolment so it lands in the shared inbox.
+    const adminBcc = ADMIN_EMAILS.map((e) => e.trim()).filter((e) => e.includes("@"));
 
     const emailPayload = {
       from: `AFA Falguera <${FROM_EMAIL}>`,
       to: recipients,
+      ...(adminBcc.length ? { bcc: adminBcc } : {}),
       reply_to: replyTo,
       subject: t.subject,
       html: `
