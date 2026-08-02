@@ -6,6 +6,7 @@ export interface CalendarEvent {
   title: string;
   description: string | null;
   event_date: string;
+  end_date: string | null;
   start_time: string | null;
   end_time: string | null;
   location: string | null;
@@ -27,8 +28,8 @@ export const CalendarService = {
     const { data: calendarEvents, error: eventsError } = await supabase
       .from('events')
       .select('*')
-      .gte('event_date', startDate)
       .lte('event_date', endDate)
+      .gte('end_date', startDate)
       .order('event_date', { ascending: true });
 
     if (eventsError) throw eventsError;
@@ -53,6 +54,8 @@ export const CalendarService = {
         title: item.title,
         description: item.excerpt,
         event_date: item.event_date!.split('T')[0],
+        // Una noticia ocupa un unico dia en el calendario.
+        end_date: item.event_date!.split('T')[0],
         start_time: item.event_date ? format(new Date(item.event_date), 'HH:mm') : null,
         end_time: null,
         location: null,

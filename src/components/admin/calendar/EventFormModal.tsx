@@ -94,9 +94,38 @@ export function EventFormModal({
                             type="date"
                             lang={nativeDateLocale}
                             value={formData.event_date}
-                            onChange={e => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
+                            onChange={e => {
+                                const event_date = e.target.value;
+                                // Adelantar el inicio por detras del fin dejaria un rango
+                                // invertido, que la BD rechaza: arrastramos el fin con el.
+                                setFormData(prev => ({
+                                    ...prev,
+                                    event_date,
+                                    end_date: prev.end_date && prev.end_date < event_date ? event_date : prev.end_date
+                                }));
+                            }}
                             className={FIELD_CLASS}
                         />
+                    </div>
+                    <div>
+                        <label htmlFor="event-end-date" className={LABEL_CLASS}>
+                            {t('admin.calendar.field_end_date', 'Fecha fin')}
+                        </label>
+                        <input
+                            id="event-end-date"
+                            type="date"
+                            lang={nativeDateLocale}
+                            value={formData.end_date || ''}
+                            min={formData.event_date || undefined}
+                            onChange={e => setFormData(prev => ({ ...prev, end_date: e.target.value || null }))}
+                            className={FIELD_CLASS}
+                        />
+                        <p className="mt-1 text-[11px] text-neutral-500">
+                            {t(
+                                'admin.calendar.field_end_date_hint',
+                                'Déjalo vacío si dura un solo día. Para Semana Santa o colonias, pon el último día.'
+                            )}
+                        </p>
                     </div>
                     <div>
                         <label htmlFor="event-type" className={LABEL_CLASS}>
