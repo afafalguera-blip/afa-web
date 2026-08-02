@@ -13,6 +13,36 @@ export interface DatedEvent {
   end_date?: string | null;
 }
 
+/**
+ * Fecha civil `yyyy-MM-dd` de un Date, leída en la zona horaria LOCAL.
+ *
+ * `toISOString()` convierte antes a UTC, así que en España (UTC+1/+2) el día 1
+ * de un mes a las 00:00 se vuelve el último día del mes anterior a las 22:00 y
+ * la cadena resultante retrocede un día. Eso hacía que el calendario de abril
+ * pidiera "hasta el 29" (perdiendo los eventos del 30) y el de mayo "desde el
+ * 30 de abril" (colándolos). Para una fecha sin hora hay que formatear con los
+ * getters locales, nunca con toISOString().
+ */
+export function toLocalISODate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Hoy en formato `yyyy-MM-dd`, en la zona horaria local. */
+export function todayISODate(): string {
+  return toLocalISODate(new Date());
+}
+
+/** Primer y último día del mes de `date`, ambos inclusivos. */
+export function monthRange(date: Date): { from: string; to: string } {
+  return {
+    from: toLocalISODate(new Date(date.getFullYear(), date.getMonth(), 1)),
+    to: toLocalISODate(new Date(date.getFullYear(), date.getMonth() + 1, 0)),
+  };
+}
+
 /** Último día del evento; cae en `event_date` cuando no hay rango. */
 export function eventEndDate(event: DatedEvent): string {
   return event.end_date || event.event_date;
