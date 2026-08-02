@@ -38,6 +38,7 @@ export function EventFormModal({
             open={isOpen}
             onClose={onClose}
             closeOnBackdrop={false}
+            size="md"
             title={editingEvent ? t('admin.calendar.edit_event') : t('admin.calendar.new_event')}
             footer={
                 <>
