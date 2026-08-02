@@ -531,7 +531,7 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
             <button
               type="button"
               onClick={() => setExcludedCols(new Set())}
-              className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-[13px] font-medium text-white transition-colors"
+              className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-[13px] font-medium text-white transition-colors"
             >
               {t('forms.viewer.select_all', 'Todas')}
             </button>

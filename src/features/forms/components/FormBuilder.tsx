@@ -384,7 +384,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             setIsCreatingFolder(false);
                           }
                         }}
-                        className="px-3 py-2 bg-neutral-900 text-white rounded-md hover:bg-neutral-800 text-sm font-medium transition-colors"
+                        className="px-3 py-2 bg-admin-accent text-white rounded-md hover:bg-neutral-800 text-sm font-medium transition-colors"
                       >
                         Crear
                       </button>
@@ -707,7 +707,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                                     onClick={() => toggle(day)}
                                     className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
                                       active
-                                        ? 'bg-neutral-900 text-white border-neutral-900'
+                                        ? 'bg-admin-accent text-white border-neutral-900'
                                         : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                                     }`}
                                   >
@@ -1003,7 +1003,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-neutral-900 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500 transition-colors"
+            className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-admin-accent hover:bg-admin-accent-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500 transition-colors"
           >
             <Save className="w-5 h-5 mr-2" />
             {isSaving ? t('forms.builder.saving') : t('forms.builder.save')}

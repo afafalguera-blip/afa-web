@@ -127,7 +127,7 @@ function EditInscriptionForm({
             type="button"
             onClick={handleSubmit}
             disabled={saving}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-60"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             {t('common.save', 'Desar')}
@@ -341,7 +341,7 @@ function EditInscriptionForm({
                               onClick={() => toggleActivity(idx, activity)}
                               className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
                                 selected
-                                  ? 'bg-neutral-900 text-white border-neutral-900'
+                                  ? 'bg-admin-accent text-white border-neutral-900'
                                   : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100'
                               }`}
                             >

@@ -306,7 +306,7 @@ export default function NewsEditorPage() {
                     onClick={() => setActiveLang(lang)}
                     aria-pressed={activeLang === lang}
                     className={`px-4 py-1.5 rounded text-xs font-semibold transition-colors ${
-                      activeLang === lang ? 'bg-neutral-900 text-white' : 'text-neutral-500 hover:text-neutral-900'
+                      activeLang === lang ? 'bg-admin-accent text-white' : 'text-neutral-500 hover:text-neutral-900'
                     }`}
                   >
                     {lang.toUpperCase()}

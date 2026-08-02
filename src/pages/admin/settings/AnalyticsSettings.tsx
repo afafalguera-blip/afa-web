@@ -36,7 +36,7 @@ export function AnalyticsSettings({ analytics, setAnalytics }: AnalyticsSettings
                         aria-checked={analytics.enabled}
                         aria-label={t('admin.settings.analytics.toggle_label', 'Activar Google Analytics')}
                         onClick={() => setAnalytics({ ...analytics, enabled: !analytics.enabled })}
-                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${analytics.enabled ? 'bg-neutral-900' : 'bg-neutral-300'}`}
+                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${analytics.enabled ? 'bg-admin-accent' : 'bg-neutral-300'}`}
                     >
                         <span
                             className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${analytics.enabled ? 'translate-x-6' : 'translate-x-1'}`}

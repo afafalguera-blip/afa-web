@@ -91,7 +91,7 @@ export function FaqFormModal({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
             {saving ? t('common.saving') : t('common.save')}
           </button>
@@ -109,7 +109,7 @@ export function FaqFormModal({
                 aria-pressed={activeLang === lang}
                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                   activeLang === lang
-                    ? 'bg-neutral-900 text-white'
+                    ? 'bg-admin-accent text-white'
                     : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }`}
               >

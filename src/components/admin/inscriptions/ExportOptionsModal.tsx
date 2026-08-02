@@ -90,7 +90,7 @@ export function ExportOptionsModal({
             type="button"
             disabled={exporting}
             onClick={() => onExport('excel', exportType)}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-60"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-60"
           >
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
             Excel

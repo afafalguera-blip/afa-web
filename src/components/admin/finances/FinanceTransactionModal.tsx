@@ -68,7 +68,7 @@ export function FinanceTransactionModal({
                         type="submit"
                         form="finance-transaction-form"
                         disabled={isSubmitting}
-                        className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                        className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
                     >
                         {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         {t('common.save', 'Guardar')}
@@ -77,7 +77,7 @@ export function FinanceTransactionModal({
             }
         >
             <form id="finance-transaction-form" onSubmit={onSubmit} className="space-y-5">
-                <p className="text-xs text-neutral-500 -mt-1">Registra un nou moviment econòmic</p>
+                <p className="text-xs text-neutral-500 -mt-1">Registra un nuevo movimiento económico</p>
 
                 {/* Type & Date Row */}
                 <div className="grid grid-cols-2 gap-4">
@@ -129,7 +129,7 @@ export function FinanceTransactionModal({
                         id="finance-description"
                         type="text"
                         required
-                        placeholder="Ex: Pagament botiga, Subvenció AFA..."
+                        placeholder="Ej: Pago tienda, Subvención AFA..."
                         className={FIELD_CLASS}
                         value={transaction.description}
                         onChange={e => setTransaction({ ...transaction, description: e.target.value })}

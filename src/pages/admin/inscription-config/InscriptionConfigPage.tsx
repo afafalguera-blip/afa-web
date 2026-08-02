@@ -177,7 +177,7 @@ export default function InscriptionConfigPage() {
               aria-controls={selected ? panelId : undefined}
               onClick={() => handleTabChange(id)}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-[13px] font-medium transition-colors ${selected
-                ? 'bg-neutral-900 text-white'
+                ? 'bg-admin-accent text-white'
                 : 'text-neutral-600 hover:bg-neutral-100'
                 }`}
             >
@@ -216,7 +216,7 @@ export default function InscriptionConfigPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+            className="w-full bg-admin-accent hover:bg-admin-accent-hover text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

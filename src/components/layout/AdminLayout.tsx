@@ -30,17 +30,18 @@ import {
   ClipboardList
 } from 'lucide-react';
 
-// Payload-style hybrid shell: dark neutral sidebar, light content.
-// Flat (no gradients/shadows), small radii, compact nav.
+// AFA shell: forest-green sidebar over a cream content area.
+// Flat (no gradients/shadows), small radii, compact nav. Colours come from the
+// semantic `admin.*` tokens in tailwind.config.js, never from raw greys.
 const navClass = ({ isActive }: { isActive: boolean }) => `
-  flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-colors
+  flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors
   ${isActive
-    ? 'bg-neutral-800 text-white'
-    : 'text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-100'}
+    ? 'bg-admin-active-bg text-admin-active-fg font-semibold'
+    : 'text-admin-sidebar-muted hover:bg-admin-sidebar-hover hover:text-white'}
 `;
 
-const sectionLabel = 'px-3 text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1';
-const sectionWrap = 'pt-4 mt-4 border-t border-neutral-800';
+const sectionLabel = 'px-3 text-[11px] font-semibold text-admin-sidebar-muted/70 uppercase tracking-wider mb-1';
+const sectionWrap = 'pt-4 mt-4 border-t border-admin-sidebar-border';
 
 export function AdminLayout() {
   const { t } = useTranslation();
@@ -75,15 +76,15 @@ export function AdminLayout() {
   const closeSidebar = () => setSidebarOpen(false);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-100">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-700"></div>
+    <div className="min-h-screen flex items-center justify-center bg-admin-bg">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-admin-accent"></div>
     </div>
   );
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex">
+    <div className="min-h-screen bg-admin-bg flex">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -94,15 +95,15 @@ export function AdminLayout() {
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-60 bg-neutral-900 border-r border-neutral-800 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static
+        fixed inset-y-0 left-0 z-50 w-60 bg-admin-sidebar border-r border-admin-sidebar-border transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static
         flex flex-col h-screen overflow-hidden
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-14 flex-shrink-0 flex items-center px-4 border-b border-neutral-800">
+        <div className="h-14 flex-shrink-0 flex items-center px-4 border-b border-admin-sidebar-border">
           <Link
             to="/"
             onClick={closeSidebar}
-            className="text-[15px] font-semibold text-white hover:text-neutral-300 transition-colors"
+            className="text-[15px] font-semibold text-white hover:text-admin-active-bg transition-colors"
           >
             {t('admin.title')}
           </Link>
@@ -110,7 +111,7 @@ export function AdminLayout() {
             className="ml-auto lg:hidden"
             onClick={closeSidebar}
           >
-            <X className="w-5 h-5 text-neutral-500" />
+            <X className="w-5 h-5 text-admin-sidebar-muted" />
           </button>
         </div>
 
@@ -233,19 +234,19 @@ export function AdminLayout() {
           </div>
         </nav>
 
-        <div className="flex-shrink-0 p-3 border-t border-neutral-800">
+        <div className="flex-shrink-0 p-3 border-t border-admin-sidebar-border">
           <div className="flex items-center gap-3 px-1 mb-3">
-            <div className="w-8 h-8 rounded-md bg-neutral-700 text-neutral-100 flex items-center justify-center font-semibold text-xs uppercase">
+            <div className="w-8 h-8 rounded-lg bg-admin-active-bg text-admin-active-fg flex items-center justify-center font-semibold text-xs uppercase">
               {profile?.full_name?.substring(0, 2) || user?.email?.substring(0, 2)}
             </div>
             <div className="overflow-hidden">
               <p className="text-[13px] font-medium text-neutral-100 truncate">{profile?.full_name || user?.email}</p>
-              <p className="text-xs text-neutral-500 capitalize">{profile?.role || 'User'}</p>
+              <p className="text-xs text-admin-sidebar-muted capitalize">{profile?.role || 'User'}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-neutral-800 rounded-md text-[13px] font-medium text-neutral-400 hover:bg-neutral-800 hover:text-red-400 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-admin-sidebar-border rounded-lg text-[13px] font-medium text-admin-sidebar-muted hover:bg-admin-sidebar-hover hover:text-red-300 transition-colors"
           >
             <LogOut className="w-4 h-4" />
             {t('admin.sidebar.logout')}
@@ -268,7 +269,7 @@ export function AdminLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-neutral-100 p-4 lg:p-8">
+        <main className="flex-1 overflow-auto bg-admin-bg p-4 lg:p-8">
           <Outlet />
         </main>
       </div>

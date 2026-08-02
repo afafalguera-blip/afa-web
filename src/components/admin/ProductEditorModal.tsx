@@ -214,7 +214,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
               type="submit"
               form="product-editor-form"
               disabled={loading || !formData.name}
-              className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {product ? 'Guardar Canvis' : 'Crear Producte'}
@@ -315,7 +315,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-semibold text-neutral-400 uppercase tracking-wider">
-              <span>Talles i Preus</span>
+              <span>Tallas y Precios</span>
               <div className="w-24 h-px bg-neutral-100"></div>
             </div>
             <button
@@ -402,7 +402,7 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
 
             {variants.length === 0 && (
               <div className="text-center py-8 bg-neutral-50 rounded-lg border border-dashed border-neutral-200">
-                <p className="text-sm text-neutral-500">No hi ha talles definides. Afegeix-ne una.</p>
+                <p className="text-sm text-neutral-500">No hay tallas definidas. Añade una.</p>
               </div>
             )}
           </div>

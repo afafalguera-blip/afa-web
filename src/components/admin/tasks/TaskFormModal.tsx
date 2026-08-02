@@ -73,7 +73,7 @@ export function TaskFormModal({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+            className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
             {saving ? t('common.saving') : t('common.save')}
           </button>

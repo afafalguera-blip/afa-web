@@ -182,7 +182,7 @@ export default function AiKeysSettings() {
                       type="button"
                       onClick={() => handleSave(def.key)}
                       disabled={row.saving || !row.draft.trim()}
-                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-admin-accent hover:bg-admin-accent-hover text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {row.saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       {row.saving ? t('settings.ai_keys.saving') : t('settings.ai_keys.save')}

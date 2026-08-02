@@ -77,7 +77,7 @@ export function InventoryPage() {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
       <AdminPageHeader
-        title="Gestió d'Inventari"
+        title="Gestión de Inventario"
         subtitle="Controla l'estoc, preus i talles dels productes de la botiga."
         icon={Package}
         loading={loading}
@@ -181,7 +181,7 @@ export function InventoryPage() {
                     {/* Variants — table on md+, cards on mobile */}
                     {(!product.variants || product.variants.length === 0) ? (
                       <div className="p-8 text-center bg-neutral-50/50">
-                        <p className="text-neutral-400 text-sm italic">Aquest producte no té variants configurades.</p>
+                        <p className="text-neutral-400 text-sm italic">Este producto no tiene variantes configuradas.</p>
                       </div>
                     ) : (
                       <>
@@ -317,7 +317,7 @@ export function InventoryPage() {
                   <Search className="w-8 h-8 text-neutral-300" />
                 </div>
                 <h3 className="text-xl font-bold text-neutral-900">No s'han trobat productes</h3>
-                <p className="text-neutral-500 mt-2">Prova amb una altra cerca o crea un producte nou.</p>
+                <p className="text-neutral-500 mt-2">Prueba con otra búsqueda o crea un producto nuevo.</p>
               </div>
             )}
           </div>
