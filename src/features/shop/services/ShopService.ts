@@ -69,9 +69,12 @@ function sanitizeSearch(term: string): string {
     return term.replace(/[,.():*%\\]/g, ' ').trim();
 }
 
-interface FilterableQuery<T> {
-    eq(column: string, value: unknown): T;
-    or(filters: string): T;
+// Non-recursive shape on purpose: constraining the generic to `T extends
+// FilterableQuery<T>` makes TS instantiate PostgREST's builder type against
+// itself and blow the depth limit (TS2589).
+interface FilterableQuery {
+    eq(column: string, value: unknown): FilterableQuery;
+    or(filters: string): FilterableQuery;
 }
 
 /**
@@ -79,8 +82,8 @@ interface FilterableQuery<T> {
  * Legacy rows may have a NULL delivery_status (the UI reads them as "pending"),
  * hence the explicit null branch instead of a plain `not.in`.
  */
-function applyOrderFilters<T extends FilterableQuery<T>>(query: T, filters: OrdersFilters): T {
-    let q = query;
+function applyOrderFilters<T>(query: T, filters: OrdersFilters): T {
+    let q = query as FilterableQuery;
     const orGroups: string[] = [];
 
     if (filters.academicYear) q = q.eq('academic_year', filters.academicYear);
@@ -108,7 +111,7 @@ function applyOrderFilters<T extends FilterableQuery<T>>(query: T, filters: Orde
     // PostgREST guarantees a single top-level `or`; nest the groups to AND them.
     else if (orGroups.length > 1) q = q.or(`and(${orGroups.map((g) => `or(${g})`).join(',')})`);
 
-    return q;
+    return q as T;
 }
 
 export const ShopService = {

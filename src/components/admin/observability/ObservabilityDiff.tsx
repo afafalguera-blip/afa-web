@@ -26,7 +26,7 @@ const truncate = (value: string): string =>
 
 const isEmpty = (value: unknown): boolean => value === null || value === undefined;
 
-export function computeChanges(
+function computeChanges(
   oldData: Record<string, unknown> | null,
   newData: Record<string, unknown> | null
 ): FieldChange[] {

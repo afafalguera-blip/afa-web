@@ -40,13 +40,16 @@ function sanitizeSearch(term: string): string {
     return term.replace(/[,.():*%\\]/g, ' ').trim();
 }
 
-interface FilterableQuery<T> {
-    eq(column: string, value: unknown): T;
-    or(filters: string): T;
+// Non-recursive shape on purpose: constraining the generic to `T extends
+// FilterableQuery<T>` makes TS instantiate PostgREST's builder type against
+// itself and blow the depth limit (TS2589).
+interface FilterableQuery {
+    eq(column: string, value: unknown): FilterableQuery;
+    or(filters: string): FilterableQuery;
 }
 
-function applyFinanceFilters<T extends FilterableQuery<T>>(query: T, filters: FinanceFilters): T {
-    let q = query;
+function applyFinanceFilters<T>(query: T, filters: FinanceFilters): T {
+    let q = query as FilterableQuery;
 
     if (filters.academicYear) q = q.eq('academic_year', filters.academicYear);
     if (filters.type && filters.type !== 'all') q = q.eq('type', filters.type);
@@ -54,7 +57,7 @@ function applyFinanceFilters<T extends FilterableQuery<T>>(query: T, filters: Fi
     const search = sanitizeSearch(filters.search ?? '');
     if (search) q = q.or(`description.ilike.%${search}%,category.ilike.%${search}%`);
 
-    return q;
+    return q as T;
 }
 
 export const FinanceService = {

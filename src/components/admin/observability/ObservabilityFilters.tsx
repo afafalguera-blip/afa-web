@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, X } from 'lucide-react';
 import type { AuditLogFacets } from '../../../services/admin/AdminObservabilityService';
 import { AUDIT_ACTIONS } from '../../../services/admin/AdminObservabilityService';
+import { EMPTY_FILTERS, hasActiveFilters, type ObservabilityFilterState } from './observabilityFilterState';
 
 interface ObservabilityFiltersProps {
   filters: ObservabilityFilterState;

@@ -69,16 +69,19 @@ function combineOrGroups(groups: string[]): string | null {
 }
 
 /** Structural subset of PostgrestFilterBuilder used by the filter helper. */
-interface FilterableQuery<T> {
-  eq(column: string, value: unknown): T;
-  neq(column: string, value: unknown): T;
-  lt(column: string, value: unknown): T;
-  or(filters: string): T;
+// Non-recursive shape on purpose: constraining the generic to `T extends
+// FilterableQuery<T>` makes TS instantiate PostgREST's builder type against
+// itself and blow the depth limit (TS2589).
+interface FilterableQuery {
+  eq(column: string, value: unknown): FilterableQuery;
+  neq(column: string, value: unknown): FilterableQuery;
+  lt(column: string, value: unknown): FilterableQuery;
+  or(filters: string): FilterableQuery;
 }
 
 /** Applies every filter that can be pushed to the server. */
-function applyFilters<T extends FilterableQuery<T>>(query: T, filters: PaymentsFilters): T {
-  let q = query;
+function applyFilters<T>(query: T, filters: PaymentsFilters): T {
+  let q = query as FilterableQuery;
   const orGroups: string[] = [];
 
   if (filters.academicYear) q = q.eq('academic_year', filters.academicYear);
@@ -104,7 +107,7 @@ function applyFilters<T extends FilterableQuery<T>>(query: T, filters: PaymentsF
   const combined = combineOrGroups(orGroups);
   if (combined) q = q.or(combined);
 
-  return q;
+  return q as T;
 }
 
 export const AdminPaymentsService = {

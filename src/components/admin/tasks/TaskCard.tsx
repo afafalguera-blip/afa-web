@@ -4,7 +4,7 @@ import {
   Calendar, ChevronDown, ChevronUp, Edit, ListChecks, Tag, Trash2, User
 } from 'lucide-react';
 import type { AdminTask, TaskStatus } from '../../../services/admin/AdminTasksService';
-import { STATUS_PILL_CLASS } from '../news/ContentStatusBadge';
+import { STATUS_PILL_CLASS } from '../news/contentStatus';
 import { statusClasses, priorityClasses, isTaskOverdue, STATUS_OPTIONS } from './taskUtils';
 
 interface TaskCardProps {

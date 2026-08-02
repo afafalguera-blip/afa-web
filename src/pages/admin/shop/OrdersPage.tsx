@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { usePagedFilters } from '../../../hooks/usePagedFilters';
 import { ShopService, type OrdersFilters, type OrdersSummary, type OrdersView } from '../../../features/shop/services/ShopService';
 import { ConfigService } from '../../../services/ConfigService';
 import { Search, Plus, LayoutDashboard, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle, Mail, Phone, BadgeCheck, Archive } from 'lucide-react';
@@ -33,8 +34,9 @@ export function OrdersPage() {
     const [years, setYears] = useState<string[]>([]);
     const [yearsReady, setYearsReady] = useState(false);
 
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(25);
+    const { page, setPage, pageSize, setPageSize } = usePagedFilters(
+        `${academicYear} ${view} ${search}`
+    );
 
     const filters: OrdersFilters = useMemo(
         () => ({ academicYear: academicYear || undefined, view, search: search || undefined }),
@@ -86,10 +88,6 @@ export function OrdersPage() {
         const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300);
         return () => window.clearTimeout(timer);
     }, [searchInput]);
-
-    useEffect(() => {
-        setPage(1);
-    }, [academicYear, view, search, pageSize]);
 
     useEffect(() => {
         fetchOrders();

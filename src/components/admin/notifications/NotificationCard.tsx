@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { Edit, Trash2, AlertCircle, Info, Calendar, Link2 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Notification } from '../../../services/admin/AdminNotificationService';
-import { ContentStatusBadge, VisibilityToggleButton, STATUS_PILL_CLASS } from '../news/ContentStatusBadge';
+import { ContentStatusBadge, VisibilityToggleButton } from '../news/ContentStatusBadge';
+import { STATUS_PILL_CLASS } from '../news/contentStatus';
 
 interface NotificationCardProps {
   notification: Notification;

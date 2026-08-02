@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { usePagedFilters } from '../../../hooks/usePagedFilters';
 import { useTranslation } from 'react-i18next';
 import { Landmark } from 'lucide-react';
 import {
@@ -43,8 +44,9 @@ export function FinanceDashboard() {
   const [academicYear, setAcademicYear] = useState<string>(''); // '' = all-time
   const [yearsReady, setYearsReady] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const { page, setPage, pageSize, setPageSize } = usePagedFilters(
+    `${academicYear} ${filterType} ${search}`
+  );
 
   const [newTransaction, setNewTransaction] = useState<Partial<FinanceTransaction>>(emptyTransaction);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -99,10 +101,6 @@ export function FinanceDashboard() {
     const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300);
     return () => window.clearTimeout(timer);
   }, [searchInput]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [academicYear, filterType, search, pageSize]);
 
   useEffect(() => {
     loadData();

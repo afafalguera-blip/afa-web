@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePagedFilters } from '../../../hooks/usePagedFilters';
 import { ConfigService } from '../../../services/ConfigService';
 import {
   AdminPaymentsService,
@@ -69,8 +70,9 @@ export function PaymentsPage() {
   const [years, setYears] = useState<string[]>([]);
   const [yearsReady, setYearsReady] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const { page, setPage, pageSize, setPageSize } = usePagedFilters(
+    `${academicYear} ${conceptFilter} ${statusFilter} ${monthFilter} ${search}`
+  );
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -124,11 +126,6 @@ export function PaymentsPage() {
     const timer = window.setTimeout(() => setSearch(filterText.trim()), 300);
     return () => window.clearTimeout(timer);
   }, [filterText]);
-
-  // Any filter change invalidates the current page number.
-  useEffect(() => {
-    setPage(1);
-  }, [academicYear, conceptFilter, statusFilter, monthFilter, search, pageSize]);
 
   const fetchPayments = useCallback(async () => {
     if (!yearsReady) return;

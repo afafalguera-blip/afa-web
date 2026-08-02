@@ -10,11 +10,9 @@ import { useToast } from '../../components/common/Toast';
 import { ObservabilityLogTable } from '../../components/admin/observability/ObservabilityLogTable';
 import { ObservabilityDiff } from '../../components/admin/observability/ObservabilityDiff';
 import { ObservabilityActionBadge } from '../../components/admin/observability/ObservabilityActionBadge';
-import {
-  ObservabilityFilters,
-  EMPTY_FILTERS
-} from '../../components/admin/observability/ObservabilityFilters';
-import type { ObservabilityFilterState } from '../../components/admin/observability/ObservabilityFilters';
+import { ObservabilityFilters } from '../../components/admin/observability/ObservabilityFilters';
+import { EMPTY_FILTERS } from '../../components/admin/observability/observabilityFilterState';
+import type { ObservabilityFilterState } from '../../components/admin/observability/observabilityFilterState';
 
 const EMPTY_FACETS: AuditLogFacets = { tables: [], users: [] };
 const SEARCH_DEBOUNCE_MS = 350;
