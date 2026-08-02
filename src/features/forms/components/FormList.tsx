@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formService } from '../services/formService';
 import { resolveTemplateText } from '../utils/resolveTranslations';
@@ -8,7 +8,6 @@ import {
   Edit,
   BarChart,
   ExternalLink,
-  Plus,
   Loader2,
   FolderOpen,
   LayoutGrid,
@@ -17,6 +16,9 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
+import { AdminPageHeader } from '../../../components/admin/common/AdminPageHeader';
+import { useToast } from '../../../components/common/Toast';
+import { useConfirm } from '../../../components/common/ConfirmDialog';
 
 const ALL_FOLDERS_TAB = '__all__';
 const NO_FOLDER_TAB = '__none__';
@@ -30,6 +32,8 @@ interface Props {
 
 export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDuplicate }: Props) {
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const activeLang = i18n.resolvedLanguage || i18n.language;
   const [forms, setForms] = useState<FormTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,17 +47,28 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
   const handleDelete = async (form: FormTemplate) => {
     const count = submissionCounts[form.id!] || 0;
     const localizedTitle = resolveTemplateText(form, activeLang).title;
-    const msg = count > 0
-      ? t('forms.admin.delete_confirm_with_responses', { title: localizedTitle, count })
-      : t('forms.admin.delete_confirm', { title: localizedTitle });
-    if (!window.confirm(msg)) return;
+    const ok = await confirm({
+      title: t('forms.admin.delete_title', 'Eliminar formulari'),
+      message:
+        count > 0
+          ? t('forms.admin.delete_confirm_with_responses', { title: localizedTitle, count })
+          : t('forms.admin.delete_confirm', { title: localizedTitle }),
+      itemName: localizedTitle,
+      confirmLabel: t('forms.admin.delete', 'Eliminar'),
+      destructive: true,
+    });
+    if (!ok) return;
+
     const id = form.id!;
     setDeletingId(id);
     try {
       await formService.deleteForm(id);
       setForms((prev) => prev.filter((f) => f.id !== id));
-    } catch {
-      // silent
+      toast.success(t('forms.admin.delete_success', 'Formulari eliminat.'));
+    } catch (err: unknown) {
+      toast.error(
+        err instanceof Error ? err.message : t('forms.admin.delete_error', "No s'ha pogut eliminar el formulari."),
+      );
     } finally {
       setDeletingId(null);
     }
@@ -63,6 +78,10 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
     setDuplicatingId(form.id!);
     try {
       await onDuplicate(form);
+    } catch (err: unknown) {
+      toast.error(
+        err instanceof Error ? err.message : t('forms.admin.duplicate_error', "No s'ha pogut duplicar el formulari."),
+      );
     } finally {
       setDuplicatingId(null);
     }
@@ -74,32 +93,46 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
     try {
       const updated = await formService.updateForm(id, { is_active: !form.is_active });
       setForms((prev) => prev.map((f) => (f.id === id ? { ...f, is_active: updated.is_active } : f)));
-    } catch {
-      // silent
+      toast.success(
+        updated.is_active
+          ? t('forms.admin.publish_success', 'Formulari publicat.')
+          : t('forms.admin.unpublish_success', 'Formulari despublicat.'),
+      );
+    } catch (err: unknown) {
+      toast.error(
+        err instanceof Error ? err.message : t('forms.admin.toggle_error', "No s'ha pogut canviar l'estat."),
+      );
     } finally {
       setTogglingId(null);
     }
   };
 
-  useEffect(() => {
-    loadForms();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const loadForms = async () => {
+  // No pone isLoading a true: el estado ya nace en true y los refrescos
+  // manuales lo activan desde su handler. Así el efecto no dispara setState
+  // de forma síncrona (react-hooks/set-state-in-effect).
+  const loadForms = useCallback(async () => {
     try {
-      setIsLoading(true);
       const [data, counts] = await Promise.all([
         formService.getForms(),
         formService.getSubmissionCounts(),
       ]);
       setForms(data);
       setSubmissionCounts(counts);
+      setError(null);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('forms.admin.load_error'));
     } finally {
       setIsLoading(false);
     }
+  }, [t]);
+
+  useEffect(() => {
+    void loadForms();
+  }, [loadForms]);
+
+  const handleRefresh = () => {
+    setIsLoading(true);
+    void loadForms();
   };
 
   const folders = useMemo(() => {
@@ -138,20 +171,16 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{t('forms.admin.title')}</h1>
-          <p className="text-gray-500 text-sm">{t('forms.admin.subtitle')}</p>
-        </div>
-        <button
-          onClick={onCreateNew}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center transition-colors shadow-sm self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          {t('forms.admin.new')}
-        </button>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <AdminPageHeader
+        title={t('forms.admin.title')}
+        subtitle={t('forms.admin.subtitle')}
+        icon={FileText}
+        loading={isLoading}
+        onRefresh={handleRefresh}
+        onCreate={onCreateNew}
+        createLabel={t('forms.admin.new')}
+      />
 
       {hasFolders && (
         <div className="flex items-center gap-1 overflow-x-auto pb-1 border-b border-gray-200">
@@ -159,7 +188,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
             onClick={() => setActiveFolder(ALL_FOLDERS_TAB)}
             className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${
               activeFolder === ALL_FOLDERS_TAB
-                ? 'border-blue-600 text-blue-700 bg-blue-50'
+                ? 'border-neutral-900 text-neutral-900 bg-neutral-100'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -174,7 +203,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
                 onClick={() => setActiveFolder(folder)}
                 className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${
                   activeFolder === folder
-                    ? 'border-blue-600 text-blue-700 bg-blue-50'
+                    ? 'border-neutral-900 text-neutral-900 bg-neutral-100'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -188,7 +217,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
               onClick={() => setActiveFolder(NO_FOLDER_TAB)}
               className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${
                 activeFolder === NO_FOLDER_TAB
-                  ? 'border-blue-600 text-blue-700 bg-blue-50'
+                  ? 'border-neutral-900 text-neutral-900 bg-neutral-100'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -206,7 +235,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
           <p className="mt-1 text-sm text-gray-500">{t('forms.admin.empty_body')}</p>
           <button
             onClick={onCreateNew}
-            className="mt-6 text-blue-600 hover:text-blue-800 font-medium text-sm border-b leading-tight border-blue-600"
+            className="mt-6 text-neutral-900 hover:text-neutral-700 font-medium text-sm border-b leading-tight border-neutral-900"
           >
             {t('forms.admin.empty_cta')}
           </button>
@@ -257,7 +286,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
                   <span>{t('forms.admin.fields_count', { count: form.fields_schema.length })}</span>
                   <span className="flex items-center gap-1">
                     <BarChart className="w-3 h-3" />
-                    <span className={submissionCounts[form.id!] ? 'font-semibold text-blue-600' : ''}>
+                    <span className={submissionCounts[form.id!] ? 'font-semibold text-neutral-900' : ''}>
                       {t('forms.admin.responses_count', { count: submissionCounts[form.id!] || 0 })}
                     </span>
                   </span>
@@ -269,7 +298,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => onViewSubmissions(form)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold bg-neutral-100 text-neutral-800 hover:bg-neutral-200 rounded-lg transition-colors"
                   >
                     <BarChart className="w-3.5 h-3.5" />
                     {t('forms.admin.responses')}
@@ -293,7 +322,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
                     href={`/f/${form.slug}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    className="p-2 text-gray-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors"
                     title={t('forms.admin.view_link')}
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -367,7 +396,7 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
                       <div>{t('forms.admin.fields_count', { count: form.fields_schema.length })}</div>
                       <div className="flex items-center gap-1 mt-0.5">
                         <BarChart className="w-3 h-3" />
-                        <span className={submissionCounts[form.id!] ? 'font-semibold text-blue-600' : ''}>
+                        <span className={submissionCounts[form.id!] ? 'font-semibold text-neutral-900' : ''}>
                           {t('forms.admin.responses_count', { count: submissionCounts[form.id!] || 0 })}
                         </span>
                       </div>
@@ -381,14 +410,14 @@ export default function FormList({ onCreateNew, onEdit, onViewSubmissions, onDup
                           href={`/f/${form.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                          className="p-1.5 text-gray-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors"
                           title={t('forms.admin.view_link')}
                         >
                           <ExternalLink className="w-4 h-4" />
                         </a>
                         <button
                           onClick={() => onViewSubmissions(form)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-neutral-100 text-neutral-800 hover:bg-neutral-200 rounded-lg transition-colors"
                         >
                           <BarChart className="w-3.5 h-3.5" />
                           {t('forms.admin.responses')}

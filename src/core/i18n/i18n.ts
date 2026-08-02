@@ -42,4 +42,55 @@ i18n.on('languageChanged', (lng) => {
   syncDocumentLanguage(lng);
 });
 
+const LNG_CACHE_KEY = 'i18nextLng';
+const LNG_COOKIE = 'i18next';
+// Holds the language the visitor was using on the public site while the admin
+// panel forces Spanish. Needed because detection.caches persists every
+// changeLanguage(), so without stashing it a visit to /admin would leave the
+// public site permanently in Spanish instead of the institutional Catalan.
+const PUBLIC_LNG_KEY = 'afa_public_lng';
+
+const clearLanguageCaches = () => {
+  window.localStorage.removeItem(LNG_CACHE_KEY);
+  if (typeof document !== 'undefined') {
+    document.cookie = `${LNG_COOKIE}=; path=/; max-age=0`;
+  }
+};
+
+/** Forces the admin language, remembering the public one so it can be restored. */
+export const setAdminLanguageOverride = (adminLanguage = 'es') => {
+  if (typeof window === 'undefined') return;
+
+  if (window.localStorage.getItem(PUBLIC_LNG_KEY) === null) {
+    // Empty string = the visitor never picked a language explicitly.
+    window.localStorage.setItem(PUBLIC_LNG_KEY, window.localStorage.getItem(LNG_CACHE_KEY) ?? '');
+  }
+
+  if (i18n.language !== adminLanguage) {
+    void i18n.changeLanguage(adminLanguage);
+  }
+};
+
+/** Undoes setAdminLanguageOverride(). Safe to call when no override is active. */
+export const restorePublicLanguage = () => {
+  if (typeof window === 'undefined') return;
+
+  const saved = window.localStorage.getItem(PUBLIC_LNG_KEY);
+  if (saved === null) return;
+  window.localStorage.removeItem(PUBLIC_LNG_KEY);
+
+  if (saved) {
+    if (i18n.language !== saved) void i18n.changeLanguage(saved);
+    return;
+  }
+
+  void i18n.changeLanguage('ca').then(clearLanguageCaches);
+};
+
+// The override is undone on AdminLayout unmount, but a tab closed inside /admin
+// never unmounts. Recover on the next non-admin load.
+if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
+  restorePublicLanguage();
+}
+
 export default i18n;

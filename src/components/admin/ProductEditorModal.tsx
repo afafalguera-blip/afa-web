@@ -1,12 +1,15 @@
-
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ShopService } from '../../features/shop/services/ShopService';
 import type { ShopProduct, ShopVariant } from '../../features/shop/types/shop';
 import { useTranslation } from "react-i18next";
-import { X, Save, Loader2, Plus, Trash2, Package } from "lucide-react";
+import { Save, Loader2, Plus, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sortSizes } from "../../utils/productUtils";
 import { ConfigService, type ShopConfig } from "../../services/ConfigService";
+import { Modal } from "../common/Modal";
+import { useToast } from "../common/Toast";
+import { useConfirm } from "../common/ConfirmDialog";
+import { useDirtyGuard } from "../../hooks/useDirtyGuard";
 
 interface ProductEditorModalProps {
   isOpen: boolean;
@@ -15,43 +18,51 @@ interface ProductEditorModalProps {
   onSaved: () => void;
 }
 
+const FIELD_CLASS =
+  'w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-white text-neutral-900 focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none transition-colors';
+
+function emptyProduct(): Partial<ShopProduct> {
+  return { category: 'uniforme', name: '', description: '' };
+}
+
 export function ProductEditorModal({ isOpen, onClose, product, onSaved }: ProductEditorModalProps) {
   const { t } = useTranslation();
-  const [formData, setFormData] = useState<Partial<ShopProduct>>({
-    category: 'uniforme',
-    name: '',
-    description: '',
-  });
+  const { toast } = useToast();
+  const confirm = useConfirm();
+  const [formData, setFormData] = useState<Partial<ShopProduct>>(emptyProduct);
   const [variants, setVariants] = useState<Partial<ShopVariant>[]>([]);
+  const [initialSnapshot, setInitialSnapshot] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentLang, setCurrentLang] = useState<'es' | 'ca' | 'en'>('es');
   const [shopConfig, setShopConfig] = useState<ShopConfig | null>(null);
 
+  const isDirty = useMemo(
+    () => !loading && JSON.stringify({ formData, variants }) !== initialSnapshot,
+    [formData, variants, initialSnapshot, loading]
+  );
+  const { confirmDiscard } = useDirtyGuard(isOpen && isDirty);
+
   useEffect(() => {
-    const fetchConfig = async () => {
-      const config = await ConfigService.getShopConfig();
-      if (config) setShopConfig(config);
-    };
-    fetchConfig();
+    ConfigService.getShopConfig()
+      .then((config) => {
+        if (config) setShopConfig(config);
+      })
+      .catch(() => {
+        // Falls back to the hardcoded category list rendered below.
+      });
   }, []);
 
   useEffect(() => {
-    if (product) {
-      setFormData(product);
-      setVariants(sortSizes(product.variants || []));
-    } else {
-      setFormData({
-        category: 'uniforme',
-        name: '',
-        description: '',
-      });
-      setVariants([
-        { size: 'Única', price_member: 0, price_non_member: 0, stock: 0 }
-      ]);
-    }
-  }, [product, isOpen]);
+    if (!isOpen) return;
+    const nextForm = product ? { ...product } : emptyProduct();
+    const nextVariants: Partial<ShopVariant>[] = product
+      ? sortSizes(product.variants || [])
+      : [{ size: 'Única', price_member: 0, price_non_member: 0, stock: 0 }];
 
-  if (!isOpen) return null;
+    setFormData(nextForm);
+    setVariants(nextVariants);
+    setInitialSnapshot(JSON.stringify({ formData: nextForm, variants: nextVariants }));
+  }, [product, isOpen]);
 
   const handleChange = <K extends keyof ShopProduct>(field: K, value: ShopProduct[K]) => {
     const translatableFields = ['name', 'description'];
@@ -92,6 +103,10 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
     return currentLang === 'es' && formData[field] ? String(formData[field]) : '';
   };
 
+  const requestClose = useCallback(async () => {
+    if (await confirmDiscard()) onClose();
+  }, [confirmDiscard, onClose]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -129,11 +144,15 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
         }
       }
 
+      toast.success(
+        product?.id
+          ? t('admin.shop.product_updated', 'Producte actualitzat')
+          : t('admin.shop.product_created', 'Producte creat')
+      );
       onSaved();
       onClose();
     } catch (error) {
-      console.error("Failed to save product", error);
-      alert(t('common.error_save'));
+      toast.error(error instanceof Error ? error.message : t('common.error_save'));
     } finally {
       setLoading(false);
     }
@@ -141,253 +160,254 @@ export function ProductEditorModal({ isOpen, onClose, product, onSaved }: Produc
 
   const handleDeleteProduct = async () => {
     if (!product?.id) return;
-    if (!window.confirm(t('common.confirm') || 'Estàs segur que vols eliminar aquest producte?')) return;
+    const ok = await confirm({
+      title: t('admin.shop.delete_product_title', 'Eliminar producte'),
+      message: t('admin.shop.delete_product_message', 'S\'eliminaran també totes les seves talles.'),
+      itemName: product.name,
+      destructive: true,
+    });
+    if (!ok) return;
 
     setLoading(true);
     try {
       await ShopService.deleteProduct(product.id);
+      toast.success(t('admin.shop.product_deleted', 'Producte eliminat'));
       onSaved();
       onClose();
     } catch (error) {
-      console.error("Failed to delete product", error);
-      alert(t('common.error') || 'Error al eliminar el producte');
+      toast.error(error instanceof Error ? error.message : t('common.error', 'Error al eliminar el producte'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white dark:bg-neutral-900 w-full max-w-3xl max-h-[90vh] rounded-lg shadow-2xl flex flex-col overflow-hidden border border-neutral-200 dark:border-neutral-800"
-      >
-        {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-neutral-100 dark:border-neutral-800">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-              <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h2 className="text-xl font-bold dark:text-white">
-              {product ? 'Editar Producte' : 'Nou Producte'}
-            </h2>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors">
-            <X className="w-5 h-5 text-neutral-500" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
-
-          {/* Section: Basic Info */}
-          <section className="space-y-6">
-            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-400 uppercase tracking-wider">
-              <span>Informació Bàsica</span>
-              <div className="flex-1 h-[1px] bg-neutral-100 dark:bg-neutral-800"></div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Categoria</label>
-                <select
-                  value={formData.category}
-                  onChange={e => handleChange('category', e.target.value as 'uniforme' | 'accessoris')}
-                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                >
-                  {shopConfig?.categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.translations[currentLang] || cat.translations['ca']}
-                    </option>
-                  ))}
-                  {!shopConfig && (
-                    <>
-                      <option value="uniforme">Uniforme</option>
-                      <option value="accessoris">Accessoris</option>
-                    </>
-                  )}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">URL Imatge (opcional)</label>
-                <input
-                  type="text"
-                  value={formData.image_url || ''}
-                  onChange={e => handleChange('image_url', e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Language Tabs for Name/Description */}
-            <div className="space-y-4">
-              <div className="flex gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 w-fit rounded-lg">
-                {(['es', 'ca', 'en'] as const).map(lang => (
-                  <button
-                    key={lang}
-                    type="button"
-                    onClick={() => setCurrentLang(lang)}
-                    className={`px-4 py-1.5 text-sm font-bold rounded-md transition-all ${currentLang === lang ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}
-                  >
-                    {lang === 'es' ? 'ES' : lang === 'ca' ? 'CA' : 'EN'}
-                  </button>
-                ))}
-              </div>
-
-              <div className="space-y-4 bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-lg border border-neutral-100 dark:border-neutral-800">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Nom del Producte ({currentLang.toUpperCase()})</label>
-                  <input
-                    required={currentLang === 'es'}
-                    className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                    value={getValue('name')}
-                    onChange={e => handleChange('name', e.target.value)}
-                    placeholder={currentLang !== 'es' ? '(Opcional) Deixar buit per usar defecte' : 'Ex: Samarreta Oficial'}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Descripció ({currentLang.toUpperCase()})</label>
-                  <textarea
-                    rows={3}
-                    className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
-                    value={getValue('description')}
-                    onChange={e => handleChange('description', e.target.value)}
-                    placeholder="..."
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Section: Variants (Sizes & Prices) */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm font-semibold text-neutral-400 uppercase tracking-wider">
-                <span>Talles i Preus</span>
-                <div className="w-24 h-[1px] bg-neutral-100 dark:bg-neutral-800"></div>
-              </div>
-              <button
-                type="button"
-                onClick={addVariant}
-                className="flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400"
-              >
-                <Plus className="w-4 h-4" />
-                Afegir Talla
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <AnimatePresence mode="popLayout">
-                {variants.map((variant, index) => (
-                  <motion.div
-                    key={index}
-                    layout
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 bg-white dark:bg-neutral-800/30 rounded-lg border border-neutral-100 dark:border-neutral-800 items-end"
-                  >
-                    <div className="md:col-span-1 space-y-1.5">
-                      <label className="text-[10px] font-bold text-neutral-400 uppercase">Talla</label>
-                      <input
-                        type="text"
-                        value={variant.size}
-                        onChange={e => handleVariantChange(index, 'size', e.target.value)}
-                        placeholder="XL, 38..."
-                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-neutral-400 uppercase">Preu Soci</label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={variant.price_member}
-                          onChange={e => handleVariantChange(index, 'price_member', parseFloat(e.target.value))}
-                          className="w-full pl-3 pr-6 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm outline-none focus:border-blue-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-neutral-400">€</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-neutral-400 uppercase">Preu No Soci</label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={variant.price_non_member}
-                          onChange={e => handleVariantChange(index, 'price_non_member', parseFloat(e.target.value))}
-                          className="w-full pl-3 pr-6 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm outline-none focus:border-blue-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-neutral-400">€</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-neutral-400 uppercase">Estoc</label>
-                      <input
-                        type="number"
-                        value={variant.stock}
-                        onChange={e => handleVariantChange(index, 'stock', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-sm outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="flex justify-end pb-1">
-                      <button
-                        type="button"
-                        onClick={() => removeVariant(index)}
-                        className="p-2 text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {variants.length === 0 && (
-                <div className="text-center py-8 bg-neutral-50 dark:bg-neutral-800/20 rounded-lg border border-dashed border-neutral-200 dark:border-neutral-700">
-                  <p className="text-sm text-neutral-500">No hi ha talles definides. Afegeix-ne una.</p>
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 flex justify-between items-center">
+    <Modal
+      open={isOpen}
+      onClose={requestClose}
+      title={product ? 'Editar Producte' : 'Nou Producte'}
+      size="xl"
+      closeOnBackdrop={false}
+      footer={
+        <div className="flex flex-1 justify-between items-center gap-3">
           {product?.id ? (
             <button
               type="button"
               onClick={handleDeleteProduct}
-              className="text-sm font-bold text-red-500 hover:text-red-600 px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-all flex items-center gap-2"
+              disabled={loading}
+              className="text-[13px] font-medium text-red-600 hover:text-red-700 px-3 py-2 hover:bg-red-50 rounded-md transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
-              Eliminar Producte
+              {t('admin.shop.delete_product', 'Eliminar Producte')}
             </button>
           ) : <div />}
 
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
-              onClick={onClose}
-              className="px-5 py-2.5 text-sm font-bold text-neutral-600 hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-neutral-800 rounded-lg transition-all"
+              type="button"
+              onClick={requestClose}
+              className="px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
             >
               Cancel·lar
             </button>
             <button
-              onClick={handleSubmit}
+              type="submit"
+              form="product-editor-form"
               disabled={loading || !formData.name}
-              className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-sm shadow-blue-500/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+              className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {product ? 'Guardar Canvis' : 'Crear Producte'}
             </button>
           </div>
         </div>
+      }
+    >
+      <form id="product-editor-form" onSubmit={handleSubmit} className="space-y-8">
 
-      </motion.div>
-    </div>
+        {/* Section: Basic Info */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 text-sm font-semibold text-neutral-400 uppercase tracking-wider">
+            <span>Informació Bàsica</span>
+            <div className="flex-1 h-px bg-neutral-100"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-700" htmlFor="product-category">Categoria</label>
+              <select
+                id="product-category"
+                value={formData.category}
+                onChange={e => handleChange('category', e.target.value as 'uniforme' | 'accessoris')}
+                className={FIELD_CLASS}
+              >
+                {shopConfig?.categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.translations[currentLang] || cat.translations['ca']}
+                  </option>
+                ))}
+                {!shopConfig && (
+                  <>
+                    <option value="uniforme">Uniforme</option>
+                    <option value="accessoris">Accessoris</option>
+                  </>
+                )}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-neutral-700" htmlFor="product-image">URL Imatge (opcional)</label>
+              <input
+                id="product-image"
+                type="text"
+                value={formData.image_url || ''}
+                onChange={e => handleChange('image_url', e.target.value)}
+                placeholder="https://..."
+                className={FIELD_CLASS}
+              />
+            </div>
+          </div>
+
+          {/* Language Tabs for Name/Description */}
+          <div className="space-y-4">
+            <div className="flex gap-1 p-1 bg-neutral-100 w-fit rounded-lg">
+              {(['es', 'ca', 'en'] as const).map(lang => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setCurrentLang(lang)}
+                  aria-pressed={currentLang === lang}
+                  className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors ${currentLang === lang ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                >
+                  {lang.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-4 bg-neutral-50 p-4 rounded-lg border border-neutral-100">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-neutral-700" htmlFor="product-name">Nom del Producte ({currentLang.toUpperCase()})</label>
+                <input
+                  id="product-name"
+                  required={currentLang === 'es'}
+                  className={FIELD_CLASS}
+                  value={getValue('name')}
+                  onChange={e => handleChange('name', e.target.value)}
+                  placeholder={currentLang !== 'es' ? '(Opcional) Deixar buit per usar defecte' : 'Ex: Samarreta Oficial'}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-neutral-700" htmlFor="product-description">Descripció ({currentLang.toUpperCase()})</label>
+                <textarea
+                  id="product-description"
+                  rows={3}
+                  className={`${FIELD_CLASS} resize-none`}
+                  value={getValue('description')}
+                  onChange={e => handleChange('description', e.target.value)}
+                  placeholder="..."
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Variants (Sizes & Prices) */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-400 uppercase tracking-wider">
+              <span>Talles i Preus</span>
+              <div className="w-24 h-px bg-neutral-100"></div>
+            </div>
+            <button
+              type="button"
+              onClick={addVariant}
+              className="flex items-center gap-1.5 text-sm font-bold text-neutral-700 hover:text-neutral-900"
+            >
+              <Plus className="w-4 h-4" />
+              Afegir Talla
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <AnimatePresence mode="popLayout">
+              {variants.map((variant, index) => (
+                <motion.div
+                  key={variant.id ?? `new-${index}`}
+                  layout
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  className="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 bg-white rounded-lg border border-neutral-100 items-end"
+                >
+                  <div className="md:col-span-1 space-y-1.5">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase" htmlFor={`variant-size-${index}`}>Talla</label>
+                    <input
+                      id={`variant-size-${index}`}
+                      type="text"
+                      value={variant.size ?? ''}
+                      onChange={e => handleVariantChange(index, 'size', e.target.value)}
+                      placeholder="XL, 38..."
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-neutral-400"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase" htmlFor={`variant-member-${index}`}>Preu Soci</label>
+                    <div className="relative">
+                      <input
+                        id={`variant-member-${index}`}
+                        type="number"
+                        value={variant.price_member ?? 0}
+                        onChange={e => handleVariantChange(index, 'price_member', parseFloat(e.target.value))}
+                        className="w-full pl-3 pr-6 py-2 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-neutral-400"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-neutral-400">€</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase" htmlFor={`variant-non-member-${index}`}>Preu No Soci</label>
+                    <div className="relative">
+                      <input
+                        id={`variant-non-member-${index}`}
+                        type="number"
+                        value={variant.price_non_member ?? 0}
+                        onChange={e => handleVariantChange(index, 'price_non_member', parseFloat(e.target.value))}
+                        className="w-full pl-3 pr-6 py-2 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-neutral-400"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-neutral-400">€</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-neutral-400 uppercase" htmlFor={`variant-stock-${index}`}>Estoc</label>
+                    <input
+                      id={`variant-stock-${index}`}
+                      type="number"
+                      value={variant.stock ?? 0}
+                      onChange={e => handleVariantChange(index, 'stock', parseInt(e.target.value))}
+                      className="w-full px-3 py-2 rounded-lg border border-neutral-200 bg-white text-sm outline-none focus:border-neutral-400"
+                    />
+                  </div>
+                  <div className="flex justify-end pb-1">
+                    <button
+                      type="button"
+                      onClick={() => removeVariant(index)}
+                      aria-label={`Eliminar talla ${variant.size ?? index + 1}`}
+                      className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {variants.length === 0 && (
+              <div className="text-center py-8 bg-neutral-50 rounded-lg border border-dashed border-neutral-200">
+                <p className="text-sm text-neutral-500">No hi ha talles definides. Afegeix-ne una.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </form>
+    </Modal>
   );
 }

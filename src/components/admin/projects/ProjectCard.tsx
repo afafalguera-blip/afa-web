@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Edit, Trash2, Archive } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import type { Project } from '../../../services/admin/AdminProjectsService';
 import { proxyStorageUrl } from '../../../utils/storageUrl';
+import { ContentStatusBadge, VisibilityToggleButton } from '../news/ContentStatusBadge';
 
 interface ProjectCardProps {
   project: Project;
@@ -12,58 +13,60 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onEdit, onDelete, onToggleArchive }: ProjectCardProps) {
   const { t } = useTranslation();
+  const visible = project.status === 'active';
 
   return (
     <div
-      className={`bg-white rounded-lg border shadow-sm overflow-hidden transition-all hover:shadow-sm ${
-        project.status === 'archived' ? 'border-neutral-300 opacity-70' : 'border-neutral-200'
+      className={`bg-white rounded-lg border overflow-hidden transition-shadow hover:shadow-sm ${
+        visible ? 'border-neutral-200' : 'border-neutral-300 opacity-75'
       }`}
     >
-      <div className="aspect-video bg-neutral-100 relative">
+      <div className="aspect-video bg-neutral-100">
         <img
           src={proxyStorageUrl(project.image_url) || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2069&auto=format&fit=crop'}
           alt={project.title}
           className="w-full h-full object-cover"
         />
       </div>
+
       <div className="p-5">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-neutral-900">{project.title}</h3>
-          {project.status === 'archived' && (
-            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-600">
-              {t('admin.projects.status_archived')}
-            </span>
-          )}
+        <div className="mb-3">
+          <ContentStatusBadge visible={visible} hiddenKind="archived" />
         </div>
+
+        <h3 className="font-semibold text-[15px] text-neutral-900 line-clamp-2 mb-2">{project.title}</h3>
+
         {project.description && (
-          <p className="text-sm text-neutral-500 line-clamp-3 mb-4">{project.description}</p>
+          <p className="text-[13px] text-neutral-500 line-clamp-3 mb-5">{project.description}</p>
         )}
-        <div className="flex items-center gap-1 pt-4 border-t border-neutral-100">
-          <button
-            onClick={() => onToggleArchive(project)}
-            className={`p-2 rounded-lg transition-colors ${
-              project.status === 'active'
-                ? 'text-amber-600 hover:bg-amber-50'
-                : 'text-green-600 hover:bg-green-50'
-            }`}
-            title={project.status === 'active' ? t('admin.projects.archive') : t('admin.projects.unarchive')}
-          >
-            <Archive className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => onEdit(project)}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            title={t('common.edit')}
-          >
-            <Edit className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => onDelete(project.id)}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title={t('common.delete')}
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
+
+        <div className="flex items-center justify-between gap-2 pt-4 border-t border-neutral-100">
+          <VisibilityToggleButton
+            visible={visible}
+            hiddenKind="archived"
+            onToggle={() => onToggleArchive(project)}
+          />
+
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => onEdit(project)}
+              className="p-2 rounded-md text-neutral-600 hover:bg-neutral-100 transition-colors"
+              title={t('common.edit')}
+              aria-label={t('common.edit')}
+            >
+              <Edit className="w-[18px] h-[18px]" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete(project.id)}
+              className="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors"
+              title={t('common.delete')}
+              aria-label={t('common.delete')}
+            >
+              <Trash2 className="w-[18px] h-[18px]" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

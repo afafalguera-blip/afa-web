@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Check,
   Copy,
@@ -17,6 +17,12 @@ import {
   type ShortUrlFormData
 } from '../../services/admin/AdminShortUrlsService';
 import { toDateTimeLocalInputValue } from '../../utils/dateTime';
+import { usePagedFilters } from '../../hooks/usePagedFilters';
+import { AdminPagination } from '../../components/admin/common/AdminTable';
+import { useToast } from '../../components/common/Toast';
+import { useConfirm } from '../../components/common/ConfirmDialog';
+
+const SEARCH_DEBOUNCE_MS = 350;
 
 const createDefaultFormData = (): ShortUrlFormData => ({
   slug: '',
@@ -60,28 +66,44 @@ const formatDateTime = (value: string | null): string => {
 };
 
 export default function ShortLinksManager() {
+  const { toast } = useToast();
+  const confirm = useConfirm();
+
   const [links, setLinks] = useState<ShortUrl[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const { page, setPage, pageSize, setPageSize } = usePagedFilters(debouncedSearch);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
   const [formData, setFormData] = useState<ShortUrlFormData>(() => createDefaultFormData());
 
   const shortBaseUrl = getShortLinkBaseUrl();
 
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchText.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(id);
+  }, [searchText]);
+
   const fetchLinks = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await AdminShortUrlsService.getAll();
-      setLinks(data);
+      const { rows, total: count } = await AdminShortUrlsService.list({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined
+      });
+      setLinks(rows);
+      setTotal(count);
     } catch (error) {
       console.error('Error fetching short links:', error);
-      alert(toErrorMessage(error));
+      toast.error(toErrorMessage(error));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize, debouncedSearch, toast]);
 
   useEffect(() => {
     fetchLinks();
@@ -99,9 +121,10 @@ export default function ShortLinksManager() {
       await AdminShortUrlsService.save(formData, editingId || undefined);
       resetForm();
       await fetchLinks();
+      toast.success(editingId ? 'Enlace actualizado.' : 'Enlace creado.');
     } catch (error) {
       console.error('Error saving short link:', error);
-      alert(toErrorMessage(error));
+      toast.error(toErrorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -117,21 +140,29 @@ export default function ShortLinksManager() {
     });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('¿Seguro que quieres eliminar este enlace corto?')) return;
+  const handleDelete = async (item: ShortUrl) => {
+    const ok = await confirm({
+      title: 'Eliminar enlace corto',
+      message: 'La redirección dejará de funcionar de inmediato.',
+      itemName: `/${item.slug} → ${item.target_url}`,
+      destructive: true
+    });
+    if (!ok) return;
+
     try {
-      await AdminShortUrlsService.delete(id);
-      setLinks((prev) => prev.filter((item) => item.id !== id));
-      if (editingId === id) resetForm();
+      await AdminShortUrlsService.delete(item.id);
+      if (editingId === item.id) resetForm();
+      toast.success('Enlace eliminado.');
+      await fetchLinks();
     } catch (error) {
       console.error('Error deleting short link:', error);
-      alert(toErrorMessage(error));
+      toast.error(toErrorMessage(error));
     }
   };
 
   const handleCopy = async (slug: string) => {
     if (!shortBaseUrl) {
-      alert('Falta configurar la base de enlaces cortos.');
+      toast.error('Falta configurar la base de enlaces cortos.');
       return;
     }
 
@@ -144,19 +175,9 @@ export default function ShortLinksManager() {
       }, 1800);
     } catch (error) {
       console.error('Error copying short link:', error);
-      alert('No se pudo copiar el enlace al portapapeles.');
+      toast.error('No se pudo copiar el enlace al portapapeles.');
     }
   };
-
-  const filteredLinks = useMemo(() => {
-    const term = searchText.trim().toLowerCase();
-    if (!term) return links;
-
-    return links.filter((item) => {
-      const haystack = `${item.slug} ${item.target_url} ${item.description || ''}`.toLowerCase();
-      return haystack.includes(term);
-    });
-  }, [links, searchText]);
 
   return (
     <div className="space-y-6">
@@ -264,7 +285,7 @@ export default function ShortLinksManager() {
 
         {loading ? (
           <div className="p-8 text-center text-neutral-500">Cargando enlaces...</div>
-        ) : filteredLinks.length === 0 ? (
+        ) : links.length === 0 ? (
           <div className="p-8 text-center text-neutral-500">No hay enlaces para mostrar.</div>
         ) : (
           <div className="overflow-x-auto">
@@ -280,7 +301,7 @@ export default function ShortLinksManager() {
                 </tr>
               </thead>
               <tbody>
-                {filteredLinks.map((item) => {
+                {links.map((item) => {
                   const expired = isExpired(item.expires_at);
                   const shortUrl = shortBaseUrl ? `${shortBaseUrl}/${item.slug}` : item.slug;
 
@@ -335,7 +356,7 @@ export default function ShortLinksManager() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => handleDelete(item)}
                             className="p-2 rounded-lg hover:bg-red-50 text-red-600"
                             title="Eliminar"
                           >
@@ -348,6 +369,18 @@ export default function ShortLinksManager() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!loading && total > 0 && (
+          <div className="p-4 border-t border-neutral-200">
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  Plus,
   Save,
   Trash2,
   Pencil,
@@ -11,9 +11,7 @@ import {
   Users,
   ArrowUp,
   ArrowDown,
-  X,
-  CheckCircle2,
-  AlertCircle,
+  Search,
   Languages,
 } from 'lucide-react';
 import {
@@ -24,17 +22,28 @@ import {
   type BoardSectionConfig,
 } from '../../services/BoardService';
 import { TranslationService } from '../../services/TranslationService';
+import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
+import { Modal } from '../../components/common/Modal';
+import { useToast } from '../../components/common/Toast';
+import { useConfirm } from '../../components/common/ConfirmDialog';
+import { useDirtyGuard } from '../../hooks/useDirtyGuard';
 
-const ROLE_KEYS: { value: BoardRoleKey; label: string }[] = [
-  { value: 'president', label: 'Presidente/a' },
-  { value: 'vicepresident', label: 'Vicepresidente/a' },
-  { value: 'treasurer', label: 'Tesorero/a' },
-  { value: 'secretary', label: 'Secretario/a' },
-  { value: 'vocal', label: 'Vocal' },
+const ROLE_KEYS: { value: BoardRoleKey; labelKey: string; fallback: string }[] = [
+  { value: 'president', labelKey: 'admin.board.role.president', fallback: 'President/a' },
+  { value: 'vicepresident', labelKey: 'admin.board.role.vicepresident', fallback: 'Vicepresident/a' },
+  { value: 'treasurer', labelKey: 'admin.board.role.treasurer', fallback: 'Tresorer/a' },
+  { value: 'secretary', labelKey: 'admin.board.role.secretary', fallback: 'Secretari/ària' },
+  { value: 'vocal', labelKey: 'admin.board.role.vocal', fallback: 'Vocal' },
 ];
 
 const LANGS = ['ca', 'es', 'en'] as const;
 type Lang = typeof LANGS[number];
+
+const PRIMARY_BTN =
+  'flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50';
+
+const SECONDARY_BTN =
+  'px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors disabled:opacity-50';
 
 interface FormState {
   id?: string;
@@ -60,6 +69,10 @@ const emptyForm = (): FormState => ({
 });
 
 export default function BoardManager() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const confirm = useConfirm();
+
   const [members, setMembers] = useState<BoardMember[]>([]);
   const [config, setConfig] = useState<BoardSectionConfig>({ translations: { ca: undefined, es: undefined, en: undefined } });
   const [loading, setLoading] = useState(true);
@@ -70,14 +83,21 @@ export default function BoardManager() {
   const [translatingMember, setTranslatingMember] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm());
+  const [formBaseline, setFormBaseline] = useState<string>(JSON.stringify(emptyForm()));
   const [activeLang, setActiveLang] = useState<Lang>('es');
   const [activeConfigLang, setActiveConfigLang] = useState<Lang>('es');
-  const [toast, setToast] = useState<{ kind: 'ok' | 'err'; msg: string } | null>(null);
+  const [search, setSearch] = useState('');
 
-  const showToast = (kind: 'ok' | 'err', msg: string) => {
-    setToast({ kind, msg });
-    setTimeout(() => setToast(null), 3000);
+  const [configBaseline, setConfigBaseline] = useState<string>(() => JSON.stringify({ translations: {} }));
+
+  const roleLabel = (key: BoardRoleKey) => {
+    const entry = ROLE_KEYS.find(r => r.value === key);
+    return entry ? t(entry.labelKey, entry.fallback) : key;
   };
+
+  const configDirty = JSON.stringify(config) !== configBaseline;
+  const formDirty = showForm && JSON.stringify(form) !== formBaseline;
+  const { confirmDiscard } = useDirtyGuard(configDirty || formDirty);
 
   const load = async () => {
     setLoading(true);
@@ -87,26 +107,34 @@ export default function BoardManager() {
         BoardService.getSectionConfig(),
       ]);
       setMembers(list);
-      setConfig(cfg ?? { translations: {} });
+      const nextConfig = cfg ?? { translations: {} };
+      setConfigBaseline(JSON.stringify(nextConfig));
+      setConfig(nextConfig);
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error cargando datos');
+      toast.error(t('admin.board.error_load', 'Error carregant les dades'));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const startCreate = () => {
-    setForm(emptyForm());
+  const openForm = (state: FormState) => {
+    setForm(state);
+    setFormBaseline(JSON.stringify(state));
     setActiveLang('es');
     setShowForm(true);
   };
 
+  const startCreate = () => openForm(emptyForm());
+
   const startEdit = (m: BoardMember) => {
     const tr = m.translations || {};
-    setForm({
+    openForm({
       id: m.id,
       name: m.name,
       role_key: m.role_key,
@@ -119,8 +147,11 @@ export default function BoardManager() {
         en: { role: tr.en?.role ?? '', bio: tr.en?.bio ?? '' },
       },
     });
-    setActiveLang('es');
-    setShowForm(true);
+  };
+
+  const closeForm = async () => {
+    if (formDirty && !(await confirmDiscard())) return;
+    setShowForm(false);
   };
 
   const handleUpload = async (file: File) => {
@@ -130,23 +161,23 @@ export default function BoardManager() {
       setForm(f => ({ ...f, photo_url: url }));
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error subiendo imagen');
+      toast.error(t('admin.board.error_upload', 'Error pujant la imatge'));
     } finally {
       setUploading(false);
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!form.name.trim()) {
-      showToast('err', 'El nombre es obligatorio');
+      toast.error(t('admin.board.name_required', 'El nom és obligatori'));
       return;
     }
     setSaving(true);
     try {
       const fallbackRole =
         form.translations.es.role || form.translations.ca.role || form.translations.en.role ||
-        ROLE_KEYS.find(r => r.value === form.role_key)?.label || form.role_key;
+        roleLabel(form.role_key);
       const fallbackBio = form.translations.es.bio || form.translations.ca.bio || form.translations.en.bio || null;
 
       const payload: BoardMemberInput = {
@@ -162,31 +193,38 @@ export default function BoardManager() {
 
       if (form.id) {
         await BoardService.update(form.id, payload);
-        showToast('ok', 'Miembro actualizado');
+        toast.success(t('admin.board.member_updated', 'Membre actualitzat'));
       } else {
         const maxOrder = members.reduce((max, m) => Math.max(max, m.display_order), -1);
         await BoardService.create({ ...payload, display_order: maxOrder + 1 });
-        showToast('ok', 'Miembro creado');
+        toast.success(t('admin.board.member_created', 'Membre creat'));
       }
+      setFormBaseline(JSON.stringify(form));
       setShowForm(false);
       await load();
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error guardando');
+      toast.error(t('common.error_save'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (m: BoardMember) => {
-    if (!confirm(`¿Eliminar a ${m.name}?`)) return;
+    const ok = await confirm({
+      title: t('admin.board.delete_title', 'Eliminar membre'),
+      message: t('admin.board.delete_message', 'Aquesta acció no es pot desfer.'),
+      itemName: m.name,
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await BoardService.remove(m.id);
-      showToast('ok', 'Eliminado');
+      toast.success(t('admin.board.member_deleted', 'Membre eliminat'));
       await load();
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error eliminando');
+      toast.error(t('common.error_delete'));
     }
   };
 
@@ -196,7 +234,7 @@ export default function BoardManager() {
       await load();
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error actualizando');
+      toast.error(t('common.error_save'));
     }
   };
 
@@ -210,7 +248,7 @@ export default function BoardManager() {
       await BoardService.reorder(reordered.map(m => m.id));
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error reordenando');
+      toast.error(t('admin.board.error_reorder', 'Error reordenant'));
       await load();
     }
   };
@@ -218,7 +256,7 @@ export default function BoardManager() {
   const handleAutoTranslateConfig = async () => {
     const source = config.translations?.[activeConfigLang];
     if (!source) {
-      showToast('err', 'Rellena primero los textos en el idioma activo');
+      toast.error(t('admin.board.fill_source_first', "Omple primer els textos de l'idioma actiu"));
       return;
     }
     const fields: Record<string, string> = {
@@ -228,9 +266,8 @@ export default function BoardManager() {
       composition_title: source.composition_title || '',
       composition_intro: source.composition_intro || '',
     };
-    const hasAny = Object.values(fields).some(v => v.trim());
-    if (!hasAny) {
-      showToast('err', 'No hay contenido en el idioma activo');
+    if (!Object.values(fields).some(v => v.trim())) {
+      toast.error(t('admin.board.no_source_content', "No hi ha contingut en l'idioma actiu"));
       return;
     }
     setTranslatingConfig(true);
@@ -249,10 +286,10 @@ export default function BoardManager() {
         };
       }
       setConfig(next);
-      showToast('ok', 'Traducciones generadas — revisa y guarda');
+      toast.success(t('admin.board.translations_ready', 'Traduccions generades — revisa i desa'));
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error traduciendo (revisa VITE_TRANSLATION_PROXY_URL)');
+      toast.error(t('admin.board.error_translate', 'Error traduint (revisa VITE_TRANSLATION_PROXY_URL)'));
     } finally {
       setTranslatingConfig(false);
     }
@@ -265,7 +302,7 @@ export default function BoardManager() {
       bio: source.bio || '',
     };
     if (!fields.role.trim() && !fields.bio.trim()) {
-      showToast('err', 'No hay contenido en el idioma activo');
+      toast.error(t('admin.board.no_source_content', "No hi ha contingut en l'idioma actiu"));
       return;
     }
     setTranslatingMember(true);
@@ -283,10 +320,10 @@ export default function BoardManager() {
         }
         return next;
       });
-      showToast('ok', 'Traducciones generadas');
+      toast.success(t('admin.board.translations_ready_short', 'Traduccions generades'));
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error traduciendo');
+      toast.error(t('admin.board.error_translate_short', 'Error traduint'));
     } finally {
       setTranslatingMember(false);
     }
@@ -296,10 +333,11 @@ export default function BoardManager() {
     setSavingConfig(true);
     try {
       await BoardService.updateSectionConfig(config);
-      showToast('ok', 'Textos actualizados');
+      setConfigBaseline(JSON.stringify(config));
+      toast.success(t('admin.board.config_saved', 'Textos actualitzats'));
     } catch (e) {
       console.error(e);
-      showToast('err', 'Error guardando textos');
+      toast.error(t('admin.board.error_config_save', 'Error desant els textos'));
     } finally {
       setSavingConfig(false);
     }
@@ -319,40 +357,31 @@ export default function BoardManager() {
     }));
   };
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <header className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 flex items-center gap-3">
-            <Users className="w-8 h-8 text-blue-600" />
-            Sobre AFA / Junta Directiva
-          </h1>
-          <p className="text-neutral-500 mt-1">Configura los textos públicos y los miembros visibles en /sobre-afa.</p>
-        </div>
-        <button
-          onClick={startCreate}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo miembro
-        </button>
-      </header>
+  const visibleMembers = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return members;
+    return members.filter(m =>
+      [m.name, m.role, m.email ?? '', roleLabel(m.role_key)].some(v => v.toLowerCase().includes(term))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [members, search, t]);
 
-      {toast && (
-        <div className={`flex items-center gap-2 px-4 py-3 rounded-lg border ${
-          toast.kind === 'ok'
-            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-            : 'bg-rose-50 border-rose-200 text-rose-800'
-        }`}>
-          {toast.kind === 'ok' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          {toast.msg}
-        </div>
-      )}
+  return (
+    <div className="max-w-7xl mx-auto space-y-8">
+      <AdminPageHeader
+        title={t('admin.board.title', 'Sobre AFA / Junta Directiva')}
+        subtitle={t('admin.board.subtitle', 'Configura els textos públics i els membres visibles a /sobre-afa.')}
+        icon={Users}
+        loading={loading}
+        onRefresh={load}
+        onCreate={startCreate}
+        createLabel={t('admin.board.new_member', 'Nou membre')}
+      />
 
       {/* Section copy */}
-      <section className="bg-white rounded-lg border border-neutral-200 p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-neutral-900 mb-1">Textos de la página</h2>
-        <p className="text-sm text-neutral-500 mb-4">Hero y subtítulos en CA / ES / EN.</p>
+      <section className="bg-white rounded-lg border border-neutral-200 p-6">
+        <h2 className="text-lg font-bold text-neutral-900 mb-1">{t('admin.board.page_texts', 'Textos de la pàgina')}</h2>
+        <p className="text-sm text-neutral-500 mb-4">{t('admin.board.page_texts_hint', 'Hero i subtítols en CA / ES / EN.')}</p>
 
         <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
           <div className="flex gap-2">
@@ -361,8 +390,9 @@ export default function BoardManager() {
                 key={l}
                 type="button"
                 onClick={() => setActiveConfigLang(l)}
+                aria-pressed={activeConfigLang === l}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider ${
-                  activeConfigLang === l ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  activeConfigLang === l ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }`}
               >
                 {l}
@@ -374,341 +404,388 @@ export default function BoardManager() {
             onClick={handleAutoTranslateConfig}
             disabled={translatingConfig}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-100 disabled:opacity-50"
-            title={`Traducir desde ${activeConfigLang.toUpperCase()} a los otros idiomas`}
+            title={t('admin.board.translate_from', 'Traduir des de {{lang}}', { lang: activeConfigLang.toUpperCase() })}
           >
             <Languages className="w-4 h-4" />
-            {translatingConfig ? 'Traduciendo...' : `Auto-traducir desde ${activeConfigLang.toUpperCase()}`}
+            {translatingConfig
+              ? t('admin.board.translating', 'Traduint...')
+              : t('admin.board.translate_from', 'Traduir des de {{lang}}', { lang: activeConfigLang.toUpperCase() })}
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Título</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="board-title">
+              {t('admin.board.field_title', 'Títol')}
+            </label>
             <input
+              id="board-title"
               value={config.translations?.[activeConfigLang]?.title || ''}
               onChange={e => setConfigField(activeConfigLang, 'title', e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Subtítulo</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="board-subtitle">
+              {t('admin.board.field_subtitle', 'Subtítol')}
+            </label>
             <input
+              id="board-subtitle"
               value={config.translations?.[activeConfigLang]?.subtitle || ''}
               onChange={e => setConfigField(activeConfigLang, 'subtitle', e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
             />
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs font-semibold text-neutral-600 mb-1 block">¿Qué es el AFA? (misión)</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="board-mission">
+              {t('admin.board.field_mission', "Què és l'AFA? (missió)")}
+            </label>
             <textarea
+              id="board-mission"
               value={config.translations?.[activeConfigLang]?.mission || ''}
               onChange={e => setConfigField(activeConfigLang, 'mission', e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Título de la sección Junta</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="board-composition-title">
+              {t('admin.board.field_composition_title', 'Títol de la secció Junta')}
+            </label>
             <input
+              id="board-composition-title"
               value={config.translations?.[activeConfigLang]?.composition_title || ''}
               onChange={e => setConfigField(activeConfigLang, 'composition_title', e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-neutral-600 mb-1 block">Intro de la Junta</label>
+            <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="board-composition-intro">
+              {t('admin.board.field_composition_intro', 'Intro de la Junta')}
+            </label>
             <input
+              id="board-composition-intro"
               value={config.translations?.[activeConfigLang]?.composition_intro || ''}
               onChange={e => setConfigField(activeConfigLang, 'composition_intro', e.target.value)}
-              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
             />
           </div>
         </div>
 
-        <div className="mt-5 flex justify-end">
-          <button
-            onClick={handleSaveConfig}
-            disabled={savingConfig}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
-          >
+        <div className="mt-5 flex justify-end items-center gap-3">
+          {configDirty && <span className="text-[13px] text-amber-700">{t('admin.unsaved.banner', 'Tens canvis sense desar.')}</span>}
+          <button type="button" onClick={handleSaveConfig} disabled={savingConfig} className={PRIMARY_BTN}>
             <Save className="w-4 h-4" />
-            {savingConfig ? 'Guardando...' : 'Guardar textos'}
+            {savingConfig ? t('common.saving') : t('admin.board.save_texts', 'Desar textos')}
           </button>
         </div>
       </section>
 
       {/* Members list */}
-      <section className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
-          <h2 className="font-bold text-neutral-900">Miembros ({members.length})</h2>
+      <section className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-neutral-100 flex items-center justify-between gap-4 flex-wrap">
+          <h2 className="font-bold text-neutral-900">
+            {t('admin.board.members', 'Membres')} ({members.length})
+          </h2>
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('admin.board.search_placeholder', 'Cerca per nom, càrrec o email...')}
+              aria-label={t('admin.board.search_placeholder', 'Cerca per nom, càrrec o email...')}
+              className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg bg-white text-[13px] outline-none focus:ring-2 focus:ring-neutral-900/10"
+            />
+          </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900" />
           </div>
-        ) : members.length === 0 ? (
+        ) : visibleMembers.length === 0 ? (
           <div className="p-12 text-center">
             <Users className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-            <p className="text-neutral-500 mb-4">No hay miembros aún.</p>
-            <button onClick={startCreate} className="text-blue-600 font-semibold hover:underline">
-              Añadir el primero
-            </button>
+            <p className="text-neutral-500 mb-4">
+              {search ? t('common.no_results', 'Sense resultats') : t('admin.board.empty', 'Encara no hi ha membres.')}
+            </p>
+            {!search && (
+              <button type="button" onClick={startCreate} className="text-neutral-900 font-semibold hover:underline">
+                {t('admin.board.add_first', 'Afegir el primer')}
+              </button>
+            )}
           </div>
         ) : (
           <ul className="divide-y divide-neutral-100">
-            {members.map((m, idx) => (
-              <li key={m.id} className="flex items-center gap-4 p-4 hover:bg-neutral-50">
-                <div className="flex flex-col gap-1">
-                  <button
-                    onClick={() => move(idx, -1)}
-                    disabled={idx === 0}
-                    className="p-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
-                    title="Subir"
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => move(idx, 1)}
-                    disabled={idx === members.length - 1}
-                    className="p-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
-                    title="Bajar"
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </button>
-                </div>
+            {visibleMembers.map(m => {
+              const idx = members.indexOf(m);
+              return (
+                <li key={m.id} className="flex items-center gap-4 p-4 hover:bg-neutral-50">
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => move(idx, -1)}
+                      disabled={idx === 0 || !!search}
+                      className="p-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
+                      title={t('admin.board.move_up', 'Pujar')}
+                      aria-label={t('admin.board.move_up', 'Pujar')}
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => move(idx, 1)}
+                      disabled={idx === members.length - 1 || !!search}
+                      className="p-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
+                      title={t('admin.board.move_down', 'Baixar')}
+                      aria-label={t('admin.board.move_down', 'Baixar')}
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </button>
+                  </div>
 
-                <div className="w-14 h-14 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                  {m.photo_url ? (
-                    <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <ImageIcon className="w-6 h-6 text-neutral-300" />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-neutral-900 truncate">{m.name}</p>
-                    {!m.is_visible && (
-                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded-full">
-                        Oculto
-                      </span>
+                  <div className="w-14 h-14 rounded-full overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                    {m.photo_url ? (
+                      <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-neutral-300" />
                     )}
                   </div>
-                  <p className="text-sm text-neutral-500 truncate">{m.role}</p>
-                  {m.email && <p className="text-xs text-neutral-400 truncate">{m.email}</p>}
-                </div>
 
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handleToggleVisible(m)}
-                    className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg"
-                    title={m.is_visible ? 'Ocultar' : 'Mostrar'}
-                  >
-                    {m.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                  <button
-                    onClick={() => startEdit(m)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                    title="Editar"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(m)}
-                    className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </li>
-            ))}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-neutral-900 truncate">{m.name}</p>
+                      {!m.is_visible && (
+                        <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-neutral-100 text-neutral-500 rounded-full">
+                          {t('admin.board.hidden', 'Ocult')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-neutral-500 truncate">{m.role}</p>
+                    {m.email && <p className="text-xs text-neutral-400 truncate">{m.email}</p>}
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVisible(m)}
+                      className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg"
+                      title={m.is_visible ? t('admin.board.hide', 'Ocultar') : t('admin.board.show', 'Mostrar')}
+                      aria-label={m.is_visible ? t('admin.board.hide', 'Ocultar') : t('admin.board.show', 'Mostrar')}
+                    >
+                      {m.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(m)}
+                      className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg"
+                      title={t('common.edit')}
+                      aria-label={t('common.edit')}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(m)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                      title={t('common.delete')}
+                      aria-label={t('common.delete')}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
 
-      {/* Form modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg w-full max-w-2xl shadow-2xl my-8 max-h-[calc(100vh-4rem)] flex flex-col">
-            <div className="flex items-center justify-between p-5 border-b border-neutral-100 flex-shrink-0">
-              <h3 className="text-lg font-bold text-neutral-900">
-                {form.id ? 'Editar miembro' : 'Nuevo miembro'}
-              </h3>
-              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-neutral-100 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSave} className="p-5 space-y-4 overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-neutral-600 mb-1 block">Nombre completo *</label>
-                  <input
-                    required
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-neutral-600 mb-1 block">Cargo *</label>
-                  <select
-                    value={form.role_key}
-                    onChange={e => setForm({ ...form, role_key: e.target.value as BoardRoleKey })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {ROLE_KEYS.map(r => (
-                      <option key={r.value} value={r.value}>{r.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="text-xs font-semibold text-neutral-600 mb-1 block">Email (opcional)</label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Photo */}
-              <div>
-                <label className="text-xs font-semibold text-neutral-600 mb-1 block">Foto</label>
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                    {form.photo_url ? (
-                      <img src={form.photo_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-neutral-300" />
-                    )}
-                  </div>
-                  <label className="flex items-center gap-2 px-3 py-2 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50 text-sm font-semibold text-neutral-700">
-                    <Upload className="w-4 h-4" />
-                    {uploading ? 'Subiendo...' : 'Subir foto'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={e => {
-                        const file = e.target.files?.[0];
-                        if (file) handleUpload(file);
-                      }}
-                    />
-                  </label>
-                  {form.photo_url && (
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, photo_url: '' })}
-                      className="text-sm text-rose-600 hover:underline"
-                    >
-                      Quitar
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Translations */}
-              <div className="border-t border-neutral-100 pt-4">
-                <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-                  <p className="text-xs font-semibold text-neutral-600">Traducciones (cargo descriptivo + bio)</p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleAutoTranslateMember}
-                      disabled={translatingMember}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-100 disabled:opacity-50"
-                      title={`Traducir desde ${activeLang.toUpperCase()}`}
-                    >
-                      <Languages className="w-3.5 h-3.5" />
-                      {translatingMember ? '...' : `Auto-traducir desde ${activeLang.toUpperCase()}`}
-                    </button>
-                    <div className="flex gap-1">
-                      {LANGS.map(l => (
-                        <button
-                          key={l}
-                          type="button"
-                          onClick={() => setActiveLang(l)}
-                          className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase ${
-                            activeLang === l ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-600'
-                          }`}
-                        >
-                          {l}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-neutral-500 mb-1 block">Cargo (texto público)</label>
-                    <input
-                      value={form.translations[activeLang].role}
-                      onChange={e => setForm({
-                        ...form,
-                        translations: {
-                          ...form.translations,
-                          [activeLang]: { ...form.translations[activeLang], role: e.target.value },
-                        },
-                      })}
-                      placeholder={ROLE_KEYS.find(r => r.value === form.role_key)?.label}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-neutral-500 mb-1 block">Bio breve (opcional)</label>
-                    <textarea
-                      value={form.translations[activeLang].bio}
-                      rows={3}
-                      onChange={e => setForm({
-                        ...form,
-                        translations: {
-                          ...form.translations,
-                          [activeLang]: { ...form.translations[activeLang], bio: e.target.value },
-                        },
-                      })}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.is_visible}
-                  onChange={e => setForm({ ...form, is_visible: e.target.checked })}
-                  className="w-4 h-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-neutral-700">Visible en la web pública</span>
+      <Modal
+        open={showForm}
+        onClose={closeForm}
+        title={form.id ? t('admin.board.edit_member', 'Editar membre') : t('admin.board.new_member', 'Nou membre')}
+        size="lg"
+        closeOnBackdrop={false}
+        footer={
+          <>
+            <button type="button" onClick={closeForm} className={SECONDARY_BTN}>
+              {t('common.cancel')}
+            </button>
+            <button type="button" onClick={() => handleSave()} disabled={saving} className={PRIMARY_BTN}>
+              <Save className="w-4 h-4" />
+              {saving ? t('common.saving') : t('common.save')}
+            </button>
+          </>
+        }
+      >
+        <form onSubmit={handleSave} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="member-name">
+                {t('admin.board.field_name', 'Nom complet')} *
               </label>
-            </form>
-
-            <div className="flex justify-end gap-2 p-5 border-t border-neutral-100 flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="px-4 py-2 border border-neutral-200 rounded-lg font-semibold text-neutral-600 hover:bg-neutral-50"
+              <input
+                id="member-name"
+                required
+                value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="member-role">
+                {t('admin.board.field_role', 'Càrrec')} *
+              </label>
+              <select
+                id="member-role"
+                value={form.role_key}
+                onChange={e => setForm({ ...form, role_key: e.target.value as BoardRoleKey })}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900/10 outline-none"
               >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
-              >
-                <Save className="w-4 h-4" />
-                {saving ? 'Guardando...' : 'Guardar'}
-              </button>
+                {ROLE_KEYS.map(r => (
+                  <option key={r.value} value={r.value}>{t(r.labelKey, r.fallback)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-xs font-semibold text-neutral-600 mb-1 block" htmlFor="member-email">
+                {t('admin.board.field_email', 'Email (opcional)')}
+              </label>
+              <input
+                id="member-email"
+                type="email"
+                value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
+              />
             </div>
           </div>
-        </div>
-      )}
+
+          {/* Photo */}
+          <div>
+            <span className="text-xs font-semibold text-neutral-600 mb-1 block">{t('admin.board.field_photo', 'Foto')}</span>
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                {form.photo_url ? (
+                  <img src={form.photo_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <ImageIcon className="w-8 h-8 text-neutral-300" />
+                )}
+              </div>
+              <label className="flex items-center gap-2 px-3 py-2 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50 text-sm font-semibold text-neutral-700">
+                <Upload className="w-4 h-4" />
+                {uploading ? t('common.uploading', 'Pujant...') : t('admin.board.upload_photo', 'Pujar foto')}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) handleUpload(file);
+                  }}
+                />
+              </label>
+              {form.photo_url && (
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, photo_url: '' })}
+                  className="text-sm text-red-600 hover:underline"
+                >
+                  {t('admin.board.remove_photo', 'Treure')}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Translations */}
+          <div className="border-t border-neutral-100 pt-4">
+            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+              <p className="text-xs font-semibold text-neutral-600">
+                {t('admin.board.translations', 'Traduccions (càrrec descriptiu + bio)')}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleAutoTranslateMember}
+                  disabled={translatingMember}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-100 disabled:opacity-50"
+                >
+                  <Languages className="w-3.5 h-3.5" />
+                  {translatingMember
+                    ? '...'
+                    : t('admin.board.translate_from', 'Traduir des de {{lang}}', { lang: activeLang.toUpperCase() })}
+                </button>
+                <div className="flex gap-1">
+                  {LANGS.map(l => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setActiveLang(l)}
+                      aria-pressed={activeLang === l}
+                      className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase ${
+                        activeLang === l ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-600'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-neutral-500 mb-1 block" htmlFor="member-role-text">
+                  {t('admin.board.field_role_public', 'Càrrec (text públic)')}
+                </label>
+                <input
+                  id="member-role-text"
+                  value={form.translations[activeLang].role}
+                  onChange={e => setForm({
+                    ...form,
+                    translations: {
+                      ...form.translations,
+                      [activeLang]: { ...form.translations[activeLang], role: e.target.value },
+                    },
+                  })}
+                  placeholder={roleLabel(form.role_key)}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-neutral-500 mb-1 block" htmlFor="member-bio">
+                  {t('admin.board.field_bio', 'Bio breu (opcional)')}
+                </label>
+                <textarea
+                  id="member-bio"
+                  value={form.translations[activeLang].bio}
+                  rows={3}
+                  onChange={e => setForm({
+                    ...form,
+                    translations: {
+                      ...form.translations,
+                      [activeLang]: { ...form.translations[activeLang], bio: e.target.value },
+                    },
+                  })}
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900/10 outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.is_visible}
+              onChange={e => setForm({ ...form, is_visible: e.target.checked })}
+              className="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+            />
+            <span className="text-sm text-neutral-700">{t('admin.board.field_visible', 'Visible a la web pública')}</span>
+          </label>
+        </form>
+      </Modal>
     </div>
   );
 }

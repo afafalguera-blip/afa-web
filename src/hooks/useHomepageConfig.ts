@@ -19,22 +19,23 @@ export function invalidateHomepageCache() {
 }
 
 export function useHomepageConfig(): HomepageConfig {
-    const [config, setConfig] = useState<HomepageConfig>(cachedHomepage || DEFAULT_HOMEPAGE);
+    // Lazy initialiser already reads the cache, so a warm cache needs no effect.
+    const [config, setConfig] = useState<HomepageConfig>(() => cachedHomepage || DEFAULT_HOMEPAGE);
 
     useEffect(() => {
-        if (cachedHomepage) {
-            setConfig(cachedHomepage);
-            return;
-        }
+        if (cachedHomepage) return;
+
+        let cancelled = false;
         if (!fetchPromise) {
             fetchPromise = ConfigService.getHomepageConfig();
         }
         fetchPromise.then((data) => {
-            if (data) {
-                cachedHomepage = data;
-                setConfig(data);
-            }
+            if (cancelled || !data) return;
+            cachedHomepage = data;
+            setConfig(data);
         });
+
+        return () => { cancelled = true; };
     }, []);
 
     return config;

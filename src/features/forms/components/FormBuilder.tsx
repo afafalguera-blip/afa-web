@@ -26,6 +26,9 @@ import {
 } from 'lucide-react';
 import { RichTextEditor } from './RichTextEditor';
 import { PreviewFormRender } from './PublicFormRender';
+import { Modal } from '../../../components/common/Modal';
+import { useToast } from '../../../components/common/Toast';
+import { useDirtyGuard } from '../../../hooks/useDirtyGuard';
 
 const toDatetimeLocalValue = (iso: string | null | undefined): string => {
   if (!iso) return '';
@@ -123,6 +126,7 @@ interface Props {
 
 export default function FormBuilder({ onSuccess, onCancel, initialData }: Props) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isUploadingHeader, setIsUploadingHeader] = useState(false);
@@ -155,10 +159,21 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
     handleSubmit,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = methods;
 
   const { fields, append, remove, move } = useFieldArray({ control, name: 'fields_schema' });
+
+  // El builder es un editor largo: salir sin avisar tiraba todo el trabajo.
+  const { confirmDiscard } = useDirtyGuard(
+    isDirty && !isSaving,
+    t('forms.builder.unsaved_message', 'Si surts ara es perdrà el formulari que estàs editant.'),
+  );
+
+  const handleCancel = async () => {
+    if (!onCancel) return;
+    if (await confirmDiscard()) onCancel();
+  };
 
   const onSubmit = async (data: FormBuilderData) => {
     setIsSaving(true);
@@ -169,6 +184,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
       } else {
         await formService.createForm(data);
       }
+      toast.success(t('forms.builder.save_success', 'Formulari desat.'));
       onSuccess?.();
     } catch (err: unknown) {
       console.error('formService error:', err);
@@ -228,7 +244,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
       setValue('header_image_url', publicUrl);
     } catch (err) {
       console.error(err);
-      alert('Error al subir la imagen.');
+      toast.error(t('forms.builder.header_upload_error', "No s'ha pogut pujar la imatge."));
     } finally {
       setIsUploadingHeader(false);
     }
@@ -265,14 +281,14 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
           <button
             type="button"
             onClick={() => setIsPreviewOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg transition-colors"
           >
             <Eye className="w-4 h-4" /> {t('forms.builder.preview')}
           </button>
           {onCancel && (
             <button
               type="button"
-              onClick={onCancel}
+              onClick={handleCancel}
               className="flex items-center text-gray-500 hover:text-gray-700"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> {t('forms.builder.back')}
@@ -292,7 +308,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
               <input
                 {...register('title')}
                 placeholder="Ej: Inscripció extraescolars"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-2 px-3 border"
               />
               {errors.title && <span className="text-red-500 text-xs mt-1 block">{errors.title.message}</span>}
             </div>
@@ -306,7 +322,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                 <input
                   {...register('slug')}
                   placeholder="inscripcio-extraescolars"
-                  className="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
+                  className="flex-1 block w-full rounded-none rounded-r-md border-gray-300 focus:border-neutral-500 focus:ring-neutral-500 py-2 px-3 border"
                 />
               </div>
               {errors.slug && <span className="text-red-500 text-xs mt-1 block">{errors.slug.message}</span>}
@@ -331,7 +347,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                         onChange={(e) => setNewFolderName(e.target.value)}
                         placeholder="Nombre de la nueva carpeta..."
                         autoFocus
-                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border"
+                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-2 px-3 border"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
@@ -368,7 +384,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             setIsCreatingFolder(false);
                           }
                         }}
-                        className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium transition-colors"
+                        className="px-3 py-2 bg-neutral-900 text-white rounded-md hover:bg-neutral-800 text-sm font-medium transition-colors"
                       >
                         Crear
                       </button>
@@ -388,7 +404,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                       <select
                         value={field.value ?? ''}
                         onChange={(e) => field.onChange(e.target.value || null)}
-                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border bg-white"
+                        className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-2 px-3 border bg-white"
                       >
                         <option value="">Sin carpeta (general)</option>
                         {availableFolders.map((f) => (
@@ -426,9 +442,9 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 bg-white border-gray-300 hover:border-neutral-400 hover:bg-neutral-50">
                 {isUploadingHeader ? (
-                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                  <Loader2 className="w-8 h-8 text-neutral-500 animate-spin" />
                 ) : (
                   <>
                     <ImageIcon className="w-8 h-8 text-gray-400 mb-1" />
@@ -466,7 +482,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                 type="checkbox"
                 {...register('is_active')}
                 id="is_active"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-neutral-900 focus:ring-neutral-500 border-gray-300 rounded"
               />
               <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
                 Activar el formulario inmediatamente
@@ -486,7 +502,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                       type="datetime-local"
                       value={toDatetimeLocalValue(field.value)}
                       onChange={(e) => field.onChange(fromDatetimeLocalValue(e.target.value))}
-                      className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1.5 px-2 border text-sm"
+                      className="rounded-md border-gray-300 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-1.5 px-2 border text-sm"
                     />
                     {field.value && (
                       <button
@@ -532,7 +548,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                 <div
                   key={field.id}
                   className={`relative p-3 sm:p-4 border shadow-sm rounded-lg flex flex-col gap-3 group ${
-                    isSectionHeader ? 'border-indigo-200 bg-indigo-50/40' : 'border-blue-100 bg-white'
+                    isSectionHeader ? 'border-indigo-200 bg-indigo-50/40' : 'border-neutral-200 bg-white'
                   }`}
                 >
                   <div className="flex items-center justify-end gap-1 sm:gap-2">
@@ -541,7 +557,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                       onClick={() => index > 0 && move(index, index - 1)}
                       disabled={index === 0}
                       className={`p-1.5 rounded-md transition-colors ${
-                        index === 0 ? 'text-gray-200' : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50'
+                        index === 0 ? 'text-gray-200' : 'text-gray-400 hover:text-neutral-900 hover:bg-neutral-100'
                       }`}
                       title="Mover arriba"
                     >
@@ -554,7 +570,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                       className={`p-1.5 rounded-md transition-colors ${
                         index === fields.length - 1
                           ? 'text-gray-200'
-                          : 'text-gray-400 hover:text-blue-500 hover:bg-blue-50'
+                          : 'text-gray-400 hover:text-neutral-900 hover:bg-neutral-100'
                       }`}
                       title="Mover abajo"
                     >
@@ -596,7 +612,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             <input
                               {...register(`fields_schema.${index}.label` as const)}
                               placeholder="Ej: Dades de l'infant, Informació addicional..."
-                              className="block w-full rounded-lg border-indigo-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2.5 px-4 border text-gray-800 font-semibold"
+                              className="block w-full rounded-lg border-indigo-200 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-2.5 px-4 border text-gray-800 font-semibold"
                             />
                             {errors.fields_schema?.[index]?.label && (
                               <span className="text-red-500 text-xs mt-1 block font-bold">
@@ -611,7 +627,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                             <input
                               {...register(`fields_schema.${index}.placeholder` as const)}
                               placeholder="Texto explicativo debajo del título..."
-                              className="block w-full rounded-lg border-indigo-100 shadow-sm focus:border-indigo-400 focus:ring-indigo-400 py-2 px-3 border text-gray-500 text-sm"
+                              className="block w-full rounded-lg border-indigo-100 shadow-sm focus:border-neutral-400 focus:ring-neutral-400 py-2 px-3 border text-gray-500 text-sm"
                             />
                           </div>
                         </div>
@@ -625,7 +641,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                               {...register(`fields_schema.${index}.label` as const)}
                               placeholder="Escribe aquí tu pregunta..."
                               rows={2}
-                              className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-3 px-4 border text-gray-800 font-medium transition-all"
+                              className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-3 px-4 border text-gray-800 font-medium transition-all"
                             />
                             {errors.fields_schema?.[index]?.label && (
                               <span className="text-red-500 text-xs mt-1 block font-bold">
@@ -648,7 +664,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                                     ? '6XX XXX XXX'
                                     : 'Tu respuesta...'
                                 }`}
-                                className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border text-gray-600 text-sm"
+                                className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-2 px-3 border text-gray-600 text-sm"
                               />
                             </div>
                           )}
@@ -665,7 +681,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                   </div>
 
                   {!isSectionHeader && isWeekdays && (
-                    <div className="mt-2 pl-4 border-l-2 border-blue-200">
+                    <div className="mt-2 pl-4 border-l-2 border-neutral-200">
                       <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
                         Días disponibles
                       </label>
@@ -691,7 +707,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                                     onClick={() => toggle(day)}
                                     className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
                                       active
-                                        ? 'bg-blue-600 text-white border-blue-600'
+                                        ? 'bg-neutral-900 text-white border-neutral-900'
                                         : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
                                     }`}
                                   >
@@ -710,7 +726,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                   )}
 
                   {!isSectionHeader && needsOptions && (
-                    <div className="mt-2 pl-4 border-l-2 border-blue-200">
+                    <div className="mt-2 pl-4 border-l-2 border-neutral-200">
                       <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
                         {t('forms.builder.q_options_label')}
                       </label>
@@ -739,7 +755,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                                     value={opt}
                                     onChange={(e) => updateAt(i, e.target.value)}
                                     placeholder={t('forms.builder.option_placeholder', { n: i + 1 })}
-                                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border text-sm"
+                                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 py-2 px-3 border text-sm"
                                   />
                                   <button
                                     type="button"
@@ -755,7 +771,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                               <button
                                 type="button"
                                 onClick={addOne}
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-neutral-800 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 rounded-md transition-colors"
                               >
                                 <Plus className="w-3.5 h-3.5" />
                                 {t('forms.builder.add_option')}
@@ -779,7 +795,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                           type="checkbox"
                           id={`req_${field.id}`}
                           {...register(`fields_schema.${index}.required` as const)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-neutral-900 focus:ring-neutral-500 border-gray-300 rounded"
                         />
                         <label htmlFor={`req_${field.id}`} className="ml-2 block text-sm text-gray-700 font-medium">
                           Respuesta obligatoria
@@ -797,7 +813,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
 
                           <select
                             {...register(`fields_schema.${index}.logic.dependsOn` as const)}
-                            className="text-[11px] border-gray-200 rounded p-1.5 bg-white focus:ring-blue-500 w-full sm:w-auto"
+                            className="text-[11px] border-gray-200 rounded p-1.5 bg-white focus:ring-neutral-500 w-full sm:w-auto"
                           >
                             <option value="">Siempre visible</option>
                             {fields.slice(0, index).map((f, i) => {
@@ -827,7 +843,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                                 </span>
                                 <select
                                   {...register(`fields_schema.${index}.logic.value` as const)}
-                                  className="text-[11px] border-gray-200 rounded p-1.5 bg-white focus:ring-blue-500 w-full sm:w-auto"
+                                  className="text-[11px] border-gray-200 rounded p-1.5 bg-white focus:ring-neutral-500 w-full sm:w-auto"
                                 >
                                   <option value="">Selecciona valor...</option>
                                   {parentOptions.map((opt) => (
@@ -859,70 +875,70 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
                   onClick={() => handleAddField('text')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Texto corto
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Texto corto
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('long_text')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Párrafo
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Párrafo
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('select')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Desplegable
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Desplegable
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('radio')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Selección única
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Selección única
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('checkbox')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Casillas
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Casillas
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('date')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Fecha
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Fecha
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('email')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Email
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Email
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('phone')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Teléfono
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Teléfono
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('number')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Número
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Número
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAddField('weekdays')}
                   className="px-3 sm:px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs sm:text-sm font-semibold rounded-lg border border-gray-200 flex items-center transition shadow-sm"
                 >
-                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-blue-500" /> Días de la semana
+                  <Plus className="w-4 h-4 mr-1.5 sm:mr-2 text-neutral-500" /> Días de la semana
                 </button>
               </div>
 
@@ -987,9 +1003,7 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
           <button
             type="submit"
             disabled={isSaving}
-            className={`w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
-              isSaving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors`}
+            className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-neutral-900 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500 transition-colors"
           >
             <Save className="w-5 h-5 mr-2" />
             {isSaving ? t('forms.builder.saving') : t('forms.builder.save')}
@@ -998,25 +1012,14 @@ export default function FormBuilder({ onSuccess, onCancel, initialData }: Props)
       </form>
       </FormProvider>
 
-      {isPreviewOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-2xl my-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-white text-sm font-bold uppercase tracking-widest opacity-70">
-                Vista previa del formulario
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsPreviewOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                <X className="w-4 h-4" /> Cerrar
-              </button>
-            </div>
-            <PreviewFormRender template={buildPreviewTemplate()} />
-          </div>
-        </div>
-      )}
+      <Modal
+        open={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        title={t('forms.builder.preview_title', 'Vista prèvia del formulari')}
+        size="xl"
+      >
+        <PreviewFormRender template={buildPreviewTemplate()} />
+      </Modal>
     </div>
   );
 }

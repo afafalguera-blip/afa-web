@@ -2,19 +2,24 @@ interface ObservabilityActionBadgeProps {
     action: string;
 }
 
+const ACTION_CLASS: Record<string, string> = {
+    INSERT: 'bg-green-50 text-green-700 border-green-200',
+    UPDATE: 'bg-amber-50 text-amber-700 border-amber-200',
+    DELETE: 'bg-red-50 text-red-700 border-red-200'
+};
+
+const FALLBACK_CLASS = 'bg-neutral-100 text-neutral-700 border-neutral-200';
+
 export function ObservabilityActionBadge({ action }: ObservabilityActionBadgeProps) {
-    const getActionColor = (action: string) => {
-        switch (action.toUpperCase()) {
-            case 'INSERT': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
-            case 'UPDATE': return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800';
-            case 'DELETE': return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800';
-            default: return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700';
-        }
-    };
+    const normalized = action.toUpperCase();
 
     return (
-        <span className={`px-2.5 py-1 text-[10px] font-black rounded-full border tracking-wider ${getActionColor(action)}`}>
-            {action.toUpperCase()}
+        <span
+            className={`inline-block px-2 py-0.5 text-[11px] font-medium rounded border ${
+                ACTION_CLASS[normalized] ?? FALLBACK_CLASS
+            }`}
+        >
+            {normalized}
         </span>
     );
 }

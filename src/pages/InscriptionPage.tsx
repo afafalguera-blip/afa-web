@@ -7,8 +7,26 @@ import { useTranslation } from 'react-i18next';
 import { ConfigService, type FeesConfig, type PricingConfig, type SeasonConfig, type InscriptionFormConfig, type OptionalFieldKey, type OptionalFieldConfig, type Lang } from '../services/ConfigService';
 import { useHomepageConfig } from '../hooks/useHomepageConfig';
 import { ActivityService, type Activity } from '../services/ActivityService';
-import { classifyGroup } from '../utils/courseStage';
+import { classifyGroup, type CourseStage } from '../utils/courseStage';
+import { COURSES as COURSE_CATALOG, type CourseCode } from '../constants/courses';
 import { makeContentResolver, pickLang } from '../utils/inscriptionContent';
+
+/**
+ * Activity groups split Primary in two cycles, which the shared course catalogue
+ * does not model (it only knows infantil / primaria). Mapped here because the
+ * split only matters for matching a pupil to a schedule group.
+ */
+const ACTIVITY_STAGE_BY_COURSE: Record<CourseCode, CourseStage> = {
+  I3: 'infantil',
+  I4: 'infantil',
+  I5: 'infantil',
+  '1PRI': 'primaria1',
+  '2PRI': 'primaria1',
+  '3PRI': 'primaria1',
+  '4PRI': 'primaria2',
+  '5PRI': 'primaria2',
+  '6PRI': 'primaria2'
+};
 
 
 
@@ -108,17 +126,16 @@ export default function InscriptionPage() {
   };
   const customQuestions = (formCfg?.customQuestions ?? []).filter(q => q.enabled);
 
-  const COURSES = useMemo(() => [
-    { value: 'I3', label: t('inscription.courses.i3'), type: 'infantil' },
-    { value: 'I4', label: t('inscription.courses.i4'), type: 'infantil' },
-    { value: 'I5', label: t('inscription.courses.i5'), type: 'infantil' },
-    { value: '1PRI', label: t('inscription.courses.1pri'), type: 'primaria1' },
-    { value: '2PRI', label: t('inscription.courses.2pri'), type: 'primaria1' },
-    { value: '3PRI', label: t('inscription.courses.3pri'), type: 'primaria1' },
-    { value: '4PRI', label: t('inscription.courses.4pri'), type: 'primaria2' },
-    { value: '5PRI', label: t('inscription.courses.5pri'), type: 'primaria2' },
-    { value: '6PRI', label: t('inscription.courses.6pri'), type: 'primaria2' },
-  ], [t]);
+  const COURSES = useMemo(
+    () =>
+      COURSE_CATALOG.map(({ code, i18nKey, label }) => ({
+        value: code,
+        // i18next types t() to literal keys; catalogue keys resolve dynamically.
+        label: (t as unknown as (key: string, fallback?: string) => string)(i18nKey, label),
+        type: ACTIVITY_STAGE_BY_COURSE[code]
+      })),
+    [t]
+  );
 
   const DAY_KEYS = ['', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 

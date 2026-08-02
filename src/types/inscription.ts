@@ -1,6 +1,17 @@
+/**
+ * Inscription domain model.
+ *
+ * Canonical entity: `Inscription` (one row of `inscripcions`, one family,
+ * N children in the `students` JSONB array).
+ * `InscriptionFlat` is the ONLY derived shape (one row per child) and is
+ * produced exclusively by `toFlat()` in `src/logic/inscriptionFilters.ts` —
+ * never by hand-written duplication.
+ */
+
 export interface InscriptionStudent {
   name: string;
   surname: string;
+  /** Course code as persisted by the public form: see `src/constants/courses.ts`. */
   course: string;
   activities: string[];
   suspended?: boolean;
@@ -15,12 +26,18 @@ export interface InscriptionStudent {
 export type InscriptionStatus = 'active' | 'alta' | 'pending' | 'baja' | 'suspended';
 
 /**
- * Raw/legacy shape used in parts of the admin dashboard and tests.
- * Supports both old flat student fields and new JSON students[] format.
+ * WHY THIS EXISTS: `inscripcions` predates the `students` JSONB column. Rows
+ * created before that migration still store a single child in flat
+ * `student_*` / `selected_activities` columns and the contact in
+ * `parent_phone` / `parent_email` (no `_1` suffix).
+ *
+ * It is the INPUT contract of `normalizeInscription()` only. No component,
+ * hook or service should consume `InscriptionRaw` directly — read
+ * `Inscription` instead.
  */
 export interface InscriptionRaw {
   id: string | number;
-  created_at: string;
+  created_at?: string;
 
   parent_name?: string;
   parent_dni?: string;
@@ -47,11 +64,17 @@ export interface InscriptionRaw {
   health_info?: string;
   conditions_accepted?: boolean;
   form_language?: string;
+  academic_year?: string;
   extra_answers?: Record<string, string>;
 }
 
+/**
+ * Canonical inscription. `id` is always a string: the service stringifies it at
+ * the DB boundary so every consumer (React keys, `.eq('id', …)`, comparisons)
+ * uses one type regardless of whether the column is bigint or uuid.
+ */
 export interface Inscription {
-  id: string | number; // Treated as string/number across different admin flows
+  id: string;
   created_at: string;
   parent_name: string;
   parent_dni: string;
@@ -62,10 +85,9 @@ export interface Inscription {
 
   status: InscriptionStatus;
 
-  // students is a JSONB array.
+  /** JSONB array; always an array after normalisation (never undefined). */
   students: InscriptionStudent[];
 
-  // Extras
   afa_member: boolean;
   image_auth_consent?: string;
   can_leave_alone?: boolean;
@@ -78,12 +100,15 @@ export interface Inscription {
 }
 
 /**
- * Flattened row used by dashboard tables (one row per student).
+ * Derived view: one row per child. Built by `toFlat()`; used by exports, the
+ * details modal and the pure filtering helpers.
  */
 export interface InscriptionFlat {
-  inscription_id: string | number;
-  student_index?: number;
+  inscription_id: string;
+  student_index: number;
   created_at: string;
+  parent_name: string;
+  parent_dni: string;
   parent_phone: string;
   parent_email: string;
   afa_member: boolean;
@@ -99,9 +124,11 @@ export interface InscriptionFlat {
   can_leave_alone?: boolean;
   is_falguera?: boolean;
   external_school?: string | null;
+  authorized_pickup?: string;
+  extra_answers?: Record<string, string>;
 }
 
-// Filters for dashboard
+/** Filters shared by the admin listing and the pure filtering helpers. */
 export interface InscriptionFilters {
   course: string;
   activity: string;

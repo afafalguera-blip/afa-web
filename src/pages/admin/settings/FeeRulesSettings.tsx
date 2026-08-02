@@ -1,60 +1,111 @@
-import { useEffect, useState } from 'react';
-import { Coins, Save, CheckCircle2, AlertCircle, Loader2, Plus, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Coins, Save, Loader2, AlertTriangle } from 'lucide-react';
 import { ConfigService, type FeeRulesConfig } from '../../../services/ConfigService';
+import { ActivityService, type Activity } from '../../../services/ActivityService';
+import { useToast } from '../../../components/common/Toast';
+import { SettingsSectionNote, ExternalPricesNote } from './PricingNotices';
+import { useSettingsT } from './useSettingsT';
 
 const DEFAULT_RULES: FeeRulesConfig = {
-  exclude_titles: ['Anglès'],
+  exclude_activity_ids: [],
+  exclude_titles: [],
   multiactivity: { min_activities: 2, member_price: 36, non_member_price: 40 },
 };
 
+/** Same prefix rule the SQL uses: an activity title matches the stored value. */
+function matchesTitle(activityTitle: string, excludedTitle: string): boolean {
+  if (!activityTitle || !excludedTitle) return false;
+  return activityTitle.toLowerCase().startsWith(excludedTitle.toLowerCase());
+}
+
+interface FeeRulesSettingsProps {
+  onDirtyChange?: (dirty: boolean) => void;
+}
+
 /**
- * Self-contained panel for the configurable monthly-fee rules. Per-activity
- * prices are edited in the Activities editor; this covers exclusions and the
- * multiactivity flat price applied by generate_monthly_payments*.
+ * Monthly-fee rules: which activities the AFA does NOT bill, and the flat
+ * multiactivity price. Exclusions are stored as stable `activities.id` so that
+ * renaming an activity can no longer break receipt generation silently.
  */
-export default function FeeRulesSettings() {
+export default function FeeRulesSettings({ onDirtyChange }: FeeRulesSettingsProps) {
+  const t = useSettingsT();
+  const { toast } = useToast();
+
   const [rules, setRules] = useState<FeeRulesConfig>(DEFAULT_RULES);
-  const [newExclude, setNewExclude] = useState('');
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [orphanTitles, setOrphanTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const r = await ConfigService.getFeeRulesConfig();
-        if (r) setRules({ ...DEFAULT_RULES, ...r, multiactivity: { ...DEFAULT_RULES.multiactivity, ...r.multiactivity } });
+        const [stored, acts] = await Promise.all([
+          ConfigService.getFeeRulesConfig(),
+          ActivityService.getAll(),
+        ]);
+        setActivities(acts);
+
+        const merged: FeeRulesConfig = {
+          ...DEFAULT_RULES,
+          ...stored,
+          multiactivity: { ...DEFAULT_RULES.multiactivity, ...stored?.multiactivity },
+          exclude_activity_ids: stored?.exclude_activity_ids ?? [],
+        };
+
+        // Legacy configs only carry titles: resolve them to ids the same way the
+        // SQL fallback does, and surface any title with no matching activity.
+        if (merged.exclude_activity_ids.length === 0 && (stored?.exclude_titles?.length ?? 0) > 0) {
+          const titles = stored!.exclude_titles!;
+          const resolved = acts.filter((a) => titles.some((title) => matchesTitle(a.title, title)));
+          merged.exclude_activity_ids = resolved.map((a) => a.id);
+          setOrphanTitles(titles.filter((title) => !acts.some((a) => matchesTitle(a.title, title))));
+        }
+
+        setRules(merged);
       } catch (e) {
         console.error(e);
-        setError('Error carregant les regles de quota');
+        toast.error(t('admin.settings.fee_rules.load_error', 'Error carregant les regles de quota'));
       } finally {
         setLoading(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addExclude = () => {
-    const t = newExclude.trim();
-    if (!t || rules.exclude_titles.includes(t)) return;
-    setRules({ ...rules, exclude_titles: [...rules.exclude_titles, t] });
-    setNewExclude('');
+  const patch = (next: FeeRulesConfig) => {
+    setRules(next);
+    onDirtyChange?.(true);
   };
 
-  const removeExclude = (t: string) =>
-    setRules({ ...rules, exclude_titles: rules.exclude_titles.filter((x) => x !== t) });
+  const toggleActivity = (id: number) => {
+    const current = rules.exclude_activity_ids;
+    patch({
+      ...rules,
+      exclude_activity_ids: current.includes(id) ? current.filter((x) => x !== id) : [...current, id],
+    });
+  };
+
+  const selectedActivities = useMemo(
+    () => activities.filter((a) => rules.exclude_activity_ids.includes(a.id)),
+    [activities, rules.exclude_activity_ids]
+  );
 
   const handleSave = async () => {
     setSaving(true);
-    setSuccess(false);
-    setError(null);
     try {
-      await ConfigService.updateFeeRulesConfig(rules);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      await ConfigService.updateFeeRulesConfig({
+        ...rules,
+        // Mirror of the selection, kept only so a rollback to the pre-migration
+        // SQL still excludes the right activities. Never edited by hand.
+        exclude_titles: selectedActivities.map((a) => a.title),
+      });
+      setOrphanTitles([]);
+      onDirtyChange?.(false);
+      toast.success(t('admin.settings.fee_rules.saved', 'Regles de quota guardades'));
     } catch (e) {
       console.error(e);
-      setError('Error guardant les regles de quota');
+      toast.error(t('admin.settings.fee_rules.save_error', 'Error guardant les regles de quota'));
     } finally {
       setSaving(false);
     }
@@ -63,7 +114,7 @@ export default function FeeRulesSettings() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
       </div>
     );
   }
@@ -72,114 +123,169 @@ export default function FeeRulesSettings() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 space-y-6">
+      <SettingsSectionNote
+        title={t('admin.settings.fee_rules.note_title', 'Quota mensual de les extraescolars')}
+        body={t(
+          'admin.settings.fee_rules.note_body',
+          "Afecta l'import dels rebuts mensuals que es creen des de Cobraments. Aquí només decideixes quines activitats NO factura l'AFA i el preu combinat; el preu de cada activitat s'edita a la seva fitxa."
+        )}
+        consumedBy="generate_monthly_payments → student_monthly_fee → is_activity_excluded"
+      />
+
+      <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-6">
         <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <Coins className="w-6 h-6 text-primary" />
+          <div className="bg-neutral-100 border border-neutral-200 p-2 rounded-lg">
+            <Coins className="w-5 h-5 text-neutral-700" />
           </div>
           <div>
-            <h3 className="font-bold text-lg text-neutral-900 dark:text-white">Regles de quota mensual</h3>
+            <h3 className="font-bold text-base text-neutral-900">
+              {t('admin.settings.fee_rules.title', 'Regles de quota mensual')}
+            </h3>
             <p className="text-sm text-neutral-500">
-              Els preus per activitat s'editen a Activitats. Aquí defineixes exclusions i el preu combinat.
+              {t(
+                'admin.settings.fee_rules.subtitle',
+                'Exclusions i preu combinat aplicats sobre els preus per activitat.'
+              )}
             </p>
           </div>
         </div>
 
-        {/* Exclusions */}
+        {/* Exclusions, by stable activity id */}
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Activitats excloses de la quota AFA
+          <label className="block text-sm font-medium text-neutral-700">
+            {t('admin.settings.fee_rules.exclusions_label', "Activitats excloses de la quota AFA")}
           </label>
           <p className="text-xs text-neutral-500">
-            No generen cuota (es paguen a part, p. ex. l'anglès amb l'acadèmia externa). S'hi posa el títol de l'activitat.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {rules.exclude_titles.map((t) => (
-              <span key={t} className="inline-flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 text-sm font-medium px-3 py-1.5 rounded-lg">
-                {t}
-                <button type="button" onClick={() => removeExclude(t)} className="text-neutral-400 hover:text-red-500">
-                  <X className="w-4 h-4" />
-                </button>
-              </span>
-            ))}
-            {rules.exclude_titles.length === 0 && (
-              <span className="text-sm text-neutral-400 italic">Cap exclusió</span>
+            {t(
+              'admin.settings.fee_rules.exclusions_help',
+              "No generen rebut de l'AFA perquè es paguen a part (p. ex. l'anglès a l'acadèmia externa). Se seleccionen del catàleg: si canvies el nom de l'activitat, l'exclusió es manté."
             )}
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Títol de l'activitat (p. ex. Anglès)"
-              value={newExclude}
-              onChange={(e) => setNewExclude(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addExclude(); } }}
-              className="h-10 flex-1 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-            <button type="button" onClick={addExclude} className="flex items-center gap-1 px-4 h-10 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-sm font-bold hover:bg-neutral-200">
-              <Plus className="w-4 h-4" /> Afegir
-            </button>
-          </div>
+          </p>
+
+          {orphanTitles.length > 0 && (
+            <div className="flex items-start gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50">
+              <AlertTriangle className="w-[18px] h-[18px] mt-0.5 flex-shrink-0 text-amber-600" aria-hidden="true" />
+              <p className="text-[13px] leading-5 text-amber-900">
+                {t(
+                  'admin.settings.fee_rules.orphan_warning',
+                  'Aquestes exclusions antigues es feien per nom i ja no coincideixen amb cap activitat. Revisa la selecció i desa per corregir-ho:'
+                )}{' '}
+                <span className="font-medium">{orphanTitles.join(', ')}</span>
+              </p>
+            </div>
+          )}
+
+          {activities.length === 0 ? (
+            <p className="text-sm text-neutral-400 italic">
+              {t('admin.settings.fee_rules.no_activities', 'No hi ha activitats al catàleg.')}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto rounded-lg border border-neutral-200 p-2">
+              {activities.map((activity) => {
+                const checked = rules.exclude_activity_ids.includes(activity.id);
+                return (
+                  <label
+                    key={activity.id}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-md border cursor-pointer transition-colors ${
+                      checked ? 'border-neutral-300 bg-neutral-100' : 'border-transparent hover:bg-neutral-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleActivity(activity.id)}
+                      className="h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-400"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[13px] font-medium text-neutral-800 truncate">
+                        {activity.title}
+                      </span>
+                      <span className="block text-[11px] font-mono text-neutral-400">#{activity.id}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+
+          <p className="text-xs text-neutral-500">
+            {selectedActivities.length === 0
+              ? t('admin.settings.fee_rules.no_exclusions', 'Cap exclusió: totes les activitats es facturen.')
+              : t('admin.settings.fee_rules.exclusions_count', 'Excloses') +
+                ': ' +
+                selectedActivities.map((a) => a.title).join(', ')}
+          </p>
         </div>
 
-        {/* Multiactivity */}
-        <div className="space-y-3 border-t border-neutral-100 dark:border-neutral-800 pt-5">
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Preu combinat «Multiactivitat»
+        {/* Multiactivity flat price */}
+        <div className="space-y-3 border-t border-neutral-100 pt-5">
+          <label className="block text-sm font-medium text-neutral-700">
+            {t('admin.settings.fee_rules.multiactivity_label', 'Preu combinat «Multiactivitat»')}
           </label>
           <p className="text-xs text-neutral-500">
-            Quan un alumne fa com a mínim aquest nombre d'activitats facturables, s'aplica un preu únic en comptes de sumar-les.
+            {t(
+              'admin.settings.fee_rules.multiactivity_help',
+              "Quan un alumne fa com a mínim aquest nombre d'activitats facturables, s'aplica un preu únic en comptes de sumar-les."
+            )}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <span className="text-xs font-medium text-neutral-500">Activitats mínimes</span>
+              <span className="text-xs font-medium text-neutral-500">
+                {t('admin.settings.fee_rules.min_activities', 'Activitats mínimes')}
+              </span>
               <input
-                type="number" min={2}
+                type="number"
+                min={2}
                 value={m.min_activities}
-                onChange={(e) => setRules({ ...rules, multiactivity: { ...m, min_activities: Number(e.target.value) } })}
-                className="h-10 w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                onChange={(e) => patch({ ...rules, multiactivity: { ...m, min_activities: Number(e.target.value) } })}
+                className="h-10 w-full rounded-lg border border-neutral-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
               />
             </div>
             <div className="space-y-1.5">
-              <span className="text-xs font-medium text-neutral-500">Preu soci (€/mes)</span>
+              <span className="text-xs font-medium text-neutral-500">
+                {t('admin.settings.fee_rules.member_price', 'Preu soci (€/mes)')}
+              </span>
               <input
-                type="number" min={0} step="0.01"
+                type="number"
+                min={0}
+                step="0.01"
                 value={m.member_price}
-                onChange={(e) => setRules({ ...rules, multiactivity: { ...m, member_price: Number(e.target.value) } })}
-                className="h-10 w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                onChange={(e) => patch({ ...rules, multiactivity: { ...m, member_price: Number(e.target.value) } })}
+                className="h-10 w-full rounded-lg border border-neutral-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
               />
             </div>
             <div className="space-y-1.5">
-              <span className="text-xs font-medium text-neutral-500">Preu no soci (€/mes)</span>
+              <span className="text-xs font-medium text-neutral-500">
+                {t('admin.settings.fee_rules.non_member_price', 'Preu no soci (€/mes)')}
+              </span>
               <input
-                type="number" min={0} step="0.01"
+                type="number"
+                min={0}
+                step="0.01"
                 value={m.non_member_price}
-                onChange={(e) => setRules({ ...rules, multiactivity: { ...m, non_member_price: Number(e.target.value) } })}
-                className="h-10 w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                onChange={(e) => patch({ ...rules, multiactivity: { ...m, non_member_price: Number(e.target.value) } })}
+                className="h-10 w-full rounded-lg border border-neutral-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-300"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg">
-          <AlertCircle size={20} />
-          <p className="font-medium text-sm">{error}</p>
-        </div>
-      )}
-      {success && (
-        <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-200 text-green-700 rounded-lg">
-          <CheckCircle2 size={20} />
-          <p className="font-medium text-sm">Regles de quota guardades!</p>
-        </div>
-      )}
+      <ExternalPricesNote only={['activities']} />
 
       <button
+        type="button"
         onClick={handleSave}
         disabled={saving}
-        className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-lg flex items-center justify-center gap-3 shadow-sm shadow-primary/30 transition-all disabled:opacity-50"
+        className="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
       >
-        {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save size={20} /> Guardar regles</>}
+        {saving ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <>
+            <Save size={16} /> {t('admin.settings.fee_rules.save', 'Guardar regles')}
+          </>
+        )}
       </button>
     </div>
   );

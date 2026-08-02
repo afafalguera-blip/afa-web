@@ -4,6 +4,7 @@ import {
   Calendar, ChevronDown, ChevronUp, Edit, ListChecks, Tag, Trash2, User
 } from 'lucide-react';
 import type { AdminTask, TaskStatus } from '../../../services/admin/AdminTasksService';
+import { STATUS_PILL_CLASS } from '../news/contentStatus';
 import { statusClasses, priorityClasses, isTaskOverdue, STATUS_OPTIONS } from './taskUtils';
 
 interface TaskCardProps {
@@ -29,19 +30,21 @@ export function TaskCard({
   const overdue = isTaskOverdue(task);
 
   return (
-    <div className={`bg-white rounded-lg border shadow-sm p-5 transition-all hover:shadow-sm ${overdue ? 'border-amber-300' : 'border-neutral-200'}`}>
+    <div className={`bg-white rounded-lg border p-5 transition-shadow hover:shadow-sm ${overdue ? 'border-amber-300' : 'border-neutral-200'}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-3 min-w-0">
+          {/* Status pill first, same shape/placement as every other entity of the zone. */}
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-bold text-neutral-900 truncate">{task.title}</h3>
-            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${statusClasses[task.status]}`}>{getStatusLabel(task.status)}</span>
-            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${priorityClasses[task.priority]}`}>{getPriorityLabel(task.priority)}</span>
-            {overdue && <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">{t('admin.tasks.overdue_badge')}</span>}
+            <span className={`${STATUS_PILL_CLASS} ${statusClasses[task.status]}`}>{getStatusLabel(task.status)}</span>
+            <span className={`${STATUS_PILL_CLASS} ${priorityClasses[task.priority]}`}>{getPriorityLabel(task.priority)}</span>
+            {overdue && <span className={`${STATUS_PILL_CLASS} bg-amber-100 text-amber-700`}>{t('admin.tasks.overdue_badge')}</span>}
           </div>
 
-          {task.description && <p className="text-sm text-neutral-600 leading-relaxed line-clamp-3">{task.description}</p>}
+          <h3 className="text-[15px] font-semibold text-neutral-900 truncate">{task.title}</h3>
 
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-neutral-500">
+          {task.description && <p className="text-[13px] text-neutral-600 leading-relaxed line-clamp-3">{task.description}</p>}
+
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-[13px] text-neutral-500">
             <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4" />{t('admin.tasks.field_due_date')}: {formatDate(task.due_date)}</span>
             <span className="inline-flex items-center gap-1.5"><User className="w-4 h-4" />{t('admin.tasks.field_assignee')}: {task.assignee_name || t('admin.tasks.unassigned')}</span>
           </div>
@@ -49,7 +52,7 @@ export function TaskCard({
           {task.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {task.tags.map((tag) => (
-                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-fuchsia-100 text-fuchsia-700 text-xs font-semibold">
+                <span key={tag} className={`${STATUS_PILL_CLASS} bg-neutral-100 text-neutral-700`}>
                   <Tag className="w-3 h-3" />{tag}
                 </span>
               ))}
@@ -62,7 +65,7 @@ export function TaskCard({
                 <ListChecks className="w-4 h-4" />
                 {task.subtasks.filter((s) => s.done).length}/{task.subtasks.length} {t('admin.tasks.subtasks_progress')}
               </div>
-              <button type="button" onClick={() => setExpanded((prev) => !prev)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition-colors">
+              <button type="button" aria-expanded={expanded} onClick={() => setExpanded((prev) => !prev)} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-100 transition-colors">
                 {expanded ? <><ChevronUp className="w-4 h-4" />{t('admin.tasks.hide_subtasks', { defaultValue: getFallbackByLocale('Amagar subtasques', 'Ocultar subtareas', 'Hide subtasks') })}</> : <><ChevronDown className="w-4 h-4" />{t('admin.tasks.view_subtasks', { defaultValue: getFallbackByLocale('Veure subtasques', 'Ver subtareas', 'View subtasks') })}</>}
               </button>
             </div>
@@ -88,22 +91,22 @@ export function TaskCard({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          <button onClick={() => onEdit(task)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title={t('common.edit')}><Edit className="w-5 h-5" /></button>
-          <button onClick={() => onDelete(task.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title={t('common.delete')}><Trash2 className="w-5 h-5" /></button>
+          <button type="button" onClick={() => onEdit(task)} className="p-2 rounded-md text-neutral-600 hover:bg-neutral-100 transition-colors" title={t('common.edit')} aria-label={t('common.edit')}><Edit className="w-[18px] h-[18px]" /></button>
+          <button type="button" onClick={() => onDelete(task.id)} className="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors" title={t('common.delete')} aria-label={t('common.delete')}><Trash2 className="w-[18px] h-[18px]" /></button>
         </div>
       </div>
 
       <div className="mt-5 pt-4 border-t border-neutral-100 flex flex-col md:flex-row md:items-center gap-3">
-        <select value={task.status} onChange={(e) => onQuickStatusChange(task.id, e.target.value as TaskStatus)} disabled={updatingTaskId === task.id} className="px-4 py-2.5 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white min-w-[210px] disabled:opacity-60">
+        <select value={task.status} aria-label={t('admin.tasks.field_status')} onChange={(e) => onQuickStatusChange(task.id, e.target.value as TaskStatus)} disabled={updatingTaskId === task.id} className="px-3 py-2 border border-neutral-200 rounded-md focus:ring-2 focus:ring-neutral-300 outline-none bg-white min-w-[210px] text-[13px] disabled:opacity-60">
           {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{getStatusLabel(s)}</option>)}
         </select>
 
         {task.status !== 'done' ? (
-          <button onClick={() => onQuickStatusChange(task.id, 'done')} disabled={updatingTaskId === task.id} className="px-4 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors disabled:opacity-60">
+          <button type="button" onClick={() => onQuickStatusChange(task.id, 'done')} disabled={updatingTaskId === task.id} className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-60">
             {updatingTaskId === task.id ? t('common.saving') : t('admin.tasks.mark_done')}
           </button>
         ) : (
-          <button onClick={() => onQuickStatusChange(task.id, 'pending')} disabled={updatingTaskId === task.id} className="px-4 py-2.5 bg-neutral-100 text-neutral-700 rounded-lg font-medium hover:bg-neutral-200 transition-colors disabled:opacity-60">
+          <button type="button" onClick={() => onQuickStatusChange(task.id, 'pending')} disabled={updatingTaskId === task.id} className="px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-neutral-700 text-[13px] font-medium hover:bg-neutral-100 transition-colors disabled:opacity-60">
             {updatingTaskId === task.id ? t('common.saving') : t('admin.tasks.reopen')}
           </button>
         )}

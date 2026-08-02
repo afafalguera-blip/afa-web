@@ -1,160 +1,101 @@
 /**
- * @fileoverview Admin Dashboard for managing inscriptions
- * Refactored to use custom hooks for logic separation (Midudev pattern)
+ * @fileoverview Admin dashboard: statistics only.
+ * Inscription management (listing, filters, edit, delete, export) lives in
+ * `/admin/inscriptions` — this page no longer duplicates it.
  */
 
-import { useState } from 'react';
-import { Loader2, FileSpreadsheet, FileText } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ArrowRight, LayoutDashboard } from 'lucide-react';
 
-// Hooks
-import { useInscriptions } from '../../../hooks/useInscriptions';
+import { AdminPageHeader } from '../../../components/admin/common/AdminPageHeader';
 import { useFinancialStats } from '../../../hooks/useFinancialStats';
+import { AdminInscriptionsService } from '../../../services/admin/AdminInscriptionsService';
+import { ConfigService } from '../../../services/ConfigService';
 
-// Services
-import { ExportService } from '../../../services/ExportService';
-
-// Components
 import { StatsCards } from './StatsCards';
 import { FinancialStatsCards } from './FinancialStatsCards';
-import { Filters } from './Filters';
-import { InscriptionsTable } from './InscriptionsTable';
-import { InscriptionDetailsModal } from './InscriptionDetailsModal';
-import { InscriptionEditModal } from './InscriptionEditModal';
-
-// Types
-import type { InscriptionFlat } from '../../../types/inscription';
 
 export function Dashboard() {
   const { t } = useTranslation();
-  // Inscription logic extracted to custom hook
-  const {
-    inscriptions,
-    filteredData,
-    isLoading,
-    filters,
-    setFilter,
-    academicYear,
-    setAcademicYear,
-    academicYears,
-    activityOptions,
-    reload,
-    handleDelete,
-    handleStatusChange,
-  } = useInscriptions();
+  const [academicYear, setAcademicYear] = useState('');
+  const [academicYears, setAcademicYears] = useState<string[]>([]);
 
-  // Stats logic extracted to custom hook, scoped to the selected cohort
-  const {
-    financialStats,
-    shopStats,
-    reload: reloadStats,
-  } = useFinancialStats(academicYear);
+  // Cohort selector: defaults to the active season.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [list, season] = await Promise.all([
+          AdminInscriptionsService.getAcademicYears(),
+          ConfigService.getSeasonConfig()
+        ]);
+        if (cancelled) return;
+        setAcademicYears(list);
+        setAcademicYear(
+          season?.active_year && list.includes(season.active_year) ? season.active_year : list[0] || ''
+        );
+      } catch (err) {
+        console.error('Error loading academic years:', err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  // Modal state (kept in component as it's UI-specific)
-  const [selectedInscription, setSelectedInscription] = useState<InscriptionFlat | null>(null);
-  const [editingInscription, setEditingInscription] = useState<InscriptionFlat | null>(null);
-
-  const handleExportExcel = () => {
-    ExportService.exportInscriptionsExcel(filteredData, 'full', 'Inscripcions_AFA');
-  };
-
-  const handleExportPDF = () => {
-    ExportService.exportInscriptionsPDF(filteredData, 'full', 'Inscripcions_AFA');
-  };
-
-  const handleReload = () => {
-    reload();
-    reloadStats();
-  };
+  const { inscriptionStats, financialStats, shopStats, isLoading, reload } =
+    useFinancialStats(academicYear);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-neutral-900">{t('admin.dashboard.title')}</h2>
-          <p className="text-neutral-500">{t('admin.dashboard.subtitle')}</p>
-        </div>
-
-        <div className="flex flex-wrap gap-2 items-center">
+    <div className="max-w-7xl mx-auto space-y-6">
+      <AdminPageHeader
+        title={t('admin.dashboard.title')}
+        subtitle={t('admin.dashboard.subtitle')}
+        icon={LayoutDashboard}
+        loading={isLoading}
+        onRefresh={reload}
+        actions={
           <select
             value={academicYear}
-            onChange={(e) => setAcademicYear(e.target.value)}
-            className="h-9 rounded-lg border border-neutral-300 bg-white px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-            title="Curs"
+            onChange={(event) => setAcademicYear(event.target.value)}
+            aria-label={t('admin.inscriptions.filter_academic_year', 'Curs escolar')}
+            className="h-9 rounded-md border border-neutral-300 bg-white px-3 text-[13px] text-neutral-700 outline-none focus:ring-2 focus:ring-neutral-900/20"
           >
-            <option value="">Tots els cursos</option>
-            {academicYears.map((y) => (
-              <option key={y} value={y}>{y}</option>
+            <option value="">{t('admin.inscriptions.all_academic_years', 'Tots els cursos escolars')}</option>
+            {academicYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
+        }
+      />
 
-          <button
-            onClick={handleExportExcel}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2 text-sm font-medium"
-            title={t('admin.dashboard.export_excel')}
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span className="hidden sm:inline">Excel</span>
-          </button>
-
-          <button
-            onClick={handleExportPDF}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm font-medium"
-            title={t('admin.dashboard.export_pdf')}
-          >
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">PDF</span>
-          </button>
-
-          <button
-            onClick={handleReload}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 text-sm font-medium"
-          >
-            {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : t('admin.dashboard.update')}
-          </button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <StatsCards inscriptions={inscriptions} />
+      <StatsCards stats={inscriptionStats} />
       <FinancialStatsCards financial={financialStats} shop={shopStats} />
 
-      {/* Table with Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-neutral-200">
-        <Filters
-          course={filters.course}
-          setCourse={(value: string) => setFilter('course', value)}
-          activity={filters.activity}
-          setActivity={(value: string) => setFilter('activity', value)}
-          activityOptions={activityOptions}
-          status={filters.status}
-          setStatus={(value: string) => setFilter('status', value)}
-          search={filters.search}
-          setSearch={(value: string) => setFilter('search', value)}
-        />
-
-        <InscriptionsTable
-          rows={filteredData}
-          loading={isLoading}
-          onDelete={handleDelete}
-          onStatusChange={handleStatusChange}
-          onViewDetails={setSelectedInscription}
-          onEdit={setEditingInscription}
-        />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-neutral-200 rounded-lg p-5">
+        <div className="min-w-0">
+          <h2 className="text-[15px] font-semibold text-neutral-900">
+            {t('admin.dashboard.manage_inscriptions_title', 'Gestió d’inscripcions')}
+          </h2>
+          <p className="text-[13px] text-neutral-500">
+            {t(
+              'admin.dashboard.manage_inscriptions_subtitle',
+              'Consulta, edita i exporta totes les inscripcions des de la pantalla dedicada.'
+            )}
+          </p>
+        </div>
+        <Link
+          to="/admin/inscriptions"
+          className="flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors flex-shrink-0"
+        >
+          {t('admin.dashboard.manage_inscriptions_cta', 'Anar a inscripcions')}
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
-
-      {/* Modals */}
-      <InscriptionDetailsModal
-        inscription={selectedInscription}
-        onClose={() => setSelectedInscription(null)}
-      />
-
-      <InscriptionEditModal
-        inscription={editingInscription}
-        onClose={() => setEditingInscription(null)}
-        onSave={reload}
-      />
     </div>
   );
 }

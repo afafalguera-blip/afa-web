@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { StorageService } from '../../services/StorageService';
 import { compressImage } from '../../utils/imageCompression';
+import { useToast } from '../common/Toast';
 
 interface ImageUploadProps {
   value: string | null;
@@ -20,6 +21,7 @@ export function ImageUpload({
   className = '' 
 }: ImageUploadProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -29,7 +31,7 @@ export function ImageUpload({
 
     // Basic validation
     if (!file.type.startsWith('image/')) {
-      alert(t('admin.editor.error_invalid_file'));
+      toast.error(t('admin.editor.error_invalid_file'));
       return;
     }
 
@@ -40,7 +42,7 @@ export function ImageUpload({
       const processed = await compressImage(file).catch(() => file);
 
       if (processed.size > 10 * 1024 * 1024) {
-        alert(t('admin.editor.image_too_large'));
+        toast.error(t('admin.editor.image_too_large'));
         return;
       }
 
@@ -48,7 +50,7 @@ export function ImageUpload({
       onUpload(url);
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert(t('common.error_save'));
+      toast.error(t('common.error_save'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {

@@ -1,71 +1,58 @@
 import { UserPlus, UserMinus, Users, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Inscription } from '../../../types/inscription';
+import type { InscriptionStats } from '../../../services/admin/AdminInscriptionsService';
 
 interface StatsCardsProps {
-  inscriptions: Inscription[];
+  stats: InscriptionStats;
 }
 
-export function StatsCards({ inscriptions }: StatsCardsProps) {
+export function StatsCards({ stats }: StatsCardsProps) {
   const { t } = useTranslation();
-
-  // Logic to calculate stats
-  let totalActive = 0;
-  let totalBaja = 0;
-  let afaMembers = 0;
-
-  inscriptions.forEach((ins) => {
-    const studentCount = ins.students?.length || 0;
-
-    if (ins.status === 'baja') {
-      totalBaja += studentCount;
-    } else {
-      totalActive += studentCount;
-      if (ins.afa_member) afaMembers += studentCount;
-    }
-  });
 
   const cards = [
     {
       title: t('admin.dashboard.stats.active'),
-      value: totalActive,
+      value: String(stats.activeStudents),
       icon: UserPlus,
       color: 'text-blue-600',
       bg: 'bg-blue-100'
     },
     {
       title: t('admin.dashboard.stats.bajas'),
-      value: totalBaja,
+      value: String(stats.bajaStudents),
       icon: UserMinus,
       color: 'text-amber-600',
       bg: 'bg-amber-100'
     },
     {
       title: t('admin.dashboard.stats.afa_members'),
-      value: `${afaMembers}/${totalActive}`,
+      value: `${stats.afaMemberStudents}/${stats.activeStudents}`,
       icon: Users,
       color: 'text-green-600',
       bg: 'bg-green-100'
     },
     {
       title: t('admin.dashboard.stats.popular'),
-      value: '...',
+      value: stats.topActivity ? `${stats.topActivity.name} (${stats.topActivity.count})` : '—',
       icon: Star,
       color: 'text-purple-600',
       bg: 'bg-purple-100'
-    },
+    }
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      {cards.map((card, i) => (
-        <div key={i} className="bg-white p-6 rounded-lg shadow-sm border border-neutral-100 flex items-center gap-4">
+      {cards.map((card) => (
+        <div
+          key={card.title}
+          className="bg-white p-6 rounded-lg border border-neutral-200 flex items-center gap-4"
+        >
           <div className={`p-3 rounded-lg ${card.bg}`}>
-            <card.icon className={`w-6 h-6 ${card.color}`} />
+            <card.icon className={`w-6 h-6 ${card.color}`} aria-hidden="true" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium text-neutral-500">{card.title}</p>
-            <p className="text-2xl font-bold text-neutral-900">{card.value}</p>
+            <p className="text-2xl font-bold text-neutral-900 truncate">{card.value}</p>
           </div>
         </div>
       ))}

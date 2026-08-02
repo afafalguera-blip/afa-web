@@ -54,15 +54,47 @@ export const getShortLinkBaseUrl = (): string => {
   return `${supabaseUrl}/functions/v1/go`;
 };
 
+export interface ShortUrlListParams {
+  /** 1-based. */
+  page: number;
+  pageSize: number;
+  search?: string;
+}
+
+export interface ShortUrlListResult {
+  rows: ShortUrl[];
+  total: number;
+}
+
+/**
+ * PostgREST `or=` groups are comma/parenthesis delimited, so those characters
+ * cannot appear raw inside a value. Backslash and LIKE wildcards are escaped so
+ * the term is matched literally.
+ */
+const sanitizeOrTerm = (value: string) =>
+  value
+    .replace(/[\\%_]/g, (match) => `\\${match}`)
+    .replace(/[(),*"]/g, ' ')
+    .trim();
+
 export const AdminShortUrlsService = {
-  async getAll(): Promise<ShortUrl[]> {
-    const { data, error } = await supabase
-      .from('short_urls')
-      .select('*')
-      .order('created_at', { ascending: false });
+  /** Server-side paginated list; the search box is pushed down to the server. */
+  async list({ page, pageSize, search }: ShortUrlListParams): Promise<ShortUrlListResult> {
+    const offset = (Math.max(1, page) - 1) * pageSize;
+
+    let query = supabase.from('short_urls').select('*', { count: 'exact' });
+
+    const term = search ? sanitizeOrTerm(search) : '';
+    if (term) {
+      query = query.or(`slug.ilike.%${term}%,target_url.ilike.%${term}%,description.ilike.%${term}%`);
+    }
+
+    const { data, error, count } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + pageSize - 1);
 
     if (error) throw error;
-    return (data || []) as ShortUrl[];
+    return { rows: (data || []) as ShortUrl[], total: count ?? 0 };
   },
 
   async save(formData: ShortUrlFormData, editingId?: string): Promise<void> {

@@ -8,7 +8,10 @@ import type { FormTemplate, FormField } from '../types/formTypes';
 import { logicMatches } from '../types/formTypes';
 import { resolveTemplateText, resolveField } from '../utils/resolveTranslations';
 import { Loader2, CheckCircle, AlertCircle, Upload, Check, X as XIcon } from 'lucide-react';
+import { useToast } from '../../../components/common/Toast';
 import { sanitizeRichTextHtml } from '../../../utils/htmlSanitizer';
+// El ToastProvider de App.tsx envuelve el BrowserRouter, asi que tambien cubre
+// la ruta publica /f/:slug (fuera del AdminLayout).
 
 const MAX_FILE_SIZE_MB = 10;
 
@@ -23,6 +26,7 @@ interface FileUploadFieldProps {
 
 function FileUploadField({ label, required, value, onChange, error, formSlug }: FileUploadFieldProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
 
   const handleViewFile = async () => {
@@ -30,7 +34,7 @@ function FileUploadField({ label, required, value, onChange, error, formSlug }: 
       const url = await formService.getFileUrl(value);
       window.open(url, '_blank', 'noreferrer');
     } catch {
-      alert(t('forms.public.file_cant_get_url'));
+      toast.error(t('forms.public.file_cant_get_url'));
     }
   };
 
@@ -39,7 +43,7 @@ function FileUploadField({ label, required, value, onChange, error, formSlug }: 
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      alert(t('forms.public.file_too_large', { mb: MAX_FILE_SIZE_MB }));
+      toast.error(t('forms.public.file_too_large', { mb: MAX_FILE_SIZE_MB }));
       return;
     }
 
@@ -52,7 +56,7 @@ function FileUploadField({ label, required, value, onChange, error, formSlug }: 
       onChange(uploadedPath);
     } catch (err) {
       console.error('Error uploading file', err);
-      alert(t('forms.public.file_error'));
+      toast.error(t('forms.public.file_error'));
     } finally {
       setIsUploading(false);
     }
@@ -182,6 +186,7 @@ const generateZodSchema = (fields: FormField[]) => {
 
 function DynamicFormInstance({ template, isPreview = false }: { template: FormTemplate; isPreview?: boolean }) {
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
   const activeLang = i18n.resolvedLanguage || i18n.language;
   const resolved = resolveTemplateText(template, activeLang);
   const storageKey = `form_submitted_${template.slug}`;
@@ -251,7 +256,7 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
   const onSubmit = async (data: Record<string, unknown>) => {
     if (submittingRef.current) return;
     if (isPreview) {
-      alert(t('forms.public.preview_alert'));
+      toast.info(t('forms.public.preview_alert'));
       return;
     }
     submittingRef.current = true;

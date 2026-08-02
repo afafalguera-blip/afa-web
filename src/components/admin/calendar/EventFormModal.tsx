@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { Modal } from '../../common/Modal';
 import { EVENT_TYPES } from '../../../services/admin/AdminCalendarService';
 import type { EventFormData, CalendarEvent } from '../../../services/admin/AdminCalendarService';
 import { getRegionalLanguageTag } from '../../../utils/locale';
@@ -15,6 +16,10 @@ interface EventFormModalProps {
     saving: boolean;
 }
 
+const FIELD_CLASS =
+    'w-full px-3 py-2 bg-white border border-neutral-200 rounded-md outline-none transition-colors focus:ring-2 focus:ring-neutral-300 text-neutral-900';
+const LABEL_CLASS = 'block text-[13px] font-medium text-neutral-700 mb-1';
+
 export function EventFormModal({
     isOpen,
     onClose,
@@ -28,190 +33,184 @@ export function EventFormModal({
     const { t, i18n } = useTranslation();
     const nativeDateLocale = getRegionalLanguageTag(i18n.resolvedLanguage || i18n.language);
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden border border-neutral-200 dark:border-neutral-800 animate-in zoom-in-95 duration-200">
-                <div className="p-8 border-b border-neutral-100 dark:border-neutral-800 flex justify-between items-center">
-                    <h2 className="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
-                        {editingEvent ? t('admin.calendar.edit_event') : t('admin.calendar.new_event')}
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors"
-                    >
-                        <X className="w-6 h-6 text-neutral-400" />
-                    </button>
-                </div>
-
-                <div className="p-8 space-y-6 overflow-y-auto max-h-[calc(90vh-200px)] custom-scrollbar">
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.calendar.field_title')} *
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.title}
-                            onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner"
-                            placeholder="Ej. Fiesta de Fin de Curso"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                                {t('admin.calendar.field_date')} *
-                            </label>
-                            <input
-                                type="date"
-                                lang={nativeDateLocale}
-                                value={formData.event_date}
-                                onChange={e => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
-                                className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                                {t('admin.calendar.field_type')}
-                            </label>
-                            <select
-                                value={formData.event_type}
-                                onChange={e => {
-                                    const type = EVENT_TYPES.find(t => t.value === e.target.value);
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        event_type: e.target.value as CalendarEvent['event_type'],
-                                        color: type?.color || prev.color
-                                    }));
-                                }}
-                                className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner appearance-none cursor-pointer"
-                            >
-                                {EVENT_TYPES.map(type => (
-                                    <option key={type.value} value={type.value}>{type.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
-                        <div className="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                id="allDay"
-                                checked={formData.all_day}
-                                onChange={e => setFormData(prev => ({ ...prev, all_day: e.target.checked }))}
-                                className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer dark:bg-neutral-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-primary"></div>
-                        </div>
-                        <label htmlFor="allDay" className="text-sm font-bold text-neutral-700 dark:text-neutral-300 cursor-pointer">
-                            {t('admin.calendar.all_day')}
-                        </label>
-                    </div>
-
-                    {!formData.all_day && (
-                        <div className="grid grid-cols-2 gap-6 animate-in slide-in-from-top-2 duration-200">
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                                    {t('admin.calendar.field_start_time')}
-                                </label>
-                                <input
-                                    type="time"
-                                    value={formData.start_time || ''}
-                                    onChange={e => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
-                                    className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                                    {t('admin.calendar.field_end_time')}
-                                </label>
-                                <input
-                                    type="time"
-                                    value={formData.end_time || ''}
-                                    onChange={e => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
-                                    className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner"
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.calendar.field_location')}
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.location || ''}
-                            onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner"
-                            placeholder="Ej. Patio de la escuela"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.calendar.field_description')}
-                        </label>
-                        <textarea
-                            value={formData.description || ''}
-                            onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                            rows={3}
-                            className="w-full px-6 py-4 bg-neutral-50 dark:bg-neutral-950 border border-transparent focus:border-primary dark:focus:border-primary rounded-lg outline-none transition-all text-neutral-900 dark:text-white font-medium shadow-inner resize-none"
-                            placeholder="Añade más detalles sobre el evento..."
-                        />
-                    </div>
-
-                    <div className="space-y-3">
-                        <label className="text-xs font-black uppercase tracking-widest text-neutral-400 ml-1">
-                            {t('admin.calendar.field_color')}
-                        </label>
-                        <div className="flex flex-wrap gap-3">
-                            {['#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#22c55e', '#f59e0b', '#0ea5e9', '#6366f1'].map(color => (
-                                <button
-                                    key={color}
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, color }))}
-                                    className={`w-10 h-10 rounded-full transition-all duration-300 ${formData.color === color
-                                        ? 'ring-4 ring-offset-4 ring-primary scale-110 shadow-sm'
-                                        : 'hover:scale-110 opacity-80 hover:opacity-100'
-                                        }`}
-                                    style={{ backgroundColor: color }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="p-8 border-t border-neutral-100 dark:border-neutral-800 flex justify-between gap-4 bg-neutral-50/50 dark:bg-neutral-900/50">
+        <Modal
+            open={isOpen}
+            onClose={onClose}
+            closeOnBackdrop={false}
+            size="md"
+            title={editingEvent ? t('admin.calendar.edit_event') : t('admin.calendar.new_event')}
+            footer={
+                <>
                     {editingEvent && onDelete && (
                         <button
+                            type="button"
                             onClick={() => onDelete(editingEvent.id)}
-                            className="px-6 py-4 text-red-500 font-bold hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all flex items-center gap-2"
+                            className="mr-auto inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors"
                         >
-                            <Trash2 className="w-5 h-5" />
-                            <span className="hidden sm:inline">{t('common.delete')}</span>
+                            <Trash2 className="w-4 h-4" />
+                            {t('common.delete')}
                         </button>
                     )}
-                    <div className="flex gap-4 ml-auto w-full sm:w-auto">
-                        <button
-                            onClick={onClose}
-                            className="flex-1 sm:flex-none px-8 py-4 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-neutral-700 dark:text-neutral-300 font-bold hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all shadow-sm"
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+                    >
+                        {t('common.cancel')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onSave}
+                        disabled={saving}
+                        className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+                    >
+                        {saving ? t('common.saving') : t('common.save')}
+                    </button>
+                </>
+            }
+        >
+            <div className="space-y-5">
+                <div>
+                    <label htmlFor="event-title" className={LABEL_CLASS}>
+                        {t('admin.calendar.field_title')} *
+                    </label>
+                    <input
+                        id="event-title"
+                        type="text"
+                        value={formData.title}
+                        onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        className={FIELD_CLASS}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="event-date" className={LABEL_CLASS}>
+                            {t('admin.calendar.field_date')} *
+                        </label>
+                        <input
+                            id="event-date"
+                            type="date"
+                            lang={nativeDateLocale}
+                            value={formData.event_date}
+                            onChange={e => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
+                            className={FIELD_CLASS}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="event-type" className={LABEL_CLASS}>
+                            {t('admin.calendar.field_type')}
+                        </label>
+                        <select
+                            id="event-type"
+                            value={formData.event_type}
+                            onChange={e => {
+                                const type = EVENT_TYPES.find(item => item.value === e.target.value);
+                                setFormData(prev => ({
+                                    ...prev,
+                                    event_type: e.target.value as CalendarEvent['event_type'],
+                                    color: type?.color || prev.color
+                                }));
+                            }}
+                            className={FIELD_CLASS}
                         >
-                            {t('common.cancel')}
-                        </button>
-                        <button
-                            onClick={onSave}
-                            disabled={saving}
-                            className="flex-1 sm:flex-none px-8 py-4 bg-primary text-white rounded-lg font-black hover:bg-primary/90 transition-all disabled:opacity-50 shadow-sm shadow-primary/20 active:scale-95"
-                        >
-                            {saving ? t('common.saving') : t('common.save')}
-                        </button>
+                            {EVENT_TYPES.map(type => (
+                                <option key={type.value} value={type.value}>{type.label}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
+
+                <div className="flex items-center gap-3 p-3 bg-neutral-50 border border-neutral-200 rounded-md">
+                    <input
+                        type="checkbox"
+                        id="allDay"
+                        checked={formData.all_day}
+                        onChange={e => setFormData(prev => ({ ...prev, all_day: e.target.checked }))}
+                        className="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-400"
+                    />
+                    <label htmlFor="allDay" className="text-[13px] font-medium text-neutral-700 cursor-pointer">
+                        {t('admin.calendar.all_day')}
+                    </label>
+                </div>
+
+                {!formData.all_day && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="event-start" className={LABEL_CLASS}>
+                                {t('admin.calendar.field_start_time')}
+                            </label>
+                            <input
+                                id="event-start"
+                                type="time"
+                                value={formData.start_time || ''}
+                                onChange={e => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
+                                className={FIELD_CLASS}
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="event-end" className={LABEL_CLASS}>
+                                {t('admin.calendar.field_end_time')}
+                            </label>
+                            <input
+                                id="event-end"
+                                type="time"
+                                value={formData.end_time || ''}
+                                onChange={e => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
+                                className={FIELD_CLASS}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div>
+                    <label htmlFor="event-location" className={LABEL_CLASS}>
+                        {t('admin.calendar.field_location')}
+                    </label>
+                    <input
+                        id="event-location"
+                        type="text"
+                        value={formData.location || ''}
+                        onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                        className={FIELD_CLASS}
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="event-description" className={LABEL_CLASS}>
+                        {t('admin.calendar.field_description')}
+                    </label>
+                    <textarea
+                        id="event-description"
+                        value={formData.description || ''}
+                        onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                        rows={3}
+                        className={`${FIELD_CLASS} resize-none`}
+                    />
+                </div>
+
+                <fieldset>
+                    <legend className={LABEL_CLASS}>{t('admin.calendar.field_color')}</legend>
+                    <div className="flex flex-wrap gap-2">
+                        {['#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#22c55e', '#f59e0b', '#0ea5e9', '#6366f1'].map(color => (
+                            <button
+                                key={color}
+                                type="button"
+                                onClick={() => setFormData(prev => ({ ...prev, color }))}
+                                aria-label={color}
+                                aria-pressed={formData.color === color}
+                                className={`w-8 h-8 rounded-full transition-transform ${
+                                    formData.color === color
+                                        ? 'ring-2 ring-offset-2 ring-neutral-900 scale-105'
+                                        : 'hover:scale-105 opacity-80 hover:opacity-100'
+                                }`}
+                                style={{ backgroundColor: color }}
+                            />
+                        ))}
+                    </div>
+                </fieldset>
             </div>
-        </div>
+        </Modal>
     );
 }

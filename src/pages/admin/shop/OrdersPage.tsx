@@ -1,50 +1,93 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { ShopService } from '../../../features/shop/services/ShopService';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { usePagedFilters } from '../../../hooks/usePagedFilters';
+import { ShopService, type OrdersFilters, type OrdersSummary, type OrdersView } from '../../../features/shop/services/ShopService';
 import { ConfigService } from '../../../services/ConfigService';
-import { Search, Plus, LayoutDashboard, Archive, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle, Mail, Phone, BadgeCheck } from 'lucide-react';
+import { Search, Plus, LayoutDashboard, Euro, Truck, CheckCircle, XCircle, Settings, Trash2, AlertTriangle, Mail, Phone, BadgeCheck, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import { ca } from 'date-fns/locale';
 import { OrderEditModal } from '../../../features/shop/components/OrderEditModal';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AdminPageHeader } from '../../../components/admin/common/AdminPageHeader';
+import { AdminPagination, AdminTable, type AdminTableColumn } from '../../../components/admin/common/AdminTable';
+import { Modal } from '../../../components/common/Modal';
+import { useToast } from '../../../components/common/Toast';
+import { useConfirm } from '../../../components/common/ConfirmDialog';
 
 import type { ShopOrder } from '../../../features/shop/types/shop';
 
+const orderLabel = (order: ShopOrder) => `#${order.id.slice(0, 8)} · ${order.customer_name}`;
+
 export function OrdersPage() {
+    const { toast } = useToast();
+    const confirm = useConfirm();
+
     const [orders, setOrders] = useState<ShopOrder[]>([]);
+    const [total, setTotal] = useState(0);
+    const [summary, setSummary] = useState<OrdersSummary>({ pendingCount: 0, archivedCount: 0, totalRevenue: 0 });
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<ShopOrder | null>(null);
-    const [view, setView] = useState<'active' | 'archived'>('active');
-    const [searchTerm, setSearchTerm] = useState('');
+    const [view, setView] = useState<OrdersView>('active');
+    const [searchInput, setSearchInput] = useState('');
+    const [search, setSearch] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState('');
     const [academicYear, setAcademicYear] = useState('');
     const [years, setYears] = useState<string[]>([]);
+    const [yearsReady, setYearsReady] = useState(false);
+
+    const { page, setPage, pageSize, setPageSize } = usePagedFilters(
+        `${academicYear} ${view} ${search}`
+    );
+
+    const filters: OrdersFilters = useMemo(
+        () => ({ academicYear: academicYear || undefined, view, search: search || undefined }),
+        [academicYear, view, search],
+    );
 
     const fetchOrders = useCallback(async () => {
+        if (!yearsReady) return;
+        setLoading(true);
         try {
-            const data = await ShopService.getOrders(academicYear || undefined);
-            setOrders(data);
+            const [list, stats] = await Promise.all([
+                ShopService.listOrders({ page, pageSize, ...filters }),
+                ShopService.getOrdersSummary(filters.academicYear),
+            ]);
+            setOrders(list.rows);
+            setTotal(list.total);
+            setSummary(stats);
         } catch (error) {
-            console.error('Error fetching orders:', error);
+            toast.error(error instanceof Error ? error.message : 'No s\'han pogut carregar les comandes');
         } finally {
             setLoading(false);
         }
-    }, [academicYear]);
+    }, [filters, page, pageSize, toast, yearsReady]);
 
     // Initialise the course selector: default to the active season's course.
     useEffect(() => {
         (async () => {
-            const [list, season] = await Promise.all([
-                ShopService.getOrderAcademicYears(),
-                ConfigService.getSeasonConfig(),
-            ]);
-            setYears(list);
-            const preferred = season?.active_year && list.includes(season.active_year)
-                ? season.active_year
-                : (list[0] || '');
-            setAcademicYear(preferred);
+            try {
+                const [list, season] = await Promise.all([
+                    ShopService.getOrderAcademicYears(),
+                    ConfigService.getSeasonConfig(),
+                ]);
+                setYears(list);
+                const preferred = season?.active_year && list.includes(season.active_year)
+                    ? season.active_year
+                    : (list[0] || '');
+                setAcademicYear(preferred);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : 'No s\'han pogut carregar els cursos');
+            } finally {
+                setYearsReady(true);
+            }
         })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Debounce the search box so typing does not hammer the API.
+    useEffect(() => {
+        const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300);
+        return () => window.clearTimeout(timer);
+    }, [searchInput]);
 
     useEffect(() => {
         fetchOrders();
@@ -58,351 +101,335 @@ export function OrdersPage() {
             const newOrder = await ShopService.createEmptyOrder(newCustomerName);
             setNewCustomerName('');
             setIsCreating(false);
-            fetchOrders();
+            toast.success('Comanda creada');
+            await fetchOrders();
             // Automatically open editor for the new order to add items
             setSelectedOrder({ ...newOrder, items: [] });
-        } catch {
-            alert("Error creant la comanda");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error creant la comanda');
         }
     };
 
-    const handlePaymentUpdate = async (id: string, status: 'paid' | 'pending') => {
+    const handlePaymentUpdate = async (order: ShopOrder, status: 'paid' | 'pending') => {
         try {
-            await ShopService.updatePaymentStatus(id, status);
-            fetchOrders();
-        } catch (err) {
-            console.error(err);
-            alert("Error actualitzant l'estat de pagament");
+            await ShopService.updatePaymentStatus(order.id, status);
+            toast.success(status === 'paid' ? 'Comanda marcada com a pagada' : 'Comanda marcada com a pendent');
+            await fetchOrders();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error actualitzant l\'estat de pagament');
         }
     };
 
-    const handleDeliveryUpdate = async (id: string, status: ShopOrder['delivery_status']) => {
+    const handleDeliveryUpdate = async (order: ShopOrder, status: ShopOrder['delivery_status']) => {
         try {
-            await ShopService.updateDeliveryStatus(id, status);
-            fetchOrders();
-        } catch (err) {
-            console.error(err);
-            alert("Error actualitzant l'estat d'entrega");
+            await ShopService.updateDeliveryStatus(order.id, status);
+            await fetchOrders();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error actualitzant l\'estat d\'entrega');
         }
     };
 
-    const handleDeleteOrder = async (id: string) => {
-        if (!window.confirm('Estàs segur que vols eliminar aquesta comanda? Aquesta acció no es pot desfer.')) {
-            return;
-        }
-
-        try {
-            await ShopService.deleteOrder(id);
-            fetchOrders();
-        } catch (err) {
-            console.error(err);
-            alert("Error eliminant la comanda");
-        }
-    };
-
-    const filteredOrders = useMemo(() => {
-        return orders.filter(order => {
-            const matchesSearch = order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (order.customer_email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (order.customer_phone || '').toLowerCase().includes(searchTerm.toLowerCase());
-
-            const isArchived = order.delivery_status === 'delivered' || order.delivery_status === 'not_picked_up';
-
-            if (view === 'active') {
-                return matchesSearch && !isArchived;
-            } else {
-                return matchesSearch && isArchived;
-            }
+    const handleDeleteOrder = async (order: ShopOrder) => {
+        const ok = await confirm({
+            title: 'Eliminar comanda',
+            message: 'Aquesta acció no es pot desfer.',
+            itemName: orderLabel(order),
+            destructive: true,
         });
-    }, [orders, searchTerm, view]);
+        if (!ok) return;
 
-    const stats = useMemo(() => {
-        const active = orders.filter(o => o.delivery_status === 'pending');
-        const revenue = orders.filter(o => o.payment_status === 'paid').reduce((acc, o) => acc + o.total_amount, 0);
-        return {
-            pendingCount: active.length,
-            totalRevenue: revenue
-        };
-    }, [orders]);
+        try {
+            await ShopService.deleteOrder(order.id);
+            toast.success('Comanda eliminada');
+            await fetchOrders();
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error eliminant la comanda');
+        }
+    };
 
-    if (loading) {
-        return (
-            <div className="flex flex-col justify-center items-center h-64 gap-4">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-                <p className="text-neutral-500 font-medium animate-pulse">Carregant comandes...</p>
-            </div>
-        );
-    }
+    const columns: AdminTableColumn<ShopOrder>[] = [
+        {
+            key: 'order',
+            header: 'Comanda',
+            render: (order) => (
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-[11px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">#{order.id.slice(0, 8)}</span>
+                        {order.is_member && (
+                            <span className="flex items-center gap-1 text-[10px] font-bold uppercase bg-neutral-900 text-white px-2 py-0.5 rounded">
+                                <BadgeCheck className="w-3 h-3" /> Soci
+                            </span>
+                        )}
+                        {(order.delivery_status === 'delivered' || order.delivery_status === 'not_picked_up') && (
+                            <span className="flex items-center gap-1 text-[10px] font-bold uppercase bg-neutral-100 text-neutral-500 px-2 py-0.5 rounded">
+                                <Archive className="w-3 h-3" /> Arxivat
+                            </span>
+                        )}
+                    </div>
+                    <div className="text-xs text-neutral-400">
+                        {format(new Date(order.created_at), 'd MMM yyyy · HH:mm', { locale: ca })}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            key: 'customer',
+            header: 'Client',
+            render: (order) => (
+                <div className="space-y-0.5 min-w-0">
+                    <div className="font-semibold text-neutral-900 truncate max-w-[220px]">{order.customer_name}</div>
+                    {order.customer_email && (
+                        <div className="text-xs text-neutral-500 flex items-center gap-1.5 truncate max-w-[220px]">
+                            <Mail className="w-3 h-3 flex-shrink-0" /> {order.customer_email}
+                        </div>
+                    )}
+                    {order.customer_phone && (
+                        <div className="text-xs text-neutral-500 flex items-center gap-1.5">
+                            <Phone className="w-3 h-3 flex-shrink-0" /> {order.customer_phone}
+                        </div>
+                    )}
+                </div>
+            ),
+        },
+        {
+            key: 'items',
+            header: 'Articles',
+            render: (order) => (
+                <div className="flex flex-wrap gap-1.5 max-w-xs">
+                    {order.items?.map((item) => {
+                        const short = item.variant && item.variant.stock < item.quantity;
+                        return (
+                            <span
+                                key={item.id}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] ${short
+                                    ? 'bg-amber-50 border-amber-200 text-amber-800'
+                                    : 'bg-neutral-50 border-neutral-200 text-neutral-600'}`}
+                            >
+                                {short && <AlertTriangle className="w-3 h-3 text-amber-600" />}
+                                <span className="font-bold">{item.quantity}x</span>
+                                <span>{item.variant?.product?.name}</span>
+                                <span className="text-neutral-400 uppercase text-[10px] font-bold">T-{item.variant?.size}</span>
+                            </span>
+                        );
+                    })}
+                    {(!order.items || order.items.length === 0) && (
+                        <span className="text-xs italic text-amber-600">Sense articles</span>
+                    )}
+                </div>
+            ),
+        },
+        {
+            key: 'total',
+            header: 'Total',
+            className: 'whitespace-nowrap font-bold text-neutral-900',
+            render: (order) => `${Number(order.total_amount || 0).toFixed(2)}€`,
+        },
+        {
+            key: 'payment',
+            header: 'Pagament',
+            render: (order) => (
+                <button
+                    type="button"
+                    onClick={() => handlePaymentUpdate(order, order.payment_status === 'paid' ? 'pending' : 'paid')}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-[11px] font-bold uppercase tracking-wide transition-colors ${order.payment_status === 'paid'
+                        ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
+                        : 'bg-white border-amber-200 text-amber-700 hover:bg-amber-50'}`}
+                >
+                    <Euro className="w-3.5 h-3.5" />
+                    {order.payment_status === 'paid' ? 'Pagat' : 'Pendent'}
+                </button>
+            ),
+        },
+        {
+            key: 'delivery',
+            header: 'Entrega',
+            render: (order) => (
+                <div className="flex gap-1 p-1 bg-neutral-100 rounded-md w-fit">
+                    <button
+                        type="button"
+                        onClick={() => handleDeliveryUpdate(order, 'pending')}
+                        className={`p-1.5 rounded transition-colors ${order.delivery_status === 'pending' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+                        title="Pendent"
+                        aria-label="Marcar com a pendent"
+                    >
+                        <Truck className="w-4 h-4" />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleDeliveryUpdate(order, 'delivered')}
+                        className={`p-1.5 rounded transition-colors ${order.delivery_status === 'delivered' ? 'bg-green-600 text-white' : 'text-neutral-400 hover:text-neutral-600'}`}
+                        title="Entregat i arxivar"
+                        aria-label="Marcar com a entregat"
+                    >
+                        <CheckCircle className="w-4 h-4" />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleDeliveryUpdate(order, 'not_picked_up')}
+                        className={`p-1.5 rounded transition-colors ${order.delivery_status === 'not_picked_up' ? 'bg-red-600 text-white' : 'text-neutral-400 hover:text-neutral-600'}`}
+                        title="No recollit"
+                        aria-label="Marcar com a no recollit"
+                    >
+                        <XCircle className="w-4 h-4" />
+                    </button>
+                </div>
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Accions',
+            render: (order) => (
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setSelectedOrder(order)}
+                        className="p-2 bg-neutral-100 text-neutral-600 rounded-md hover:bg-neutral-900 hover:text-white transition-colors"
+                        title="Gestionar articles"
+                        aria-label="Gestionar articles"
+                    >
+                        <Settings className="w-4 h-4" />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleDeleteOrder(order)}
+                        className="p-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-md transition-colors"
+                        title="Eliminar comanda"
+                        aria-label="Eliminar comanda"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                </div>
+            ),
+        },
+    ];
 
     return (
-        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
-            {/* Header Area */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 dark:text-white flex items-center gap-3">
-                        <LayoutDashboard className="w-8 h-8 text-primary" />
-                        Comandes i Reserves
-                    </h1>
-                    <p className="text-neutral-500 dark:text-neutral-400 mt-1">
-                        Gestió de reserves, vendes presencials i seguiment d'entregues.
-                    </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+            <AdminPageHeader
+                title="Comandes i Reserves"
+                subtitle="Gestió de reserves, vendes presencials i seguiment d'entregues."
+                icon={LayoutDashboard}
+                loading={loading}
+                onRefresh={fetchOrders}
+                onCreate={() => setIsCreating(true)}
+                createLabel="Nova Venda"
+                createIcon={Plus}
+                actions={
                     <select
                         value={academicYear}
                         onChange={(e) => setAcademicYear(e.target.value)}
-                        className="h-10 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/20"
+                        className="h-9 rounded-md border border-neutral-200 bg-white px-3 text-[13px] font-medium text-neutral-700 outline-none focus:ring-2 focus:ring-neutral-900/10"
                         title="Curs"
+                        aria-label="Curs"
                     >
                         <option value="">Tots els cursos</option>
                         {years.map((y) => (
                             <option key={y} value={y}>{y}</option>
                         ))}
                     </select>
-
-                    <div className="flex bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg">
-                        <button
-                            onClick={() => setView('active')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${view === 'active' ? 'bg-white dark:bg-neutral-700 text-primary shadow-sm' : 'text-neutral-500'} `}
-                        >
-                            Actives ({orders.filter(o => o.delivery_status === 'pending').length})
-                        </button>
-                        <button
-                            onClick={() => setView('archived')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${view === 'archived' ? 'bg-white dark:bg-neutral-700 text-primary shadow-sm' : 'text-neutral-500'} `}
-                        >
-                            Arxiu ({orders.filter(o => o.delivery_status !== 'pending').length})
-                        </button>
-                    </div>
-
-                    <button
-                        onClick={() => setIsCreating(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-all shadow-sm shadow-primary/20 active:scale-95 whitespace-nowrap"
-                    >
-                        <Plus className="w-5 h-5" />
-                        <span>Nova Venda</span>
-                    </button>
-                </div>
-            </div>
+                }
+            />
 
             {/* Quick Stats & Search */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="md:col-span-2 relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
                     <input
-                        type="text"
-                        placeholder="Buscar per nom, email, telèfon o ID..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+                        type="search"
+                        aria-label="Buscar comandes"
+                        placeholder="Buscar per nom, email o telèfon..."
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 transition-colors"
                     />
                 </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 flex flex-col justify-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-1">Pendents Entrega</span>
-                    <span className="text-2xl font-black text-blue-700 dark:text-blue-400">{stats.pendingCount}</span>
+                <div className="bg-white p-4 rounded-lg border border-neutral-200 flex flex-col justify-center">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Pendents Entrega</span>
+                    <span className="text-2xl font-black text-neutral-900">{summary.pendingCount}</span>
                 </div>
-                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-100 dark:border-green-900/30 flex flex-col justify-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-green-500 mb-1">Facturació Total</span>
-                    <span className="text-2xl font-black text-green-700 dark:text-green-400">{stats.totalRevenue.toFixed(2)}€</span>
+                <div className="bg-white p-4 rounded-lg border border-neutral-200 flex flex-col justify-center">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Facturació Total</span>
+                    <span className="text-2xl font-black text-green-700">{summary.totalRevenue.toFixed(2)}€</span>
                 </div>
             </div>
 
-            {/* Manual Order Creation Form */}
-            <AnimatePresence>
-                {isCreating && (
-                    <motion.form
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        onSubmit={handleCreateOrder}
-                        className="overflow-hidden"
-                    >
-                        <div className="bg-primary/5 border-2 border-dashed border-primary/30 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-4">
-                            <div className="flex-1 w-full">
-                                <label className="block text-xs font-black uppercase tracking-widest text-primary mb-2">Venda Presencial - Nom del Client</label>
-                                <input
-                                    autoFocus
-                                    type="text"
-                                    placeholder="Introdueix nom i cognoms..."
-                                    value={newCustomerName}
-                                    onChange={(e) => setNewCustomerName(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg border-none ring-1 ring-primary/20 focus:ring-2 focus:ring-primary outline-none text-lg font-bold"
-                                />
-                            </div>
-                            <div className="flex gap-2 shrink-0">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCreating(false)}
-                                    className="px-6 py-3 text-neutral-500 font-bold hover:bg-neutral-100 rounded-lg transition-all"
-                                >
-                                    Cancel·lar
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-sm shadow-primary/20 hover:bg-primary-dark transition-all"
-                                >
-                                    Crear Comanda
-                                </button>
-                            </div>
-                        </div>
-                    </motion.form>
-                )}
-            </AnimatePresence>
+            {/* View tabs */}
+            <div className="flex bg-neutral-100 p-1 rounded-lg w-fit">
+                <button
+                    type="button"
+                    onClick={() => setView('active')}
+                    aria-pressed={view === 'active'}
+                    className={`px-4 py-2 rounded-md text-[13px] font-semibold transition-colors ${view === 'active' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                >
+                    Actives ({summary.pendingCount})
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setView('archived')}
+                    aria-pressed={view === 'archived'}
+                    className={`px-4 py-2 rounded-md text-[13px] font-semibold transition-colors ${view === 'archived' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                >
+                    Arxiu ({summary.archivedCount})
+                </button>
+            </div>
 
-            {/* Orders List */}
-            <div className="space-y-4">
-                <AnimatePresence mode="popLayout">
-                    {filteredOrders.map((order) => (
-                        <motion.div
-                            key={order.id}
-                            layout
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden shadow-sm hover:shadow-sm transition-all"
+            <AdminTable
+                columns={columns}
+                rows={orders}
+                keyExtractor={(order) => order.id}
+                loading={loading}
+                emptyMessage={search ? 'Prova amb una altra cerca.' : view === 'archived' ? 'No hi ha comandes arxivades encara.' : 'Actualment no hi ha comandes pendents.'}
+                footer={
+                    <AdminPagination
+                        page={page}
+                        pageSize={pageSize}
+                        total={total}
+                        onPageChange={setPage}
+                        onPageSizeChange={setPageSize}
+                    />
+                }
+            />
+
+            {/* Manual order creation */}
+            <Modal
+                open={isCreating}
+                onClose={() => setIsCreating(false)}
+                title="Nova venda presencial"
+                size="md"
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => setIsCreating(false)}
+                            className="px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
                         >
-                            <div className="p-5 flex flex-col lg:flex-row gap-6 items-start lg:items-center">
-                                {/* Order Main Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                        <span className="font-mono text-[10px] font-bold text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded-lg">#{order.id.slice(0, 8)}</span>
-                                        <span className="text-xs font-semibold text-neutral-400">
-                                            {format(new Date(order.created_at), "d MMM yyyy · HH:mm", { locale: ca })}
-                                        </span>
-                                        {order.is_member && (
-                                            <span className="flex items-center gap-1 text-[10px] font-black uppercase bg-primary/10 text-primary px-2 py-1 rounded-lg">
-                                                <BadgeCheck className="w-3 h-3" /> Soci
-                                            </span>
-                                        )}
-                                        {order.delivery_status === 'delivered' && (
-                                            <span className="flex items-center gap-1 text-[10px] font-black uppercase bg-neutral-100 dark:bg-neutral-800 text-neutral-500 px-2 py-1 rounded-lg">
-                                                <Archive className="w-3 h-3" /> Arxivat
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="flex items-baseline gap-4 mb-3">
-                                        <h3 className="font-bold text-xl text-neutral-900 dark:text-white truncate max-w-xs">{order.customer_name}</h3>
-                                        <span className="text-2xl font-black text-primary">{order.total_amount.toFixed(2)}€</span>
-                                    </div>
-
-                                    {(order.customer_email || order.customer_phone) && (
-                                        <div className="flex flex-wrap gap-3 mb-3 text-xs text-neutral-500">
-                                            {order.customer_email && (
-                                                <span className="inline-flex items-center gap-1.5">
-                                                    <Mail className="w-3.5 h-3.5" />
-                                                    {order.customer_email}
-                                                </span>
-                                            )}
-                                            {order.customer_phone && (
-                                                <span className="inline-flex items-center gap-1.5">
-                                                    <Phone className="w-3.5 h-3.5" />
-                                                    {order.customer_phone}
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    <div className="flex flex-wrap gap-2">
-                                        {order.items?.map((item) => (
-                                            <div key={item.id} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] ${item.variant && item.variant.stock < item.quantity
-                                                ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/10 dark:border-amber-900/20'
-                                                : 'bg-neutral-50 dark:bg-neutral-800/50 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300'}`}>
-                                                {item.variant && item.variant.stock < item.quantity && (
-                                                    <AlertTriangle className="w-3 h-3 text-amber-500" />
-                                                )}
-                                                <span className="font-black text-primary">{item.quantity}x</span>
-                                                <span className="font-bold">{item.variant?.product?.name}</span>
-                                                <span className={`${item.variant && item.variant.stock < item.quantity ? 'text-amber-600/70' : 'text-neutral-400'} text-[9px] uppercase font-bold`}>T- {item.variant?.size}</span>
-                                            </div>
-                                        ))}
-                                        {(!order.items || order.items.length === 0) && (
-                                            <span className="text-xs italic text-amber-500 flex items-center gap-1">
-                                                <Plus className="w-3 h-3" /> Sense articles - Afegeix productes des de Gestionar
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Status Controls */}
-                                <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-neutral-100 dark:border-neutral-800">
-
-                                    {/* Payment Toggle */}
-                                    <button
-                                        onClick={() => handlePaymentUpdate(order.id, order.payment_status === 'paid' ? 'pending' : 'paid')}
-                                        className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all min-w-[90px] ${order.payment_status === 'paid'
-                                            ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-900/30'
-                                            : 'bg-white border-amber-100 text-amber-600 dark:bg-neutral-800 dark:border-amber-900/30'
-                                            } `}
-                                    >
-                                        <Euro className="w-4 h-4 mb-1" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">
-                                            {order.payment_status === 'paid' ? 'Pagat' : 'Pendent'}
-                                        </span>
-                                    </button>
-
-                                    {/* Delivery Status */}
-                                    <div className="flex gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg grow sm:grow-0">
-                                        <button
-                                            onClick={() => handleDeliveryUpdate(order.id, 'pending')}
-                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'pending' ? 'bg-white dark:bg-neutral-700 text-blue-600 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'} `}
-                                            title="Pendent"
-                                        >
-                                            <Truck className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeliveryUpdate(order.id, 'delivered')}
-                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'delivered' ? 'bg-green-500 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-600'} `}
-                                            title="Entregat i Arxivar"
-                                        >
-                                            <CheckCircle className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeliveryUpdate(order.id, 'not_picked_up')}
-                                            className={`p-2 rounded-lg transition-all ${order.delivery_status === 'not_picked_up' ? 'bg-red-500 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-600'} `}
-                                            title="No recollit"
-                                        >
-                                            <XCircle className="w-4 h-4" />
-                                        </button>
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex gap-2 ml-auto lg:ml-0">
-                                        <button
-                                            onClick={() => setSelectedOrder(order)}
-                                            className="p-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 rounded-lg hover:bg-primary hover:text-white transition-all shadow-sm"
-                                            title="Gestionar Articles"
-                                        >
-                                            <Settings className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteOrder(order.id)}
-                                            className="p-3 bg-red-50 dark:bg-red-900/10 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all shadow-sm"
-                                            title="Eliminar Comanda"
-                                        >
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-
-                {filteredOrders.length === 0 && (
-                    <div className="text-center py-20 bg-white dark:bg-neutral-900 rounded-3xl border border-dashed border-neutral-200 dark:border-neutral-800 shadow-inner">
-                        <div className="inline-flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-800 rounded-full mb-4">
-                            <Archive className="w-8 h-8 text-neutral-300" />
-                        </div>
-                        <h3 className="text-xl font-bold dark:text-white">No s'han trobat comandes</h3>
-                        <p className="text-neutral-500 mt-2">
-                            {searchTerm ? 'Prova amb una altra cerca.' : view === 'archived' ? 'No hi ha comandes arxivades encara.' : 'Actualment no hi ha comandes pendents.'}
-                        </p>
-                    </div>
-                )}
-            </div>
+                            Cancel·lar
+                        </button>
+                        <button
+                            type="submit"
+                            form="create-order-form"
+                            disabled={!newCustomerName.trim()}
+                            className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+                        >
+                            Crear Comanda
+                        </button>
+                    </>
+                }
+            >
+                <form id="create-order-form" onSubmit={handleCreateOrder} className="space-y-2">
+                    <label className="block text-sm font-medium text-neutral-700" htmlFor="new-customer-name">
+                        Nom del client
+                    </label>
+                    <input
+                        id="new-customer-name"
+                        type="text"
+                        placeholder="Introdueix nom i cognoms..."
+                        value={newCustomerName}
+                        onChange={(e) => setNewCustomerName(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-white outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 transition-colors"
+                    />
+                </form>
+            </Modal>
 
             {selectedOrder && (
                 <OrderEditModal

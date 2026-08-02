@@ -27,8 +27,8 @@ export const statusClasses: Record<TaskStatus, string> = {
 export const priorityClasses: Record<TaskPriority, string> = {
   low: 'bg-neutral-100 text-neutral-600',
   medium: 'bg-sky-100 text-sky-700',
-  high: 'bg-orange-100 text-orange-700',
-  urgent: 'bg-rose-100 text-rose-700'
+  high: 'bg-amber-100 text-amber-700',
+  urgent: 'bg-red-100 text-red-700'
 };
 
 export const getTodayIso = () => {

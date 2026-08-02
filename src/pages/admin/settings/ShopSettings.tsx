@@ -1,5 +1,6 @@
 import { Globe, ShoppingBag, Users, Plus, Trash2 } from "lucide-react";
 import type { ShopConfig } from "../../../services/ConfigService";
+import { useSettingsT } from "./useSettingsT";
 
 interface ShopSettingsProps {
     shop: ShopConfig;
@@ -8,24 +9,32 @@ interface ShopSettingsProps {
     setActiveLang: (lang: 'ca' | 'es' | 'en') => void;
 }
 
+const LANG_NAMES: Record<'ca' | 'es' | 'en', { key: string; fallback: string }> = {
+    ca: { key: 'admin.settings.lang.ca', fallback: 'Català' },
+    es: { key: 'admin.settings.lang.es', fallback: 'Castellà' },
+    en: { key: 'admin.settings.lang.en', fallback: 'Anglès' }
+};
+
 export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopSettingsProps) {
+    const t = useSettingsT();
+    const langName = t(LANG_NAMES[activeLang].key, LANG_NAMES[activeLang].fallback);
+
     return (
-        <div className="bg-white dark:bg-neutral-800 rounded-3xl p-8 shadow-sm border border-neutral-100 dark:border-neutral-700 space-y-6 animate-in fade-in slide-in-from-left-2 duration-300">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-50 dark:border-neutral-700 pb-4 mb-6">
-                <h3 className="text-xl font-bold text-neutral-800 dark:text-white">
-                    Configuració de la Botiga (Reserves)
+        <div className="bg-white rounded-xl p-6 border border-neutral-200 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
+                <h3 className="text-lg font-bold text-neutral-900">
+                    {t('admin.settings.shop.title', 'Configuració de la botiga (reserves)')}
                 </h3>
 
-                {/* Language Switcher */}
-                <div className="flex p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg w-fit">
+                <div className="flex p-1 bg-neutral-100 rounded-lg w-fit">
                     {(['ca', 'es', 'en'] as const).map((lang) => (
                         <button
                             key={lang}
                             type="button"
                             onClick={() => setActiveLang(lang)}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeLang === lang
-                                ? 'bg-white dark:bg-neutral-700 text-primary shadow-sm'
-                                : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
+                            className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${activeLang === lang
+                                ? 'bg-white text-neutral-900 shadow-sm'
+                                : 'text-neutral-400 hover:text-neutral-600'
                                 }`}
                         >
                             {lang.toUpperCase()}
@@ -35,15 +44,23 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
             </div>
 
             <div className="space-y-4">
-                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20 mb-4">
-                    <Globe size={18} />
-                    <p className="text-xs font-medium">Estàs editant la versió en <span className="font-bold underline">{activeLang === 'ca' ? 'Català' : activeLang === 'es' ? 'Castellà' : 'Anglès'}</span></p>
+                <div className="flex items-center gap-2 text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-100">
+                    <Globe size={18} aria-hidden="true" />
+                    <p className="text-xs font-medium">
+                        {t('admin.settings.editing_lang', 'Estàs editant la versió en')}{' '}
+                        <span className="font-bold underline">{langName}</span>
+                    </p>
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300">Missatge de Confirmació de Reserva</label>
-                    <p className="text-xs text-neutral-500 mb-2 italic">Aquest missatge apareixerà a la web un cop l'usuari finalitzi la seva reserva.</p>
+                    <label htmlFor="shop-confirmation" className="block text-sm font-bold text-neutral-700">
+                        {t('admin.settings.shop.confirmation_message', 'Missatge de confirmació de reserva')}
+                    </label>
+                    <p className="text-xs text-neutral-500 italic">
+                        {t('admin.settings.shop.confirmation_hint', "Aquest missatge apareixerà a la web un cop l'usuari finalitzi la seva reserva.")}
+                    </p>
                     <textarea
+                        id="shop-confirmation"
                         required
                         value={shop.translations?.[activeLang] || ""}
                         onChange={(e) => {
@@ -52,28 +69,26 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
                             setShop({ ...shop, translations: newTranslations });
                         }}
                         rows={4}
-                        className="w-full px-4 py-3 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 focus:ring-2 focus:ring-primary outline-none transition-all text-sm leading-relaxed"
-                        placeholder="Ex: Pots passar a recollir la teva comanda..."
+                        className="w-full px-4 py-3 rounded-lg border border-neutral-200 bg-neutral-50 focus:ring-2 focus:ring-neutral-300 outline-none transition-all text-sm leading-relaxed"
+                        placeholder={t('admin.settings.shop.confirmation_placeholder', 'Ex: Pots passar a recollir la teva comanda...')}
                     />
                 </div>
 
-                <hr className="border-neutral-100 dark:border-neutral-700" />
+                <hr className="border-neutral-100" />
 
-                {/* Admin Emails Management */}
+                {/* Admin notification emails */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                            <Users size={16} /> Emails per Notificacions
+                        <h4 className="text-sm font-bold text-neutral-700 flex items-center gap-2">
+                            <Users size={16} aria-hidden="true" />
+                            {t('admin.settings.shop.notification_emails', 'Emails per notificacions')}
                         </h4>
                         <button
                             type="button"
-                            onClick={() => {
-                                const newEmails = [...(shop.admin_emails || []), ""];
-                                setShop({ ...shop, admin_emails: newEmails });
-                            }}
-                            className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                            onClick={() => setShop({ ...shop, admin_emails: [...(shop.admin_emails || []), ""] })}
+                            className="text-xs font-bold text-neutral-700 hover:text-neutral-900 hover:underline flex items-center gap-1"
                         >
-                            <Plus size={14} /> Afegir email
+                            <Plus size={14} /> {t('admin.settings.shop.add_email', 'Afegir email')}
                         </button>
                     </div>
                     <div className="space-y-2">
@@ -82,20 +97,19 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
                                 <input
                                     type="email"
                                     value={email}
+                                    aria-label={`${t('admin.settings.shop.email', 'Email')} ${idx + 1}`}
                                     onChange={(e) => {
                                         const newEmails = [...shop.admin_emails];
                                         newEmails[idx] = e.target.value;
                                         setShop({ ...shop, admin_emails: newEmails });
                                     }}
-                                    className="flex-1 px-4 py-2 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-900 text-sm"
+                                    className="flex-1 px-4 py-2 rounded-lg border border-neutral-200 bg-neutral-50 text-sm"
                                     placeholder="admin@exemple.com"
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        const newEmails = shop.admin_emails.filter((_, i) => i !== idx);
-                                        setShop({ ...shop, admin_emails: newEmails });
-                                    }}
+                                    aria-label={t('common.delete', 'Eliminar')}
+                                    onClick={() => setShop({ ...shop, admin_emails: shop.admin_emails.filter((_, i) => i !== idx) })}
                                     className="p-2 text-neutral-400 hover:text-red-500"
                                 >
                                     <Trash2 size={16} />
@@ -103,39 +117,44 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
                             </div>
                         ))}
                         {(shop.admin_emails || []).length === 0 && (
-                            <p className="text-xs text-neutral-400 italic">No hi ha emails configurats.</p>
+                            <p className="text-xs text-neutral-400 italic">
+                                {t('admin.settings.shop.no_emails', 'No hi ha emails configurats.')}
+                            </p>
                         )}
                     </div>
                 </div>
 
-                <hr className="border-neutral-100 dark:border-neutral-700" />
+                <hr className="border-neutral-100" />
 
-                {/* Categories Management */}
+                {/* Product categories */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-bold text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
-                            <ShoppingBag size={16} /> Categories de Productes
+                        <h4 className="text-sm font-bold text-neutral-700 flex items-center gap-2">
+                            <ShoppingBag size={16} aria-hidden="true" />
+                            {t('admin.settings.shop.categories', 'Categories de productes')}
                         </h4>
                         <button
                             type="button"
-                            onClick={() => {
-                                const newCategories = [
+                            onClick={() => setShop({
+                                ...shop,
+                                categories: [
                                     ...(shop.categories || []),
                                     { id: `cat-${Date.now()}`, translations: { ca: "", es: "", en: "" } }
-                                ];
-                                setShop({ ...shop, categories: newCategories });
-                            }}
-                            className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                                ]
+                            })}
+                            className="text-xs font-bold text-neutral-700 hover:text-neutral-900 hover:underline flex items-center gap-1"
                         >
-                            <Plus size={14} /> Afegir categoria
+                            <Plus size={14} /> {t('admin.settings.shop.add_category', 'Afegir categoria')}
                         </button>
                     </div>
                     <div className="space-y-4">
                         {(shop.categories || []).map((cat, idx) => (
-                            <div key={cat.id} className="p-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg border border-neutral-100 dark:border-neutral-700 space-y-3">
+                            <div key={cat.id} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200 space-y-3">
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="flex-1 space-y-1">
-                                        <label className="text-[10px] font-bold text-neutral-400 uppercase">Slug / ID</label>
+                                        <label className="text-[10px] font-bold text-neutral-400 uppercase">
+                                            {t('admin.settings.shop.slug', 'Slug / ID')}
+                                        </label>
                                         <input
                                             type="text"
                                             value={cat.id}
@@ -144,15 +163,13 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
                                                 newCats[idx] = { ...cat, id: e.target.value.toLowerCase().replace(/\s+/g, '-') };
                                                 setShop({ ...shop, categories: newCats });
                                             }}
-                                            className="w-full px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-xs font-mono"
+                                            className="w-full px-3 py-1.5 rounded-lg border border-neutral-200 bg-white text-xs font-mono"
                                         />
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => {
-                                            const newCats = shop.categories.filter((_, i) => i !== idx);
-                                            setShop({ ...shop, categories: newCats });
-                                        }}
+                                        aria-label={t('common.delete', 'Eliminar')}
+                                        onClick={() => setShop({ ...shop, categories: shop.categories.filter((_, i) => i !== idx) })}
                                         className="p-2 text-neutral-400 hover:text-red-500 self-end"
                                     >
                                         <Trash2 size={16} />
@@ -167,12 +184,11 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
                                                 value={cat.translations[lang]}
                                                 onChange={(e) => {
                                                     const newCats = [...shop.categories];
-                                                    const newTrans = { ...cat.translations, [lang]: e.target.value };
-                                                    newCats[idx] = { ...cat, translations: newTrans };
+                                                    newCats[idx] = { ...cat, translations: { ...cat.translations, [lang]: e.target.value } };
                                                     setShop({ ...shop, categories: newCats });
                                                 }}
-                                                className="w-full px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-xs"
-                                                placeholder={lang === 'ca' ? "Nom..." : ""}
+                                                className="w-full px-3 py-1.5 rounded-lg border border-neutral-200 bg-white text-xs"
+                                                placeholder={lang === 'ca' ? t('admin.settings.shop.category_name', 'Nom...') : ""}
                                             />
                                         </div>
                                     ))}
@@ -180,7 +196,9 @@ export function ShopSettings({ shop, setShop, activeLang, setActiveLang }: ShopS
                             </div>
                         ))}
                         {(shop.categories || []).length === 0 && (
-                            <p className="text-xs text-neutral-400 italic">No hi ha categories configurades.</p>
+                            <p className="text-xs text-neutral-400 italic">
+                                {t('admin.settings.shop.no_categories', 'No hi ha categories configurades.')}
+                            </p>
                         )}
                     </div>
                 </div>

@@ -34,3 +34,12 @@ tmp/
 supabase/.temp/
 
 .vercel
+
+# One-off tooling dumps (lint/tsc/test logs) — never commit these
+*_output*.txt
+lint_*.txt
+lint_report*.json
+tsc_*.txt
+test-output*.txt
+any_errors.json
+build_errors.txt

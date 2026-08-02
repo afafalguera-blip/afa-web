@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bell } from 'lucide-react';
 import { TranslationService } from '../../services/TranslationService';
 import { getRegionalLanguageTag } from '../../utils/locale';
 import { AdminNotificationService } from '../../services/admin/AdminNotificationService';
 import type { Notification, NotificationFormData } from '../../services/admin/AdminNotificationService';
-import { NotificationHeader } from '../../components/admin/notifications/NotificationHeader';
+import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
+import { useToast } from '../../components/common/Toast';
+import { useConfirm } from '../../components/common/ConfirmDialog';
+import { useDirtyGuard } from '../../hooks/useDirtyGuard';
 import { NotificationFilters } from '../../components/admin/notifications/NotificationFilters';
 import { NotificationCard } from '../../components/admin/notifications/NotificationCard';
 import { NotificationFormModal } from '../../components/admin/notifications/NotificationFormModal';
@@ -20,6 +24,9 @@ const EMPTY_FORM: NotificationFormData = {
 };
 
 export default function NotificationManager() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const confirm = useConfirm();
   const nativeDateLocale = getRegionalLanguageTag(
     typeof document !== 'undefined' ? document.documentElement.lang : undefined
   );
@@ -32,56 +39,73 @@ export default function NotificationManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<NotificationFormData>(EMPTY_FORM);
+  const [formSnapshot, setFormSnapshot] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  const isDirty = isModalOpen && JSON.stringify(formData) !== formSnapshot;
+  const { confirmDiscard } = useDirtyGuard(isDirty);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const data = await AdminNotificationService.getNotifications();
       setNotifications(data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      alert('Error al cargar notificaciones');
+      toast.error(t('common.error_generic'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, t]);
 
-  const handleCreate = () => {
-    setEditingId(null);
-    setFormData({
-      ...EMPTY_FORM,
-      start_at: new Date().toISOString().slice(0, 16)
-    });
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  const openModal = (id: string | null, data: NotificationFormData) => {
+    setEditingId(id);
+    setFormData(data);
+    setFormSnapshot(JSON.stringify(data));
     setIsModalOpen(true);
   };
 
-  const handleEdit = (notification: Notification) => {
-    setEditingId(notification.id);
-    setFormData({
-      title: notification.title,
-      message: notification.message || '',
-      type: notification.type,
-      link: notification.link || '',
-      start_at: new Date(notification.start_at).toISOString().slice(0, 16),
-      end_at: notification.end_at ? new Date(notification.end_at).toISOString().slice(0, 16) : '',
-      active: notification.active
-    });
-    setIsModalOpen(true);
+  const handleCreate = () => openModal(null, {
+    ...EMPTY_FORM,
+    start_at: new Date().toISOString().slice(0, 16)
+  });
+
+  const handleEdit = (notification: Notification) => openModal(notification.id, {
+    title: notification.title,
+    message: notification.message || '',
+    type: notification.type,
+    link: notification.link || '',
+    start_at: new Date(notification.start_at).toISOString().slice(0, 16),
+    end_at: notification.end_at ? new Date(notification.end_at).toISOString().slice(0, 16) : '',
+    active: notification.active
+  });
+
+  const handleCloseModal = async () => {
+    if (!(await confirmDiscard())) return;
+    setIsModalOpen(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta notificación?')) return;
+    const notification = notifications.find((item) => item.id === id);
+    const accepted = await confirm({
+      title: t('admin.notifications.delete_confirm', 'Segur que vols eliminar aquesta notificació?'),
+      itemName: notification?.title,
+      confirmLabel: t('common.delete'),
+      destructive: true
+    });
+    if (!accepted) return;
+
     try {
       await AdminNotificationService.deleteNotification(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
+      toast.success(t('admin.notifications.deleted', 'Notificació eliminada'));
     } catch (error) {
       console.error('Error deleting:', error);
-      alert('Error al eliminar');
+      toast.error(t('common.error_delete'));
     }
   };
 
@@ -92,15 +116,20 @@ export default function NotificationManager() {
       setNotifications(prev => prev.map(n =>
         n.id === notification.id ? { ...n, active: newActive } : n
       ));
+      toast.success(
+        newActive
+          ? t('admin.status.published_toast', 'Contingut publicat')
+          : t('admin.status.unpublished_toast', 'Contingut despublicat')
+      );
     } catch (error) {
       console.error('Error toggling active:', error);
-      alert('Error al actualizar estado');
+      toast.error(t('common.error_save'));
     }
   };
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      alert('El título es obligatorio');
+      toast.error(t('admin.notifications.title_required', 'El títol és obligatori'));
       return;
     }
     setSaving(true);
@@ -123,31 +152,37 @@ export default function NotificationManager() {
       }
 
       await AdminNotificationService.saveNotification({ ...formData, translations }, editingId ?? undefined);
+      setFormSnapshot(JSON.stringify(formData));
       setIsModalOpen(false);
-      fetchNotifications();
+      toast.success(t('admin.notifications.saved', 'Notificació desada'));
+      await fetchNotifications();
     } catch (error) {
       console.error('Error saving:', error);
-      alert('Error al guardar');
+      toast.error(t('common.error_save'));
     } finally {
       setSaving(false);
     }
   };
 
-  const filteredNotifications = notifications.filter(n => {
+  const filteredNotifications = useMemo(() => notifications.filter(n => {
     const matchesSearch = n.title.toLowerCase().includes(searchText.toLowerCase());
     const matchesType = typeFilter === 'all' || n.type === typeFilter;
     const matchesStatus = statusFilter === 'all' ||
       (statusFilter === 'active' && n.active) ||
       (statusFilter === 'inactive' && !n.active);
     return matchesSearch && matchesType && matchesStatus;
-  });
+  }), [notifications, searchText, typeFilter, statusFilter]);
 
   return (
-    <div className="space-y-6">
-      <NotificationHeader
+    <div className="max-w-7xl mx-auto space-y-6">
+      <AdminPageHeader
+        title={t('admin.notifications.title', 'Gestor de notificacions')}
+        subtitle={t('admin.notifications.subtitle', 'Administra els avisos i alertes de la campaneta')}
+        icon={Bell}
+        loading={loading}
         onRefresh={fetchNotifications}
         onCreate={handleCreate}
-        loading={loading}
+        createLabel={t('admin.notifications.new', 'Nova notificació')}
       />
 
       <NotificationFilters
@@ -161,12 +196,12 @@ export default function NotificationManager() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900" />
         </div>
       ) : filteredNotifications.length === 0 ? (
         <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center text-neutral-500">
-          <Bell className="w-12 h-12 mx-auto mb-3 opacity-20" />
-          No hay notificaciones
+          <Bell className="w-12 h-12 mx-auto mb-3 text-neutral-300" />
+          {t('admin.notifications.empty', 'No hi ha notificacions')}
         </div>
       ) : (
         <div className="grid gap-4">
@@ -182,17 +217,16 @@ export default function NotificationManager() {
         </div>
       )}
 
-      {isModalOpen && (
-        <NotificationFormModal
-          isEditing={!!editingId}
-          formData={formData}
-          setFormData={setFormData}
-          saving={saving}
-          nativeDateLocale={nativeDateLocale}
-          onSave={handleSave}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
+      <NotificationFormModal
+        open={isModalOpen}
+        isEditing={!!editingId}
+        formData={formData}
+        setFormData={setFormData}
+        saving={saving}
+        nativeDateLocale={nativeDateLocale}
+        onSave={handleSave}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

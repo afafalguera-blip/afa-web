@@ -1,13 +1,20 @@
 /**
- * @fileoverview Custom hook for financial and shop statistics
- * Extracts stats logic from Dashboard component
+ * @fileoverview Dashboard statistics: inscription counters, payments and shop.
+ * All three are aggregated queries scoped to the selected cohort — the
+ * dashboard never loads the inscription list itself.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { StatsService, type FinancialStats, type ShopStats } from '../services/StatsService';
+import {
+  AdminInscriptionsService,
+  type InscriptionStats,
+} from '../services/admin/AdminInscriptionsService';
 
 interface UseFinancialStatsReturn {
-  /** Financial statistics (inscriptions) */
+  /** Inscription counters (students, bajas, AFA members, top activity) */
+  inscriptionStats: InscriptionStats;
+  /** Financial statistics (payments) */
   financialStats: FinancialStats;
   /** Shop statistics (orders) */
   shopStats: ShopStats;
@@ -18,6 +25,14 @@ interface UseFinancialStatsReturn {
   /** Reload statistics from API */
   reload: () => Promise<void>;
 }
+
+const DEFAULT_INSCRIPTION_STATS: InscriptionStats = {
+  totalInscriptions: 0,
+  activeStudents: 0,
+  bajaStudents: 0,
+  afaMemberStudents: 0,
+  topActivity: null,
+};
 
 const DEFAULT_FINANCIAL_STATS: FinancialStats = {
   totalAmount: 0,
@@ -31,11 +46,8 @@ const DEFAULT_SHOP_STATS: ShopStats = {
   revenue: 0,
 };
 
-/**
- * Hook for managing financial and shop statistics
- * Encapsulates all stats-related API calls and state
- */
 export function useFinancialStats(academicYear?: string): UseFinancialStatsReturn {
+  const [inscriptionStats, setInscriptionStats] = useState<InscriptionStats>(DEFAULT_INSCRIPTION_STATS);
   const [financialStats, setFinancialStats] = useState<FinancialStats>(DEFAULT_FINANCIAL_STATS);
   const [shopStats, setShopStats] = useState<ShopStats>(DEFAULT_SHOP_STATS);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,10 +58,12 @@ export function useFinancialStats(academicYear?: string): UseFinancialStatsRetur
     setError(null);
 
     try {
-      const [fin, shop] = await Promise.all([
+      const [inscriptions, fin, shop] = await Promise.all([
+        AdminInscriptionsService.getInscriptionStats(academicYear || undefined),
         StatsService.getFinancialStats(academicYear || undefined),
         StatsService.getShopStats(academicYear || undefined),
       ]);
+      setInscriptionStats(inscriptions);
       setFinancialStats(fin);
       setShopStats(shop);
     } catch (err) {
@@ -62,10 +76,19 @@ export function useFinancialStats(academicYear?: string): UseFinancialStatsRetur
   }, [academicYear]);
 
   useEffect(() => {
-    loadStats();
+    // Deferred to a microtask: the effect body itself must not call setState
+    // synchronously (react-hooks/set-state-in-effect).
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) loadStats();
+    });
+    return () => {
+      active = false;
+    };
   }, [loadStats]);
 
   return {
+    inscriptionStats,
     financialStats,
     shopStats,
     isLoading,

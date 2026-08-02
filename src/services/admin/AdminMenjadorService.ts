@@ -4,6 +4,9 @@ import type { MenjadorMenu, MenjadorRate } from '../MenjadorService';
 export type AdminMenjadorRate = MenjadorRate;
 export type AdminMenjadorMenu = MenjadorMenu;
 
+/** A row being edited: rows the admin just added carry a `tmp-` id until saved. */
+export type AdminMenjadorRateDraft = Omit<AdminMenjadorRate, 'id'> & { id?: string };
+
 export interface MenuUploadData {
   title: string;
   month: number | null;
@@ -13,6 +16,16 @@ export interface MenuUploadData {
 
 const ALLOWED_MIMES = new Set(['application/pdf']);
 const MAX_SIZE = 15 * 1024 * 1024; // 15 MB
+const TMP_PREFIX = 'tmp-';
+
+export function newMenjadorDraftId(): string {
+  return `${TMP_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** True when the id refers to a row that already exists in the database. */
+export function isPersistedId(id?: string): id is string {
+  return !!id && !id.startsWith(TMP_PREFIX);
+}
 
 export const AdminMenjadorService = {
   // ---------- Rates ----------
@@ -26,37 +39,61 @@ export const AdminMenjadorService = {
   },
 
   /**
-   * Replace all rates with the supplied list. Mirrors AcollidaManager pattern:
-   * delete-then-insert keeps it simple and stable for a small static list.
+   * Persists the edited list without ever emptying the table.
+   *
+   * Writes happen before deletes: existing rows are upserted by `id` (keeping
+   * their ids and any reference to them), new rows are inserted, and only then
+   * are the rows the admin actually removed deleted. A failure at any step
+   * aborts the rest, so the worst case is a partial update, never a wipe.
+   *
+   * @param rates     the list as shown in the editor, in display order
+   * @param loadedIds ids present when the editor loaded, used to diff deletions
    */
-  async replaceAllRates(rates: Omit<AdminMenjadorRate, 'id'>[]): Promise<void> {
-    const { error: delError } = await supabase
-      .from('menjador_rates')
-      .delete()
-      .neq('label', '__FORCE_DELETE_ALL__');
-    if (delError) throw delError;
+  async saveRates(rates: AdminMenjadorRateDraft[], loadedIds: string[]): Promise<AdminMenjadorRate[]> {
+    const keptIds = new Set(rates.map(r => r.id).filter(isPersistedId));
+    const removedIds = loadedIds.filter(id => !keptIds.has(id));
 
-    if (rates.length === 0) return;
+    const toRow = (r: AdminMenjadorRateDraft, i: number) => ({
+      label: r.label || r.label_ca || r.label_es || r.label_en || '',
+      label_ca: r.label_ca ?? null,
+      label_es: r.label_es ?? null,
+      label_en: r.label_en ?? null,
+      rate_type: r.rate_type,
+      preu_soci: r.preu_soci,
+      preu_no_soci: r.preu_no_soci,
+      note: r.note ?? null,
+      note_ca: r.note_ca ?? null,
+      note_es: r.note_es ?? null,
+      note_en: r.note_en ?? null,
+      order_index: i,
+    });
 
-    const { error: insError } = await supabase
-      .from('menjador_rates')
-      .insert(
-        rates.map((r, i) => ({
-          label: r.label,
-          label_ca: r.label_ca,
-          label_es: r.label_es,
-          label_en: r.label_en,
-          rate_type: r.rate_type,
-          preu_soci: r.preu_soci,
-          preu_no_soci: r.preu_no_soci,
-          note: r.note,
-          note_ca: r.note_ca,
-          note_es: r.note_es,
-          note_en: r.note_en,
-          order_index: i,
-        }))
-      );
-    if (insError) throw insError;
+    const existing = rates
+      .map((rate, index) => ({ rate, index }))
+      .filter(({ rate }) => isPersistedId(rate.id))
+      .map(({ rate, index }) => ({ id: rate.id as string, ...toRow(rate, index) }));
+
+    const created = rates
+      .map((rate, index) => ({ rate, index }))
+      .filter(({ rate }) => !isPersistedId(rate.id))
+      .map(({ rate, index }) => toRow(rate, index));
+
+    if (existing.length > 0) {
+      const { error } = await supabase.from('menjador_rates').upsert(existing, { onConflict: 'id' });
+      if (error) throw error;
+    }
+
+    if (created.length > 0) {
+      const { error } = await supabase.from('menjador_rates').insert(created);
+      if (error) throw error;
+    }
+
+    if (removedIds.length > 0) {
+      const { error } = await supabase.from('menjador_rates').delete().in('id', removedIds);
+      if (error) throw error;
+    }
+
+    return this.getAllRates();
   },
 
   // ---------- Menus ----------

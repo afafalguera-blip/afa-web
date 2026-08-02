@@ -1,6 +1,9 @@
+import { useTranslation } from 'react-i18next';
+import { Modal } from '../../common/Modal';
 import type { NotificationFormData, Notification } from '../../../services/admin/AdminNotificationService';
 
 interface NotificationFormModalProps {
+  open: boolean;
   isEditing: boolean;
   formData: NotificationFormData;
   setFormData: React.Dispatch<React.SetStateAction<NotificationFormData>>;
@@ -10,118 +13,145 @@ interface NotificationFormModalProps {
   onClose: () => void;
 }
 
+const FIELD_CLASS =
+  'w-full px-3 py-2 border border-neutral-200 rounded-md focus:ring-2 focus:ring-neutral-300 outline-none bg-white';
+const LABEL_CLASS = 'block text-[13px] font-medium text-neutral-700 mb-1';
+
 export function NotificationFormModal({
-  isEditing, formData, setFormData, saving, nativeDateLocale, onSave, onClose
+  open, isEditing, formData, setFormData, saving, nativeDateLocale, onSave, onClose
 }: NotificationFormModalProps) {
+  const { t } = useTranslation();
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-sm w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-neutral-200">
-          <h2 className="text-xl font-bold text-neutral-900">
-            {isEditing ? 'Editar Notificación' : 'Nueva Notificación'}
-          </h2>
-        </div>
-        <div className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Título *</label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="Ej: Fiesta del Chocolate"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Mensaje (Opcional)</label>
-            <textarea
-              value={formData.message}
-              onChange={e => setFormData(prev => ({ ...prev, message: e.target.value }))}
-              className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              rows={3}
-              placeholder="Detalles breves..."
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Tipo</label>
-              <select
-                value={formData.type}
-                onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as Notification['type'] }))}
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              >
-                <option value="info">Información</option>
-                <option value="alert">Alerta</option>
-                <option value="news">Noticia</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Enlace (Opcional)</label>
-              <input
-                type="text"
-                value={formData.link}
-                onChange={e => setFormData(prev => ({ ...prev, link: e.target.value }))}
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="https://..."
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Mostrar desde *</label>
-              <input
-                type="datetime-local"
-                lang={nativeDateLocale}
-                value={formData.start_at}
-                onChange={e => setFormData(prev => ({ ...prev, start_at: e.target.value }))}
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Mostrar hasta</label>
-              <input
-                type="datetime-local"
-                lang={nativeDateLocale}
-                value={formData.end_at}
-                onChange={e => setFormData(prev => ({ ...prev, end_at: e.target.value }))}
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <p className="text-xs text-neutral-400 mt-1">Dejar vacío para indefinido</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="active"
-              checked={formData.active}
-              onChange={e => setFormData(prev => ({ ...prev, active: e.target.checked }))}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-            />
-            <label htmlFor="active" className="text-sm font-medium text-neutral-700">Activo visible</label>
-          </div>
-
-        </div>
-        <div className="p-6 border-t border-neutral-200 flex justify-end gap-3">
+    <Modal
+      open={open}
+      onClose={onClose}
+      closeOnBackdrop={false}
+      title={isEditing ? t('admin.notifications.edit', 'Editar notificació') : t('admin.notifications.new', 'Nova notificació')}
+      footer={
+        <>
           <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
             disabled={saving}
+            className="px-3.5 py-2 rounded-md border border-neutral-300 bg-white text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {t('common.cancel')}
           </button>
           <button
+            type="button"
             onClick={onSave}
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
-            {saving ? 'Guardando...' : 'Guardar'}
+            {saving ? t('common.saving') : t('common.save')}
           </button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="notification-title" className={LABEL_CLASS}>
+            {t('admin.notifications.field_title', 'Títol')} *
+          </label>
+          <input
+            id="notification-title"
+            type="text"
+            value={formData.title}
+            onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            className={FIELD_CLASS}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="notification-message" className={LABEL_CLASS}>
+            {t('admin.notifications.field_message', 'Missatge (opcional)')}
+          </label>
+          <textarea
+            id="notification-message"
+            value={formData.message}
+            onChange={e => setFormData(prev => ({ ...prev, message: e.target.value }))}
+            className={`${FIELD_CLASS} resize-none`}
+            rows={3}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="notification-type" className={LABEL_CLASS}>
+              {t('admin.notifications.field_type', 'Tipus')}
+            </label>
+            <select
+              id="notification-type"
+              value={formData.type}
+              onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as Notification['type'] }))}
+              className={FIELD_CLASS}
+            >
+              <option value="info">{t('admin.notifications.type_info', 'Informació')}</option>
+              <option value="alert">{t('admin.notifications.type_alert', 'Alerta')}</option>
+              <option value="news">{t('admin.notifications.type_news', 'Notícia')}</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="notification-link" className={LABEL_CLASS}>
+              {t('admin.notifications.field_link', 'Enllaç (opcional)')}
+            </label>
+            <input
+              id="notification-link"
+              type="text"
+              value={formData.link}
+              onChange={e => setFormData(prev => ({ ...prev, link: e.target.value }))}
+              className={FIELD_CLASS}
+              placeholder="https://..."
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="notification-start" className={LABEL_CLASS}>
+              {t('admin.notifications.field_start', 'Mostrar des de')} *
+            </label>
+            <input
+              id="notification-start"
+              type="datetime-local"
+              lang={nativeDateLocale}
+              value={formData.start_at}
+              onChange={e => setFormData(prev => ({ ...prev, start_at: e.target.value }))}
+              className={FIELD_CLASS}
+            />
+          </div>
+          <div>
+            <label htmlFor="notification-end" className={LABEL_CLASS}>
+              {t('admin.notifications.field_end', 'Mostrar fins a')}
+            </label>
+            <input
+              id="notification-end"
+              type="datetime-local"
+              lang={nativeDateLocale}
+              value={formData.end_at}
+              onChange={e => setFormData(prev => ({ ...prev, end_at: e.target.value }))}
+              className={FIELD_CLASS}
+            />
+            <p className="text-xs text-neutral-400 mt-1">
+              {t('admin.notifications.end_hint', 'Deixa-ho buit per indefinit')}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="notification-active"
+            checked={formData.active}
+            onChange={e => setFormData(prev => ({ ...prev, active: e.target.checked }))}
+            className="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-400"
+          />
+          <label htmlFor="notification-active" className="text-[13px] font-medium text-neutral-700">
+            {t('admin.status.visible', 'Publicat')}
+          </label>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

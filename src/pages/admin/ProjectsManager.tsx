@@ -1,75 +1,77 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderHeart } from 'lucide-react';
 import { AdminProjectsService } from '../../services/admin/AdminProjectsService';
 import type { Project, ProjectFormData } from '../../services/admin/AdminProjectsService';
 import { TranslationService } from '../../services/TranslationService';
-import { ProjectsHeader } from '../../components/admin/projects/ProjectsHeader';
+import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
+import { useToast } from '../../components/common/Toast';
+import { useConfirm } from '../../components/common/ConfirmDialog';
+import { useDirtyGuard } from '../../hooks/useDirtyGuard';
 import { ProjectsFilterBar } from '../../components/admin/projects/ProjectsFilterBar';
 import { ProjectCard } from '../../components/admin/projects/ProjectCard';
 import { ProjectFormModal } from '../../components/admin/projects/ProjectFormModal';
 
-const EMPTY_TRANSLATIONS = {
-  ca: { title: '', description: '', details: '', impact: '', participants: '' },
-  es: { title: '', description: '', details: '', impact: '', participants: '' },
-  en: { title: '', description: '', details: '', impact: '', participants: '' }
-};
-
-const EMPTY_FORM: ProjectFormData = {
+const createEmptyForm = (): ProjectFormData => ({
   title: '',
   description: '',
   image_url: '',
-  translations: { ...EMPTY_TRANSLATIONS }
-};
+  translations: {
+    ca: { title: '', description: '', details: '', impact: '', participants: '' },
+    es: { title: '', description: '', details: '', impact: '', participants: '' },
+    en: { title: '', description: '', details: '', impact: '', participants: '' }
+  }
+});
 
 export default function ProjectsManager() {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const confirm = useConfirm();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [formData, setFormData] = useState<ProjectFormData>(EMPTY_FORM);
+  const [formData, setFormData] = useState<ProjectFormData>(createEmptyForm);
+  const [formSnapshot, setFormSnapshot] = useState('');
   const [activeLang, setActiveLang] = useState<'ca' | 'es' | 'en'>('es');
   const [isTranslating, setIsTranslating] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  const isDirty = isModalOpen && JSON.stringify(formData) !== formSnapshot;
+  const { confirmDiscard } = useDirtyGuard(isDirty);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
       const data = await AdminProjectsService.getProjects();
       setProjects(data);
     } catch (error) {
       console.error('Error fetching projects:', error);
+      toast.error(t('common.error_generic'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, t]);
 
-  const handleCreate = () => {
-    setEditingProject(null);
-    setFormData({
-      title: '',
-      description: '',
-      image_url: '',
-      translations: {
-        ca: { title: '', description: '', details: '', impact: '', participants: '' },
-        es: { title: '', description: '', details: '', impact: '', participants: '' },
-        en: { title: '', description: '', details: '', impact: '', participants: '' }
-      }
-    });
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  const openModal = (project: Project | null, data: ProjectFormData) => {
+    setEditingProject(project);
+    setFormData(data);
+    setFormSnapshot(JSON.stringify(data));
     setActiveLang('es');
     setIsModalOpen(true);
   };
 
+  const handleCreate = () => openModal(null, createEmptyForm());
+
   const handleEdit = (project: Project) => {
-    setEditingProject(project);
-    setFormData({
+    openModal(project, {
       title: project.title,
       description: project.description || '',
       image_url: project.image_url || '',
@@ -80,19 +82,30 @@ export default function ProjectsManager() {
         ...(project.translations || {})
       }
     });
-    setActiveLang('es');
-    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = async () => {
+    if (!(await confirmDiscard())) return;
+    setIsModalOpen(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('admin.projects.delete_confirm'))) return;
+    const project = projects.find((item) => item.id === id);
+    const accepted = await confirm({
+      title: t('admin.projects.delete_confirm'),
+      itemName: project?.title,
+      confirmLabel: t('common.delete'),
+      destructive: true
+    });
+    if (!accepted) return;
 
     try {
       await AdminProjectsService.deleteProject(id);
       setProjects(prev => prev.filter(p => p.id !== id));
+      toast.success(t('admin.projects.deleted', 'Projecte eliminat'));
     } catch (error) {
       console.error('Error deleting project:', error);
-      alert(t('common.error_delete'));
+      toast.error(t('common.error_delete'));
     }
   };
 
@@ -104,9 +117,14 @@ export default function ProjectsManager() {
       setProjects(prev => prev.map(p =>
         p.id === project.id ? { ...p, status: newStatus } : p
       ));
+      toast.success(
+        newStatus === 'active'
+          ? t('admin.status.published_toast', 'Contingut publicat')
+          : t('admin.status.unpublished_toast', 'Contingut despublicat')
+      );
     } catch (error) {
       console.error('Error updating project:', error);
-      alert(t('common.error_save'));
+      toast.error(t('common.error_save'));
     }
   };
 
@@ -114,7 +132,7 @@ export default function ProjectsManager() {
     const sourceContent = formData.translations[activeLang];
 
     if (!sourceContent.title) {
-      alert(t('admin.news.fill_source_first'));
+      toast.error(t('admin.news.fill_source_first'));
       return;
     }
 
@@ -144,9 +162,10 @@ export default function ProjectsManager() {
         ...prev,
         translations: updatedTranslations
       }));
+      toast.success(t('admin.news.translated', 'Traduccions generades'));
     } catch (error) {
       console.error('Translation error:', error);
-      alert(t('common.error_translation'));
+      toast.error(t('common.error_translation'));
     } finally {
       setIsTranslating(false);
     }
@@ -154,7 +173,7 @@ export default function ProjectsManager() {
 
   const handleSave = async () => {
     if (!formData.translations.es.title.trim() && !formData.title.trim()) {
-      alert(t('admin.projects.title_required'));
+      toast.error(t('admin.projects.title_required'));
       return;
     }
 
@@ -162,28 +181,34 @@ export default function ProjectsManager() {
     try {
       const maxOrder = projects.reduce((max, p) => Math.max(max, p.display_order), 0);
       await AdminProjectsService.saveProject(formData, maxOrder, editingProject?.id);
+      setFormSnapshot(JSON.stringify(formData));
       setIsModalOpen(false);
-      fetchProjects();
+      toast.success(t('admin.projects.saved', 'Projecte desat'));
+      await fetchProjects();
     } catch (error) {
       console.error('Error saving project:', error);
-      alert(t('common.error_save'));
+      toast.error(t('common.error_save'));
     } finally {
       setSaving(false);
     }
   };
 
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = useMemo(() => projects.filter(project => {
     if (statusFilter !== 'all' && project.status !== statusFilter) return false;
     if (searchText && !project.title.toLowerCase().includes(searchText.toLowerCase())) return false;
     return true;
-  });
+  }), [projects, statusFilter, searchText]);
 
   return (
-    <div className="space-y-6">
-      <ProjectsHeader
+    <div className="max-w-7xl mx-auto space-y-6">
+      <AdminPageHeader
+        title={t('admin.projects.title')}
+        subtitle={t('admin.projects.subtitle')}
+        icon={FolderHeart}
         loading={loading}
         onRefresh={fetchProjects}
         onCreate={handleCreate}
+        createLabel={t('admin.projects.new_project')}
       />
 
       <ProjectsFilterBar
@@ -195,7 +220,7 @@ export default function ProjectsManager() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-900" />
         </div>
       ) : filteredProjects.length === 0 ? (
         <div className="bg-white rounded-lg border border-neutral-200 p-8 text-center text-neutral-500">
@@ -216,20 +241,19 @@ export default function ProjectsManager() {
         </div>
       )}
 
-      {isModalOpen && (
-        <ProjectFormModal
-          isEditing={!!editingProject}
-          formData={formData}
-          setFormData={setFormData}
-          activeLang={activeLang}
-          setActiveLang={setActiveLang}
-          isTranslating={isTranslating}
-          saving={saving}
-          onAutoTranslate={handleAutoTranslate}
-          onSave={handleSave}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
+      <ProjectFormModal
+        open={isModalOpen}
+        isEditing={!!editingProject}
+        formData={formData}
+        setFormData={setFormData}
+        activeLang={activeLang}
+        setActiveLang={setActiveLang}
+        isTranslating={isTranslating}
+        saving={saving}
+        onAutoTranslate={handleAutoTranslate}
+        onSave={handleSave}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
