@@ -102,7 +102,7 @@ export function TaskCard({
         </select>
 
         {task.status !== 'done' ? (
-          <button type="button" onClick={() => onQuickStatusChange(task.id, 'done')} disabled={updatingTaskId === task.id} className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-60">
+          <button type="button" onClick={() => onQuickStatusChange(task.id, 'done')} disabled={updatingTaskId === task.id} className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-60">
             {updatingTaskId === task.id ? t('common.saving') : t('admin.tasks.mark_done')}
           </button>
         ) : (

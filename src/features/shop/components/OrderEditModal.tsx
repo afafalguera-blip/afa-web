@@ -146,7 +146,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
             <button
               type="button"
               onClick={requestClose}
-              className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors"
+              className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors"
             >
               Tancar
             </button>
@@ -181,7 +181,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                   type="button"
                   onClick={handleUpdateName}
                   aria-label="Desar nom"
-                  className="p-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+                  className="p-2 bg-admin-accent text-white rounded-lg hover:bg-neutral-800 transition-colors"
                 >
                   <Save className="w-4 h-4" />
                 </button>
@@ -213,14 +213,14 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                     onChange={e => handleToggleMember(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-neutral-200 rounded-full peer-checked:bg-neutral-900 transition-colors"></div>
+                  <div className="w-9 h-5 bg-neutral-200 rounded-full peer-checked:bg-admin-accent transition-colors"></div>
                   <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <BadgeCheck className={`w-4 h-4 ${order.is_member ? 'text-neutral-900' : 'text-neutral-300'}`} />
                   <span className="text-sm font-bold text-neutral-700">Soci</span>
                   {order.is_member && (
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-neutral-900 text-white px-2 py-0.5 rounded-full">Preu soci aplicat</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-admin-accent text-white px-2 py-0.5 rounded-full">Preu soci aplicat</span>
                   )}
                 </div>
               </label>
@@ -234,7 +234,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
               <button
                 type="button"
                 onClick={() => setShowAddProduct(true)}
-                className="flex items-center gap-1.5 text-[13px] font-medium bg-neutral-900 text-white px-3 py-1.5 rounded-md hover:bg-neutral-800 transition-colors"
+                className="flex items-center gap-1.5 text-[13px] font-medium bg-admin-accent text-white px-3 py-1.5 rounded-md hover:bg-neutral-800 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" /> Afegir Producte
               </button>
@@ -310,7 +310,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
             type="button"
             disabled={!selectedVariantId || loading}
             onClick={handleAddItem}
-            className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+            className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
             {loading ? 'Processant...' : 'Confirmar i Afegir'}
           </button>
@@ -345,7 +345,7 @@ export function OrderEditModal({ order: initialOrder, onClose, onUpdate }: Order
                     type="button"
                     onClick={() => setSelectedVariantId(v.id)}
                     aria-pressed={selectedVariantId === v.id}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold border transition-colors ${selectedVariantId === v.id ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-400'}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold border transition-colors ${selectedVariantId === v.id ? 'bg-admin-accent text-white border-neutral-900' : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-400'}`}
                   >
                     {v.size} ({v.stock} disp.)
                   </button>

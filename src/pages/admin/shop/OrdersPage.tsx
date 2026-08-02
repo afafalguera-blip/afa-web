@@ -101,7 +101,7 @@ export function OrdersPage() {
             const newOrder = await ShopService.createEmptyOrder(newCustomerName);
             setNewCustomerName('');
             setIsCreating(false);
-            toast.success('Comanda creada');
+            toast.success('Pedido creado');
             await fetchOrders();
             // Automatically open editor for the new order to add items
             setSelectedOrder({ ...newOrder, items: [] });
@@ -113,7 +113,7 @@ export function OrdersPage() {
     const handlePaymentUpdate = async (order: ShopOrder, status: 'paid' | 'pending') => {
         try {
             await ShopService.updatePaymentStatus(order.id, status);
-            toast.success(status === 'paid' ? 'Comanda marcada com a pagada' : 'Comanda marcada com a pendent');
+            toast.success(status === 'paid' ? 'Pedido marcado como pagado' : 'Pedido marcado como pendiente');
             await fetchOrders();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Error actualitzant l\'estat de pagament');
@@ -140,7 +140,7 @@ export function OrdersPage() {
 
         try {
             await ShopService.deleteOrder(order.id);
-            toast.success('Comanda eliminada');
+            toast.success('Pedido eliminado');
             await fetchOrders();
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Error eliminant la comanda');
@@ -150,13 +150,13 @@ export function OrdersPage() {
     const columns: AdminTableColumn<ShopOrder>[] = [
         {
             key: 'order',
-            header: 'Comanda',
+            header: 'Pedido',
             render: (order) => (
                 <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono text-[11px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">#{order.id.slice(0, 8)}</span>
                         {order.is_member && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold uppercase bg-neutral-900 text-white px-2 py-0.5 rounded">
+                            <span className="flex items-center gap-1 text-[10px] font-bold uppercase bg-admin-accent text-white px-2 py-0.5 rounded">
                                 <BadgeCheck className="w-3 h-3" /> Soci
                             </span>
                         )}
@@ -174,7 +174,7 @@ export function OrdersPage() {
         },
         {
             key: 'customer',
-            header: 'Client',
+            header: 'Cliente',
             render: (order) => (
                 <div className="space-y-0.5 min-w-0">
                     <div className="font-semibold text-neutral-900 truncate max-w-[220px]">{order.customer_name}</div>
@@ -193,7 +193,7 @@ export function OrdersPage() {
         },
         {
             key: 'items',
-            header: 'Articles',
+            header: 'Artículos',
             render: (order) => (
                 <div className="flex flex-wrap gap-1.5 max-w-xs">
                     {order.items?.map((item) => {
@@ -213,7 +213,7 @@ export function OrdersPage() {
                         );
                     })}
                     {(!order.items || order.items.length === 0) && (
-                        <span className="text-xs italic text-amber-600">Sense articles</span>
+                        <span className="text-xs italic text-amber-600">Sin artículos</span>
                     )}
                 </div>
             ),
@@ -226,7 +226,7 @@ export function OrdersPage() {
         },
         {
             key: 'payment',
-            header: 'Pagament',
+            header: 'Pago',
             render: (order) => (
                 <button
                     type="button"
@@ -249,8 +249,8 @@ export function OrdersPage() {
                         type="button"
                         onClick={() => handleDeliveryUpdate(order, 'pending')}
                         className={`p-1.5 rounded transition-colors ${order.delivery_status === 'pending' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
-                        title="Pendent"
-                        aria-label="Marcar com a pendent"
+                        title="Pendiente"
+                        aria-label="Marcar como pendiente"
                     >
                         <Truck className="w-4 h-4" />
                     </button>
@@ -258,8 +258,8 @@ export function OrdersPage() {
                         type="button"
                         onClick={() => handleDeliveryUpdate(order, 'delivered')}
                         className={`p-1.5 rounded transition-colors ${order.delivery_status === 'delivered' ? 'bg-green-600 text-white' : 'text-neutral-400 hover:text-neutral-600'}`}
-                        title="Entregat i arxivar"
-                        aria-label="Marcar com a entregat"
+                        title="Entregado y archivar"
+                        aria-label="Marcar como entregado"
                     >
                         <CheckCircle className="w-4 h-4" />
                     </button>
@@ -267,8 +267,8 @@ export function OrdersPage() {
                         type="button"
                         onClick={() => handleDeliveryUpdate(order, 'not_picked_up')}
                         className={`p-1.5 rounded transition-colors ${order.delivery_status === 'not_picked_up' ? 'bg-red-600 text-white' : 'text-neutral-400 hover:text-neutral-600'}`}
-                        title="No recollit"
-                        aria-label="Marcar com a no recollit"
+                        title="No recogido"
+                        aria-label="Marcar como no recogido"
                     >
                         <XCircle className="w-4 h-4" />
                     </button>
@@ -277,15 +277,15 @@ export function OrdersPage() {
         },
         {
             key: 'actions',
-            header: 'Accions',
+            header: 'Acciones',
             render: (order) => (
                 <div className="flex gap-2">
                     <button
                         type="button"
                         onClick={() => setSelectedOrder(order)}
-                        className="p-2 bg-neutral-100 text-neutral-600 rounded-md hover:bg-neutral-900 hover:text-white transition-colors"
-                        title="Gestionar articles"
-                        aria-label="Gestionar articles"
+                        className="p-2 bg-neutral-100 text-neutral-600 rounded-md hover:bg-admin-accent hover:text-white transition-colors"
+                        title="Gestionar artículos"
+                        aria-label="Gestionar artículos"
                     >
                         <Settings className="w-4 h-4" />
                     </button>
@@ -293,8 +293,8 @@ export function OrdersPage() {
                         type="button"
                         onClick={() => handleDeleteOrder(order)}
                         className="p-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-md transition-colors"
-                        title="Eliminar comanda"
-                        aria-label="Eliminar comanda"
+                        title="Eliminar pedido"
+                        aria-label="Eliminar pedido"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -306,23 +306,23 @@ export function OrdersPage() {
     return (
         <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
             <AdminPageHeader
-                title="Comandes i Reserves"
-                subtitle="Gestió de reserves, vendes presencials i seguiment d'entregues."
+                title="Pedidos y Reservas"
+                subtitle="Gestión de reservas, ventas presenciales y seguimiento de entregas."
                 icon={LayoutDashboard}
                 loading={loading}
                 onRefresh={fetchOrders}
                 onCreate={() => setIsCreating(true)}
-                createLabel="Nova Venda"
+                createLabel="Nueva Venta"
                 createIcon={Plus}
                 actions={
                     <select
                         value={academicYear}
                         onChange={(e) => setAcademicYear(e.target.value)}
                         className="h-9 rounded-md border border-neutral-200 bg-white px-3 text-[13px] font-medium text-neutral-700 outline-none focus:ring-2 focus:ring-neutral-900/10"
-                        title="Curs"
-                        aria-label="Curs"
+                        title="Curso"
+                        aria-label="Curso"
                     >
-                        <option value="">Tots els cursos</option>
+                        <option value="">Todos los cursos</option>
                         {years.map((y) => (
                             <option key={y} value={y}>{y}</option>
                         ))}
@@ -336,19 +336,19 @@ export function OrdersPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
                     <input
                         type="search"
-                        aria-label="Buscar comandes"
-                        placeholder="Buscar per nom, email o telèfon..."
+                        aria-label="Buscar pedidos"
+                        placeholder="Buscar por nombre, email o teléfono..."
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         className="w-full pl-12 pr-4 py-3 bg-white border border-neutral-200 rounded-lg outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 transition-colors"
                     />
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-neutral-200 flex flex-col justify-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Pendents Entrega</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Pendientes Entrega</span>
                     <span className="text-2xl font-black text-neutral-900">{summary.pendingCount}</span>
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-neutral-200 flex flex-col justify-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Facturació Total</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1">Facturación Total</span>
                     <span className="text-2xl font-black text-green-700">{summary.totalRevenue.toFixed(2)}€</span>
                 </div>
             </div>
@@ -361,7 +361,7 @@ export function OrdersPage() {
                     aria-pressed={view === 'active'}
                     className={`px-4 py-2 rounded-md text-[13px] font-semibold transition-colors ${view === 'active' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
                 >
-                    Actives ({summary.pendingCount})
+                    Activos ({summary.pendingCount})
                 </button>
                 <button
                     type="button"
@@ -369,7 +369,7 @@ export function OrdersPage() {
                     aria-pressed={view === 'archived'}
                     className={`px-4 py-2 rounded-md text-[13px] font-semibold transition-colors ${view === 'archived' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
                 >
-                    Arxiu ({summary.archivedCount})
+                    Archivo ({summary.archivedCount})
                 </button>
             </div>
 
@@ -378,7 +378,7 @@ export function OrdersPage() {
                 rows={orders}
                 keyExtractor={(order) => order.id}
                 loading={loading}
-                emptyMessage={search ? 'Prova amb una altra cerca.' : view === 'archived' ? 'No hi ha comandes arxivades encara.' : 'Actualment no hi ha comandes pendents.'}
+                emptyMessage={search ? 'Prueba con otra búsqueda.' : view === 'archived' ? 'Todavía no hay pedidos archivados.' : 'Actualmente no hay pedidos pendientes.'}
                 footer={
                     <AdminPagination
                         page={page}
@@ -394,7 +394,7 @@ export function OrdersPage() {
             <Modal
                 open={isCreating}
                 onClose={() => setIsCreating(false)}
-                title="Nova venda presencial"
+                title="Nueva venta presencial"
                 size="md"
                 footer={
                     <>
@@ -409,9 +409,9 @@ export function OrdersPage() {
                             type="submit"
                             form="create-order-form"
                             disabled={!newCustomerName.trim()}
-                            className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+                            className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
                         >
-                            Crear Comanda
+                            Crear Pedido
                         </button>
                     </>
                 }
@@ -423,7 +423,7 @@ export function OrdersPage() {
                     <input
                         id="new-customer-name"
                         type="text"
-                        placeholder="Introdueix nom i cognoms..."
+                        placeholder="Introduce nombre y apellidos..."
                         value={newCustomerName}
                         onChange={(e) => setNewCustomerName(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 bg-white outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 transition-colors"

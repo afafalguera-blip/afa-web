@@ -26,7 +26,7 @@ function ToolbarButton({ title, active = false, disabled = false, onClick, icon 
       aria-pressed={active}
       className={`h-9 w-9 rounded-md border text-neutral-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
         active
-          ? 'border-neutral-900 bg-neutral-900 text-white'
+          ? 'border-neutral-900 bg-admin-accent text-white'
           : 'border-neutral-200 bg-white hover:bg-neutral-100 hover:text-neutral-900'
       }`}
     >

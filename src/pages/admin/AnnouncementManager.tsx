@@ -143,8 +143,8 @@ export default function AnnouncementManager() {
     return (
         <div className="max-w-4xl mx-auto">
             <AdminPageHeader
-                title="Banner d'Anuncis"
-                subtitle="Configura missatges globals a la part superior de la web."
+                title="Banner de Anuncios"
+                subtitle="Configura mensajes globales en la parte superior de la web."
                 icon={Megaphone}
                 actions={
                     <VisibilityToggleButton
@@ -247,20 +247,20 @@ export default function AnnouncementManager() {
                     <button
                         disabled={saving}
                         type="submit"
-                        className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white font-bold py-4 rounded-lg flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
+                        className="flex-1 bg-admin-accent hover:bg-admin-accent-hover text-white font-bold py-4 rounded-lg flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
                     >
                         {saving ? (
                             <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
                         ) : (
                             <>
                                 <Save size={20} />
-                                Guardar Configuració
+                                Guardar Configuración
                             </>
                         )}
                     </button>
                     <div className="flex items-center gap-2 p-4 bg-neutral-100 rounded-lg border border-neutral-200 text-neutral-500">
                         <Info size={18} />
-                        <p className="text-xs">L'actualització és instantània per a tots els usuaris.</p>
+                        <p className="text-xs">La actualización es instantánea para todos los usuarios.</p>
                     </div>
                 </div>
             </form>

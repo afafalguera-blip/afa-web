@@ -607,7 +607,7 @@ export function PaymentsPage() {
               type="button"
               onClick={genMode === 'extraescolar' ? genExtraescolar : genAcollidaRollover}
               disabled={generating}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
             >
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               {t('admin.payments.generate', 'Generar')}
@@ -616,7 +616,7 @@ export function PaymentsPage() {
         }
       >
         <div className="space-y-5">
-          <p className="text-sm text-neutral-500">Curs comptable: <strong className="text-neutral-900">{academicYear}</strong></p>
+          <p className="text-sm text-neutral-500">Curso contable: <strong className="text-neutral-900">{academicYear}</strong></p>
 
           {genMode === 'acollida' && (
             <div>

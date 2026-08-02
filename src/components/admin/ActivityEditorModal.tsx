@@ -200,7 +200,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
             type="submit"
             form="activity-form"
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {t('admin.editor.save')}
@@ -348,7 +348,7 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
             <button
               type="button"
               onClick={addScheduleGroup}
-              className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors text-sm font-bold"
+              className="flex items-center gap-2 px-3 py-1.5 bg-admin-accent hover:bg-admin-accent-hover text-white rounded-lg transition-colors text-sm font-bold"
             >
               <Plus className="w-4 h-4" /> {t('admin.editor.add_group')}
             </button>

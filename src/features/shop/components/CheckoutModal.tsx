@@ -96,7 +96,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors"
+                        className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors"
                     >
                         {t('common.close')}
                     </button>
@@ -127,7 +127,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
                         type="submit"
                         form={CHECKOUT_FORM_ID}
                         disabled={loading}
-                        className="w-full py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-black rounded-xl transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
+                        className="w-full py-3 bg-admin-accent hover:bg-admin-accent-hover text-white font-black rounded-xl transition-colors disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
                     >
                         {loading ? (
                             <>

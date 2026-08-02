@@ -58,7 +58,7 @@ export function ProjectFormModal({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+            className="px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
             {saving ? t('common.saving') : t('common.save')}
           </button>
@@ -76,7 +76,7 @@ export function ProjectFormModal({
                 onClick={() => setActiveLang(lang)}
                 aria-pressed={activeLang === lang}
                 className={`px-4 py-1.5 rounded text-xs font-semibold transition-colors ${
-                  activeLang === lang ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:text-neutral-900'
+                  activeLang === lang ? 'bg-admin-accent text-white' : 'text-neutral-600 hover:text-neutral-900'
                 }`}
               >
                 {lang.toUpperCase()}

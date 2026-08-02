@@ -163,7 +163,7 @@ export default function SeasonSettings({ onDirtyChange }: SeasonSettingsProps) {
         type="button"
         onClick={handleSave}
         disabled={saving || !season.active_year.trim()}
-        className="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+        className="w-full bg-admin-accent hover:bg-admin-accent-hover text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
       >
         {saving ? (
           <Loader2 className="w-4 h-4 animate-spin" />

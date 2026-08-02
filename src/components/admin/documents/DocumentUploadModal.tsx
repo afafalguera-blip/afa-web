@@ -84,7 +84,7 @@ export function DocumentUploadModal({
                         type="submit"
                         form="document-upload-form"
                         disabled={uploading || !canSubmit}
-                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
                     >
                         {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
                         {uploading ? t('common.uploading', 'Pujant...') : t('admin.documents.upload_btn', 'Pujar Document')}

@@ -181,7 +181,7 @@ export default function ContactManager() {
                         <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
                             {t('admin.contact.inbox', "Bústia d'entrada")}
                         </span>
-                        <span className="bg-neutral-900 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                        <span className="bg-admin-accent text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
                             {t('admin.contact.unread_count', '{{count}} NO LLEGITS', { count: unreadCount })}
                         </span>
                     </div>
@@ -208,7 +208,7 @@ export default function ContactManager() {
                                     className={`w-full text-left p-4 transition-colors hover:bg-neutral-50 flex gap-3 relative ${selectedMessage?.id === message.id ? 'bg-neutral-100 border-l-4 border-neutral-900' : ''
                                         } ${message.status === 'unread' ? 'font-bold' : ''}`}
                                 >
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${message.status === 'unread' ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-500'
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${message.status === 'unread' ? 'bg-admin-accent text-white' : 'bg-neutral-100 text-neutral-500'
                                         }`}>
                                         <User size={18} />
                                     </div>
@@ -223,7 +223,7 @@ export default function ContactManager() {
                                         <p className="text-[10px] text-neutral-400 line-clamp-1">{message.message}</p>
                                     </div>
                                     {message.status === 'unread' && (
-                                        <div className="absolute top-4 right-1.5 w-2 h-2 bg-neutral-900 rounded-full"></div>
+                                        <div className="absolute top-4 right-1.5 w-2 h-2 bg-admin-accent rounded-full"></div>
                                     )}
                                 </button>
                             ))
@@ -253,7 +253,7 @@ export default function ContactManager() {
                                     >
                                         <ChevronLeft size={22} />
                                     </button>
-                                    <div className="w-12 h-12 bg-neutral-900 text-white rounded-lg flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-admin-accent text-white rounded-lg flex items-center justify-center">
                                         <Mail size={24} />
                                     </div>
                                     <div className="min-w-0">
@@ -301,7 +301,7 @@ export default function ContactManager() {
                                             </label>
                                             <div className="mt-1">
                                                 {selectedMessage.status === 'unread' ? (
-                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-900 text-white">
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-admin-accent text-white">
                                                         <Clock size={12} /> {t('admin.contact.filter.unread', 'NO LLEGIT')}
                                                     </span>
                                                 ) : selectedMessage.status === 'read' ? (
@@ -330,7 +330,7 @@ export default function ContactManager() {
                                 <div className="pt-8 border-t border-neutral-200 flex justify-center">
                                     <a
                                         href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`}
-                                        className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 transition-colors"
+                                        className="bg-admin-accent hover:bg-admin-accent-hover text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 transition-colors"
                                     >
                                         <ChevronRight size={18} /> {t('admin.contact.reply', 'Respondre per Email')}
                                     </a>

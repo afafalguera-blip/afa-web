@@ -48,7 +48,7 @@ const FIELD_LABEL_KEYS: Record<keyof MenjadorInfoBlock, { key: string; fallback:
 };
 
 const PRIMARY_BTN =
-  'flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50';
+  'flex items-center gap-2 px-4 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50';
 
 export default function MenjadorManager() {
   const { t } = useTranslation();

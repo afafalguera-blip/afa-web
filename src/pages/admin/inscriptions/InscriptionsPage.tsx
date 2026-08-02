@@ -93,7 +93,7 @@ export default function InscriptionsPage() {
             <div className="font-medium text-neutral-900">{row.parent_name || '—'}</div>
             <div className="text-[12px] text-neutral-500">{row.parent_dni}</div>
             {row.afa_member && (
-              <span className="inline-flex mt-1 px-2 py-0.5 rounded-full bg-neutral-900 text-white text-[10px] font-semibold uppercase">
+              <span className="inline-flex mt-1 px-2 py-0.5 rounded-full bg-admin-accent text-white text-[10px] font-semibold uppercase">
                 {t('admin.inscriptions.member_badge', 'Soci AFA')}
               </span>
             )}
@@ -251,7 +251,7 @@ export default function InscriptionsPage() {
           <button
             type="button"
             onClick={() => setExportOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors"
           >
             <FileSpreadsheet className="w-4 h-4" />
             {t('admin.inscriptions.export_button', 'Exportar')}

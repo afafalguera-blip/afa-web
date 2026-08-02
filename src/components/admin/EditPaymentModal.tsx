@@ -156,7 +156,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave, defaultConc
             type="submit"
             form="edit-payment-form"
             disabled={loading}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white text-[13px] font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-admin-accent hover:bg-admin-accent-hover text-white text-[13px] font-medium transition-colors disabled:opacity-50"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Guardant...' : 'Guardar Pagament'}
@@ -183,7 +183,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave, defaultConc
         {/* Student Selection (Only if Creating) */}
         {!payment && (
           <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
-            <label className={LABEL_CLASS} htmlFor="payment-student">Cercar Alumne (Opcional)</label>
+            <label className={LABEL_CLASS} htmlFor="payment-student">Buscar Alumno (Opcional)</label>
             <select
               id="payment-student"
               className={FIELD_CLASS}
@@ -197,13 +197,13 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave, defaultConc
                 </option>
               ))}
             </select>
-            <p className="text-xs text-neutral-500 mt-1">Seleccionar un alumne omplirà automàticament les dades.</p>
+            <p className="text-xs text-neutral-500 mt-1">Seleccionar un alumno rellenará automáticamente los datos.</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={LABEL_CLASS} htmlFor="payment-name">Nom Alumne</label>
+            <label className={LABEL_CLASS} htmlFor="payment-name">Nombre Alumno</label>
             <input
               id="payment-name"
               type="text"
@@ -225,7 +225,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave, defaultConc
             />
           </div>
           <div>
-            <label className={LABEL_CLASS} htmlFor="payment-course">Curs</label>
+            <label className={LABEL_CLASS} htmlFor="payment-course">Curso</label>
             <input
               id="payment-course"
               type="text"
@@ -278,7 +278,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSave, defaultConc
           </div>
           {formData.status === 'paid' && (
             <div>
-              <label className={LABEL_CLASS} htmlFor="payment-paid-date">Data Pagament</label>
+              <label className={LABEL_CLASS} htmlFor="payment-paid-date">Fecha Pago</label>
               <input
                 id="payment-paid-date"
                 type="date"
