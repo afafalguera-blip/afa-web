@@ -2,6 +2,7 @@ import { format, parseISO, type Locale } from 'date-fns';
 import { Calendar as CalendarIcon, Clock, MapPin, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { CalendarEvent } from '../../../services/CalendarService';
+import { eventEndDate, isMultiDay } from '../../../utils/eventDates';
 
 interface EventDetailModalProps {
     event: CalendarEvent;
@@ -49,7 +50,9 @@ export function EventDetailModal({ event, onClose, locale }: EventDetailModalPro
                                     {event.title}
                                 </h3>
                                 <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-1">
-                                    {format(parseISO(event.event_date), "EEEE d MMMM yyyy", { locale })}
+                                    {isMultiDay(event)
+                                        ? `${format(parseISO(event.event_date), "d MMMM", { locale })} — ${format(parseISO(eventEndDate(event)), "d MMMM yyyy", { locale })}`
+                                        : format(parseISO(event.event_date), "EEEE d MMMM yyyy", { locale })}
                                 </p>
                             </div>
                         </div>

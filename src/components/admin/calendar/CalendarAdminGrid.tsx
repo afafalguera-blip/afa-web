@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { eventCoversDate, eventSegment, isMultiDay } from '../../../utils/eventDates';
 import type { CalendarEvent } from '../../../services/admin/AdminCalendarService';
 
 interface CalendarAdminGridProps {
@@ -33,9 +34,10 @@ export function CalendarAdminGrid({
     const toDateString = (day: number) =>
         `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+    // Un evento aparece en todos los dias de su rango, no solo el de inicio.
     const getEventsForDay = (day: number) => {
         const dateStr = toDateString(day);
-        return events.filter(e => e.event_date === dateStr);
+        return events.filter(e => eventCoversDate(e, dateStr));
     };
 
     const days = generateCalendarDays();
@@ -85,18 +87,29 @@ export function CalendarAdminGrid({
                                         {day}
                                     </button>
                                     <div className="space-y-1 mt-1.5">
-                                        {dayEvents.slice(0, 3).map(event => (
-                                            <button
-                                                key={event.id}
-                                                type="button"
-                                                onClick={() => onEventClick(event)}
-                                                className="block w-full text-left text-[10px] px-2 py-0.5 rounded truncate text-white font-medium transition-opacity hover:opacity-90"
-                                                style={{ backgroundColor: event.color }}
-                                                title={event.title}
-                                            >
-                                                {event.title}
-                                            </button>
-                                        ))}
+                                        {dayEvents.slice(0, 3).map(event => {
+                                            const dateStr = toDateString(day);
+                                            const multi = isMultiDay(event);
+                                            const { isStart, isEnd } = eventSegment(event, dateStr);
+                                            // En un rango, solo el primer dia lleva texto: el resto
+                                            // son tramos de la misma barra, sin bordes interiores.
+                                            return (
+                                                <button
+                                                    key={event.id}
+                                                    type="button"
+                                                    onClick={() => onEventClick(event)}
+                                                    className={`block w-full text-left text-[10px] px-2 py-0.5 truncate text-white font-medium transition-opacity hover:opacity-90 ${
+                                                        !multi
+                                                            ? 'rounded'
+                                                            : `${isStart ? 'rounded-l' : ''} ${isEnd ? 'rounded-r' : ''}`
+                                                    }`}
+                                                    style={{ backgroundColor: event.color }}
+                                                    title={event.title}
+                                                >
+                                                    {!multi || isStart ? event.title : ' '}
+                                                </button>
+                                            );
+                                        })}
                                         {dayEvents.length > 3 && (
                                             <div className="text-[10px] text-neutral-400 font-semibold px-1 text-center">
                                                 +{dayEvents.length - 3}

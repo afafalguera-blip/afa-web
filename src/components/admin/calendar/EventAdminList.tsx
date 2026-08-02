@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Search, Calendar, Clock, MapPin, Edit, Trash2 } from 'lucide-react';
 import type { CalendarEvent } from '../../../services/admin/AdminCalendarService';
+import { eventEndDate, isMultiDay } from '../../../utils/eventDates';
 
 interface EventAdminListProps {
     events: CalendarEvent[];
@@ -68,11 +69,17 @@ export function EventAdminList({
                                         <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[11px] font-medium text-neutral-500">
                                             <span className="inline-flex items-center gap-1.5 bg-neutral-100 px-2 py-0.5 rounded">
                                                 <Calendar className="w-3.5 h-3.5" />
-                                                {new Date(event.event_date + 'T00:00:00').toLocaleDateString(undefined, {
-                                                    weekday: 'short',
-                                                    day: 'numeric',
-                                                    month: 'short'
-                                                })}
+                                                {(() => {
+                                                    const fmt = (d: string) =>
+                                                        new Date(d + 'T00:00:00').toLocaleDateString(undefined, {
+                                                            weekday: 'short',
+                                                            day: 'numeric',
+                                                            month: 'short'
+                                                        });
+                                                    return isMultiDay(event)
+                                                        ? `${fmt(event.event_date)} — ${fmt(eventEndDate(event))}`
+                                                        : fmt(event.event_date);
+                                                })()}
                                             </span>
                                             {!event.all_day && event.start_time && (
                                                 <span className="inline-flex items-center gap-1.5 bg-neutral-100 px-2 py-0.5 rounded">

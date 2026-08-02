@@ -5,6 +5,8 @@ export interface CalendarEvent {
   title: string;
   description: string | null;
   event_date: string;
+  /** Ultimo dia del evento, inclusivo. Igual a event_date si dura un dia. */
+  end_date: string | null;
   start_time: string | null;
   end_time: string | null;
   location: string | null;
@@ -29,11 +31,18 @@ export const AdminCalendarService = {
     const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
 
+    const from = startOfMonth.toISOString().split('T')[0];
+    const to = endOfMonth.toISOString().split('T')[0];
+
+    // Solape de intervalos: un evento entra en el mes si empieza antes de que
+    // acabe y termina despues de que empiece. Filtrar solo por event_date
+    // dejaria fuera los rangos que vienen del mes anterior (p.ej. Semana Santa
+    // a caballo entre marzo y abril).
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .gte('event_date', startOfMonth.toISOString().split('T')[0])
-      .lte('event_date', endOfMonth.toISOString().split('T')[0])
+      .lte('event_date', to)
+      .gte('end_date', from)
       .order('event_date', { ascending: true });
 
     if (error) throw error;
@@ -46,7 +55,10 @@ export const AdminCalendarService = {
       start_time: formData.all_day ? null : formData.start_time || null,
       end_time: formData.all_day ? null : formData.end_time || null,
       description: formData.description || null,
-      location: formData.location || null
+      location: formData.location || null,
+      // Un solo dia => end_date se iguala a event_date (el trigger de la BD
+      // hace lo mismo si llegara null, pero lo dejamos explicito).
+      end_date: formData.end_date || formData.event_date
     };
 
     if (id) {

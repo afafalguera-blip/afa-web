@@ -5,6 +5,7 @@ export interface CalendarEvent {
   title: string;
   description: string | null;
   event_date: string;
+  end_date: string | null;
   start_time: string | null;
   end_time: string | null;
   location: string | null;
@@ -18,7 +19,8 @@ export const EventsService = {
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .gte('event_date', new Date().toISOString().split('T')[0])
+      // Un evento en curso sigue siendo "proximo" hasta su ultimo dia.
+      .gte('end_date', new Date().toISOString().split('T')[0])
       .order('event_date', { ascending: true })
       .limit(limit);
 

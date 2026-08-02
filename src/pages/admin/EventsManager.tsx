@@ -15,6 +15,7 @@ const createEmptyForm = (date?: string): EventFormData => ({
   title: '',
   description: '',
   event_date: date || new Date().toISOString().split('T')[0],
+  end_date: null,
   start_time: '',
   end_time: '',
   location: '',
@@ -73,6 +74,9 @@ export default function EventsManager() {
       title: event.title,
       description: event.description || '',
       event_date: event.event_date,
+      // Los de un dia guardan end_date = event_date; el campo se muestra vacio
+      // para no dar a entender que hay un rango.
+      end_date: event.end_date && event.end_date !== event.event_date ? event.end_date : null,
       start_time: event.start_time || '',
       end_time: event.end_time || '',
       location: event.location || '',
@@ -111,6 +115,13 @@ export default function EventsManager() {
   const handleSave = async () => {
     if (!formData.title.trim() || !formData.event_date) {
       toast.error(t('admin.calendar.required_fields'));
+      return;
+    }
+
+    if (formData.end_date && formData.end_date < formData.event_date) {
+      toast.error(
+        t('admin.calendar.end_before_start', 'La fecha de fin no puede ser anterior a la de inicio.')
+      );
       return;
     }
 

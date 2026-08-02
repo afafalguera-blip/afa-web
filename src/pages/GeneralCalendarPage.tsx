@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { eventCoversDate } from '../utils/eventDates';
 import { useTranslation } from 'react-i18next';
 import {
   ChevronLeft,
@@ -66,7 +67,7 @@ export default function GeneralCalendarPage() {
     const month = String(day.getMonth() + 1).padStart(2, '0');
     const date = String(day.getDate()).padStart(2, '0');
     const dayStr = `${year}-${month}-${date}`;
-    return events.filter(event => event.event_date === dayStr);
+    return events.filter(event => eventCoversDate(event, dayStr));
   };
 
   const handlePrev = () => {
@@ -111,7 +112,7 @@ export default function GeneralCalendarPage() {
     });
     return daysInMonth.filter(day => {
       const dayStr = getDayStr(day);
-      return events.some(e => e.event_date === dayStr);
+      return events.some(e => eventCoversDate(e, dayStr));
     });
   }, [currentDate, events]);
 
