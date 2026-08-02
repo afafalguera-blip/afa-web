@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AdminCalendarService } from '../../services/admin/AdminCalendarService';
 import type { CalendarEvent, EventFormData } from '../../services/admin/AdminCalendarService';
+import { todayISODate } from '../../utils/eventDates';
 import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
 import { useToast } from '../../components/common/Toast';
 import { useConfirm } from '../../components/common/ConfirmDialog';
@@ -14,7 +15,7 @@ import { EventFormModal } from '../../components/admin/calendar/EventFormModal';
 const createEmptyForm = (date?: string): EventFormData => ({
   title: '',
   description: '',
-  event_date: date || new Date().toISOString().split('T')[0],
+  event_date: date || todayISODate(),
   end_date: null,
   start_time: '',
   end_time: '',

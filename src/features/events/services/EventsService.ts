@@ -1,4 +1,5 @@
 import { supabase } from '../../../lib/supabase';
+import { todayISODate } from '../../../utils/eventDates';
 
 export interface CalendarEvent {
   id: string;
@@ -20,7 +21,7 @@ export const EventsService = {
       .from('events')
       .select('*')
       // Un evento en curso sigue siendo "proximo" hasta su ultimo dia.
-      .gte('end_date', new Date().toISOString().split('T')[0])
+      .gte('end_date', todayISODate())
       .order('event_date', { ascending: true })
       .limit(limit);
 

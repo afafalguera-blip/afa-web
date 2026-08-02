@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { monthRange } from '../../utils/eventDates';
 
 export interface CalendarEvent {
   id: string;
@@ -28,11 +29,9 @@ export const EVENT_TYPES = [
 
 export const AdminCalendarService = {
   async getEventsForMonth(currentMonth: Date): Promise<CalendarEvent[]> {
-    const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-    const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-
-    const from = startOfMonth.toISOString().split('T')[0];
-    const to = endOfMonth.toISOString().split('T')[0];
+    // monthRange formatea en horario local: toISOString() convertiria a UTC y
+    // desplazaria ambos extremos un dia hacia atras.
+    const { from, to } = monthRange(currentMonth);
 
     // Solape de intervalos: un evento entra en el mes si empieza antes de que
     // acabe y termina despues de que empiece. Filtrar solo por event_date
