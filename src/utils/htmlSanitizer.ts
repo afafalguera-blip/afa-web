@@ -50,69 +50,76 @@ function isSafeUrl(url: string, allowMailAndTel: boolean): boolean {
 }
 
 function sanitizeNode(element: Element): void {
-  const children = Array.from(element.children);
+  let child = element.firstElementChild;
 
-  children.forEach((child) => {
+  while (child) {
+    // Se calcula antes de tocar el nodo: al eliminarlo se pierde el hermano.
+    let next = child.nextElementSibling;
     const tag = child.tagName.toLowerCase();
 
     if (!ALLOWED_TAGS.has(tag)) {
-      if (DROP_CONTENT_TAGS.has(tag)) {
-        child.remove();
-        return;
-      }
+      if (!DROP_CONTENT_TAGS.has(tag) && child.parentNode) {
+        const parent = child.parentNode;
+        const firstUnwrapped = child.firstElementChild;
 
-      const parent = child.parentNode;
-      if (!parent) return;
+        while (child.firstChild) {
+          parent.insertBefore(child.firstChild, child);
+        }
 
-      while (child.firstChild) {
-        parent.insertBefore(child.firstChild, child);
+        // Los hijos ascendidos todavía no han pasado por el saneado: seguir por
+        // ellos, o un <div><img onerror=...> saldría intacto (XSS almacenado).
+        if (firstUnwrapped) next = firstUnwrapped;
       }
 
       child.remove();
-      return;
+      child = next;
+      continue;
     }
 
+    const node = child;
     const allowedAttrs = new Set([...(TAG_ALLOWED_ATTRS[tag] || []), ...GLOBAL_ALLOWED_ATTRS]);
 
-    Array.from(child.attributes).forEach((attr) => {
+    Array.from(node.attributes).forEach((attr) => {
       const attrName = attr.name.toLowerCase();
       const attrValue = attr.value.trim();
 
       if (attrName.startsWith('on') || !allowedAttrs.has(attrName)) {
-        child.removeAttribute(attr.name);
+        node.removeAttribute(attr.name);
         return;
       }
 
       if (tag === 'a' && attrName === 'href') {
         if (!isSafeUrl(attrValue, true)) {
-          child.removeAttribute(attr.name);
+          node.removeAttribute(attr.name);
           return;
         }
         const proxied = proxyStorageUrl(attrValue);
-        if (proxied !== attrValue) child.setAttribute('href', proxied);
+        if (proxied !== attrValue) node.setAttribute('href', proxied);
       }
 
       if (tag === 'img' && attrName === 'src') {
         if (!isSafeUrl(attrValue, false)) {
-          child.remove();
+          node.remove();
           return;
         }
         const proxied = proxyStorageUrl(attrValue);
-        if (proxied !== attrValue) child.setAttribute('src', proxied);
+        if (proxied !== attrValue) node.setAttribute('src', proxied);
       }
     });
 
-    if (!child.isConnected) return;
-
-    if (tag === 'a') {
-      child.setAttribute('rel', 'noopener noreferrer');
-      if (child.getAttribute('target') !== '_blank') {
-        child.removeAttribute('target');
+    if (node.isConnected) {
+      if (tag === 'a') {
+        node.setAttribute('rel', 'noopener noreferrer');
+        if (node.getAttribute('target') !== '_blank') {
+          node.removeAttribute('target');
+        }
       }
+
+      sanitizeNode(node);
     }
 
-    sanitizeNode(child);
-  });
+    child = next;
+  }
 }
 
 export function sanitizeRichTextHtml(html: string): string {
