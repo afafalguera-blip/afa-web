@@ -1,3 +1,11 @@
+-- Fusion de 2 ficheros que compartian la version 20260315.
+-- La CLI de Supabase identifica cada migracion por los digitos previos al
+-- primer '_', asi que varios ficheros con la misma version chocan contra la
+-- clave primaria de schema_migrations al aplicarlos desde cero. Produccion
+-- tiene una sola fila para esta version, de modo que un unico fichero es
+-- justo lo que ya hay aplicado alli.
+
+-- ===== 20260315_create_admin_tasks.sql =====
 -- Internal AFA task management for admin users
 
 CREATE TABLE IF NOT EXISTS public.admin_tasks (
@@ -90,3 +98,22 @@ CREATE TRIGGER update_admin_tasks_updated_at
   BEFORE UPDATE ON public.admin_tasks
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
+
+-- ===== 20260315_add_admin_tasks_subtasks_tags_assignee_name.sql =====
+-- Add free-text assignee, tags, and subtasks support for admin_tasks
+
+ALTER TABLE public.admin_tasks
+  ADD COLUMN IF NOT EXISTS assignee_name TEXT,
+  ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS subtasks JSONB NOT NULL DEFAULT '[]'::jsonb;
+
+CREATE INDEX IF NOT EXISTS idx_admin_tasks_assignee_name
+  ON public.admin_tasks(assignee_name);
+
+CREATE INDEX IF NOT EXISTS idx_admin_tasks_tags
+  ON public.admin_tasks
+  USING GIN(tags);
+
+CREATE INDEX IF NOT EXISTS idx_admin_tasks_subtasks
+  ON public.admin_tasks
+  USING GIN(subtasks);
