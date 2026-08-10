@@ -26,7 +26,7 @@ export interface AdminTaskRow {
   updated_at: string;
 }
 
-export interface AdminTask extends AdminTaskRow {}
+export type AdminTask = AdminTaskRow;
 
 export interface TaskFormData {
   title: string;

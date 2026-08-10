@@ -63,7 +63,7 @@ export default function AnnouncementManager() {
             const sourceText = announcement.translations?.[activeLang] || announcement.message || '';
             const targetLangs = (['ca', 'es', 'en'] as const).filter(l => l !== activeLang);
 
-            let translations = { ...(announcement.translations || { ca: sourceText, es: sourceText, en: sourceText }) };
+            const translations = { ...(announcement.translations || { ca: sourceText, es: sourceText, en: sourceText }) };
 
             if (sourceText.trim()) {
                 const result = await TranslationService.translateBulk(
