@@ -101,14 +101,6 @@ const policies = await query(`
   where schemaname = 'public' and tablename in (${list})
   order by tablename, policyname`);
 
-const triggers = await query(`
-  select c.relname as tabla, t.tgname as nombre, pg_get_triggerdef(t.oid) as def
-  from pg_trigger t
-  join pg_class c on c.oid = t.tgrelid
-  join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public' and c.relname in (${list}) and not t.tgisinternal
-  order by c.relname, t.tgname`);
-
 // `handle_audit_log` y sus triggers NO se incluyen: los crea
 // 20260801140000_audit_logs_definition.sql, y adelantarlos rompería el orden.
 // Ocho migraciones insertan en site_config antes de esa fecha, y con el trigger
@@ -123,18 +115,42 @@ const AUDIT_TRIGGER_PREFIX = 'trg_audit_';
 const SECRET_PATTERNS = [/eyJ[A-Za-z0-9._-]{20,}/, /x-webhook-secret/i, /service_role/i];
 const carriesSecret = (sql) => SECRET_PATTERNS.some((re) => re.test(sql));
 
+const triggersRaw = await query(`
+  select c.relname as tabla, t.tgname as nombre, pg_get_triggerdef(t.oid) as def
+  from pg_trigger t
+  join pg_class c on c.oid = t.tgrelid
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relname in (${list}) and not t.tgisinternal
+  order by c.relname, t.tgname`);
+
+const authTriggersRaw = await query(`
+  select t.tgname as nombre, pg_get_triggerdef(t.oid) as def
+  from pg_trigger t
+  where t.tgrelid = 'auth.users'::regclass and not t.tgisinternal`);
+
+const triggerFunction = (def) => def.match(/EXECUTE (?:PROCEDURE|FUNCTION) ([a-z0-9_."]+)\s*\(/i)?.[1];
+
+// Un trigger solo sirve si su función existe ya. Se recogen las funciones de
+// todos los triggers que se van a emitir y se vuelcan antes que ellos.
+const neededFunctions = new Set(['is_admin']); // is_admin la usan las políticas
+for (const trg of [...triggersRaw, ...authTriggersRaw]) {
+  if (trg.nombre.startsWith(AUDIT_TRIGGER_PREFIX)) continue;
+  if (carriesSecret(trg.def)) continue;
+  const fn = triggerFunction(trg.def)?.replace(/^public\.|"/g, '');
+  if (fn) neededFunctions.add(fn);
+}
+
+const functionList = [...neededFunctions].map((f) => `'${f}'`).join(',');
 const functions = await query(`
   select p.proname as nombre, pg_get_functiondef(p.oid) as def
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname = 'public'
-    and p.proname in ('handle_new_user', 'is_admin', 'set_updated_at', 'update_updated_at_column')
+  where n.nspname = 'public' and p.proname in (${functionList})
   order by p.proname`);
 
-const authTriggers = await query(`
-  select t.tgname as nombre, pg_get_triggerdef(t.oid) as def
-  from pg_trigger t
-  where t.tgrelid = 'auth.users'::regclass and not t.tgisinternal`);
+const definedFunctions = new Set(functions.map((f) => f.nombre));
+
+const authTriggers = authTriggersRaw;
 
 const by = (rows, key) => {
   const map = new Map();
@@ -150,7 +166,7 @@ const colsByTable = by(columns, 'tabla');
 const consByTable = by(constraints, 'tabla');
 const idxByTable = by(indexes, 'tabla');
 const polByTable = by(policies, 'tabla');
-const trgByTable = by(triggers, 'tabla');
+const trgByTable = by(triggersRaw, 'tabla');
 const rlsByTable = new Map(rls.map((r) => [r.tabla, r.activo]));
 
 const out = [];
@@ -238,6 +254,11 @@ for (const table of TABLES) {
     if (trg.nombre.startsWith(AUDIT_TRIGGER_PREFIX)) continue;
     if (carriesSecret(trg.def)) {
       omitted.push(`${trg.nombre} (webhook, lleva credenciales)`);
+      continue;
+    }
+    const fn = triggerFunction(trg.def)?.replace(/^public\.|"/g, '');
+    if (fn && !definedFunctions.has(fn)) {
+      omitted.push(`${trg.nombre} (su función ${fn}() la crea una migración posterior)`);
       continue;
     }
     w(`DROP TRIGGER IF EXISTS ${trg.nombre} ON public.${table};`);

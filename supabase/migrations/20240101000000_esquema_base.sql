@@ -286,6 +286,66 @@ CREATE INDEX IF NOT EXISTS idx_shop_order_items_variant_id ON public.shop_order_
 
 -- =========================== FUNCIONES ===========================
 
+CREATE OR REPLACE FUNCTION public.check_inscripcio_rate_limit()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    recent_same_email INT;
+    recent_total INT;
+BEGIN
+    SELECT COUNT(*) INTO recent_same_email
+    FROM public.inscripcions
+    WHERE created_at > (NOW() - interval '60 seconds')
+      AND parent_email_1 IS NOT DISTINCT FROM NEW.parent_email_1;
+
+    IF recent_same_email >= 3 THEN
+        RAISE EXCEPTION 'Rate limit exceeded: massa inscripcions en poc temps'
+            USING ERRCODE = 'P0429';
+    END IF;
+
+    -- Freno global generoso: no bloquea una jornada de inscripciones real,
+    -- pero corta el flood automatizado que dispara emails via webhook.
+    SELECT COUNT(*) INTO recent_total
+    FROM public.inscripcions
+    WHERE created_at > (NOW() - interval '60 seconds');
+
+    IF recent_total >= 40 THEN
+        RAISE EXCEPTION 'Rate limit exceeded: massa inscripcions en poc temps'
+            USING ERRCODE = 'P0429';
+    END IF;
+
+    RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.handle_new_shop_order()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+  PERFORM
+    net.http_post(
+      url := 'https://zaxbtnjkidqwzqsehvld.supabase.co/functions/v1/send-order-email',
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json'
+      ),
+      body := jsonb_build_object(
+        'type', 'INSERT',
+        'table', 'shop_orders',
+        'record', row_to_json(NEW)::jsonb
+      )
+    );
+  RETURN NEW;
+END;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.handle_new_user()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -296,6 +356,38 @@ BEGIN
   INSERT INTO public.profiles (id, full_name, avatar_url, role)
   VALUES (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url', 'familia');
   RETURN new;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.handle_shop_order_inventory_on_status_change()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+DECLARE
+    item RECORD;
+BEGIN
+    -- Detectar si el estado de pago pasa a cancelado/reembolsado
+    IF (OLD.payment_status NOT IN ('cancelled', 'refunded') AND NEW.payment_status IN ('cancelled', 'refunded')) THEN
+        -- Restaurar stock de todos los ítems del pedido
+        FOR item IN SELECT variant_id, quantity FROM public.shop_order_items WHERE order_id = NEW.id LOOP
+            UPDATE public.shop_variants
+            SET stock = stock + item.quantity
+            WHERE id = item.variant_id;
+        END LOOP;
+    
+    -- Detectar si el pedido sale de un estado cancelado/reembolsado (ej: reactivado)
+    ELSIF (OLD.payment_status IN ('cancelled', 'refunded') AND NEW.payment_status NOT IN ('cancelled', 'refunded')) THEN
+        -- Restar stock de nuevo
+        FOR item IN SELECT variant_id, quantity FROM public.shop_order_items WHERE order_id = NEW.id LOOP
+            UPDATE public.shop_variants
+            SET stock = stock - item.quantity
+            WHERE id = item.variant_id;
+        END LOOP;
+    END IF;
+    
+    RETURN NEW;
 END;
 $function$
 ;
@@ -311,6 +403,172 @@ AS $function$
     WHERE profiles.id = auth.uid()
       AND profiles.role IN ('admin', 'coordinator')
   );
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.protect_profile_role()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    jwt_role text := COALESCE(
+        NULLIF(current_setting('request.jwt.claims', true), '')::json ->> 'role',
+        ''
+    );
+    caller_is_admin boolean;
+BEGIN
+    IF TG_OP = 'UPDATE' AND NEW.role IS NOT DISTINCT FROM OLD.role THEN
+        RETURN NEW;
+    END IF;
+
+    -- Sin claims JWT = conexion directa (psql, Management API, migraciones)
+    IF jwt_role IN ('service_role', 'supabase_admin', '') THEN
+        RETURN NEW;
+    END IF;
+
+    SELECT (p.role = 'admin') INTO caller_is_admin
+    FROM public.profiles p
+    WHERE p.id = auth.uid();
+
+    IF COALESCE(caller_is_admin, false) THEN
+        RETURN NEW;
+    END IF;
+
+    IF TG_OP = 'INSERT' THEN
+        NEW.role := 'familia';
+        RETURN NEW;
+    END IF;
+
+    RAISE EXCEPTION 'No autoritzat a modificar profiles.role'
+        USING ERRCODE = '42501';
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.set_finance_tx_academic_year()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+  IF NEW.academic_year IS NULL THEN
+    NEW.academic_year := public.academic_year_for(
+      EXTRACT(MONTH FROM NEW.date)::int,
+      EXTRACT(YEAR FROM NEW.date)::int);
+  END IF;
+  RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.set_inscripcio_academic_year()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+  IF NEW.academic_year IS NULL THEN
+    NEW.academic_year := public.current_academic_year();
+  END IF;
+  RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.set_payment_academic_year()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+  NEW.academic_year := public.academic_year_for(NEW.payment_month, NEW.payment_year);
+  RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.set_shop_order_academic_year()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+  IF NEW.academic_year IS NULL THEN
+    NEW.academic_year := public.current_academic_year();
+  END IF;
+  RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.sync_shop_variant_stock()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        UPDATE public.shop_variants
+        SET stock = stock - NEW.quantity
+        WHERE id = NEW.variant_id;
+    ELSIF (TG_OP = 'DELETE') THEN
+        UPDATE public.shop_variants
+        SET stock = stock + OLD.quantity
+        WHERE id = OLD.variant_id;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        -- Si cambia la variante
+        IF (OLD.variant_id <> NEW.variant_id) THEN
+            UPDATE public.shop_variants
+            SET stock = stock + OLD.quantity
+            WHERE id = OLD.variant_id;
+            
+            UPDATE public.shop_variants
+            SET stock = stock - NEW.quantity
+            WHERE id = NEW.variant_id;
+        -- Si solo cambia la cantidad
+        ELSIF (OLD.quantity <> NEW.quantity) THEN
+            UPDATE public.shop_variants
+            SET stock = stock + (OLD.quantity - NEW.quantity)
+            WHERE id = NEW.variant_id;
+        END IF;
+    END IF;
+    RETURN NULL;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.update_shop_order_total()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_order_id UUID;
+    v_total NUMERIC;
+BEGIN
+    IF (TG_OP = 'DELETE') THEN
+        v_order_id := OLD.order_id;
+    ELSE
+        v_order_id := NEW.order_id;
+    END IF;
+
+    SELECT COALESCE(SUM(quantity * price_at_time), 0)
+    INTO v_total
+    FROM public.shop_order_items
+    WHERE order_id = v_order_id;
+
+    UPDATE public.shop_orders
+    SET total_amount = v_total
+    WHERE id = v_order_id;
+
+    RETURN NULL;
+END;
 $function$
 ;
 
