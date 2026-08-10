@@ -8,6 +8,17 @@
 -- Todo es idempotente (IF NOT EXISTS / DROP ... IF EXISTS), así que también
 -- es inofensivo contra una base que ya las tenga.
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Stub de compatibilidad, ver comentario en scripts/dump-schema.mjs.
+CREATE OR REPLACE FUNCTION public.log_audit_change()
+RETURNS trigger LANGUAGE plpgsql AS $stub$
+BEGIN
+  -- Intencionadamente sin efecto: la auditoria de verdad son los trg_audit_*.
+  RETURN COALESCE(NEW, OLD);
+END;
+$stub$;
+
 -- ============================ TABLAS ============================
 
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -322,6 +333,267 @@ END;
 $function$
 ;
 
+CREATE OR REPLACE FUNCTION public.create_inscripcions_backup()
+ RETURNS text
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+    backup_table_name TEXT;
+    sql_statement TEXT;
+BEGIN
+    -- Crear nombre de tabla con fecha actual
+    backup_table_name := 'inscripcions_backup_' || TO_CHAR(CURRENT_DATE, 'YYYY_MM_DD');
+    
+    -- Crear la tabla de backup
+    sql_statement := 'CREATE TABLE IF NOT EXISTS ' || backup_table_name || ' AS SELECT * FROM inscripcions';
+    EXECUTE sql_statement;
+    
+    -- Agregar comentario
+    sql_statement := 'COMMENT ON TABLE ' || backup_table_name || ' IS ''Backup automático de inscripcions creado el ' || CURRENT_DATE || '''';
+    EXECUTE sql_statement;
+    
+    RETURN 'Backup creado exitosamente: ' || backup_table_name;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.dar_de_alta_inscripcion(p_inscripcion_id uuid, p_motivo text DEFAULT NULL::text, p_changed_by text DEFAULT 'admin'::text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+    v_previous_record JSONB;
+    v_new_record JSONB;
+BEGIN
+    -- Obtener el registro completo antes de modificarlo
+    SELECT to_jsonb(inscripcions.*) INTO v_previous_record
+    FROM inscripcions
+    WHERE id = p_inscripcion_id;
+
+    -- Actualizar el status de la inscripción a 'alta'
+    UPDATE inscripcions
+    SET status = 'alta',
+        updated_at = NOW()
+    WHERE id = p_inscripcion_id;
+
+    -- Obtener el registro completo después de modificarlo
+    SELECT to_jsonb(inscripcions.*) INTO v_new_record
+    FROM inscripcions
+    WHERE id = p_inscripcion_id;
+
+    -- Registrar en el historial con el registro anterior y nuevo
+    INSERT INTO inscripcions_history (
+        inscripcion_id,
+        changed_by,
+        action,
+        note,
+        previous_record,
+        new_record
+    ) VALUES (
+        p_inscripcion_id,
+        p_changed_by,
+        'alta',
+        p_motivo,
+        v_previous_record,
+        v_new_record
+    );
+
+    -- Mensaje de confirmación en logs
+    RAISE NOTICE 'Inscripción % dada de alta por %', p_inscripcion_id, p_changed_by;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.dar_de_baja_inscripcion(p_inscripcion_id uuid, p_motivo text DEFAULT NULL::text, p_changed_by text DEFAULT 'admin'::text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+    v_previous_record JSONB;
+    v_new_record JSONB;
+BEGIN
+    -- Obtener el registro completo antes de modificarlo
+    SELECT to_jsonb(inscripcions.*) INTO v_previous_record
+    FROM inscripcions
+    WHERE id = p_inscripcion_id;
+
+    -- Actualizar el status de la inscripción a 'baja'
+    UPDATE inscripcions
+    SET status = 'baja',
+        updated_at = NOW()
+    WHERE id = p_inscripcion_id;
+
+    -- Obtener el registro completo después de modificarlo
+    SELECT to_jsonb(inscripcions.*) INTO v_new_record
+    FROM inscripcions
+    WHERE id = p_inscripcion_id;
+
+    -- Registrar en el historial con el registro anterior y nuevo
+    INSERT INTO inscripcions_history (
+        inscripcion_id,
+        changed_by,
+        action,
+        note,
+        previous_record,
+        new_record
+    ) VALUES (
+        p_inscripcion_id,
+        p_changed_by,
+        'baja',
+        p_motivo,
+        v_previous_record,
+        v_new_record
+    );
+
+    -- Mensaje de confirmación en logs
+    RAISE NOTICE 'Inscripción % marcada como baja por %', p_inscripcion_id, p_changed_by;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.fn_create_payments_for_inscription()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+declare
+    v_now date := current_date;
+    v_year int := extract(year from v_now)::int;
+    v_month int := extract(month from v_now)::int;
+    v_due_date date := make_date(v_year, v_month, 10); -- vencimiento día 10 del mes en curso
+    v_student jsonb;
+    v_name text;
+    v_surname text;
+    v_course text;
+    v_activities text[];
+begin
+    -- Si la inscripción tiene formato nuevo con array de students
+    if NEW.students is not null then
+        for v_student in select * from jsonb_array_elements(NEW.students)
+        loop
+            v_name := coalesce((v_student->>'name'), '');
+            v_surname := coalesce((v_student->>'surname'), '');
+            v_course := coalesce((v_student->>'course'), '');
+            -- Convertir array JSON de actividades a text[]
+            v_activities := coalesce(
+                (select array_agg(elem::text)
+                   from jsonb_array_elements_text(coalesce(v_student->'activities','[]'::jsonb)) as elem),
+                array[]::text[]
+            );
+
+            insert into public.payments (
+                student_name,
+                student_surname,
+                course,
+                activities,
+                amount,
+                due_date,
+                status,
+                bank_reference,
+                notes,
+                afa_member,
+                payment_month,
+                payment_year,
+                payment_date,
+                updated_at
+            ) values (
+                v_name,
+                v_surname,
+                v_course,
+                v_activities,
+                0, -- se puede ajustar luego; aquí solo creamos el registro de control
+                v_due_date,
+                'pending',
+                null,
+                'Auto-creado desde preinscripción',
+                coalesce(NEW.afa_member, false),
+                v_month,
+                v_year,
+                null,
+                now()
+            );
+        end loop;
+    else
+        -- Formato antiguo: un único alumno en columnas sueltas
+        insert into public.payments (
+            student_name,
+            student_surname,
+            course,
+            activities,
+            amount,
+            due_date,
+            status,
+            bank_reference,
+            notes,
+            afa_member,
+            payment_month,
+            payment_year,
+            payment_date,
+            updated_at
+        ) values (
+            coalesce(NEW.student_name,''),
+            coalesce(NEW.student_surname,''),
+            coalesce(NEW.student_course,''),
+            coalesce(NEW.activities, array[]::text[]),
+            0,
+            v_due_date,
+            'pending',
+            null,
+            'Auto-creado desde preinscripción (formato antiguo)',
+            coalesce(NEW.afa_member, false),
+            v_month,
+            v_year,
+            null,
+            now()
+        );
+    end if;
+
+    return NEW;
+end;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.generate_slug(t text)
+ RETURNS text
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+  RETURN lower(regexp_replace(t, '[^a-zA-Z0-9]+', '-', 'g'));
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.handle_new_contact_message()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  PERFORM
+    net.http_post(
+      url := 'https://zaxbtnjkidqwzqsehvld.supabase.co/functions/v1/notify-contact',
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json'
+      ),
+      body := jsonb_build_object(
+        'type', 'INSERT',
+        'table', 'contact_messages',
+        'record', row_to_json(NEW)::jsonb
+      )
+    );
+  RETURN NEW;
+END;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.handle_new_shop_order()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -392,6 +664,18 @@ END;
 $function$
 ;
 
+CREATE OR REPLACE FUNCTION public.hash_password(password text)
+ RETURNS text
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+BEGIN
+    -- Hash simple usando MD5 (para demo - en producción usar bcrypt)
+    RETURN md5(password || 'afa_salt_2024');
+END;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.is_admin()
  RETURNS boolean
  LANGUAGE sql
@@ -403,6 +687,31 @@ AS $function$
     WHERE profiles.id = auth.uid()
       AND profiles.role IN ('admin', 'coordinator')
   );
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.prevent_triggers_on_inscripcions()
+ RETURNS event_trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  cmd record;
+BEGIN
+  FOR cmd IN SELECT * FROM pg_event_trigger_ddl_commands()
+  LOOP
+    IF cmd.object_type = 'trigger'
+       AND cmd.schema_name = 'public'
+       AND cmd.object_identity LIKE '% inscripcions' -- target table
+    THEN
+      -- extraer nombre del trigger propuesto
+      -- object_identity suele ser: trigger_name ON public.inscripcions
+      IF split_part(cmd.object_identity, ' ', 1) <> 'update_inscripcions_updated_at' THEN
+        RAISE EXCEPTION 'Por política: no se pueden crear triggers en public.inscripcions salvo update_inscripcions_updated_at';
+      END IF;
+    END IF;
+  END LOOP;
+END
 $function$
 ;
 
@@ -444,6 +753,90 @@ BEGIN
     RAISE EXCEPTION 'No autoritzat a modificar profiles.role'
         USING ERRCODE = '42501';
 END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.record_payment_received(p_student_name text, p_student_surname text, p_payment_date date, p_amount numeric, p_bank_reference text DEFAULT NULL::text, p_notes text DEFAULT NULL::text)
+ RETURNS TABLE(success boolean, message text)
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+    v_payment RECORD;
+    v_payment_id UUID;
+BEGIN
+    -- Buscar el pago pendiente más reciente para este estudiante
+    SELECT * INTO v_payment
+    FROM payments 
+    WHERE student_name = p_student_name 
+      AND student_surname = p_student_surname
+      AND status = 'pending'
+      AND amount = p_amount
+    ORDER BY due_date DESC
+    LIMIT 1;
+    
+    IF NOT FOUND THEN
+        RETURN QUERY SELECT FALSE, 'No se encontró un pago pendiente que coincida con los datos proporcionados';
+        RETURN;
+    END IF;
+    
+    v_payment_id := v_payment.id;
+    
+    -- Actualizar el pago como pagado
+    UPDATE payments 
+    SET status = 'paid', 
+        payment_date = p_payment_date,
+        bank_reference = p_bank_reference,
+        notes = p_notes,
+        updated_at = NOW()
+    WHERE id = v_payment_id;
+    
+    -- Registrar en el historial
+    INSERT INTO payment_history (
+        payment_id,
+        status_change,
+        changed_by,
+        notes
+    ) VALUES (
+        v_payment_id,
+        'paid',
+        'admin',
+        COALESCE(p_notes, 'Pago registrado manualmente')
+    );
+    
+    RETURN QUERY SELECT TRUE, 'Pago registrado exitosamente';
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.remove_baja_payments_for_month(p_month integer, p_year integer)
+ RETURNS TABLE(removed integer)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare v_removed int := 0;
+begin
+  with bajas as (
+    select id, lower(coalesce(parent_email_1,'')) e1, lower(coalesce(parent_email_2,'')) e2
+    from inscripcions
+    where coalesce(status,'pendiente') = 'baja'
+  ),
+  del as (
+    delete from payments p
+    using bajas b
+    where p.payment_month = p_month
+      and p.payment_year  = p_year
+      and (
+            (p.inscripcion_id is not null and p.inscripcion_id = b.id)
+         or (p.inscripcion_id is null and lower(coalesce(p.parent_email,'')) in (b.e1, b.e2))
+      )
+    returning 1
+  )
+  select count(*) into v_removed from del;
+
+  return query select coalesce(v_removed,0);
+end;
 $function$
 ;
 
