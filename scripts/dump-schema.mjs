@@ -132,7 +132,23 @@ const triggerFunction = (def) => def.match(/EXECUTE (?:PROCEDURE|FUNCTION) ([a-z
 
 // Un trigger solo sirve si su función existe ya. Se recogen las funciones de
 // todos los triggers que se van a emitir y se vuelcan antes que ellos.
-const neededFunctions = new Set(['is_admin']); // is_admin la usan las políticas
+// Funciones que existen en produccion y que ninguna migracion crea. Sin ellas,
+// un entorno nuevo se queda sin la mitad de la logica de negocio (altas y bajas
+// de inscripcion, generacion de recibos, backups...).
+const ORPHAN_FUNCTIONS = [
+  'create_inscripcions_backup',
+  'dar_de_alta_inscripcion',
+  'dar_de_baja_inscripcion',
+  'fn_create_payments_for_inscription',
+  'generate_slug',
+  'handle_new_contact_message',
+  'hash_password',
+  'prevent_triggers_on_inscripcions',
+  'record_payment_received',
+  'remove_baja_payments_for_month',
+];
+
+const neededFunctions = new Set(['is_admin', ...ORPHAN_FUNCTIONS]);
 for (const trg of [...triggersRaw, ...authTriggersRaw]) {
   if (trg.nombre.startsWith(AUDIT_TRIGGER_PREFIX)) continue;
   if (carriesSecret(trg.def)) continue;
@@ -181,6 +197,24 @@ w('-- Va con la fecha más antigua de todas para que un entorno nuevo cree');
 w('-- primero estas tablas y las 57 migraciones siguientes se apliquen encima.');
 w('-- Todo es idempotente (IF NOT EXISTS / DROP ... IF EXISTS), así que también');
 w('-- es inofensivo contra una base que ya las tenga.');
+w();
+
+w('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+w();
+
+// Tres migraciones de 2025 crean triggers que llaman a log_audit_change(), una
+// funcion que NO existe en produccion: esos ficheros nunca se aplicaron tal
+// cual. La auditoria real la hacen los trg_audit_* con handle_audit_log(), que
+// llegan en 20260801140000. Sin este stub, un entorno nuevo se atasca en la
+// tercera migracion.
+w('-- Stub de compatibilidad, ver comentario en scripts/dump-schema.mjs.');
+w(`CREATE OR REPLACE FUNCTION public.log_audit_change()
+RETURNS trigger LANGUAGE plpgsql AS $stub$
+BEGIN
+  -- Intencionadamente sin efecto: la auditoria de verdad son los trg_audit_*.
+  RETURN COALESCE(NEW, OLD);
+END;
+$stub$;`);
 w();
 
 w('-- ============================ TABLAS ============================');
