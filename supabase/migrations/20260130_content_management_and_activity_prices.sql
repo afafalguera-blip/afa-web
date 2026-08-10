@@ -61,10 +61,12 @@ ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for news
+DROP POLICY IF EXISTS "Anyone can read published news" ON news;
 CREATE POLICY "Anyone can read published news" ON news
   FOR SELECT TO PUBLIC
   USING (published = true);
 
+DROP POLICY IF EXISTS "Admins can manage all news" ON news;
 CREATE POLICY "Admins can manage all news" ON news
   FOR ALL TO authenticated
   USING (
@@ -76,10 +78,12 @@ CREATE POLICY "Admins can manage all news" ON news
   );
 
 -- RLS Policies for projects
+DROP POLICY IF EXISTS "Anyone can read active projects" ON projects;
 CREATE POLICY "Anyone can read active projects" ON projects
   FOR SELECT TO PUBLIC
   USING (status = 'active');
 
+DROP POLICY IF EXISTS "Admins can manage all projects" ON projects;
 CREATE POLICY "Admins can manage all projects" ON projects
   FOR ALL TO authenticated
   USING (
@@ -91,10 +95,12 @@ CREATE POLICY "Admins can manage all projects" ON projects
   );
 
 -- RLS Policies for events
+DROP POLICY IF EXISTS "Anyone can read events" ON events;
 CREATE POLICY "Anyone can read events" ON events
   FOR SELECT TO PUBLIC
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage events" ON events;
 CREATE POLICY "Admins can manage events" ON events
   FOR ALL TO authenticated
   USING (
@@ -114,11 +120,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_news_updated_at ON news;
 CREATE TRIGGER update_news_updated_at
   BEFORE UPDATE ON news
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
 CREATE TRIGGER update_projects_updated_at
   BEFORE UPDATE ON projects
   FOR EACH ROW

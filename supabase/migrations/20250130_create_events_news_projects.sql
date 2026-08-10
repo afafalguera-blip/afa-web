@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS public.events (
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Admins can do everything
+DROP POLICY IF EXISTS "Admins have full access to events" ON public.events;
 CREATE POLICY "Admins have full access to events"
   ON public.events
   FOR ALL
@@ -50,6 +51,7 @@ CREATE POLICY "Admins have full access to events"
   );
 
 -- Policy: Anyone can read events
+DROP POLICY IF EXISTS "Anyone can read events" ON public.events;
 CREATE POLICY "Anyone can read events"
   ON public.events
   FOR SELECT
@@ -57,17 +59,19 @@ CREATE POLICY "Anyone can read events"
   USING (true);
 
 -- Add trigger for audit logging
+DROP TRIGGER IF EXISTS log_events_changes ON public.events;
 CREATE TRIGGER log_events_changes
   AFTER INSERT OR UPDATE OR DELETE ON public.events
   FOR EACH ROW EXECUTE FUNCTION log_audit_change();
 
 -- Add updated_at trigger
+DROP TRIGGER IF EXISTS update_events_updated_at ON public.events;
 CREATE TRIGGER update_events_updated_at
   BEFORE UPDATE ON public.events
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Create index for date queries
-CREATE INDEX idx_events_event_date ON public.events(event_date);
+CREATE INDEX IF NOT EXISTS idx_events_event_date ON public.events(event_date);
 
 COMMENT ON TABLE public.events IS 'Stores general calendar events for the AFA';
 
@@ -94,6 +98,7 @@ CREATE TABLE IF NOT EXISTS public.news (
 ALTER TABLE public.news ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Admins can do everything
+DROP POLICY IF EXISTS "Admins have full access to news" ON public.news;
 CREATE POLICY "Admins have full access to news"
   ON public.news
   FOR ALL
@@ -114,6 +119,7 @@ CREATE POLICY "Admins have full access to news"
   );
 
 -- Policy: Anyone can read published news
+DROP POLICY IF EXISTS "Anyone can read published news" ON public.news;
 CREATE POLICY "Anyone can read published news"
   ON public.news
   FOR SELECT
@@ -121,6 +127,7 @@ CREATE POLICY "Anyone can read published news"
   USING (published = true);
 
 -- Add trigger for audit logging
+DROP TRIGGER IF EXISTS log_news_changes ON public.news;
 CREATE TRIGGER log_news_changes
   AFTER INSERT OR UPDATE OR DELETE ON public.news
   FOR EACH ROW EXECUTE FUNCTION log_audit_change();
@@ -134,6 +141,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_news_updated_at ON public.news;
 CREATE TRIGGER update_news_updated_at
   BEFORE UPDATE ON public.news
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -161,6 +169,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Admins can do everything
+DROP POLICY IF EXISTS "Admins have full access to projects" ON public.projects;
 CREATE POLICY "Admins have full access to projects"
   ON public.projects
   FOR ALL
@@ -181,6 +190,7 @@ CREATE POLICY "Admins have full access to projects"
   );
 
 -- Policy: Anyone can read active projects
+DROP POLICY IF EXISTS "Anyone can read active projects" ON public.projects;
 CREATE POLICY "Anyone can read active projects"
   ON public.projects
   FOR SELECT
@@ -188,11 +198,13 @@ CREATE POLICY "Anyone can read active projects"
   USING (status = 'active');
 
 -- Add trigger for audit logging
+DROP TRIGGER IF EXISTS log_projects_changes ON public.projects;
 CREATE TRIGGER log_projects_changes
   AFTER INSERT OR UPDATE OR DELETE ON public.projects
   FOR EACH ROW EXECUTE FUNCTION log_audit_change();
 
 -- Add updated_at trigger
+DROP TRIGGER IF EXISTS update_projects_updated_at ON public.projects;
 CREATE TRIGGER update_projects_updated_at
   BEFORE UPDATE ON public.projects
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

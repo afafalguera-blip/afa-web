@@ -36,22 +36,26 @@ BEGIN
 END $$;
 
 -- Create proper admin-only policies for finance_transactions
+DROP POLICY IF EXISTS "Admins can read finance_transactions" ON public.finance_transactions;
 CREATE POLICY "Admins can read finance_transactions"
   ON public.finance_transactions FOR SELECT
   TO authenticated
   USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can insert finance_transactions" ON public.finance_transactions;
 CREATE POLICY "Admins can insert finance_transactions"
   ON public.finance_transactions FOR INSERT
   TO authenticated
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update finance_transactions" ON public.finance_transactions;
 CREATE POLICY "Admins can update finance_transactions"
   ON public.finance_transactions FOR UPDATE
   TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete finance_transactions" ON public.finance_transactions;
 CREATE POLICY "Admins can delete finance_transactions"
   ON public.finance_transactions FOR DELETE
   TO authenticated
@@ -71,6 +75,7 @@ BEGIN
 END $$;
 
 -- Allow anyone (including anon) to INSERT inscriptions (public form)
+DROP POLICY IF EXISTS "Anyone can submit inscriptions" ON public.inscripcions;
 CREATE POLICY "Anyone can submit inscriptions"
   ON public.inscripcions FOR INSERT
   TO anon, authenticated
@@ -85,6 +90,7 @@ BEGIN
     WHERE tablename = 'inscripcions'
       AND policyname = 'Admins can select inscriptions'
   ) THEN
+    DROP POLICY IF EXISTS "Admins can select inscriptions" ON public.inscripcions;
     CREATE POLICY "Admins can select inscriptions"
       ON public.inscripcions FOR SELECT
       TO authenticated
@@ -96,6 +102,7 @@ BEGIN
     WHERE tablename = 'inscripcions'
       AND policyname = 'Admins can update inscriptions'
   ) THEN
+    DROP POLICY IF EXISTS "Admins can update inscriptions" ON public.inscripcions;
     CREATE POLICY "Admins can update inscriptions"
       ON public.inscripcions FOR UPDATE
       TO authenticated
@@ -108,6 +115,7 @@ BEGIN
     WHERE tablename = 'inscripcions'
       AND policyname = 'Admins can delete inscriptions'
   ) THEN
+    DROP POLICY IF EXISTS "Admins can delete inscriptions" ON public.inscripcions;
     CREATE POLICY "Admins can delete inscriptions"
       ON public.inscripcions FOR DELETE
       TO authenticated

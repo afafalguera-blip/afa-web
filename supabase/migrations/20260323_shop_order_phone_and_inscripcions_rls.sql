@@ -188,12 +188,14 @@ DROP POLICY IF EXISTS "Allow anonymous update" ON public.inscripcions;
 DROP POLICY IF EXISTS "Allow anonymous delete" ON public.inscripcions;
 DROP POLICY IF EXISTS "Allow anonymous insert" ON public.inscripcions;
 
+DROP POLICY IF EXISTS "Admins can select inscriptions" ON public.inscripcions;
 CREATE POLICY "Admins can select inscriptions"
 ON public.inscripcions
 FOR SELECT
 TO authenticated
 USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update inscriptions" ON public.inscripcions;
 CREATE POLICY "Admins can update inscriptions"
 ON public.inscripcions
 FOR UPDATE
@@ -201,12 +203,14 @@ TO authenticated
 USING (public.is_admin())
 WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete inscriptions" ON public.inscripcions;
 CREATE POLICY "Admins can delete inscriptions"
 ON public.inscripcions
 FOR DELETE
 TO authenticated
 USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Public can insert inscriptions" ON public.inscripcions;
 CREATE POLICY "Public can insert inscriptions"
 ON public.inscripcions
 FOR INSERT
