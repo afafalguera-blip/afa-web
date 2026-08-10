@@ -129,29 +129,60 @@ Tres problemas encontrados al montar el workflow de Supabase:
    literal y los correos de confirmación de inscripción dejarían de enviarse.
    **Comprobar con `supabase migration list --linked` antes del primer push.**
 
-3. **Las migraciones NO aplican desde cero.** El job `esquema` lo comprobó en el
-   primer run y falla en la segunda migración:
+3. **Las migraciones no aplicaban desde cero** — en curso desde el 2026-08-11.
+
+   El job `esquema` falló en la segunda migración:
 
    ```
    Applying migration 20250130_create_events_table.sql...
    ERROR: relation "public.profiles" does not exist (SQLSTATE 42P01)
    ```
 
-   `20250130_create_events_table.sql` crea políticas RLS que consultan
-   `public.profiles`, y **ninguna migración del repo crea esa tabla**: existe en
-   producción porque se creó a mano en su día. La consecuencia práctica es que
-   hoy no se puede levantar un entorno nuevo (ni staging, ni una copia local
-   para depurar) desde el repositorio.
+   Al investigarlo apareció que el problema era mucho mayor que `profiles`:
+   **15 tablas de producción no las crea ninguna migración**, entre ellas
+   `payments`, `inscripcions`, `site_config` y las cuatro de la tienda. El
+   repositorio solo contenía parches incrementales sobre un esquema que se
+   construyó a mano en el panel de Supabase y nunca se capturó.
 
-   Arreglo: una migración inicial que cree `public.profiles` (y cualquier otro
-   objeto huérfano que aparezca al reintentar), colocada con una versión
-   anterior a `20250130`. Se saca el DDL real con
-   `supabase db dump --linked --schema public`.
+   Arreglo aplicado: `20240101000000_esquema_base.sql`, generado leyendo el
+   catálogo de producción con
+   [scripts/dump-schema.mjs](../scripts/dump-schema.mjs) (solo consultas SELECT).
+   Lleva la fecha más antigua de todas para que un entorno nuevo cree primero
+   esas tablas, y todo es idempotente, así que no molesta contra una base que ya
+   las tenga.
 
-   Hasta entonces el job queda en `continue-on-error`: informa en cada PR sin
-   bloquear.
+   Quedan fuera del volcado a propósito:
+   - Los `trg_audit_*`, que los crea `20260801140000_audit_logs_definition.sql`
+     junto con la tabla a la que escriben. Adelantarlos rompería las ocho
+     migraciones anteriores que insertan en `site_config`.
+   - Los dos webhooks a Edge Functions, porque su definición lleva credenciales
+     (ver punto 8).
 
-## 8. Cosas menores
+   **Sigue sin estar cerrado:** las migraciones posteriores pueden chocar con el
+   esquema base (un `ADD COLUMN` de algo que ya existe, una política duplicada).
+   El job `esquema` es quien lo va diciendo, run a run, y hasta que pase en
+   verde sigue en `continue-on-error`.
+
+## 8. El service_role vive dentro de dos triggers
+
+Los webhooks `send-inscription-email-webhook` (en `inscripcions`) y
+`send-order-email-webhook` (en `shop_orders`) llevan el JWT de `service_role` —
+y uno de ellos, además, un `x-webhook-secret` — escritos en texto plano dentro
+de su propia definición, porque `supabase_functions.http_request` recibe las
+cabeceras como literal.
+
+- **No es alcanzable desde la API**: PostgREST solo expone el esquema `public`,
+  no `pg_catalog`. Hace falta conexión directa a Postgres para leerlo.
+- **Pero sí importa**: la clave está duplicada dentro de la base, y rotarla
+  obliga a recrear los dos triggers a mano o los correos dejan de enviarse en
+  silencio.
+- Por eso `dump-schema.mjs` los detecta y los excluye del volcado: si no,
+  acabarían versionados en el repositorio.
+
+**Cómo se paga:** mover el secreto a `vault` de Supabase y leerlo desde una
+función `SECURITY DEFINER`, en vez de incrustarlo en la definición del trigger.
+
+## 9. Cosas menores
 
 - `README.md` sigue siendo la plantilla de Vite: no explica variables de
   entorno, cómo levantar el proyecto ni cómo desplegar.
