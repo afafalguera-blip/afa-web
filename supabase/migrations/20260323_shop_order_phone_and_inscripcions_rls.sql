@@ -1,3 +1,11 @@
+-- Fusion de 2 ficheros que compartian la version 20260323.
+-- La CLI de Supabase identifica cada migracion por los digitos previos al
+-- primer '_', asi que varios ficheros con la misma version chocan contra la
+-- clave primaria de schema_migrations al aplicarlos desde cero. Produccion
+-- tiene una sola fila para esta version, de modo que un unico fichero es
+-- justo lo que ya hay aplicado alli.
+
+-- ===== 20260323_add_shop_order_contact_phone.sql =====
 -- Add optional phone contact to shop orders and update checkout RPC.
 
 ALTER TABLE public.shop_orders
@@ -168,3 +176,39 @@ BEGIN
   );
 END;
 $function$;
+
+-- ===== 20260323_fix_inscripcions_rls_admin.sql =====
+-- Fix RLS for inscriptions so admin users (authenticated with admin role) can read/manage records.
+-- Keep public insert enabled for public inscription form.
+
+ALTER TABLE public.inscripcions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow anonymous select" ON public.inscripcions;
+DROP POLICY IF EXISTS "Allow anonymous update" ON public.inscripcions;
+DROP POLICY IF EXISTS "Allow anonymous delete" ON public.inscripcions;
+DROP POLICY IF EXISTS "Allow anonymous insert" ON public.inscripcions;
+
+CREATE POLICY "Admins can select inscriptions"
+ON public.inscripcions
+FOR SELECT
+TO authenticated
+USING (public.is_admin());
+
+CREATE POLICY "Admins can update inscriptions"
+ON public.inscripcions
+FOR UPDATE
+TO authenticated
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+
+CREATE POLICY "Admins can delete inscriptions"
+ON public.inscripcions
+FOR DELETE
+TO authenticated
+USING (public.is_admin());
+
+CREATE POLICY "Public can insert inscriptions"
+ON public.inscripcions
+FOR INSERT
+TO anon, authenticated
+WITH CHECK (true);

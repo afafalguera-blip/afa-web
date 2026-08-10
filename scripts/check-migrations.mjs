@@ -21,29 +21,25 @@ import { dirname, join } from 'node:path';
 const MIGRATIONS_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'supabase', 'migrations');
 
 /**
- * Migraciones anteriores a esta guarda, ya aplicadas en producción.
+ * Migraciones anteriores a esta guarda, ya aplicadas en producción, con versión
+ * de 8 dígitos. Renombrarlas rompería `schema_migrations` allí, así que quedan
+ * congeladas. Ya no hay versiones duplicadas: las que las tenían se fusionaron
+ * en un fichero por versión (2026-08-11).
+ *
  * NO añadir entradas nuevas: si la guarda se queja, renombra tu fichero.
  */
 const LEGACY = new Set([
   '20240130_create_activities.sql',
-  '20250130_create_events_table.sql',
-  '20250130_create_news_table.sql',
-  '20250130_create_projects_table.sql',
-  '20260130_content_management_tables.sql',
-  '20260130_update_activity_prices.sql',
+  '20250130_create_events_news_projects.sql',
+  '20260130_content_management_and_activity_prices.sql',
   '20260131_add_news_translations.sql',
   '20260202_documents_feature.sql',
-  '20260224_add_announcement_banner.sql',
-  '20260224_create_contact_messages.sql',
+  '20260224_announcement_banner_and_contact_messages.sql',
   '20260226_add_announcement_translations.sql',
   '20260306_add_news_metadata_columns.sql',
-  '20260315_add_admin_tasks_subtasks_tags_assignee_name.sql',
-  '20260315_create_admin_tasks.sql',
+  '20260315_create_admin_tasks_with_subtasks.sql',
   '20260321_add_news_pdf_attachments.sql',
-  '20260323_add_shop_order_contact_phone.sql',
-  '20260323_fix_inscripcions_rls_admin.sql',
-  '20260506000000_add_menjador_feature.sql',
-  '20260506000000_create_board_members.sql',
+  '20260323_shop_order_phone_and_inscripcions_rls.sql',
   '20260616_create_faqs_table.sql',
 ]);
 
