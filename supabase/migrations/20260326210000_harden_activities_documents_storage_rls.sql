@@ -48,17 +48,20 @@ CREATE POLICY "Public documents are viewable by everyone"
   ON public.documents FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can insert documents" ON public.documents;
 CREATE POLICY "Admins can insert documents"
   ON public.documents FOR INSERT
   TO authenticated
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update documents" ON public.documents;
 CREATE POLICY "Admins can update documents"
   ON public.documents FOR UPDATE
   TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete documents" ON public.documents;
 CREATE POLICY "Admins can delete documents"
   ON public.documents FOR DELETE
   TO authenticated

@@ -61,6 +61,7 @@ CREATE TRIGGER trg_protect_profile_role
 
 -- Defensa en profundidad: la policy tambien fija el rol permitido.
 DROP POLICY IF EXISTS "Users can update own profile." ON public.profiles;
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
 CREATE POLICY "profiles_update_own"
     ON public.profiles FOR UPDATE
     TO authenticated
@@ -68,6 +69,7 @@ CREATE POLICY "profiles_update_own"
     WITH CHECK ((SELECT auth.uid()) = id);
 
 DROP POLICY IF EXISTS "Users can insert their own profile." ON public.profiles;
+DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
 CREATE POLICY "profiles_insert_own"
     ON public.profiles FOR INSERT
     TO authenticated
@@ -76,6 +78,7 @@ CREATE POLICY "profiles_insert_own"
 -- El SELECT era USING (true) para public: exponia nombre y rol de los
 -- administradores a cualquier visitante anonimo.
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.profiles;
+DROP POLICY IF EXISTS "profiles_select_own_or_admin" ON public.profiles;
 CREATE POLICY "profiles_select_own_or_admin"
     ON public.profiles FOR SELECT
     TO authenticated

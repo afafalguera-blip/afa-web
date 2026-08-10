@@ -23,6 +23,7 @@ $$;
 DROP POLICY IF EXISTS "Public can read visible board members" ON public.board_members;
 DROP POLICY IF EXISTS "Admins can read all board members" ON public.board_members;
 
+DROP POLICY IF EXISTS "Read board members" ON public.board_members;
 CREATE POLICY "Read board members"
   ON public.board_members FOR SELECT
   USING (is_visible = true OR public.is_admin());

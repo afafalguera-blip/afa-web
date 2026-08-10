@@ -16,20 +16,24 @@ create table if not exists public.documents (
 alter table public.documents enable row level security;
 
 -- Policies for documents table
+DROP POLICY IF EXISTS "Public documents are viewable by everyone" ON public.documents;
 create policy "Public documents are viewable by everyone"
   on public.documents for select
   using (true);
 
+DROP POLICY IF EXISTS "Admins can insert documents" ON public.documents;
 create policy "Admins can insert documents"
   on public.documents for insert
   to authenticated
   with check (true); -- In a real app we'd check roles, but for now authenticated is 'admin' logic effectively in this simple setup or assumes middleware checks
 
+DROP POLICY IF EXISTS "Admins can update documents" ON public.documents;
 create policy "Admins can update documents"
   on public.documents for update
   to authenticated
   using (true);
 
+DROP POLICY IF EXISTS "Admins can delete documents" ON public.documents;
 create policy "Admins can delete documents"
   on public.documents for delete
   to authenticated
@@ -42,20 +46,24 @@ values ('documents', 'documents', true)
 on conflict (id) do nothing;
 
 -- Storage Policies
+DROP POLICY IF EXISTS "Documents are publicly accessible" ON storage.objects;
 create policy "Documents are publicly accessible"
   on storage.objects for select
   using ( bucket_id = 'documents' );
 
+DROP POLICY IF EXISTS "Admins can upload documents" ON storage.objects;
 create policy "Admins can upload documents"
   on storage.objects for insert
   to authenticated
   with check ( bucket_id = 'documents' );
 
+DROP POLICY IF EXISTS "Admins can delete documents" ON storage.objects;
 create policy "Admins can delete documents"
   on storage.objects for delete
   to authenticated
   using ( bucket_id = 'documents' );
 
+DROP POLICY IF EXISTS "Admins can update documents" ON storage.objects;
 create policy "Admins can update documents"
   on storage.objects for update
   to authenticated
