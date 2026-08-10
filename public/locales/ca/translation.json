@@ -826,7 +826,7 @@
       "inscription_config": "Config. Inscripcions",
       "short_links": "Enllaços curts",
       "documents": "Documents",
-      "board": "Sobre AFA / Junta",
+      "board": "Sobre l'AFA / Junta",
       "settings": "Configuració General"
     },
     "acollidaManager": {
@@ -932,7 +932,7 @@
         "students": "Alumnes",
         "status": "Estat",
         "date": "Data",
-        "actions": "Acciones",
+        "actions": "Accions",
         "loading": "Carregant...",
         "no_results": "No s'han trobat inscripcions."
       },
@@ -1203,9 +1203,12 @@
       "no_events": "No hi ha esdeveniments aquest mes.",
       "delete_confirm": "Estàs segur que vols eliminar aquest esdeveniment?",
       "required_fields": "El títol i la data són obligatoris",
+      "end_before_start": "La data de fi no pot ser anterior a la d'inici.",
       "all_day": "Tot el dia",
       "field_title": "Títol",
       "field_date": "Data",
+      "field_end_date": "Data de fi",
+      "field_end_date_hint": "Deixa-ho buit si dura un sol dia. Per a Setmana Santa o colònies, posa l'últim dia.",
       "field_type": "Tipus",
       "field_start_time": "Hora inici",
       "field_end_time": "Hora fi",
@@ -1429,7 +1432,7 @@
       "search_placeholder": "Cerca per nom, càrrec o email...",
       "show": "Mostrar",
       "subtitle": "Configura els textos públics i els membres visibles a /sobre-afa.",
-      "title": "Sobre AFA / Junta Directiva",
+      "title": "Sobre l'AFA / Junta Directiva",
       "translate_from": "Traduir des de {{lang}}",
       "translating": "Traduint...",
       "translations": "Traduccions (càrrec descriptiu + bio)",
@@ -1783,7 +1786,7 @@
   "common": {
     "all_day": "Tot el dia",
     "list": "Llista",
-    "search": "Buscar...",
+    "search": "Cercar...",
     "all": "Totes",
     "error_delete": "Error en eliminar",
     "error_save": "Error en desar",

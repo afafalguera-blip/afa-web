@@ -826,7 +826,7 @@
       "inscription_config": "Config. Inscripciones",
       "short_links": "Enlaces cortos",
       "documents": "Documentos",
-      "board": "Sobre AFA / Junta",
+      "board": "Sobre el AFA / Junta",
       "settings": "Configuración General"
     },
     "acollidaManager": {
@@ -1215,7 +1215,10 @@
       "deleted": "Evento eliminado",
       "next_month": "Mes siguiente",
       "prev_month": "Mes anterior",
-      "saved": "Evento guardado"
+      "saved": "Evento guardado",
+      "end_before_start": "La fecha de fin no puede ser anterior a la de inicio.",
+      "field_end_date": "Fecha de fin",
+      "field_end_date_hint": "Déjalo vacío si dura un solo día. Para Semana Santa o colonias, pon el último día."
     },
     "tasks": {
       "title": "Tareas del AFA",
@@ -1281,7 +1284,7 @@
       "fill_source_first": "Rellena primero la pregunta en el idioma de origen.",
       "auto_translate": "Auto-traducir",
       "translating": "Traduciendo...",
-      "field_category": "Categoria",
+      "field_category": "Categoría",
       "category_placeholder": "Ej.: Inscripciones, plazas y lista de espera",
       "category_hint": "Las preguntas con la misma categoria se agrupan juntas.",
       "field_question": "Pregunta",
@@ -1429,7 +1432,7 @@
       "search_placeholder": "Busca por nombre, cargo o email...",
       "show": "Mostrar",
       "subtitle": "Configura los textos públicos y los miembros visibles en /sobre-afa.",
-      "title": "Sobre AFA / Junta Directiva",
+      "title": "Sobre el AFA / Junta Directiva",
       "translate_from": "Traducir desde {{lang}}",
       "translating": "Traduciendo...",
       "translations": "Traducciones (cargo descriptivo + bio)",
