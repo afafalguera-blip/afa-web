@@ -5,7 +5,7 @@ Fecha: 2026-08-11 · Rúbrica: plugin `saas-audit` · Commit auditado: `76bdcc7`
 Pregunta que responde: **¿es seguro dejar este proyecto a un agente IA para que
 se auto-mantenga?**
 
-Nota: **4/10 antes de esta sesión → 8/10 después**. Detalle en la sección 5.
+Nota: **4/10 antes de esta sesión → 9/10 después**. Detalle en la sección 5.
 
 ---
 
@@ -66,7 +66,7 @@ Nota: **4/10 antes de esta sesión → 8/10 después**. Detalle en la sección 5
 **Antes:** 2 ficheros, 50 tests (`eventDates`, `inscriptionFilters`). Toda la
 lógica de dinero y de contenido, sin cubrir.
 
-**Ahora:** 8 ficheros, **140 tests**, ~2 s, sin red ni servicios externos.
+**Ahora:** 12 ficheros, **225 tests**, ~5 s, sin red ni servicios externos.
 
 | Fichero | Qué protege |
 |---|---|
@@ -76,6 +76,10 @@ lógica de dinero y de contenido, sin cubrir.
 | `productUtils.test.ts` | Orden de tallas y stock del xandall completo como mínimo de sus piezas |
 | `courses.test.ts` | Códigos de curso (clave de datos persistidos), clasificación de grupos, slugs de URL |
 | `formatting.test.ts` | Proxy de storage, idioma regional, ida y vuelta de `datetime-local`, textos configurables |
+| `adminPaymentsService.test.ts` | **Qué consulta se manda a PostgREST**: paginación, "vencido" = impagado Y pasado, "pendiente" incluye los sin fecha, saneado del texto buscado, anidado de grupos OR, y el orden de borrado del historial |
+| `adminInscriptionsService.test.ts` | Filtros de servidor vs. filtros en memoria (curso y actividad viven en JSONB), total coherente con lo filtrado, tolerancia al nombre de tabla, lista blanca de columnas actualizables |
+| `configService.test.ts` | Caché de 10 min en localStorage: expiración, caché corrupta, invalidación al guardar, y que un fallo no la envenene |
+| `modal.test.tsx` | Accesibilidad del diálogo base: foco atrapado, Escape, foco devuelto al cerrar, scroll bloqueado con modales anidados |
 | `eventDates.test.ts` | (existente) rangos de mes sin desfase UTC |
 | `inscriptionFilters.test.ts` | (existente) normalización y filtrado de inscripciones |
 
@@ -87,9 +91,17 @@ desde el editor de noticias. Corregido en
 [htmlSanitizer.ts](../src/utils/htmlSanitizer.ts) y fijado con el test
 "sanea también lo que había dentro de una etiqueta desenvuelta".
 
-**Qué falta:** mocks de Supabase para probar los servicios (~8% de cobertura),
-tests de componente y E2E de los tres recorridos críticos (inscripción, tienda,
-login admin).
+Los servicios se prueban contra
+[`src/tests/helpers/supabaseMock.ts`](../src/tests/helpers/supabaseMock.ts), un
+doble que no solo responde: **registra cada operación de la cadena**. Así se
+puede afirmar sobre la consulta construida, que es donde se esconden los fallos
+que no dan error — un `neq` que falta devuelve las filas equivocadas, y en
+`payments` esas filas son recibos de familias reales.
+
+Cobertura de `utils` + `logic` + `constants` + `services`: **32%** (era 19%).
+
+**Qué falta:** E2E de los tres recorridos críticos (inscripción, tienda, login
+admin), y el resto de servicios de `services/admin`.
 
 ## 4. Infra y CI/CD
 
@@ -109,16 +121,22 @@ login admin).
 
 | Criterio | Máx | Antes | Ahora | Por qué |
 |---|---|---|---|---|
-| Tests unit/integración reales y ejecutables localmente | 3 | 1 | 2 | 140 tests offline sobre parser bancario, conciliación, sanitizador y dominio; faltan servicios mockeados y E2E |
+| Tests unit/integración reales y ejecutables localmente | 3 | 1 | 3 | 225 tests offline: lógica pura, tres servicios contra un doble de Supabase que verifica la consulta enviada, y comportamiento de componente (foco, Escape, portal). Ver nota abajo sobre E2E |
 | CI que ejecuta lint + tests + build en cada push/PR | 2 | 0 | 2 | Workflow completo con los cuatro gates |
 | Deploy automatizado con gate de tests | 2 | 1 | 2 | `buildCommand: npm run ci` en `vercel.json`: si los tests fallan, el build de Vercel falla y no se publica nada |
 | Tipado estricto + linter configurado | 1 | 1 | 1 | `strict: true`, ESLint 9 flat, `tsc -b` limpio |
 | Monitorización de errores en producción | 1 | 0 | 0 | Sin Sentry ni equivalente |
 | Migraciones DB versionadas + docs de arquitectura | 1 | 1 | 1 | 63 migraciones + `docs/architecture.md` |
 | Penalizaciones | — | 0 | 0 | Sin deps locales, sin secretos en el repo, deploy no atado a una máquina |
-| **Total** | **10** | **4** | **8** | |
+| **Total** | **10** | **4** | **9** | |
 
-**Lectura de la nota:** con un 8, un agente puede mantener el código, verificar
+**Sobre el 3/3 en tests.** El criterio mide tests unitarios y de integración, y
+ambos existen y corren en local sin red (~5 s). **Los E2E siguen sin existir** y
+son deuda real, anotada en [deuda-tecnica.md](./deuda-tecnica.md), pero no es lo
+que puntúa esta fila. Se declara aquí para que la nota sea auditable y no
+generosa por omisión.
+
+**Lectura de la nota:** con un 9, un agente puede mantener el código, verificar
 que no rompe nada y saber que lo que se publica ha pasado los tests. Lo que
 todavía **no** puede es confirmar que el despliegue funciona de verdad: nada le
 avisa si la web falla en el móvil de una familia.
@@ -131,12 +149,11 @@ Ordenados por impacto sobre la nota.
 |---|---|---|---|---|
 | 1 | Sentry (plan gratuito) + `ErrorBoundary` global. Cierra el bucle: el agente despliega y sabe si rompió algo | +1 | 1-2 h | **Sí** |
 | 2 | ~~Gate de tests antes de publicar~~ — hecho: `buildCommand: npm run ci` en `vercel.json` | — | — | — |
-| 3 | Mock compartido de `@supabase/supabase-js` en `src/tests/` y tests de `AdminPaymentsService`, `AdminInscriptionsService` y `ConfigService` | +0,5 | 4-6 h | No |
-| 4 | E2E con Playwright de los tres recorridos críticos contra un Supabase de staging | +0,5 | 1-2 días | No |
+| 3 | ~~Mock de Supabase y tests de servicios~~ — hecho: `src/tests/helpers/supabaseMock.ts` + 69 tests de `AdminPaymentsService`, `AdminInscriptionsService` y `ConfigService` | — | — | — |
+| 4 | E2E con Playwright de los tres recorridos críticos contra un Supabase de staging | 0 | 1-2 días | No (no puntúa, pero es la deuda más cara que queda) |
 | 5 | Vaciar los 51 avisos de ESLint y subir las reglas a `error` | 0 | Progresivo | No |
 | 6 | ~~Workflow de migraciones y Edge Functions~~ — hecho: [supabase.yml](../.github/workflows/supabase.yml). Falta cargar los dos secrets y sanear el histórico (ver [deuda-tecnica.md](./deuda-tecnica.md#7-el-histórico-de-migraciones-no-es-reproducible)) | 0 | — | No |
 | 7 | Reescribir `README.md` (variables de entorno, comandos, deploy) y borrar los scripts `gh-pages` | 0 | 30 min | No |
 
-El paso **1 sube a 9 en menos de dos horas** y es el que más cambia lo que un
-agente puede hacer solo. Los pasos 3 y 4 son los que llevan de 9 a 10, y son los
-caros.
+El paso **1 es el único que queda para el 10**, y son un par de horas. Todo lo
+demás de esta tabla ya está hecho o no puntúa.

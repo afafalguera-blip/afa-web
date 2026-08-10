@@ -85,26 +85,29 @@ algún día divergen en comportamiento, el aviso llegaría por el lado de Vercel
 | Zona | Líneas cubiertas | Comentario |
 |---|---|---|
 | `src/logic` | 100% | Filtros de inscripciones |
-| `src/utils` | 72% | Falta `imageCompression` (Canvas), `CategoryUtils` (i18n) |
-| `src/services` | ~8% | Casi todo es I/O contra Supabase, sin mocks |
-| **Total medido** | **~19%** | |
+| `src/utils` | 74% | Falta `imageCompression` (Canvas), `CategoryUtils` (i18n) |
+| `src/services/admin` | 37% | Pagos e inscripciones cubiertos; el resto no |
+| `src/services` | 4% | `ConfigService` cubierto en su parte de caché; el resto es I/O fino |
+| **Total medido** | **~32%** | Era 19% |
 
 No hay umbral configurado a propósito: poner uno hoy solo generaría tests de
-relleno. Se fija cuando los servicios tengan mocks.
+relleno.
 
-**Cómo se paga:** un mock de `@supabase/supabase-js` compartido en
-`src/tests/` permitiría probar `AdminInscriptionsService`,
-`AdminPaymentsService` y `ConfigService`, que es donde vive la lógica de negocio
-con dinero de por medio.
+**Cómo se sigue:** el doble de Supabase ya existe
+([`src/tests/helpers/supabaseMock.ts`](../src/tests/helpers/supabaseMock.ts)),
+así que cubrir un servicio más es escribir el test, no montar andamiaje.
+Siguientes por valor: `AdminMenjadorService`, `AdminDocumentsService` y
+`ExportService`.
 
-## 6. Sin tests de componente ni E2E
+## 6. Sin E2E
 
-Los 140 tests actuales son de lógica pura. Los tres recorridos que no pueden
-romperse (inscripción pública, checkout de la tienda, login de admin) no tienen
-ninguna red de seguridad automática.
+Ya hay tests de componente (`modal.test.tsx` cubre foco, Escape y scroll del
+diálogo que usa todo el panel), pero los tres recorridos completos que no pueden
+romperse — inscripción pública, checkout de la tienda, login de admin — siguen
+sin red de seguridad automática de punta a punta.
 
-**Cómo se paga:** Playwright contra un proyecto de Supabase de staging, o
-`@testing-library/react` (ya está instalado) para el formulario de inscripción.
+**Cómo se paga:** Playwright contra un Supabase de staging. Bloqueado de hecho
+por el punto 7: hoy no se puede levantar ese staging desde el repositorio.
 
 ## 7. El histórico de migraciones no es reproducible
 
