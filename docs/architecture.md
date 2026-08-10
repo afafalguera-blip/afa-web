@@ -50,3 +50,42 @@ El proyecto mantiene un ciclo de auditoría constante mediante:
 
 - **Linting**: Reglas estrictas de ESLint para detectar deuda técnica.
 - **TypeScript**: Chequeo de tipos en build time (`tsc --noEmit`).
+- **Tests**: Vitest sobre la lógica pura (`src/utils`, `src/logic`, y la lógica
+  de negocio de `src/services`). Viven en `src/tests/` y no tocan la red: los
+  servicios que importan Supabase funcionan con las variables falsas declaradas
+  en `vitest.config.ts`.
+- **CI**: `.github/workflows/ci.yml` ejecuta lint, tipos, tests con cobertura y
+  build en cada push y pull request.
+- **Supabase**: `.github/workflows/supabase.yml` valida los nombres de las
+  migraciones y las aplica desde cero en un Supabase limpio. El despliegue a
+  producción (`db push` + `functions deploy`) es **manual**, desde
+  Actions → Supabase → Run workflow, porque no hay entorno de staging.
+- **Dependencias**: Dependabot semanal agrupado por familia
+  (`.github/dependabot.yml`).
+
+### Comandos
+
+```bash
+npm run lint          # ESLint (0 errores; los avisos son deuda inventariada)
+npm run typecheck     # tsc -b
+npm test              # Vitest, una pasada
+npm run test:watch    # Vitest en modo watch
+npm run test:coverage # Vitest + informe de cobertura en coverage/
+npm run check:migrations # nombres de supabase/migrations
+npm run ci            # todos los gates, igual que en GitHub Actions
+```
+
+### Secrets que espera CI
+
+| Secret | Dónde se usa | Cómo se obtiene |
+|---|---|---|
+| `SUPABASE_ACCESS_TOKEN` | job `desplegar` | Supabase → Account → Access Tokens |
+| `SUPABASE_DB_PASSWORD` | job `desplegar` | Contraseña de Postgres del proyecto |
+
+```bash
+gh secret set SUPABASE_ACCESS_TOKEN --repo afafalguera-blip/afa-web
+gh secret set SUPABASE_DB_PASSWORD  --repo afafalguera-blip/afa-web
+```
+
+Estado y deuda conocida: [auditoria-mantenibilidad-2026-08.md](./auditoria-mantenibilidad-2026-08.md)
+y [deuda-tecnica.md](./deuda-tecnica.md).
