@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint · Types · Tests · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Comprobar tipos
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm run test:coverage
+
+      # Vite inyecta estas variables en tiempo de build. En CI solo se comprueba
+      # que el bundle compila, así que valen valores falsos: el artefacto no se
+      # despliega (de eso se encarga Vercel con sus propios secrets).
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://ci.invalid
+          VITE_SUPABASE_ANON_KEY: ci-placeholder-key
+
+      - name: Guardar informe de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  audit:
+    name: Vulnerabilidades de dependencias
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Solo dependencias de producción: las de desarrollo no llegan al usuario.
+      # No bloquea el merge (xlsx arrastra un aviso sin parche publicado en npm,
+      # ver docs/deuda-tecnica.md), pero deja el listado visible en cada PR.
+      - name: npm audit (producción)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true

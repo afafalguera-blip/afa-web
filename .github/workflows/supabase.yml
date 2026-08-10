@@ -1,0 +1,128 @@
+name: Supabase
+
+on:
+  pull_request:
+    paths: ['supabase/**', 'scripts/check-migrations.mjs', '.github/workflows/supabase.yml']
+  push:
+    branches: [main]
+    paths: ['supabase/**', 'scripts/check-migrations.mjs', '.github/workflows/supabase.yml']
+  workflow_dispatch:
+    inputs:
+      que_desplegar:
+        description: Qué se despliega
+        type: choice
+        default: solo-listar
+        options:
+          - solo-listar
+          - migraciones
+          - funciones
+          - migraciones-y-funciones
+
+env:
+  # No es un secreto: ya aparece en vercel.json y en las URLs públicas de storage.
+  PROJECT_REF: zaxbtnjkidqwzqsehvld
+
+concurrency:
+  group: supabase-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Bloquea el merge. No necesita credenciales ni Docker: es solo higiene de
+  # nombres, que es lo que rompe `supabase db push` (versiones duplicadas).
+  # ---------------------------------------------------------------------------
+  nombres:
+    name: Nombres de migración
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: node scripts/check-migrations.mjs
+
+  # ---------------------------------------------------------------------------
+  # Levanta un Supabase limpio y aplica las 57 migraciones desde cero. Es la
+  # única forma de saber si el histórico sigue siendo reproducible.
+  #
+  # Informativo a propósito: el histórico arrastra migraciones aplicadas fuera
+  # de banda (ver el aviso de 20260707000000_..._webhook.sql), así que hasta que
+  # se sanee no puede bloquear un merge. Cuando pase en verde varias veces
+  # seguidas, quitar `continue-on-error`.
+  # ---------------------------------------------------------------------------
+  esquema:
+    name: Migraciones desde cero (informativo)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # `supabase start` aplica supabase/migrations al crear la base. Si una
+      # migración tiene SQL inválido, este paso falla.
+      - name: Levantar Supabase local
+        run: supabase start -x studio,imgproxy,logflare,vector,supavisor,mailpit
+
+      - name: Avisos del linter de Postgres
+        run: supabase db lint --level warning
+        continue-on-error: true
+
+      - name: Parar
+        if: always()
+        run: supabase stop --no-backup
+
+  # ---------------------------------------------------------------------------
+  # Despliegue. Solo manual (Actions → Supabase → Run workflow) y nunca en push:
+  # no hay entorno de staging, así que lo que se aplique aquí va directo a la
+  # base de datos con la que trabajan las familias.
+  #
+  # Secrets necesarios en el repositorio:
+  #   SUPABASE_ACCESS_TOKEN  → Supabase → Account → Access Tokens
+  #   SUPABASE_DB_PASSWORD   → contraseña de Postgres del proyecto
+  # ---------------------------------------------------------------------------
+  desplegar:
+    name: Desplegar a producción
+    if: github.event_name == 'workflow_dispatch'
+    needs: [nombres]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Enlazar proyecto
+        run: supabase link --project-ref "$PROJECT_REF"
+
+      # Siempre, incluso en modo solo-listar: deja por escrito en el log qué
+      # migraciones tiene el repo y cuáles la base de datos remota.
+      - name: Comparar migraciones locales y remotas
+        run: supabase migration list --linked
+
+      # Sin --include-all a propósito: ese flag reaplica migraciones anteriores
+      # a la última remota, y el histórico tiene versiones de 8 dígitos que
+      # ordenan de forma engañosa.
+      - name: Aplicar migraciones
+        if: contains(github.event.inputs.que_desplegar, 'migraciones')
+        run: supabase db push
+
+      - name: Desplegar Edge Functions
+        if: contains(github.event.inputs.que_desplegar, 'funciones')
+        run: supabase functions deploy --project-ref "$PROJECT_REF"

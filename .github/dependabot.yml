@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    # Un PR por familia: menos ruido y menos riesgo de mezclar majors.
+    groups:
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom', 'react-router-dom']
+      tiptap:
+        patterns: ['@tiptap/*']
+      i18n:
+        patterns: ['i18next*', 'react-i18next']
+      dev-tooling:
+        dependency-type: development
+        patterns: ['*']
+    ignore:
+      # Los majors de estos rompen API: se suben a mano y con pruebas.
+      - dependency-name: '@supabase/supabase-js'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'react'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'vite'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
