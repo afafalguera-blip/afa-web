@@ -114,10 +114,27 @@ Tres problemas encontrados al montar el workflow de Supabase:
    literal y los correos de confirmación de inscripción dejarían de enviarse.
    **Comprobar con `supabase migration list --linked` antes del primer push.**
 
-3. **Nadie ha verificado que las 57 migraciones apliquen desde cero.** El job
-   `esquema` lo comprueba en cada PR, de momento como informativo
-   (`continue-on-error`). Cuando pase en verde de forma estable, quitarlo y que
-   bloquee.
+3. **Las migraciones NO aplican desde cero.** El job `esquema` lo comprobó en el
+   primer run y falla en la segunda migración:
+
+   ```
+   Applying migration 20250130_create_events_table.sql...
+   ERROR: relation "public.profiles" does not exist (SQLSTATE 42P01)
+   ```
+
+   `20250130_create_events_table.sql` crea políticas RLS que consultan
+   `public.profiles`, y **ninguna migración del repo crea esa tabla**: existe en
+   producción porque se creó a mano en su día. La consecuencia práctica es que
+   hoy no se puede levantar un entorno nuevo (ni staging, ni una copia local
+   para depurar) desde el repositorio.
+
+   Arreglo: una migración inicial que cree `public.profiles` (y cualquier otro
+   objeto huérfano que aparezca al reintentar), colocada con una versión
+   anterior a `20250130`. Se saca el DDL real con
+   `supabase db dump --linked --schema public`.
+
+   Hasta entonces el job queda en `continue-on-error`: informa en cada PR sin
+   bloquear.
 
 ## 8. Cosas menores
 

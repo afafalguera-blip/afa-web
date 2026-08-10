@@ -37,9 +37,9 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -49,10 +49,11 @@ jobs:
   # Levanta un Supabase limpio y aplica las 57 migraciones desde cero. Es la
   # única forma de saber si el histórico sigue siendo reproducible.
   #
-  # Informativo a propósito: el histórico arrastra migraciones aplicadas fuera
-  # de banda (ver el aviso de 20260707000000_..._webhook.sql), así que hasta que
-  # se sanee no puede bloquear un merge. Cuando pase en verde varias veces
-  # seguidas, quitar `continue-on-error`.
+  # Informativo a propósito: hoy FALLA, y falla por un motivo real —
+  # 20250130_create_events_table.sql declara políticas RLS sobre
+  # public.profiles, y ninguna migración del repo crea esa tabla (existe en
+  # producción porque se creó a mano). Ver docs/deuda-tecnica.md.
+  # Cuando el histórico se sanee y pase en verde, quitar `continue-on-error`.
   # ---------------------------------------------------------------------------
   esquema:
     name: Migraciones desde cero (informativo)
@@ -61,23 +62,31 @@ jobs:
     continue-on-error: true
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: supabase/setup-cli@v1
+      # Versión fija: con `latest` la acción resuelve la release por la API de
+      # GitHub sin autenticar y salta el rate limit en cuanto hay varios runs
+      # a la vez (pasó en el primer push, con los PR de Dependabot en paralelo).
+      - uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 2.113.0
 
       # `supabase start` aplica supabase/migrations al crear la base. Si una
-      # migración tiene SQL inválido, este paso falla.
+      # migración tiene SQL inválido, o depende de algo que no crea ninguna
+      # migración, este paso falla.
       - name: Levantar Supabase local
+        id: arrancar
         run: supabase start -x studio,imgproxy,logflare,vector,supavisor,mailpit
 
       - name: Avisos del linter de Postgres
+        if: steps.arrancar.outcome == 'success'
         run: supabase db lint --level warning
         continue-on-error: true
 
+      # Solo si llegó a arrancar: si falló la instalación de la CLI, `supabase`
+      # no existe y este paso moría con "command not found".
       - name: Parar
-        if: always()
+        if: always() && steps.arrancar.outcome != 'skipped'
         run: supabase stop --no-backup
 
   # ---------------------------------------------------------------------------
@@ -102,9 +111,9 @@ jobs:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
 
