@@ -1,6 +1,6 @@
 {
   "installCommand": "npm install --include=dev",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run ci",
   "rewrites": [
     {
       "source": "/storage/:path*",

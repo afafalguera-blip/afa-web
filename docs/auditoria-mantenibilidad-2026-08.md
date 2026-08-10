@@ -5,7 +5,7 @@ Fecha: 2026-08-11 · Rúbrica: plugin `saas-audit` · Commit auditado: `76bdcc7`
 Pregunta que responde: **¿es seguro dejar este proyecto a un agente IA para que
 se auto-mantenga?**
 
-Nota: **4/10 antes de esta sesión → 7/10 después**. Detalle en la sección 5.
+Nota: **4/10 antes de esta sesión → 8/10 después**. Detalle en la sección 5.
 
 ---
 
@@ -97,7 +97,7 @@ login admin).
 |---|---|
 | CI | **Nuevo**: [.github/workflows/ci.yml](../.github/workflows/ci.yml) — lint + tipos + tests con cobertura + build en cada push y PR, más job informativo de `npm audit` |
 | Actualización de deps | **Nuevo**: [.github/dependabot.yml](../.github/dependabot.yml) — semanal, agrupado por familia, majors críticos excluidos |
-| Deploy web | Automático en Vercel al hacer push a `main`. **No espera a CI** |
+| Deploy web | Automático en Vercel al hacer push a `main`. **Nuevo**: `buildCommand` es `npm run ci`, así que un commit que rompa los tests no llega a publicarse |
 | Migraciones DB | Versionadas en `supabase/migrations/` (57). **Nuevo**: [supabase.yml](../.github/workflows/supabase.yml) valida nombres en cada PR y las aplica desde cero en un Supabase limpio; el `db push` a producción es manual |
 | Edge Functions | `supabase functions deploy` desde el mismo workflow, disparo manual. Política de JWT por función fijada en `supabase/config.toml` |
 | Entorno de staging | No hay: se trabaja contra el proyecto Supabase de producción |
@@ -111,31 +111,32 @@ login admin).
 |---|---|---|---|---|
 | Tests unit/integración reales y ejecutables localmente | 3 | 1 | 2 | 140 tests offline sobre parser bancario, conciliación, sanitizador y dominio; faltan servicios mockeados y E2E |
 | CI que ejecuta lint + tests + build en cada push/PR | 2 | 0 | 2 | Workflow completo con los cuatro gates |
-| Deploy automatizado con gate de tests | 2 | 1 | 1 | Vercel despliega solo, pero no espera al resultado de CI |
+| Deploy automatizado con gate de tests | 2 | 1 | 2 | `buildCommand: npm run ci` en `vercel.json`: si los tests fallan, el build de Vercel falla y no se publica nada |
 | Tipado estricto + linter configurado | 1 | 1 | 1 | `strict: true`, ESLint 9 flat, `tsc -b` limpio |
 | Monitorización de errores en producción | 1 | 0 | 0 | Sin Sentry ni equivalente |
 | Migraciones DB versionadas + docs de arquitectura | 1 | 1 | 1 | 63 migraciones + `docs/architecture.md` |
 | Penalizaciones | — | 0 | 0 | Sin deps locales, sin secretos en el repo, deploy no atado a una máquina |
-| **Total** | **10** | **4** | **7** | |
+| **Total** | **10** | **4** | **8** | |
 
-**Lectura de la nota:** con un 7, un agente puede mantener el código y verificar
-que no rompe nada (CI se lo dice), pero **no puede confirmar que el despliegue
-salió bien**: nada le avisa si la web falla en producción.
+**Lectura de la nota:** con un 8, un agente puede mantener el código, verificar
+que no rompe nada y saber que lo que se publica ha pasado los tests. Lo que
+todavía **no** puede es confirmar que el despliegue funciona de verdad: nada le
+avisa si la web falla en el móvil de una familia.
 
 ## 6. Pasos para llegar al 10
 
 Ordenados por impacto sobre la nota.
 
-| # | Paso | Suma | Esfuerzo | ¿Basta para un 8? |
+| # | Paso | Suma | Esfuerzo | ¿Basta para un 9? |
 |---|---|---|---|---|
 | 1 | Sentry (plan gratuito) + `ErrorBoundary` global. Cierra el bucle: el agente despliega y sabe si rompió algo | +1 | 1-2 h | **Sí** |
-| 2 | En Vercel, Settings → Git → *Wait for CI to pass before deploying*. Un commit rojo deja de publicarse | +1 | 10 min | **Sí** |
+| 2 | ~~Gate de tests antes de publicar~~ — hecho: `buildCommand: npm run ci` en `vercel.json` | — | — | — |
 | 3 | Mock compartido de `@supabase/supabase-js` en `src/tests/` y tests de `AdminPaymentsService`, `AdminInscriptionsService` y `ConfigService` | +0,5 | 4-6 h | No |
 | 4 | E2E con Playwright de los tres recorridos críticos contra un Supabase de staging | +0,5 | 1-2 días | No |
 | 5 | Vaciar los 51 avisos de ESLint y subir las reglas a `error` | 0 | Progresivo | No |
 | 6 | ~~Workflow de migraciones y Edge Functions~~ — hecho: [supabase.yml](../.github/workflows/supabase.yml). Falta cargar los dos secrets y sanear el histórico (ver [deuda-tecnica.md](./deuda-tecnica.md#7-el-histórico-de-migraciones-no-es-reproducible)) | 0 | — | No |
 | 7 | Reescribir `README.md` (variables de entorno, comandos, deploy) y borrar los scripts `gh-pages` | 0 | 30 min | No |
 
-Los pasos **1 y 2 suman 2 puntos en menos de dos horas** y son los que más
-cambian lo que un agente puede hacer solo. Los pasos 3 y 4 son los que llevan de
-8 a 10, y son los caros.
+El paso **1 sube a 9 en menos de dos horas** y es el que más cambia lo que un
+agente puede hacer solo. Los pasos 3 y 4 son los que llevan de 9 a 10, y son los
+caros.

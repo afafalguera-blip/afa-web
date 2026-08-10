@@ -57,14 +57,26 @@ errores de frontend.
 punto que impide cerrar el ciclo "el agente edita → CI valida → deploy →
 monitorización confirma".
 
-## 4. El deploy no espera a CI
+## 4. ~~El deploy no espera a CI~~ — resuelto el 2026-08-11
 
-Vercel construye y publica en cuanto llega un push a `main`, en paralelo a
-GitHub Actions. Un commit que rompe los tests se publica igual.
+Vercel construía y publicaba en paralelo a GitHub Actions, así que un commit que
+rompía los tests se publicaba igual.
 
-**Cómo se paga:** activar en Vercel "Wait for CI to pass before deploying"
-(Settings → Git), o mover el deploy a un job del workflow con
-`needs: [quality]`.
+Resuelto por la vía más simple: `vercel.json` pasa de `"buildCommand": "npm run
+build"` a `"buildCommand": "npm run ci"`, que encadena lint → tipos → tests →
+nombres de migración → build. Si algo falla, **el build de Vercel falla y no se
+publica nada**: la versión anterior sigue en línea.
+
+Ventaja sobre desplegar desde el workflow: no hace falta ningún token de Vercel
+guardado en GitHub, y la regla vive en el repositorio en vez de en un ajuste del
+panel que nadie recuerda. Coste: cada build de Vercel tarda ~1 minuto más.
+
+Descartado el camino de la CLI de Vercel dentro del workflow: exige un token
+*personal*, y los tokens de equipo (`vcp_...`) no le valen — la CLI necesita un
+usuario y devuelve "User not found".
+
+Pendiente menor: GitHub Actions corre sobre Node 22 y Vercel sobre Node 24. Si
+algún día divergen en comportamiento, el aviso llegaría por el lado de Vercel.
 
 ## 5. Cobertura desigual
 

@@ -56,6 +56,10 @@ El proyecto mantiene un ciclo de auditoría constante mediante:
   en `vitest.config.ts`.
 - **CI**: `.github/workflows/ci.yml` ejecuta lint, tipos, tests con cobertura y
   build en cada push y pull request.
+- **Gate de publicación**: el `buildCommand` de `vercel.json` es `npm run ci`,
+  no `npm run build`. Si lint, tipos, tests o la guarda de migraciones fallan,
+  el build de Vercel falla y **no se publica nada**: sigue en línea la versión
+  anterior.
 - **Supabase**: `.github/workflows/supabase.yml` valida los nombres de las
   migraciones y las aplica desde cero en un Supabase limpio. El despliegue a
   producción (`db push` + `functions deploy`) es **manual**, desde
