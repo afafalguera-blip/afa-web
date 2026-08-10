@@ -15,7 +15,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "check:migrations": "node scripts/check-migrations.mjs",
-    "ci": "npm run lint && npm run typecheck && npm test && npm run check:migrations && npm run build"
+    "i18n:audit": "node scripts/i18n/audit.mjs",
+    "i18n:apply": "node scripts/i18n/apply.mjs",
+    "ci": "npm run lint && npm run typecheck && npm test && npm run check:migrations && npm run i18n:audit && npm run build"
   },
   "engines": {
     "node": ">=22"
