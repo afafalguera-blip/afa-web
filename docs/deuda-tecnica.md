@@ -71,9 +71,18 @@ Decisiones que conviene no deshacer sin pensarlo:
 - **El reportero nunca lanza.** Un fallo reportando un fallo no puede tumbar la
   página; hay un test que lo fija.
 
-Pendiente: la migración `20260811000000_client_errors.sql` **tiene que aplicarse
-a producción** para que esto registre algo. Hasta entonces los INSERT fallan en
-silencio, que es justo lo que se pidió del reportero.
+Aplicado a producción el 2026-08-11 y verificado de extremo a extremo: un
+visitante anónimo consigue escribir (HTTP 201), no consigue leer (la política de
+SELECT lo deja fuera), la fila llega y la función de resumen la agrupa.
+
+La verificación destapó un fallo del propio resumen: `COUNT(DISTINCT NULL)`
+devuelve 0, así que un reporte sin sesión y sin user-agent no contaba como
+nadie afectado. Corregido con un `COALESCE` de tres ramas.
+
+Nota de fontanería: se aplicó por la Management API, así que **no consta en
+`supabase_migrations.schema_migrations`**. Un `db push` futuro intentará
+aplicarla otra vez; es idempotente y no rompería nada, pero lo limpio es
+marcarla con `supabase migration repair --status applied 20260811000000`.
 
 ## 4. ~~El deploy no espera a CI~~ — resuelto el 2026-08-11
 

@@ -131,7 +131,9 @@ AS $$
            MIN(e.kind)                                        AS kind,
            MIN(e.message)                                     AS message,
            COUNT(*)                                           AS veces,
-           COUNT(DISTINCT COALESCE(e.user_id::TEXT, e.user_agent)) AS afectados,
+           -- El tercer COALESCE importa: COUNT(DISTINCT NULL) da 0, así que un
+           -- reporte sin sesión y sin user-agent no contaba como nadie.
+           COUNT(DISTINCT COALESCE(e.user_id::TEXT, e.user_agent, 'anònim')) AS afectados,
            MIN(e.created_at)                                  AS primera_vez,
            MAX(e.created_at)                                  AS ultima_vez,
            COUNT(*) FILTER (WHERE e.resolved_at IS NOT NULL)  AS resueltos
