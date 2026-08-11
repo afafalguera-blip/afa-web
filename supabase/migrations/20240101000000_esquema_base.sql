@@ -10,6 +10,10 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Como hace pg_dump: sin esto, una función SQL que referencia una tabla que
+-- aún no existe falla al crearse. Solo afecta a esta transacción.
+SET check_function_bodies = off;
+
 -- Stub defensivo, ver comentario en scripts/dump-schema.mjs.
 CREATE OR REPLACE FUNCTION public.handle_audit_log()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $stub$
@@ -308,6 +312,136 @@ CREATE INDEX IF NOT EXISTS idx_shop_order_items_variant_id ON public.shop_order_
 
 -- =========================== FUNCIONES ===========================
 
+CREATE OR REPLACE FUNCTION public.academic_year_for(p_month integer, p_year integer)
+ RETURNS text
+ LANGUAGE sql
+ IMMUTABLE
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT CASE
+    WHEN p_month >= 9
+      THEN p_year::text || '-' || lpad(((p_year + 1) % 100)::text, 2, '0')
+      ELSE (p_year - 1)::text || '-' || lpad((p_year % 100)::text, 2, '0')
+  END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.activity_monthly_price(p_activity text, p_is_member boolean)
+ RETURNS numeric
+ LANGUAGE sql
+ STABLE
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT COALESCE(
+    (
+      SELECT CASE
+               WHEN p_is_member THEN COALESCE(a.price_member, a.price)
+               ELSE COALESCE(a.price_non_member, a.price_member, a.price)
+             END
+      FROM public.activities a
+      WHERE a.title IS NOT NULL
+        AND a.title <> ''
+        AND p_activity ILIKE a.title || '%'
+      ORDER BY length(a.title) DESC
+      LIMIT 1
+    ),
+    -- Fallback for legacy / unmatched activity names.
+    CASE WHEN p_is_member THEN 20.00 ELSE 25.00 END
+  );
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.afa_annual_fee()
+ RETURNS numeric
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT COALESCE(
+    (SELECT (value->>'annual_fee_amount')::numeric FROM public.site_config WHERE key = 'fees'),
+    0
+  );
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.book_price_for(p_course text)
+ RETURNS numeric
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT COALESCE(
+    (SELECT (value->'map'->>p_course)::numeric FROM public.site_config WHERE key = 'book_prices'),
+    (SELECT (value->>'default')::numeric      FROM public.site_config WHERE key = 'book_prices'),
+    0
+  );
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.check_contact_message_rate_limit()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    recent_same_email INT;
+    recent_total INT;
+BEGIN
+    SELECT COUNT(*) INTO recent_same_email
+    FROM public.contact_messages
+    WHERE created_at > (NOW() - interval '300 seconds')
+      AND email IS NOT DISTINCT FROM NEW.email;
+
+    IF recent_same_email >= 3 THEN
+        RAISE EXCEPTION 'Rate limit exceeded: massa missatges en poc temps'
+            USING ERRCODE = 'P0429';
+    END IF;
+
+    SELECT COUNT(*) INTO recent_total
+    FROM public.contact_messages
+    WHERE created_at > (NOW() - interval '60 seconds');
+
+    IF recent_total >= 20 THEN
+        RAISE EXCEPTION 'Rate limit exceeded: massa missatges en poc temps'
+            USING ERRCODE = 'P0429';
+    END IF;
+
+    RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.check_form_submission_rate_limit()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    recent_count INT;
+BEGIN
+    SELECT COUNT(*) INTO recent_count
+    FROM public.form_submissions
+    WHERE form_id = NEW.form_id
+      AND submitted_at > (NOW() - interval '60 seconds')
+      AND deleted_at IS NULL
+      AND (
+          (NEW.submitted_by_user_id IS NOT NULL AND submitted_by_user_id = NEW.submitted_by_user_id)
+          OR
+          (NEW.submitted_by_user_id IS NULL AND submitted_by_user_id IS NULL)
+      );
+
+    IF recent_count >= 5 THEN
+        RAISE EXCEPTION 'Rate limit exceeded: too many submissions in a short period'
+            USING ERRCODE = 'P0429';
+    END IF;
+
+    RETURN NEW;
+END;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.check_inscripcio_rate_limit()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -366,6 +500,122 @@ BEGIN
     
     RETURN 'Backup creado exitosamente: ' || backup_table_name;
 END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.create_shop_complex_order_v1(p_customer_name text, p_customer_email text, p_customer_phone text, p_total_amount numeric, p_items jsonb, p_user_id uuid DEFAULT NULL::uuid, p_language text DEFAULT 'ca'::text, p_is_member boolean DEFAULT false)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_order_id uuid;
+  v_item jsonb;
+  v_real_total numeric := 0;
+  v_variant_record record;
+  v_actual_price numeric;
+  v_is_member boolean;
+  v_caller_uid uuid;
+  v_clean_email text;
+  v_clean_phone text;
+  v_language text;
+BEGIN
+  v_clean_email := nullif(trim(coalesce(p_customer_email, '')), '');
+  v_clean_phone := nullif(trim(coalesce(p_customer_phone, '')), '');
+  v_language := coalesce(nullif(trim(coalesce(p_language, '')), ''), 'ca');
+
+  IF v_clean_email IS NULL AND v_clean_phone IS NULL THEN
+    RAISE EXCEPTION 'Either customer email or phone is required';
+  END IF;
+
+  -- Authentication Check (Prevent User Spoofing)
+  v_caller_uid := auth.uid();
+  IF p_user_id IS NOT NULL AND p_user_id != v_caller_uid THEN
+    RAISE EXCEPTION 'Unauthorized: user_id mismatch. You cannot place an order for another user.';
+  END IF;
+
+  -- Use explicit p_is_member flag (caller controls pricing tier)
+  v_is_member := p_is_member;
+
+  -- Create the order header
+  INSERT INTO shop_orders (
+    customer_name,
+    customer_email,
+    customer_phone,
+    total_amount,
+    user_id,
+    language,
+    status,
+    is_member
+  ) VALUES (
+    p_customer_name,
+    v_clean_email,
+    v_clean_phone,
+    0,
+    p_user_id,
+    v_language,
+    'pending',
+    v_is_member
+  ) RETURNING id INTO v_order_id;
+
+  -- Process each item (server-side validation)
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
+    SELECT * INTO v_variant_record
+    FROM shop_variants
+    WHERE id = (v_item->>'variant_id')::uuid;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Variant not found: %', (v_item->>'variant_id');
+    END IF;
+
+    -- NOTE: no stock guard. Out-of-stock items are accepted as a backorder;
+    -- stock is allowed to go negative to signal how many units are owed.
+
+    IF v_is_member THEN
+      v_actual_price := v_variant_record.price_member;
+    ELSE
+      v_actual_price := v_variant_record.price_non_member;
+    END IF;
+
+    v_real_total := v_real_total + (v_actual_price * (v_item->>'quantity')::int);
+
+    INSERT INTO shop_order_items (
+      order_id,
+      variant_id,
+      quantity,
+      price_at_time
+    ) VALUES (
+      v_order_id,
+      v_variant_record.id,
+      (v_item->>'quantity')::int,
+      v_actual_price
+    );
+
+    UPDATE shop_variants
+    SET stock = stock - (v_item->>'quantity')::int
+    WHERE id = v_variant_record.id;
+  END LOOP;
+
+  UPDATE shop_orders
+  SET total_amount = v_real_total
+  WHERE id = v_order_id;
+
+  RETURN v_order_id;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.current_academic_year()
+ RETURNS text
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT COALESCE(
+    (SELECT value->>'active_year' FROM public.site_config WHERE key = 'season'),
+    '2026-27'
+  );
 $function$
 ;
 
@@ -463,6 +713,21 @@ BEGIN
 
     -- Mensaje de confirmación en logs
     RAISE NOTICE 'Inscripción % marcada como baja por %', p_inscripcion_id, p_changed_by;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.events_fill_end_date()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+    IF NEW.end_date IS NULL THEN
+        NEW.end_date := NEW.event_date;
+    END IF;
+    RETURN NEW;
 END;
 $function$
 ;
@@ -570,6 +835,112 @@ end;
 $function$
 ;
 
+CREATE OR REPLACE FUNCTION public.generate_book_payments(p_year integer)
+ RETURNS TABLE(success boolean, message text, payments_generated integer)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_ins record; v_student jsonb; v_course text; v_amount numeric;
+  v_year_str text; v_due date; v_count int := 0;
+BEGIN
+  IF NOT public.is_admin() THEN RETURN QUERY SELECT false, 'No autoritzat', 0; RETURN; END IF;
+  v_year_str := public.academic_year_for(9, p_year);
+  v_due := make_date(p_year, 9, 15);
+  FOR v_ins IN
+    SELECT * FROM inscripcions
+    WHERE coalesce(status, 'alta') = 'alta'
+      AND coalesce(academic_year, v_year_str) = v_year_str
+  LOOP
+    FOR v_student IN SELECT jsonb_array_elements(v_ins.students) LOOP
+      v_course := v_student->>'course';
+      v_amount := public.book_price_for(v_course);
+      IF coalesce(v_amount, 0) <= 0 THEN CONTINUE; END IF;
+      INSERT INTO payments(student_name, student_surname, course, concept, activities, amount, due_date,
+        parent_name, parent_email, parent_phone, afa_member, status, payment_month, payment_year)
+      VALUES (v_student->>'name', v_student->>'surname', v_course, 'llibres', ARRAY['Llibres socialització'], v_amount, v_due,
+        v_ins.parent_name, v_ins.parent_email_1, v_ins.parent_phone_1, v_ins.afa_member, 'pending', 9, p_year)
+      ON CONFLICT ON CONSTRAINT uq_payments_student_month DO UPDATE SET
+        amount = EXCLUDED.amount, due_date = EXCLUDED.due_date, updated_at = now()
+      WHERE payments.status <> 'paid';
+      v_count := v_count + 1;
+    END LOOP;
+  END LOOP;
+  RETURN QUERY SELECT true, 'Cobraments de llibres generats/actualitzats', v_count;
+END $function$
+;
+
+CREATE OR REPLACE FUNCTION public.generate_monthly_payments(p_month integer, p_year integer)
+ RETURNS TABLE(success boolean, message text, payments_generated integer)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_ins record; v_student jsonb; v_activities text[]; v_billable text[];
+  v_total numeric(10,2); v_due_date date; v_count int := 0;
+BEGIN
+  IF p_month < 1 OR p_month > 12 THEN RETURN QUERY SELECT false, 'Mes inválido', 0; RETURN; END IF;
+  v_due_date := (date_trunc('month', make_date(p_year, p_month, 1)) + interval '9 days')::date;
+  FOR v_ins IN SELECT * FROM inscripcions LOOP
+    FOR v_student IN SELECT jsonb_array_elements(v_ins.students) LOOP
+      v_activities := ARRAY(SELECT jsonb_array_elements_text(v_student->'activities'));
+      IF coalesce(array_length(v_activities,1),0) = 0 THEN CONTINUE; END IF;
+      v_billable := ARRAY(SELECT a FROM unnest(v_activities) a WHERE NOT public.is_activity_excluded(a));
+      v_total := public.student_monthly_fee(v_activities, v_ins.afa_member);
+      IF coalesce(v_total,0) <= 0 THEN CONTINUE; END IF;
+      INSERT INTO payments(student_name, student_surname, course, activities, amount, due_date,
+        parent_name, parent_email, parent_phone, afa_member, status, payment_month, payment_year)
+      VALUES (v_student->>'name', v_student->>'surname', v_student->>'course', v_billable, v_total, v_due_date,
+        v_ins.parent_name, v_ins.parent_email_1, v_ins.parent_phone_1, v_ins.afa_member, 'pending', p_month, p_year)
+      ON CONFLICT ON CONSTRAINT uq_payments_student_month DO UPDATE SET
+        activities = EXCLUDED.activities, amount = EXCLUDED.amount, due_date = EXCLUDED.due_date,
+        parent_name = EXCLUDED.parent_name, parent_email = EXCLUDED.parent_email, parent_phone = EXCLUDED.parent_phone,
+        afa_member = EXCLUDED.afa_member, updated_at = now()
+      WHERE payments.status <> 'paid';
+      v_count := v_count + 1;
+    END LOOP;
+  END LOOP;
+  RETURN QUERY SELECT true, 'Pagos generados/actualizados', v_count;
+END $function$
+;
+
+CREATE OR REPLACE FUNCTION public.generate_monthly_payments_only_active(p_month integer, p_year integer)
+ RETURNS TABLE(success boolean, message text, payments_generated integer)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_ins record; v_student jsonb; v_activities text[]; v_billable text[];
+  v_total numeric(10,2); v_due_date date; v_count int := 0;
+BEGIN
+  IF p_month < 1 OR p_month > 12 THEN RETURN QUERY SELECT false, 'Mes inválido', 0; RETURN; END IF;
+  v_due_date := (date_trunc('month', make_date(p_year, p_month, 1)) + interval '9 days')::date;
+  FOR v_ins IN SELECT * FROM inscripcions WHERE coalesce(status,'alta') = 'alta' LOOP
+    FOR v_student IN SELECT jsonb_array_elements(v_ins.students) LOOP
+      v_activities := ARRAY(SELECT jsonb_array_elements_text(v_student->'activities'));
+      IF coalesce(array_length(v_activities,1),0) = 0 THEN CONTINUE; END IF;
+      v_billable := ARRAY(SELECT a FROM unnest(v_activities) a WHERE NOT public.is_activity_excluded(a));
+      v_total := public.student_monthly_fee(v_activities, v_ins.afa_member);
+      IF coalesce(v_total,0) <= 0 THEN CONTINUE; END IF;
+      INSERT INTO payments(student_name, student_surname, course, activities, amount, due_date,
+        parent_name, parent_email, parent_phone, afa_member, status, payment_month, payment_year)
+      VALUES (v_student->>'name', v_student->>'surname', v_student->>'course', v_billable, v_total, v_due_date,
+        v_ins.parent_name, v_ins.parent_email_1, v_ins.parent_phone_1, v_ins.afa_member, 'pending', p_month, p_year)
+      ON CONFLICT ON CONSTRAINT uq_payments_student_month DO UPDATE SET
+        activities = EXCLUDED.activities, amount = EXCLUDED.amount, due_date = EXCLUDED.due_date,
+        parent_name = EXCLUDED.parent_name, parent_email = EXCLUDED.parent_email, parent_phone = EXCLUDED.parent_phone,
+        afa_member = EXCLUDED.afa_member, updated_at = now()
+      WHERE payments.status <> 'paid';
+      v_count := v_count + 1;
+    END LOOP;
+  END LOOP;
+  RETURN QUERY SELECT true, 'Pagos generados/actualizados', v_count;
+END $function$
+;
+
 CREATE OR REPLACE FUNCTION public.generate_slug(t text)
  RETURNS text
  LANGUAGE plpgsql
@@ -577,6 +948,130 @@ CREATE OR REPLACE FUNCTION public.generate_slug(t text)
 AS $function$
 BEGIN
   RETURN lower(regexp_replace(t, '[^a-zA-Z0-9]+', '-', 'g'));
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.generate_soci_payments(p_year integer)
+ RETURNS TABLE(success boolean, message text, payments_generated integer)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_ins record; v_fee numeric; v_year_str text; v_due date; v_count int := 0;
+BEGIN
+  IF NOT public.is_admin() THEN RETURN QUERY SELECT false, 'No autoritzat', 0; RETURN; END IF;
+  v_fee := public.afa_annual_fee();
+  IF coalesce(v_fee, 0) <= 0 THEN
+    RETURN QUERY SELECT false, 'Quota de soci no configurada (Config > Quotes)', 0; RETURN;
+  END IF;
+  v_year_str := public.academic_year_for(9, p_year);
+  v_due := make_date(p_year, 10, 1);
+  FOR v_ins IN
+    SELECT * FROM inscripcions
+    WHERE afa_member = true
+      AND coalesce(status, 'alta') = 'alta'
+      AND coalesce(academic_year, v_year_str) = v_year_str
+  LOOP
+    INSERT INTO payments(student_name, student_surname, course, concept, activities, amount, due_date,
+      parent_name, parent_email, parent_phone, afa_member, status, payment_month, payment_year, bank_reference)
+    VALUES (coalesce(NULLIF(v_ins.parent_name, ''), 'Família'), '', '', 'soci', ARRAY['Quota soci AFA'], v_fee, v_due,
+      v_ins.parent_name, v_ins.parent_email_1, v_ins.parent_phone_1, true, 'pending', 9, p_year, 'INS-' || v_ins.id)
+    ON CONFLICT ON CONSTRAINT uq_payments_student_month DO UPDATE SET
+      amount = EXCLUDED.amount, due_date = EXCLUDED.due_date,
+      parent_email = EXCLUDED.parent_email, parent_phone = EXCLUDED.parent_phone,
+      bank_reference = EXCLUDED.bank_reference, updated_at = now()
+    WHERE payments.status <> 'paid';
+    v_count := v_count + 1;
+  END LOOP;
+  RETURN QUERY SELECT true, 'Quotes de soci generades/actualitzades', v_count;
+END $function$
+;
+
+CREATE OR REPLACE FUNCTION public.get_db_size_bytes()
+ RETURNS bigint
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT pg_database_size(current_database())::bigint;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.get_fee_rules()
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT COALESCE(
+    (SELECT value FROM public.site_config WHERE key = 'fee_rules'),
+    '{"exclude_activity_ids":[],"exclude_titles":["Anglès"],"multiactivity":{"min_activities":2,"member_price":36,"non_member_price":40}}'::jsonb
+  );
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.get_storage_size_bytes()
+ RETURNS bigint
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  SELECT COALESCE(
+    SUM((metadata->>'size')::bigint),
+    0
+  )::bigint
+  FROM storage.objects
+  WHERE (metadata->>'size') IS NOT NULL;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.handle_audit_log()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+DECLARE
+    v_old  JSONB;
+    v_new  JSONB;
+    v_id   TEXT;
+    v_user UUID;
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        v_old := to_jsonb(OLD);
+        v_new := NULL;
+        v_id  := COALESCE(v_old ->> 'id', '');
+    ELSIF TG_OP = 'UPDATE' THEN
+        v_old := to_jsonb(OLD);
+        v_new := to_jsonb(NEW);
+        v_id  := COALESCE(v_new ->> 'id', v_old ->> 'id', '');
+        -- Sin cambios reales (p.ej. UPDATE que solo toca updated_at por trigger
+        -- BEFORE y deja el resto igual) no merece una fila de auditoría.
+        IF v_old = v_new THEN
+            RETURN NEW;
+        END IF;
+    ELSE
+        v_old := NULL;
+        v_new := to_jsonb(NEW);
+        v_id  := COALESCE(v_new ->> 'id', '');
+    END IF;
+
+    -- auth.uid() revienta si no hay contexto de request (cron, psql directo).
+    BEGIN
+        v_user := auth.uid();
+    EXCEPTION WHEN OTHERS THEN
+        v_user := NULL;
+    END;
+
+    INSERT INTO public.audit_logs (table_name, record_id, action, old_data, new_data, changed_by)
+    VALUES (TG_TABLE_NAME, v_id, TG_OP, v_old, v_new, v_user);
+
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    END IF;
+    RETURN NEW;
 END;
 $function$
 ;
@@ -684,6 +1179,61 @@ BEGIN
     -- Hash simple usando MD5 (para demo - en producción usar bcrypt)
     RETURN md5(password || 'afa_salt_2024');
 END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.increment_clicks(p_slug text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  UPDATE public.short_urls
+  SET clicks = clicks + 1
+  WHERE slug = p_slug;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.is_activity_excluded(p_activity text)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+  WITH rules AS (
+    SELECT public.get_fee_rules() AS j
+  ),
+  ids AS (
+    SELECT ARRAY(
+      SELECT e::bigint
+      FROM rules, jsonb_array_elements_text(COALESCE(rules.j->'exclude_activity_ids', '[]'::jsonb)) AS t(e)
+      WHERE e ~ '^[0-9]+$'
+    ) AS arr
+  ),
+  excluded_titles AS (
+    -- Configured by id: resolve the current title from the catalogue.
+    SELECT a.title AS title
+    FROM public.activities a, ids
+    WHERE COALESCE(array_length(ids.arr, 1), 0) > 0
+      AND a.id = ANY(ids.arr)
+
+    UNION ALL
+
+    -- Legacy fallback: only while no ids are configured.
+    SELECT t.title
+    FROM rules, ids,
+         jsonb_array_elements_text(COALESCE(rules.j->'exclude_titles', '[]'::jsonb)) AS t(title)
+    WHERE COALESCE(array_length(ids.arr, 1), 0) = 0
+  )
+  SELECT EXISTS (
+    SELECT 1
+    FROM excluded_titles
+    WHERE title IS NOT NULL
+      AND title <> ''
+      AND p_activity ILIKE title || '%'
+  );
 $function$
 ;
 
@@ -851,6 +1401,40 @@ end;
 $function$
 ;
 
+CREATE OR REPLACE FUNCTION public.rollover_acollida_payments(p_from_month integer, p_from_year integer, p_to_month integer, p_to_year integer)
+ RETURNS TABLE(success boolean, message text, payments_generated integer)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE v_due date; v_count int := 0;
+BEGIN
+  IF NOT public.is_admin() THEN RETURN QUERY SELECT false, 'No autoritzat', 0; RETURN; END IF;
+  v_due := (date_trunc('month', make_date(p_to_year, p_to_month, 1)) + interval '9 days')::date;
+  INSERT INTO payments(student_name, student_surname, course, concept, activities, amount, due_date,
+    parent_name, parent_email, parent_phone, afa_member, status, payment_month, payment_year, notes)
+  SELECT student_name, student_surname, course, 'acollida', activities, amount, v_due,
+    parent_name, parent_email, parent_phone, afa_member, 'pending', p_to_month, p_to_year, notes
+  FROM payments
+  WHERE concept = 'acollida' AND payment_month = p_from_month AND payment_year = p_from_year
+  ON CONFLICT ON CONSTRAINT uq_payments_student_month DO NOTHING;
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN QUERY SELECT true, 'Rebuts d''acollida duplicats', v_count;
+END $function$
+;
+
+CREATE OR REPLACE FUNCTION public.set_board_members_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+BEGIN
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.set_finance_tx_academic_year()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -868,6 +1452,17 @@ END;
 $function$
 ;
 
+CREATE OR REPLACE FUNCTION public.set_forms_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.set_inscripcio_academic_year()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -880,6 +1475,14 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.set_payer_aliases_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN NEW.updated_at := now(); RETURN NEW; END;
 $function$
 ;
 
@@ -907,6 +1510,61 @@ BEGIN
     NEW.academic_year := public.current_academic_year();
   END IF;
   RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.soft_delete_form_submission(submission_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+    IF NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Solo administradores pueden borrar envíos'
+            USING ERRCODE = '42501';
+    END IF;
+
+    UPDATE public.form_submissions
+       SET deleted_at = NOW()
+     WHERE id = submission_id
+       AND deleted_at IS NULL;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.student_monthly_fee(p_activities text[], p_is_member boolean)
+ RETURNS numeric
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public', 'pg_catalog'
+AS $function$
+DECLARE
+  v_rules jsonb := public.get_fee_rules();
+  v_min int := COALESCE((v_rules->'multiactivity'->>'min_activities')::int, 2);
+  v_billable text[];
+  v_n int;
+  v_total numeric(10,2) := 0;
+  v_activity text;
+BEGIN
+  v_billable := ARRAY(SELECT a FROM unnest(p_activities) a WHERE NOT public.is_activity_excluded(a));
+  v_n := COALESCE(array_length(v_billable, 1), 0);
+  IF v_n = 0 THEN
+    RETURN 0;
+  END IF;
+
+  IF v_n >= v_min THEN
+    RETURN CASE
+      WHEN p_is_member THEN COALESCE((v_rules->'multiactivity'->>'member_price')::numeric, 0)
+      ELSE COALESCE((v_rules->'multiactivity'->>'non_member_price')::numeric, 0)
+    END;
+  END IF;
+
+  FOREACH v_activity IN ARRAY v_billable LOOP
+    v_total := v_total + public.activity_monthly_price(v_activity, p_is_member);
+  END LOOP;
+  RETURN v_total;
 END;
 $function$
 ;
@@ -972,6 +1630,18 @@ BEGIN
     WHERE id = v_order_id;
 
     RETURN NULL;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.update_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
 END;
 $function$
 ;
