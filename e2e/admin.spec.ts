@@ -38,33 +38,49 @@ test('un correo que no existe tampoco', async ({ page }) => {
   await expect(page).toHaveURL(/\/login/);
 });
 
-test('el admin del seed entra y ve el panel', async ({ page }) => {
+// Tras un login correcto la app NO va al panel: navega a location.state.from y,
+// si no hay, a /botiga. Los tests van luego al panel a mano.
+test('el admin del seed entra', async ({ page }) => {
   await rellenarLogin(page, ADMIN.email, ADMIN.password);
 
-  await expect(page).toHaveURL(/\/admin/, { timeout: 20_000 });
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 20_000 });
+  await expect(page.locator('#root')).not.toBeEmpty();
+  await expect(page.getByRole('alert').filter({ hasText: /deixat de funcionar/i })).toHaveCount(0);
+});
+
+test('con sesión, el panel se abre', async ({ page }) => {
+  await rellenarLogin(page, ADMIN.email, ADMIN.password);
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 20_000 });
+
+  await page.goto('/admin/dashboard');
+
+  await expect(page).toHaveURL(/\/admin\/dashboard/, { timeout: 20_000 });
   await expect(page.locator('#root')).not.toBeEmpty();
   await expect(page.getByRole('alert').filter({ hasText: /deixat de funcionar/i })).toHaveCount(0);
 });
 
 test('la sesión sobrevive a recargar', async ({ page }) => {
   await rellenarLogin(page, ADMIN.email, ADMIN.password);
-  await expect(page).toHaveURL(/\/admin/, { timeout: 20_000 });
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 20_000 });
 
+  await page.goto('/admin/dashboard');
+  await expect(page).toHaveURL(/\/admin\/dashboard/, { timeout: 20_000 });
   await page.reload();
 
   // Si la sesión no persistiera, cada F5 echaría a la junta fuera del panel.
-  await expect(page).toHaveURL(/\/admin/);
+  await expect(page).toHaveURL(/\/admin\/dashboard/);
   await expect(page.locator('#root')).not.toBeEmpty();
 });
 
 test('la pantalla de errores del navegador carga', async ({ page }) => {
   await rellenarLogin(page, ADMIN.email, ADMIN.password);
-  await expect(page).toHaveURL(/\/admin/, { timeout: 20_000 });
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 20_000 });
 
   await page.goto('/admin/errors');
-  await expect(page.locator('#root')).not.toBeEmpty();
+
+  await expect(page).toHaveURL(/\/admin\/errors/, { timeout: 20_000 });
   // Sin errores registrados debe decirlo, no quedarse en blanco.
   await expect(page.getByText(/cap error|errors del navegador/i).first()).toBeVisible({
-    timeout: 15_000,
+    timeout: 20_000,
   });
 });

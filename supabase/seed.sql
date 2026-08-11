@@ -64,8 +64,16 @@ INSERT INTO public.activities (title, title_ca, category, description, price, in
 SELECT 'Anglès', 'Anglès', 'idiomes', 'Activitat de prova per als tests.', 30, true
  WHERE NOT EXISTS (SELECT 1 FROM public.activities);
 
+-- Las claves que pinta la web publica. Sin ellas la pagina carga igual (desde
+-- que ConfigService usa maybeSingle), pero queda sosa y no se parece a nada.
 INSERT INTO public.site_config (key, value)
 VALUES
-    ('season', '{"academic_year":"2026-27"}'::jsonb),
-    ('branding', '{"site_name":"AFA Falguera (proves)"}'::jsonb)
+    ('season',   '{"academic_year":"2026-27"}'::jsonb),
+    ('branding', '{"site_name":"AFA Falguera (proves)"}'::jsonb),
+    ('hero',     '{"title":"AFA Falguera","subtitle":"Entorn de proves"}'::jsonb),
+    ('contact',  '{"email":"proves@example.test"}'::jsonb),
+    ('social',   '{}'::jsonb),
+    ('about',    '{"title":"Qui som"}'::jsonb),
+    ('shop',     '{"enabled":true}'::jsonb),
+    ('homepage', '{}'::jsonb)
 ON CONFLICT (key) DO NOTHING;

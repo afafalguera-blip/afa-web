@@ -261,12 +261,17 @@ export const ConfigService = {
       .from('site_config')
       .select('value')
       .eq('key', key)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error(`Error fetching ${key} config:`, error);
       return null;
     }
+
+    // Una clave sin fila no es un error, es "todavia no configurado". Con
+    // .single() esto devolvia PGRST116 y ensuciaba la consola en cada pantalla
+    // de un entorno recien montado.
+    if (!data) return null;
 
     setCachedConfig(key, data.value);
     return data.value as T;

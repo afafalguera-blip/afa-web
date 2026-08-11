@@ -83,7 +83,7 @@ describe('ConfigService.getConfig — caché', () => {
     const [query] = mock.on('site_config');
     expect(query.arg('eq', 'key')).toBe('branding');
     expect(query.first('select')?.[0]).toBe('value');
-    expect(query.has('single')).toBe(true);
+    expect(query.has('maybeSingle')).toBe(true);
   });
 
   it('cachea cada clave por separado', async () => {
@@ -98,6 +98,15 @@ describe('ConfigService.getConfig — caché', () => {
 });
 
 describe('ConfigService.getConfig — errores', () => {
+  it('una clave sin fila devuelve null sin ruido', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mock.queue('site_config', { data: null, error: null });
+
+    expect(await ConfigService.getConfig('hero')).toBeNull();
+    expect(spy).not.toHaveBeenCalled();
+    expect(localStorage.getItem(CACHE_PREFIX + 'hero')).toBeNull();
+  });
+
   it('devuelve null y deja rastro en consola en vez de romper la página', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mock.queue('site_config', { data: null, error: { message: 'sin permiso' } });
