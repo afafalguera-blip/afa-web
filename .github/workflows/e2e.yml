@@ -1,0 +1,60 @@
+name: E2E
+
+# Los E2E tardan varios minutos (levantan Postgres, GoTrue y PostgREST en
+# contenedores), así que no van en cada push: en los PR y a mano cuando haga
+# falta. El gate rápido sigue siendo el workflow CI.
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: Recorreguts crítics
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 2.113.0
+
+      # Aplica las migraciones y el seed. Si esto falla, el problema es el
+      # esquema, no los tests: lo dirá también el workflow Supabase.
+      - name: Levantar Supabase local
+        run: supabase start -x studio,imgproxy,logflare,vector,supavisor,mailpit
+
+      # Vite hornea las VITE_* en tiempo de compilación, así que hay que
+      # construir DESPUÉS de saber la URL y la clave del Supabase local.
+      - name: Construir contra el Supabase local
+        run: |
+          set -euo pipefail
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          echo "VITE_SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "VITE_SUPABASE_ANON_KEY=$ANON_KEY" >> "$GITHUB_ENV"
+          VITE_SUPABASE_URL="$API_URL" VITE_SUPABASE_ANON_KEY="$ANON_KEY" npm run build
+
+      - name: Instalar navegador
+        run: npx playwright install --with-deps chromium
+
+      - name: Passar els tests
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: informe-playwright
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Parar Supabase
+        if: always()
+        run: supabase stop --no-backup
