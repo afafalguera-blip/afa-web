@@ -23,7 +23,7 @@ Nota: **4/10 antes de esta sesión → 10/10 después**. Detalle en la sección 
 | Editor | TipTap | 3.29 |
 | Exportación | jsPDF, xlsx (SheetJS) | 4.2 / 0.18.5 |
 | Formularios | react-hook-form + zod | 7.84 / 4.4 |
-| Tests | Vitest + Testing Library + jsdom | 4.1 |
+| Tests | Vitest + Testing Library + jsdom · Playwright | 4.1 · 1.62 |
 | Hosting | Vercel (SPA + rewrites + cabeceras CSP) | — |
 | Gestor | npm con `package-lock.json` (Node ≥22) | 10.9 |
 
@@ -102,8 +102,14 @@ que no dan error — un `neq` que falta devuelve las filas equivocadas, y en
 
 Cobertura de `utils` + `logic` + `constants` + `services`: **32%** (era 19%).
 
-**Qué falta:** E2E de los tres recorridos críticos (inscripción, tienda, login
-admin), y el resto de servicios de `services/admin`.
+**E2E:** 16 tests de Playwright contra un Supabase limpio levantado desde el
+repositorio (`npm run e2e`, y el workflow `E2E` en cada PR). Encontraron cuatro
+fallos reales en su primera ejecución, entre ellos que la botiga petaba con una
+configuración incompleta y que una URL errónea daba pantalla en blanco. Detalle
+en [deuda-tecnica.md](./deuda-tecnica.md).
+
+**Qué falta:** los recorridos que escriben (enviar una inscripción, completar
+una compra) y el resto de servicios de `services/admin`.
 
 ## 4. Infra y CI/CD
 
@@ -157,7 +163,7 @@ Ordenados por impacto sobre la nota.
 | 1 | ~~Monitorización de errores~~ — hecho, y sin Sentry: `client_errors` + `ErrorBoundary` + panel, sobre la infraestructura que ya había | +1 | — | — |
 | 2 | ~~Gate de tests antes de publicar~~ — hecho: `buildCommand: npm run ci` en `vercel.json` | — | — | — |
 | 3 | ~~Mock de Supabase y tests de servicios~~ — hecho: `src/tests/helpers/supabaseMock.ts` + 69 tests de `AdminPaymentsService`, `AdminInscriptionsService` y `ConfigService` | — | — | — |
-| 4 | E2E con Playwright de los tres recorridos críticos. **Ya es posible**: desde hoy se puede levantar un Supabase limpio desde el repositorio | 0 | 1-2 días | No (no puntúa, pero es la deuda más cara que queda) |
+| 4 | ~~E2E con Playwright~~ — hecho: 16 tests en `e2e/`, con su workflow. Falta cubrir los recorridos que escriben | 0 | — | — |
 | 5 | Vaciar los 51 avisos de ESLint y subir las reglas a `error` | 0 | Progresivo | No |
 | 6 | ~~Workflow de migraciones + histórico reproducible~~ — hecho. El proyecto ya se puede reconstruir entero desde el repositorio, y CI lo comprueba en cada PR. Falta cargar `SUPABASE_DB_PASSWORD` para poder usar el despliegue manual | 0 | — | No |
 | 7 | Reescribir `README.md` (variables de entorno, comandos, deploy) y borrar los scripts `gh-pages` | 0 | 30 min | No |
