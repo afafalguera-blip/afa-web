@@ -46,20 +46,18 @@ jobs:
       - run: node scripts/check-migrations.mjs
 
   # ---------------------------------------------------------------------------
-  # Levanta un Supabase limpio y aplica las 57 migraciones desde cero. Es la
+  # Levanta un Supabase limpio y aplica las 52 migraciones desde cero. Es la
   # única forma de saber si el histórico sigue siendo reproducible.
   #
-  # Informativo a propósito: hoy FALLA, y falla por un motivo real —
-  # 20250130_create_events_table.sql declara políticas RLS sobre
-  # public.profiles, y ninguna migración del repo crea esa tabla (existe en
-  # producción porque se creó a mano). Ver docs/deuda-tecnica.md.
-  # Cuando el histórico se sanee y pase en verde, quitar `continue-on-error`.
+  # Bloquea desde el 2026-08-11, cuando el histórico se saneó y empezó a pasar
+  # en verde. Es la única prueba de que el proyecto se puede reconstruir desde
+  # el repositorio; si se pone en rojo, algo ha dejado de ser reproducible y hay
+  # que arreglarlo, no saltárselo.
   # ---------------------------------------------------------------------------
   esquema:
-    name: Migraciones desde cero (informativo)
+    name: Migraciones desde cero
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v7
@@ -115,7 +113,7 @@ jobs:
 
       - uses: supabase/setup-cli@v3
         with:
-          version: latest
+          version: 2.113.0
 
       - name: Enlazar proyecto
         run: supabase link --project-ref "$PROJECT_REF"

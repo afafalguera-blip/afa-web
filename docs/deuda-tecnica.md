@@ -106,62 +106,59 @@ diálogo que usa todo el panel), pero los tres recorridos completos que no puede
 romperse — inscripción pública, checkout de la tienda, login de admin — siguen
 sin red de seguridad automática de punta a punta.
 
-**Cómo se paga:** Playwright contra un Supabase de staging. Bloqueado de hecho
-por el punto 7: hoy no se puede levantar ese staging desde el repositorio.
+**Cómo se paga:** Playwright contra un Supabase limpio. Desde que el punto 7
+está resuelto, ese entorno se levanta con `supabase start` desde el propio
+repositorio, así que ya no hay nada que lo bloquee.
 
-## 7. El histórico de migraciones no es reproducible
+## 7. ~~El histórico de migraciones no es reproducible~~ — resuelto el 2026-08-11
 
-Tres problemas encontrados al montar el workflow de Supabase:
+Punto de partida: `supabase start` moría en la segunda migración, y detrás
+había mucho más que un fallo suelto. El repositorio solo contenía parches
+incrementales sobre un esquema construido a mano en el panel de Supabase.
 
-1. **18 migraciones con versión de 8 dígitos** (`20260130_...`) en vez de los 14
-   que genera `supabase migration new`. Cinco parejas comparten versión, y para
-   la CLI la versión es la identidad de la migración: dos ficheros con la misma
-   son ambiguos y el orden entre ellos lo decide el alfabeto.
-   Renombrarlos rompería `supabase_migrations.schema_migrations` en producción,
-   así que quedan congelados en la lista `LEGACY` de
-   [scripts/check-migrations.mjs](../scripts/check-migrations.mjs). La guarda
-   (`npm run check:migrations`, y job `nombres` en CI) impide que crezcan.
+Lo que faltaba, y ya está capturado:
 
-2. **`20260707000000_inscription_confirmation_email_webhook.sql` es un
-   marcador de posición**: contiene literalmente `<SERVICE_ROLE_KEY>` porque el
-   trigger real se aplicó por la Management API. Si esa migración no consta como
-   aplicada en remoto, un `supabase db push` crearía el trigger con la cadena
-   literal y los correos de confirmación de inscripción dejarían de enviarse.
-   **Comprobar con `supabase migration list --linked` antes del primer push.**
+| Qué | Detalle |
+|---|---|
+| 15 tablas | `payments`, `inscripcions`, `site_config`, `profiles`, `admin_users` y las cuatro de la tienda, entre otras |
+| 51 funciones | Incluidas `dar_de_alta_inscripcion`, `fn_create_payments_for_inscription` y `record_payment_received` |
+| 25 columnas de `activities` | La migración declaraba 18; producción tiene 43 |
+| 14 triggers, 30 políticas, 25 índices | |
 
-3. **Las migraciones no aplicaban desde cero** — en curso desde el 2026-08-11.
+Todo en [`20240101000000_esquema_base.sql`](../supabase/migrations/20240101000000_esquema_base.sql)
+y [`20240131000000_activities_columnas_reales.sql`](../supabase/migrations/20240131000000_activities_columnas_reales.sql),
+generados con [`scripts/dump-schema.mjs`](../scripts/dump-schema.mjs) leyendo el
+catálogo de producción (solo `SELECT`). Idempotente: contra una base que ya lo
+tiene, no hace nada.
 
-   El job `esquema` falló en la segunda migración:
+Además hizo falta:
 
-   ```
-   Applying migration 20250130_create_events_table.sql...
-   ERROR: relation "public.profiles" does not exist (SQLSTATE 42P01)
-   ```
+1. **Fusionar las versiones duplicadas.** Seis versiones repartidas en trece
+   ficheros chocaban contra la clave primaria de `schema_migrations`. Ahora hay
+   un fichero por versión, que es exactamente lo que consta aplicado en
+   producción. La lista `LEGACY` de la guarda baja de 20 entradas a 12.
 
-   Al investigarlo apareció que el problema era mucho mayor que `profiles`:
-   **15 tablas de producción no las crea ninguna migración**, entre ellas
-   `payments`, `inscripcions`, `site_config` y las cuatro de la tienda. El
-   repositorio solo contenía parches incrementales sobre un esquema que se
-   construyó a mano en el panel de Supabase y nunca se capturó.
+2. **Hacer idempotentes las migraciones antiguas** (48 sentencias en 8 ficheros):
+   `CREATE POLICY` y `CREATE TRIGGER` con su `DROP ... IF EXISTS` delante,
+   `CREATE INDEX IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`.
 
-   Arreglo aplicado: `20240101000000_esquema_base.sql`, generado leyendo el
-   catálogo de producción con
-   [scripts/dump-schema.mjs](../scripts/dump-schema.mjs) (solo consultas SELECT).
-   Lleva la fecha más antigua de todas para que un entorno nuevo cree primero
-   esas tablas, y todo es idempotente, así que no molesta contra una base que ya
-   las tenga.
+3. **Dos stubs documentados** para funciones que las migraciones invocan antes
+   de que existan: `log_audit_change()` (que no existe en producción — tres
+   ficheros de 2025 nunca se aplicaron tal cual) y `handle_audit_log()`, que
+   no audita mientras `audit_logs` no exista y se sustituye después.
 
-   Quedan fuera del volcado a propósito:
-   - Los `trg_audit_*`, que los crea `20260801140000_audit_logs_definition.sql`
-     junto con la tabla a la que escriben. Adelantarlos rompería las ocho
-     migraciones anteriores que insertan en `site_config`.
-   - Los dos webhooks a Edge Functions, porque su definición lleva credenciales
-     (ver punto 8).
+4. **`SET check_function_bodies = off`** al principio del esquema base, como
+   hace `pg_dump`.
 
-   **Sigue sin estar cerrado:** las migraciones posteriores pueden chocar con el
-   esquema base (un `ADD COLUMN` de algo que ya existe, una política duplicada).
-   El job `esquema` es quien lo va diciendo, run a run, y hasta que pase en
-   verde sigue en `continue-on-error`.
+El job `esquema` **ya bloquea**: si alguien vuelve a dejar el repositorio en un
+estado del que no se pueda reconstruir el proyecto, CI se pone en rojo.
+
+Queda pendiente, y no es automático: la primera vez que se lance el workflow de
+despliegue habrá que comprobar con `supabase migration list --linked` que
+producción ya da por aplicadas las versiones nuevas (`20240101000000`,
+`20240131000000`) o marcarlas con `supabase migration repair --status applied`.
+Si no, `db push` intentará aplicarlas — son idempotentes, así que no romperían
+nada, pero es mejor saberlo antes que después.
 
 ## 8. El service_role vive dentro de dos triggers
 

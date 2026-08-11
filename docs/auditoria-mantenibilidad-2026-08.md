@@ -110,7 +110,7 @@ admin), y el resto de servicios de `services/admin`.
 | CI | **Nuevo**: [.github/workflows/ci.yml](../.github/workflows/ci.yml) — lint + tipos + tests con cobertura + build en cada push y PR, más job informativo de `npm audit` |
 | Actualización de deps | **Nuevo**: [.github/dependabot.yml](../.github/dependabot.yml) — semanal, agrupado por familia, majors críticos excluidos |
 | Deploy web | Automático en Vercel al hacer push a `main`. **Nuevo**: `buildCommand` es `npm run ci`, así que un commit que rompa los tests no llega a publicarse |
-| Migraciones DB | Versionadas en `supabase/migrations/` (57). **Nuevo**: [supabase.yml](../.github/workflows/supabase.yml) valida nombres en cada PR y las aplica desde cero en un Supabase limpio; el `db push` a producción es manual |
+| Migraciones DB | 52 en `supabase/migrations/`. **Nuevo**: [supabase.yml](../.github/workflows/supabase.yml) valida nombres y **aplica las 52 desde cero en un Supabase limpio en cada PR, bloqueando el merge si falla**. El esquema base que faltaba (15 tablas, 51 funciones) ya está capturado. El `db push` a producción sigue siendo manual |
 | Edge Functions | `supabase functions deploy` desde el mismo workflow, disparo manual. Política de JWT por función fijada en `supabase/config.toml` |
 | Entorno de staging | No hay: se trabaja contra el proyecto Supabase de producción |
 | Cabeceras de seguridad | CSP, HSTS, `X-Frame-Options`, Permissions-Policy en `vercel.json` |
@@ -150,9 +150,9 @@ Ordenados por impacto sobre la nota.
 | 1 | Sentry (plan gratuito) + `ErrorBoundary` global. Cierra el bucle: el agente despliega y sabe si rompió algo | +1 | 1-2 h | **Sí** |
 | 2 | ~~Gate de tests antes de publicar~~ — hecho: `buildCommand: npm run ci` en `vercel.json` | — | — | — |
 | 3 | ~~Mock de Supabase y tests de servicios~~ — hecho: `src/tests/helpers/supabaseMock.ts` + 69 tests de `AdminPaymentsService`, `AdminInscriptionsService` y `ConfigService` | — | — | — |
-| 4 | E2E con Playwright de los tres recorridos críticos contra un Supabase de staging | 0 | 1-2 días | No (no puntúa, pero es la deuda más cara que queda) |
+| 4 | E2E con Playwright de los tres recorridos críticos. **Ya es posible**: desde hoy se puede levantar un Supabase limpio desde el repositorio | 0 | 1-2 días | No (no puntúa, pero es la deuda más cara que queda) |
 | 5 | Vaciar los 51 avisos de ESLint y subir las reglas a `error` | 0 | Progresivo | No |
-| 6 | ~~Workflow de migraciones y Edge Functions~~ — hecho: [supabase.yml](../.github/workflows/supabase.yml). Falta cargar los dos secrets y sanear el histórico (ver [deuda-tecnica.md](./deuda-tecnica.md#7-el-histórico-de-migraciones-no-es-reproducible)) | 0 | — | No |
+| 6 | ~~Workflow de migraciones + histórico reproducible~~ — hecho. El proyecto ya se puede reconstruir entero desde el repositorio, y CI lo comprueba en cada PR. Falta cargar `SUPABASE_DB_PASSWORD` para poder usar el despliegue manual | 0 | — | No |
 | 7 | Reescribir `README.md` (variables de entorno, comandos, deploy) y borrar los scripts `gh-pages` | 0 | 30 min | No |
 
 El paso **1 es el único que queda para el 10**, y son un par de horas. Todo lo
