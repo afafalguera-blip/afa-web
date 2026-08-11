@@ -123,16 +123,42 @@ así que cubrir un servicio más es escribir el test, no montar andamiaje.
 Siguientes por valor: `AdminMenjadorService`, `AdminDocumentsService` y
 `ExportService`.
 
-## 6. Sin E2E
+## 6. ~~Sin E2E~~ — resuelto el 2026-08-11
 
-Ya hay tests de componente (`modal.test.tsx` cubre foco, Escape y scroll del
-diálogo que usa todo el panel), pero los tres recorridos completos que no pueden
-romperse — inscripción pública, checkout de la tienda, login de admin — siguen
-sin red de seguridad automática de punta a punta.
+16 tests de Playwright contra la app construida y un Supabase limpio levantado
+desde el propio repositorio ([.github/workflows/e2e.yml](../.github/workflows/e2e.yml)).
+Corren en cada PR y a mano; no en cada push, porque levantar Postgres, GoTrue y
+PostgREST en contenedores tarda unos minutos y el gate rápido sigue siendo el
+workflow `CI`.
 
-**Cómo se paga:** Playwright contra un Supabase limpio. Desde que el punto 7
-está resuelto, ese entorno se levanta con `supabase start` desde el propio
-repositorio, así que ya no hay nada que lo bloquee.
+- `e2e/publico.spec.ts`: siete rutas públicas montan, no dejan la pantalla en
+  blanco, no disparan el `ErrorBoundary` y no escupen errores de consola.
+- `e2e/admin.spec.ts`: el panel no se abre sin sesión, una contraseña mala no
+  entra, el admin del seed sí, la sesión sobrevive a un F5.
+
+Se prueba sobre `vite preview` y no sobre el servidor de desarrollo: lo que hay
+que validar es el bundle que acaba en producción.
+
+**Lo que encontraron nada más existir** — cuatro cosas que llevaban tiempo ahí y
+que ni los tests unitarios ni CI podían ver:
+
+1. **Ninguna migración concedía permisos a `anon` ni `authenticated`.** Un
+   entorno nuevo levantaba el esquema correcto y la web no podía leer nada:
+   42501 en cada pantalla. Resuelto en `20260810000000_grants_por_defecto.sql`.
+2. **`ShopLanding` hacía `shopConfig?.categories.map(...)`.** El `?.` protegía
+   `shopConfig`, no `categories`: una configuración de tienda sin ese campo
+   tumbaba la botiga entera para todos los visitantes.
+3. **No había `<Route path="*">`.** Con el rewrite de `vercel.json`, un enlace
+   viejo de una circular o una errata al teclear daban pantalla en blanco, sin
+   error y sin forma de volver.
+4. **`ConfigService` usaba `.single()`**, que devuelve error cuando la clave no
+   tiene fila. Una configuración sin definir no es un error; ahora usa
+   `.maybeSingle()`.
+
+**Qué sigue faltando:** los recorridos que *escriben* — enviar una inscripción
+de verdad y completar una compra. Necesitan selectores estables (`data-testid`)
+en los formularios, porque hoy los campos se localizan por placeholder
+traducido y eso se rompe al cambiar un texto.
 
 ## 7. ~~El histórico de migraciones no es reproducible~~ — resuelto el 2026-08-11
 

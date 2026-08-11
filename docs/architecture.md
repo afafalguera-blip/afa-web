@@ -79,6 +79,7 @@ npm test              # Vitest, una pasada
 npm run test:watch    # Vitest en modo watch
 npm run test:coverage # Vitest + informe de cobertura en coverage/
 npm run check:migrations # nombres de supabase/migrations
+npm run e2e           # Playwright (necesita `supabase start` levantado)
 npm run ci            # todos los gates, igual que en GitHub Actions
 ```
 
