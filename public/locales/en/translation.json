@@ -813,6 +813,7 @@
       "acollida": "Childcare Management",
       "menjador": "Canteen Management",
       "observability": "Auditing",
+      "errors": "Errors",
       "logout": "Logout",
       "faq": "FAQ",
       "inscription_config": "Inscription config",

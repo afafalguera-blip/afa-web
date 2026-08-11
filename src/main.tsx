@@ -7,13 +7,20 @@ import App from './App.tsx'
 import { HelmetProvider } from 'react-helmet-async'
 
 import { Loading } from './components/common/Loading'
+import { ErrorBoundary } from './core/errors/ErrorBoundary'
+import { instalarCapturaGlobal } from './core/errors/reporter'
+
+// Antes de montar nada: si el propio arranque falla, que quede registrado.
+instalarCapturaGlobal()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HelmetProvider>
-      <Suspense fallback={<Loading />}>
-        <App />
-      </Suspense>
-    </HelmetProvider>
+    <ErrorBoundary zona="root">
+      <HelmetProvider>
+        <Suspense fallback={<Loading />}>
+          <App />
+        </Suspense>
+      </HelmetProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

@@ -56,6 +56,9 @@ El proyecto mantiene un ciclo de auditoría constante mediante:
   en `vitest.config.ts`.
 - **CI**: `.github/workflows/ci.yml` ejecuta lint, tipos, tests con cobertura y
   build en cada push y pull request.
+- **Errores de navegador**: `src/core/errors/` — un `ErrorBoundary` global en
+  `main.tsx` más la captura de `window.onerror` y promesas rechazadas. Van a la
+  tabla `client_errors`, agrupados por huella, y se ven en Admin → Errors.
 - **Gate de publicación**: el `buildCommand` de `vercel.json` es `npm run ci`,
   no `npm run build`. Si lint, tipos, tests o la guarda de migraciones fallan,
   el build de Vercel falla y **no se publica nada**: sigue en línea la versión
