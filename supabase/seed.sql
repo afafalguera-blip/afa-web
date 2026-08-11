@@ -50,8 +50,10 @@ UPDATE public.profiles
 -- ------------------------------------------------------------------
 -- Contenido mínimo
 -- ------------------------------------------------------------------
-INSERT INTO public.activities (title, title_ca, description, price, is_active)
-SELECT 'Anglès', 'Anglès', 'Activitat de prova per als tests.', 30, true
+-- `category` es NOT NULL y no hay is_active: la visibilidad se controla con
+-- inscription_enabled. Columnas verificadas contra el esquema real.
+INSERT INTO public.activities (title, title_ca, category, description, price, inscription_enabled)
+SELECT 'Anglès', 'Anglès', 'idiomes', 'Activitat de prova per als tests.', 30, true
  WHERE NOT EXISTS (SELECT 1 FROM public.activities);
 
 INSERT INTO public.site_config (key, value)
