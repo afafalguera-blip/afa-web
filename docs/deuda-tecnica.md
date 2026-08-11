@@ -79,10 +79,7 @@ La verificación destapó un fallo del propio resumen: `COUNT(DISTINCT NULL)`
 devuelve 0, así que un reporte sin sesión y sin user-agent no contaba como
 nadie afectado. Corregido con un `COALESCE` de tres ramas.
 
-Nota de fontanería: se aplicó por la Management API, así que **no consta en
-`supabase_migrations.schema_migrations`**. Un `db push` futuro intentará
-aplicarla otra vez; es idempotente y no rompería nada, pero lo limpio es
-marcarla con `supabase migration repair --status applied 20260811000000`.
+Registrada en `schema_migrations` junto con el resto (ver punto 7).
 
 ## 4. ~~El deploy no espera a CI~~ — resuelto el 2026-08-11
 
@@ -180,12 +177,31 @@ Además hizo falta:
 El job `esquema` **ya bloquea**: si alguien vuelve a dejar el repositorio en un
 estado del que no se pueda reconstruir el proyecto, CI se pone en rojo.
 
-Queda pendiente, y no es automático: la primera vez que se lance el workflow de
-despliegue habrá que comprobar con `supabase migration list --linked` que
-producción ya da por aplicadas las versiones nuevas (`20240101000000`,
-`20240131000000`) o marcarlas con `supabase migration repair --status applied`.
-Si no, `db push` intentará aplicarlas — son idempotentes, así que no romperían
-nada, pero es mejor saberlo antes que después.
+### El registro de migraciones estaba vacío de todo esto
+
+Al ir a marcar las versiones nuevas apareció algo peor de lo esperado: los dos
+registros eran **completamente disjuntos**. Producción tenía 55 versiones en
+`supabase_migrations.schema_migrations` y **ninguna** coincidía con las 53 del
+repositorio.
+
+Es decir: las migraciones de este repo **nunca se habían aplicado con la CLI**.
+Todo el esquema se construyó por el panel y por la Management API, y el registro
+guardaba otra cosa (versiones que la propia interfaz iba generando).
+
+La consecuencia era una mina: `supabase db push` habría intentado aplicar las 53
+de golpe contra producción. Con la pasada de idempotencia la mayoría no habría
+roto nada, pero `20260707000000` habría creado el trigger del webhook con el
+literal `<SERVICE_ROLE_KEY>` y los correos de confirmación de inscripción
+habrían dejado de enviarse.
+
+Resuelto el 2026-08-11: las 53 versiones del repositorio quedan registradas como
+aplicadas (`created_by = 'claude-code repair 2026-08-11'`), que es exactamente
+lo que hace `supabase migration repair --status applied` pero por la Management
+API, sin necesitar la contraseña de Postgres. Comprobado: hoy `db push` no
+aplicaría nada.
+
+Las 55 versiones antiguas siguen ahí y son inofensivas — `db push` solo mira
+las locales que faltan. Aparecerán como "remote only" en `migration list`.
 
 ## 8. El service_role vive dentro de dos triggers
 
