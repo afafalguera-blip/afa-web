@@ -1073,7 +1073,10 @@
       "deleted": "Event deleted",
       "next_month": "Next month",
       "prev_month": "Previous month",
-      "saved": "Event saved"
+      "saved": "Event saved",
+      "end_before_start": "The end date cannot be earlier than the start date.",
+      "field_end_date": "End date",
+      "field_end_date_hint": "Leave it empty if it lasts a single day. For Easter week or camps, set the last day."
     },
     "dashboard": {
       "export_excel": "Export to Excel",
