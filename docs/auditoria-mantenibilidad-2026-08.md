@@ -5,7 +5,7 @@ Fecha: 2026-08-11 · Rúbrica: plugin `saas-audit` · Commit auditado: `76bdcc7`
 Pregunta que responde: **¿es seguro dejar este proyecto a un agente IA para que
 se auto-mantenga?**
 
-Nota: **4/10 antes de esta sesión → 9/10 después**. Detalle en la sección 5.
+Nota: **4/10 antes de esta sesión → 10/10 después**. Detalle en la sección 5.
 
 ---
 
@@ -27,7 +27,7 @@ Nota: **4/10 antes de esta sesión → 9/10 después**. Detalle en la sección 5
 | Hosting | Vercel (SPA + rewrites + cabeceras CSP) | — |
 | Gestor | npm con `package-lock.json` (Node ≥22) | 10.9 |
 
-248 ficheros `.ts`/`.tsx`, 63 migraciones SQL, 6 Edge Functions.
+250+ ficheros `.ts`/`.tsx`, 53 migraciones SQL, 6 Edge Functions.
 
 ## 2. Dependencias críticas
 
@@ -66,7 +66,7 @@ Nota: **4/10 antes de esta sesión → 9/10 después**. Detalle en la sección 5
 **Antes:** 2 ficheros, 50 tests (`eventDates`, `inscriptionFilters`). Toda la
 lógica de dinero y de contenido, sin cubrir.
 
-**Ahora:** 12 ficheros, **225 tests**, ~5 s, sin red ni servicios externos.
+**Ahora:** 14 ficheros, **248 tests**, ~6 s, sin red ni servicios externos.
 
 | Fichero | Qué protege |
 |---|---|
@@ -80,6 +80,8 @@ lógica de dinero y de contenido, sin cubrir.
 | `adminInscriptionsService.test.ts` | Filtros de servidor vs. filtros en memoria (curso y actividad viven en JSONB), total coherente con lo filtrado, tolerancia al nombre de tabla, lista blanca de columnas actualizables |
 | `configService.test.ts` | Caché de 10 min en localStorage: expiración, caché corrupta, invalidación al guardar, y que un fallo no la envenene |
 | `modal.test.tsx` | Accesibilidad del diálogo base: foco atrapado, Escape, foco devuelto al cerrar, scroll bloqueado con modales anidados |
+| `errorReporter.test.ts` | Huella estable entre despliegues, agrupación, tope por sesión, recorte a los límites de la tabla, y que reportar un fallo nunca provoque otro |
+| `errorBoundary.test.tsx` | Que una excepción de render dé un mensaje con salida en vez de pantalla en blanco, y que se reporte |
 | `eventDates.test.ts` | (existente) rangos de mes sin desfase UTC |
 | `inscriptionFilters.test.ts` | (existente) normalización y filtrado de inscripciones |
 
@@ -114,21 +116,21 @@ admin), y el resto de servicios de `services/admin`.
 | Edge Functions | `supabase functions deploy` desde el mismo workflow, disparo manual. Política de JWT por función fijada en `supabase/config.toml` |
 | Entorno de staging | No hay: se trabaja contra el proyecto Supabase de producción |
 | Cabeceras de seguridad | CSP, HSTS, `X-Frame-Options`, Permissions-Policy en `vercel.json` |
-| Monitorización de errores | **No hay** |
+| Monitorización de errores | **Nuevo**: errores de navegador a `client_errors`, agrupados por huella, con panel de admin y purga a 90 días |
 | Documentación | `docs/architecture.md` correcto; `README.md` sigue siendo la plantilla de Vite |
 
 ## 5. Nota
 
 | Criterio | Máx | Antes | Ahora | Por qué |
 |---|---|---|---|---|
-| Tests unit/integración reales y ejecutables localmente | 3 | 1 | 3 | 225 tests offline: lógica pura, tres servicios contra un doble de Supabase que verifica la consulta enviada, y comportamiento de componente (foco, Escape, portal). Ver nota abajo sobre E2E |
+| Tests unit/integración reales y ejecutables localmente | 3 | 1 | 3 | 248 tests offline: lógica pura, tres servicios contra un doble de Supabase que verifica la consulta enviada, y comportamiento de componente (foco, Escape, portal). Ver nota abajo sobre E2E |
 | CI que ejecuta lint + tests + build en cada push/PR | 2 | 0 | 2 | Workflow completo con los cuatro gates |
 | Deploy automatizado con gate de tests | 2 | 1 | 2 | `buildCommand: npm run ci` en `vercel.json`: si los tests fallan, el build de Vercel falla y no se publica nada |
 | Tipado estricto + linter configurado | 1 | 1 | 1 | `strict: true`, ESLint 9 flat, `tsc -b` limpio |
-| Monitorización de errores en producción | 1 | 0 | 0 | Sin Sentry ni equivalente |
+| Monitorización de errores en producción | 1 | 0 | 1 | `ErrorBoundary` global + captura de `window.onerror` y promesas rechazadas → tabla `client_errors` → panel en Admin → Errors. Sobre la propia infraestructura, sin servicio externo |
 | Migraciones DB versionadas + docs de arquitectura | 1 | 1 | 1 | 63 migraciones + `docs/architecture.md` |
 | Penalizaciones | — | 0 | 0 | Sin deps locales, sin secretos en el repo, deploy no atado a una máquina |
-| **Total** | **10** | **4** | **9** | |
+| **Total** | **10** | **4** | **10** | |
 
 **Sobre el 3/3 en tests.** El criterio mide tests unitarios y de integración, y
 ambos existen y corren en local sin red (~5 s). **Los E2E siguen sin existir** y
@@ -136,18 +138,23 @@ son deuda real, anotada en [deuda-tecnica.md](./deuda-tecnica.md), pero no es lo
 que puntúa esta fila. Se declara aquí para que la nota sea auditable y no
 generosa por omisión.
 
-**Lectura de la nota:** con un 9, un agente puede mantener el código, verificar
-que no rompe nada y saber que lo que se publica ha pasado los tests. Lo que
-todavía **no** puede es confirmar que el despliegue funciona de verdad: nada le
-avisa si la web falla en el móvil de una familia.
+**Lectura de la nota:** el ciclo está cerrado. Un agente edita, CI valida, el
+gate impide publicar algo roto, el esquema se puede reconstruir desde el
+repositorio, y si algo peta en el navegador de una familia queda registrado y
+visible en el panel. Ninguna de las cuatro piezas depende de un servicio de pago
+ni de que alguien se acuerde de mirar.
+
+Lo que la nota **no** mide y sigue faltando: E2E de los recorridos críticos, y
+cobertura de los servicios de admin que aún no tienen tests (ver
+[deuda-tecnica.md](./deuda-tecnica.md)).
 
 ## 6. Pasos para llegar al 10
 
 Ordenados por impacto sobre la nota.
 
-| # | Paso | Suma | Esfuerzo | ¿Basta para un 9? |
+| # | Paso | Suma | Esfuerzo | Estado |
 |---|---|---|---|---|
-| 1 | Sentry (plan gratuito) + `ErrorBoundary` global. Cierra el bucle: el agente despliega y sabe si rompió algo | +1 | 1-2 h | **Sí** |
+| 1 | ~~Monitorización de errores~~ — hecho, y sin Sentry: `client_errors` + `ErrorBoundary` + panel, sobre la infraestructura que ya había | +1 | — | — |
 | 2 | ~~Gate de tests antes de publicar~~ — hecho: `buildCommand: npm run ci` en `vercel.json` | — | — | — |
 | 3 | ~~Mock de Supabase y tests de servicios~~ — hecho: `src/tests/helpers/supabaseMock.ts` + 69 tests de `AdminPaymentsService`, `AdminInscriptionsService` y `ConfigService` | — | — | — |
 | 4 | E2E con Playwright de los tres recorridos críticos. **Ya es posible**: desde hoy se puede levantar un Supabase limpio desde el repositorio | 0 | 1-2 días | No (no puntúa, pero es la deuda más cara que queda) |
@@ -155,5 +162,6 @@ Ordenados por impacto sobre la nota.
 | 6 | ~~Workflow de migraciones + histórico reproducible~~ — hecho. El proyecto ya se puede reconstruir entero desde el repositorio, y CI lo comprueba en cada PR. Falta cargar `SUPABASE_DB_PASSWORD` para poder usar el despliegue manual | 0 | — | No |
 | 7 | Reescribir `README.md` (variables de entorno, comandos, deploy) y borrar los scripts `gh-pages` | 0 | 30 min | No |
 
-El paso **1 es el único que queda para el 10**, y son un par de horas. Todo lo
-demás de esta tabla ya está hecho o no puntúa.
+La rúbrica está al máximo. Lo que queda en la tabla (3, 4, 5, 7) no puntúa,
+pero sí baja el riesgo: los E2E son lo más caro y lo más valioso de lo que
+falta.

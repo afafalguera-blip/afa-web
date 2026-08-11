@@ -55,6 +55,7 @@ const EventsManager = lazy(() => import('./pages/admin/EventsManager'));
 const NotificationManager = lazy(() => import('./pages/admin/NotificationManager'));
 const DocumentsManager = lazy(() => import('./pages/admin/DocumentsManager'));
 const AdminObservability = lazy(() => import('./pages/admin/AdminObservability'));
+const AdminClientErrors = lazy(() => import('./pages/admin/AdminClientErrors'));
 const AcollidaManager = lazy(() => import('./pages/admin/AcollidaManager'));
 const MenjadorManager = lazy(() => import('./pages/admin/MenjadorManager'));
 const AnnouncementManager = lazy(() => import('./pages/admin/AnnouncementManager'));
@@ -130,6 +131,7 @@ function App() {
                     <Route path="board" element={<BoardManager />} />
                     <Route path="forms" element={<FormsAdminPage />} />
                     <Route path="observability" element={<AdminObservability />} />
+                    <Route path="errors" element={<AdminClientErrors />} />
                   </Route>
                 </Routes>
               </Suspense>

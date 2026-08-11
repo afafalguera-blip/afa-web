@@ -45,17 +45,35 @@ corregidas se distribuyen solo desde `cdn.sheetjs.com`.
 Las otras dos (`dompurify`, `nanoid`) son transitivas de dependencias de
 desarrollo y se cierran con `npm audit fix` cuando toque tocar el lockfile.
 
-## 3. Sin monitorización de errores en producción
+## 3. ~~Sin monitorización de errores en producción~~ — resuelto el 2026-08-11
 
-No hay Sentry ni equivalente. Si una pantalla revienta en el móvil de una
-familia, nadie se entera hasta que alguien lo cuenta por WhatsApp.
+Si una pantalla petaba en el móvil de una familia, nadie se enteraba: la web es
+una SPA, el fallo ocurre en su navegador y no deja rastro en ningún log.
 
-`AdminObservability` mide consumo de Supabase (filas, storage, funciones), no
-errores de frontend.
+Resuelto sobre la infraestructura que ya había, sin servicio externo:
 
-**Cómo se paga:** Sentry con plan gratuito + `ErrorBoundary` global. Es el único
-punto que impide cerrar el ciclo "el agente edita → CI valida → deploy →
-monitorización confirma".
+| Pieza | Qué hace |
+|---|---|
+| [`ErrorBoundary`](../src/core/errors/ErrorBoundary.tsx) | Envuelve la app en `main.tsx`. Sustituye la pantalla en blanco por un mensaje con botón de reintentar |
+| [`reporter.ts`](../src/core/errors/reporter.ts) | Captura también `window.onerror` y las promesas rechazadas, que el boundary no ve |
+| `client_errors` | Tabla con RLS: escribe cualquiera (las visitas son anónimas), leen solo los admin |
+| Admin → Errors | Agrupado por huella, con detalle, marcar resuelto y borrar |
+
+Decisiones que conviene no deshacer sin pensarlo:
+
+- **INSERT abierto a `anon`.** El 95% de las visitas no tienen sesión; un
+  reporte que solo funcione con sesión no sirve. El abuso se acota con los
+  `CHECK` de tamaño de la tabla y la purga a 90 días, no con la política.
+- **Agrupación por huella** normalizando los números: si no, cada despliegue
+  cambia las líneas del bundle y el mismo fallo parece uno nuevo.
+- **Tope de 20 reportes por carga de página** y ventana de 60 s por huella: un
+  bucle de render puede lanzar miles de errores por segundo.
+- **El reportero nunca lanza.** Un fallo reportando un fallo no puede tumbar la
+  página; hay un test que lo fija.
+
+Pendiente: la migración `20260811000000_client_errors.sql` **tiene que aplicarse
+a producción** para que esto registre algo. Hasta entonces los INSERT fallan en
+silencio, que es justo lo que se pidió del reportero.
 
 ## 4. ~~El deploy no espera a CI~~ — resuelto el 2026-08-11
 

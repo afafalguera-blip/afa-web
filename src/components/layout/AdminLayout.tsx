@@ -17,6 +17,7 @@ import {
   FolderHeart,
   CalendarRange,
   History as HistoryIcon,
+  Bug,
   Bell,
   Megaphone,
   MessageSquare,
@@ -230,6 +231,10 @@ export function AdminLayout() {
             <NavLink to="/admin/observability" onClick={closeSidebar} className={navClass}>
               <HistoryIcon className="w-[18px] h-[18px]" />
               {t('admin.sidebar.observability')}
+            </NavLink>
+            <NavLink to="/admin/errors" onClick={closeSidebar} className={navClass}>
+              <Bug className="w-[18px] h-[18px]" />
+              {t('admin.sidebar.errors', 'Errors')}
             </NavLink>
           </div>
         </nav>
