@@ -12,10 +12,16 @@
 -- ------------------------------------------------------------------
 -- La contraseña se cifra con crypt() igual que hace GoTrue. El trigger
 -- on_auth_user_created creará su fila en profiles con rol 'familia'.
+-- Las columnas de token van a cadena vacía, no a NULL: GoTrue las lee sin
+-- comprobar nulos y con NULL el login falla sin decir por qué.
 INSERT INTO auth.users (
     instance_id, id, aud, role, email, encrypted_password,
     email_confirmed_at, created_at, updated_at,
-    raw_app_meta_data, raw_user_meta_data
+    raw_app_meta_data, raw_user_meta_data,
+    confirmation_token, recovery_token,
+    email_change, email_change_token_new, email_change_token_current,
+    phone_change, phone_change_token, reauthentication_token,
+    is_super_admin, is_sso_user, is_anonymous
 )
 VALUES (
     '00000000-0000-0000-0000-000000000000',
@@ -25,7 +31,9 @@ VALUES (
     crypt('provaE2E!2026', gen_salt('bf')),
     NOW(), NOW(), NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    '{"full_name":"Admin de proves"}'::jsonb
+    '{"full_name":"Admin de proves"}'::jsonb,
+    '', '', '', '', '', '', '', '',
+    false, false, false
 )
 ON CONFLICT (id) DO NOTHING;
 
