@@ -51,8 +51,13 @@ for (const { ruta, nombre } of RUTAS) {
     await expect(root).not.toBeEmpty({ timeout: 15_000 });
     await expect(page.locator('body')).toContainText(/\S/);
 
-    // Y no ha saltado el ErrorBoundary, que es lo que se vería si petara.
-    await expect(page.getByRole('alert').filter({ hasText: /deixat de funcionar/i })).toHaveCount(0);
+    // Y no ha saltado el ErrorBoundary, que es lo que se vería si petara. El
+    // mensaje lleva los errores capturados: sin eso, el fallo solo dice "había
+    // un alert" y toca adivinar la causa.
+    await expect(
+      page.getByRole('alert').filter({ hasText: /deixat de funcionar/i }),
+      `el ErrorBoundary saltó en ${ruta}. Errores: ${errores.join(' | ') || '(ninguno capturado)'}`,
+    ).toHaveCount(0);
 
     expect(errores, `errores de consola en ${ruta}`).toEqual([]);
   });
@@ -68,9 +73,12 @@ test('la navegación entre secciones no recarga la página', async ({ page }) =>
   await expect(page.locator('#root')).not.toBeEmpty();
 });
 
-test('una ruta que no existe no rompe la aplicación', async ({ page }) => {
-  // El rewrite de vercel.json manda todo a index.html; si el router no maneja
-  // la ruta, la familia debe ver algo, no un fallo.
+test('una ruta que no existe enseña un 404, no una pantalla en blanco', async ({ page }) => {
+  // El rewrite de vercel.json manda todo a index.html, así que aquí llega la
+  // app entera: si el router no tiene comodín, no pinta nada.
   await page.goto('/esta-ruta-no-existe-jamas');
+
   await expect(page.locator('#root')).not.toBeEmpty();
+  await expect(page.getByText('404')).toBeVisible();
+  await expect(page.getByRole('link', { name: /anar a l'inici/i })).toBeVisible();
 });
