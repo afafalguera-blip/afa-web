@@ -107,7 +107,7 @@ export function ShopLanding() {
             {t('shop_page.filter_all')}
           </button>
 
-          {shopConfig?.categories.map(cat => (
+          {shopConfig?.categories?.map(cat => (
             <button
               key={cat.id}
               /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

@@ -56,6 +56,7 @@ const NotificationManager = lazy(() => import('./pages/admin/NotificationManager
 const DocumentsManager = lazy(() => import('./pages/admin/DocumentsManager'));
 const AdminObservability = lazy(() => import('./pages/admin/AdminObservability'));
 const AdminClientErrors = lazy(() => import('./pages/admin/AdminClientErrors'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 const AcollidaManager = lazy(() => import('./pages/admin/AcollidaManager'));
 const MenjadorManager = lazy(() => import('./pages/admin/MenjadorManager'));
 const AnnouncementManager = lazy(() => import('./pages/admin/AnnouncementManager'));
@@ -133,6 +134,10 @@ function App() {
                     <Route path="observability" element={<AdminObservability />} />
                     <Route path="errors" element={<AdminClientErrors />} />
                   </Route>
+
+                  {/* Comodín: sin esto, una URL que no case deja la pantalla
+                      en blanco, porque vercel.json manda todo a index.html. */}
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
             </BrowserRouter>
