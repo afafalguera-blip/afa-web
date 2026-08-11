@@ -207,6 +207,22 @@ w();
 // cual. La auditoria real la hacen los trg_audit_* con handle_audit_log(), que
 // llegan en 20260801140000. Sin este stub, un entorno nuevo se atasca en la
 // tercera migracion.
+// 20260506020000_security_hardening.sql crea triggers de auditoria, pero la
+// funcion real llega en 20260801140000. Se define aqui una version defensiva
+// que no hace nada mientras audit_logs no exista; esa migracion la sustituye
+// luego con CREATE OR REPLACE.
+w('-- Stub defensivo, ver comentario en scripts/dump-schema.mjs.');
+w(`CREATE OR REPLACE FUNCTION public.handle_audit_log()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $stub$
+BEGIN
+  -- Hasta que 20260801140000 cree audit_logs y sustituya esta funcion, no hay
+  -- donde escribir: se deja pasar la fila sin auditar en vez de reventar la
+  -- migracion que la esta insertando.
+  RETURN COALESCE(NEW, OLD);
+END;
+$stub$;`);
+w();
+
 w('-- Stub de compatibilidad, ver comentario en scripts/dump-schema.mjs.');
 w(`CREATE OR REPLACE FUNCTION public.log_audit_change()
 RETURNS trigger LANGUAGE plpgsql AS $stub$

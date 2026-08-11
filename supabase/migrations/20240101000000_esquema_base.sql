@@ -10,6 +10,17 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Stub defensivo, ver comentario en scripts/dump-schema.mjs.
+CREATE OR REPLACE FUNCTION public.handle_audit_log()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $stub$
+BEGIN
+  -- Hasta que 20260801140000 cree audit_logs y sustituya esta funcion, no hay
+  -- donde escribir: se deja pasar la fila sin auditar en vez de reventar la
+  -- migracion que la esta insertando.
+  RETURN COALESCE(NEW, OLD);
+END;
+$stub$;
+
 -- Stub de compatibilidad, ver comentario en scripts/dump-schema.mjs.
 CREATE OR REPLACE FUNCTION public.log_audit_change()
 RETURNS trigger LANGUAGE plpgsql AS $stub$
