@@ -44,3 +44,7 @@ tsc_*.txt
 test-output*.txt
 any_errors.json
 build_errors.txt
+playwright-report/
+test-results/
+/blob-report/
+.playwright/
