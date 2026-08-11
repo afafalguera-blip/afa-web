@@ -156,13 +156,17 @@ for (const trg of [...triggersRaw, ...authTriggersRaw]) {
   if (fn) neededFunctions.add(fn);
 }
 
-const functionList = [...neededFunctions].map((f) => `'${f}'`).join(',');
+// Se vuelcan TODAS las funciones de `public`, no solo las huérfanas: varias
+// migraciones antiguas hacen REVOKE/GRANT o llaman a funciones que se definen
+// mucho después (20260506020000_security_hardening.sql endurece
+// generate_monthly_payments tres meses antes de que exista). Las posteriores
+// las declaran con CREATE OR REPLACE, así que adelantarlas no choca.
 const functions = await query(`
   select p.proname as nombre, pg_get_functiondef(p.oid) as def
   from pg_proc p
   join pg_namespace n on n.oid = p.pronamespace
-  where n.nspname = 'public' and p.proname in (${functionList})
-  order by p.proname`);
+  where n.nspname = 'public' and p.prokind = 'f'
+  order by p.proname, p.oid`);
 
 const definedFunctions = new Set(functions.map((f) => f.nombre));
 
@@ -200,6 +204,10 @@ w('-- es inofensivo contra una base que ya las tenga.');
 w();
 
 w('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+w();
+w('-- Como hace pg_dump: sin esto, una función SQL que referencia una tabla que');
+w('-- aún no existe falla al crearse. Solo afecta a esta transacción.');
+w('SET check_function_bodies = off;');
 w();
 
 // Tres migraciones de 2025 crean triggers que llaman a log_audit_change(), una
