@@ -6,6 +6,10 @@
 -- repositorio esa columna no existía.
 --
 -- Todo va con IF NOT EXISTS: contra producción, donde ya están, no hace nada.
+--
+-- La versión es 20240131 y no 20240130000001 porque la CLI ordena por nombre de
+-- fichero: '0' va antes que '_', así que 20240130000001_... se habría aplicado
+-- ANTES de 20240130_create_activities.sql, cuando la tabla aún no existe.
 
 ALTER TABLE public.activities ADD COLUMN IF NOT EXISTS id bigint;
 ALTER TABLE public.activities ADD COLUMN IF NOT EXISTS created_at timestamp with time zone DEFAULT timezone('utc'::text, now());
