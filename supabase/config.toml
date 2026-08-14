@@ -390,12 +390,26 @@ deno_version = 2
 [functions.go]
 verify_jwt = false
 
+# `activity-alert` la llama pg_cron con `net.http_post`, que solo manda las
+# cabeceras que se le escriben en el SQL del cron: Content-Type y el secreto
+# compartido. No hay Authorization, así que con verify_jwt = true el aviso
+# devolvería 401 y no se enviaría nunca — que es justo el fallo que esta
+# función existe para evitar. La autorización real es x-alert-secret, comparado
+# en tiempo constante (_shared/security.ts).
+[functions.activity-alert]
+verify_jwt = false
+
 # El resto se invocan siempre con un JWT válido, así que mantienen la
 # verificación activada:
 #   send-contact-email / send-order-email / send-inscription-email → webhooks de
 #     la base de datos, que envían el service_role en Authorization.
 #   translate → el panel de admin, con el access_token de la sesión.
-#   usage-alert → pg_cron, con el service_role.
+#
+# OJO con `usage-alert`: su cron (20260417010000_usage_alert_cron.sql) tampoco
+# manda Authorization, así que aquí debería estar en el mismo caso que
+# activity-alert. Si en producción se desplegó con verify_jwt activo, ese aviso
+# lleva sin llegar desde que se montó. Pendiente de comprobar en los logs de la
+# función antes de tocarlo (docs/deuda-tecnica.md).
 
 [analytics]
 enabled = true
