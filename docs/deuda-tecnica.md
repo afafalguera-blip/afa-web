@@ -1,6 +1,6 @@
 # Inventario de deuda técnica
 
-Estado: **2026-08-11**. Se revisa cada vez que CI cambie de color o al cerrar un bloque.
+Estado: **2026-08-14**. Se revisa cada vez que CI cambie de color o al cerrar un bloque.
 
 Regla: nada entra aquí sin fecha y sin criterio de cierre. Si un punto se queda
 sin dueño más de un curso escolar, o se paga o se decide explícitamente vivir
@@ -248,7 +248,84 @@ cabeceras como literal.
 **Cómo se paga:** mover el secreto a `vault` de Supabase y leerlo desde una
 función `SECURITY DEFINER`, en vez de incrustarlo en la definición del trigger.
 
-## 9. Cosas menores
+## 9. El histórico de inscripciones estuvo abierto a cualquiera — cerrado el 2026-08-14
+
+`inscripcions_history` guarda en `previous_record` y `new_record` una copia
+JSONB entera de la inscripción: nombre del alumno, del padre o la madre,
+correo, teléfono y el resto del formulario. La política
+`"Allow anonymous select history"` la dejaba con `USING (true)` para `anon`, y
+`20260810000000_grants_por_defecto.sql` concede `SELECT` a `anon` sobre todas
+las tablas de `public`.
+
+Cualquiera con la anon key —que es pública por diseño y viaja en el bundle de
+la web y en el HTML del proyecto de preinscripciones— podía leer el histórico
+completo con una petición a `/rest/v1/inscripcions_history`. Sin sesión.
+
+- **Cerrado** en `20260814100000_inscripcions_history_solo_admin.sql`: SELECT
+  solo para admin. El INSERT anónimo se mantiene, porque lo escribe el trigger
+  dentro de la transacción de la familia que envía la inscripción.
+- **Fijado** en [`scripts/check-rls.sql`](../scripts/check-rls.sql): el workflow
+  `Supabase` bloquea el merge si vuelve a aparecer una política de lectura
+  abierta a `anon` sobre una tabla con datos personales.
+- **Pendiente**: aplicar la migración a producción (Actions → Supabase → Run
+  workflow → `migraciones`). Hasta entonces la tabla sigue abierta en la base
+  real.
+
+Cómo se comprueba desde fuera, sin credenciales de admin:
+
+```bash
+curl -s "https://zaxbtnjkidqwzqsehvld.supabase.co/rest/v1/inscripcions_history?select=id&limit=1" \
+  -H "apikey: <anon key>" -H "Authorization: Bearer <anon key>"
+```
+
+Debe devolver `[]`, no filas.
+
+## 10. El aviso de cuota puede llevar meses sin llegar
+
+El cron de `usage-alert` (`20260417010000_usage_alert_cron.sql`) manda
+`Content-Type` y `x-alert-secret`, y **no manda `Authorization`**. Si la función
+se desplegó con `verify_jwt` activo, la plataforma la rechaza con 401 antes de
+llegar al código, y el aviso de que Supabase se acerca al límite gratuito no ha
+salido nunca.
+
+No se ha tocado porque no se puede verificar desde el repositorio. **Cómo
+comprobarlo**: Supabase → Edge Functions → `usage-alert` → Logs, filtrando por
+lunes a las 08:00 UTC. Si hay 401, la solución es la misma que lleva
+`activity-alert`: `verify_jwt = false` en `supabase/config.toml` y redesplegar.
+
+Es el caso de libro de una comprobación que ha dejado de comprobar: sigue
+apareciendo como monitorización montada y no vigila nada.
+
+## 11. La instantánea del esquema aún no está armada
+
+`.github/workflows/supabase.yml` vuelca el esquema que producen las migraciones
+y lo compara con `supabase/schema.snapshot.sql`. Ese fichero **todavía no
+existe**: no se puede generar sin Docker y sin levantar Supabase.
+
+Mientras falte, el paso avisa (`::warning::`) y no bloquea, así que **la red
+anti-deriva no está activa**. Para armarla, una sola vez:
+
+1. Actions → Supabase → Run workflow (o abrir cualquier PR que toque `supabase/`).
+2. Descargar el artefacto `esquema-construido`.
+3. Revisar el SQL y hacer commit como `supabase/schema.snapshot.sql`.
+
+A partir de ahí, cualquier cambio de esquema que no venga en una migración pone
+el job en rojo.
+
+## 12. Cinco pantallas hablan con Supabase sin pasar por `services/`
+
+`NotificationBell`, `FeaturedProjects`, `AcollidaPage`, `LoginPage` e
+`InscriptionPage` importan el cliente directamente. Consecuencia práctica: sus
+consultas no las cubre ningún test —los tests de servicio son los que verifican
+qué se manda a PostgREST— y un filtro olvidado devuelve filas de otras familias
+sin dar ningún error.
+
+Están inventariadas como excepciones **con motivo** en
+[`scripts/check-invariants.mjs`](../scripts/check-invariants.mjs), y el guardián
+impide que aparezcan más. **Criterio de cierre**: cuando las cinco tengan su
+servicio, borrar las entradas de la lista y esta sección.
+
+## 13. Cosas menores
 
 - `README.md` sigue siendo la plantilla de Vite: no explica variables de
   entorno, cómo levantar el proyecto ni cómo desplegar.

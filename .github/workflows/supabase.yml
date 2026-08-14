@@ -2,10 +2,10 @@ name: Supabase
 
 on:
   pull_request:
-    paths: ['supabase/**', 'scripts/check-migrations.mjs', '.github/workflows/supabase.yml']
+    paths: ['supabase/**', 'scripts/check-migrations.mjs', 'scripts/check-rls.sql', '.github/workflows/supabase.yml']
   push:
     branches: [main]
-    paths: ['supabase/**', 'scripts/check-migrations.mjs', '.github/workflows/supabase.yml']
+    paths: ['supabase/**', 'scripts/check-migrations.mjs', 'scripts/check-rls.sql', '.github/workflows/supabase.yml']
   workflow_dispatch:
     inputs:
       que_desplegar:
@@ -75,6 +75,52 @@ jobs:
       - name: Levantar Supabase local
         id: arrancar
         run: supabase start -x studio,imgproxy,logflare,vector,supavisor,mailpit
+
+      # Bloquea. Lo que comprueba (RLS y políticas reales) no se puede leer de
+      # las migraciones con expresiones regulares: hay políticas dentro de
+      # bloques comentados y migraciones que deshacen lo que hizo otra. Solo la
+      # base ya construida dice la verdad. Ver la cabecera del propio SQL.
+      - name: Permisos y RLS
+        if: steps.arrancar.outcome == 'success'
+        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -f scripts/check-rls.sql
+
+      # Red anti-deriva: el esquema que producen las migraciones tiene que ser
+      # idéntico al que hay commiteado. Si alguien toca la base a mano por el
+      # panel y luego escribe una migración que no hace lo mismo, aquí se ve.
+      - name: Volcar el esquema construido
+        if: steps.arrancar.outcome == 'success'
+        run: |
+          set -euo pipefail
+          supabase db dump --db-url "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -f esquema-construido.sql
+
+      - name: Comparar con la instantánea del repositorio
+        if: steps.arrancar.outcome == 'success'
+        run: |
+          set -euo pipefail
+          if [ ! -f supabase/schema.snapshot.sql ]; then
+            echo "::warning::No hay supabase/schema.snapshot.sql. Descarga el artefacto 'esquema-construido' de este run, revísalo y haz commit como supabase/schema.snapshot.sql para armar la comprobación de deriva."
+            echo "### Falta la instantánea del esquema" >> "$GITHUB_STEP_SUMMARY"
+            echo "Descarga el artefacto \`esquema-construido\` y haz commit del fichero como \`supabase/schema.snapshot.sql\`." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if ! diff -u supabase/schema.snapshot.sql esquema-construido.sql > deriva.diff; then
+            echo "::error::El esquema que producen las migraciones ya no coincide con supabase/schema.snapshot.sql"
+            head -100 deriva.diff
+            echo "Si el cambio es intencionado, actualiza la instantánea en el mismo PR que la migración."
+            exit 1
+          fi
+          echo "Esquema idéntico a la instantánea."
+
+      - name: Guardar el esquema construido
+        if: always() && steps.arrancar.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: esquema-construido
+          path: |
+            esquema-construido.sql
+            deriva.diff
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Avisos del linter de Postgres
         if: steps.arrancar.outcome == 'success'
