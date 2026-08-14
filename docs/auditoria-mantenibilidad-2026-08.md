@@ -171,3 +171,35 @@ Ordenados por impacto sobre la nota.
 La rúbrica está al máximo. Lo que queda en la tabla (3, 4, 5, 7) no puntúa,
 pero sí baja el riesgo: los E2E son lo más caro y lo más valioso de lo que
 falta.
+
+---
+
+## 7. Segunda pasada — 2026-08-14
+
+Se vuelve a auditar sin dar por buena la nota anterior: `npm run ci` verificado
+en local (0 errores de lint, 52 avisos, 249 tests en verde antes de esta
+sesión) y CI de `main` en verde. **La rúbrica sigue en 10/10**, así que esta
+pasada no va de puntuación, sino de lo que la rúbrica no mide.
+
+Lo que se encontró y qué se ha hecho:
+
+| Hallazgo | Estado |
+|---|---|
+| `inscripcions_history` legible por cualquiera con la anon key: copia JSONB de cada inscripción, con nombres, correos y teléfonos | Cerrado en `20260814100000`, **pendiente de aplicar a producción**. Ver [deuda-tecnica.md §9](./deuda-tecnica.md) |
+| Nadie se enteraba si la web dejaba de usarse: `usage-alert` vigila la cuota de Supabase, no el negocio | Nueva Edge Function `activity-alert` + cron diario: cinco días laborables sin señal de familias ni de la junta |
+| Las reglas de `architecture.md` no las comprobaba nada, y una ya estaba rota (cinco pantallas hablan con Supabase saltándose `services/`) | `scripts/check-invariants.mjs` con 6 invariantes, dentro de `npm run ci`. Las cinco pantallas quedan como excepciones documentadas, y no pueden aparecer más |
+| Sin `.env.example`: 18 variables leídas por el código y documentadas en ningún sitio | Creado, y el guardián exige que siga completo |
+| CI probaba que las migraciones levantan una base, pero nada comparaba el resultado con nada | Volcado + comparación contra `supabase/schema.snapshot.sql` en el workflow. **Falta generar la instantánea una vez** ([§11](./deuda-tecnica.md)) |
+| El cron de `usage-alert` no manda `Authorization`: si la función tiene `verify_jwt` activo, ese aviso no ha salido nunca | Anotado y explicado; no se toca sin ver los logs de producción ([§10](./deuda-tecnica.md)) |
+| Vercel construía también en commits de solo documentación, con el pipeline entero por delante | `ignoreCommand` en `vercel.json`, comprobado contra dos commits reales del histórico |
+
+Cada guarda se verificó rompiéndola a propósito: las seis invariantes dan rojo
+cuando toca y verde al deshacer el cambio.
+
+**Lo que sigue sin cubrir**, por orden de lo que más duele:
+
+1. Las Edge Functions no tienen tests (sí la lógica de `activity-alert`, que
+   por eso vive en `_shared/businessDays.ts`).
+2. La cobertura no mide `src/features/**`: la tienda y los formularios no
+   aparecen en el 32%.
+3. No hay E2E de los recorridos que escriben.

@@ -1,6 +1,7 @@
 {
   "installCommand": "npm install --include=dev",
   "buildCommand": "npm run ci",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- ':(exclude)docs' ':(exclude)e2e' ':(exclude).github' ':(exclude)*.md' ':(exclude)src/tests' || exit 1; exit 0",
   "rewrites": [
     {
       "source": "/storage/:path*",

@@ -69,6 +69,24 @@ El proyecto mantiene un ciclo de auditoría constante mediante:
   Actions → Supabase → Run workflow, porque no hay entorno de staging.
 - **Dependencias**: Dependabot semanal agrupado por familia
   (`.github/dependabot.yml`).
+- **Guardián de invariantes**: `scripts/check-invariants.mjs`, dentro de
+  `npm run ci`. Convierte en fallo de CI las reglas que ninguna herramienta
+  genérica conoce: la frontera del cliente de Supabase (solo `services/`), que
+  `.env.example` documente toda variable que el código lee, que no haya
+  credenciales versionadas, que solo se referencie un proyecto de Supabase, que
+  la versión de la CLI sea la misma en todos los workflows, y que el HTML crudo
+  solo se pinte donde se sanea. Las excepciones viven en el propio script **con
+  el motivo escrito**.
+- **Permisos reales**: `scripts/check-rls.sql`, ejecutado contra el Supabase
+  limpio del workflow `Supabase`. Exige RLS en toda tabla de `public` y ninguna
+  política de lectura abierta a `anon` sobre datos personales. Bloquea el merge.
+- **Deriva de esquema**: el mismo job vuelca el esquema que producen las
+  migraciones y lo compara con `supabase/schema.snapshot.sql`.
+- **Uso real del producto**: Edge Function `activity-alert` + cron diario. Avisa
+  si pasan cinco días **laborables** sin ninguna señal de vida (inscripciones,
+  pedidos, contactos, formularios, o actividad de la junta en el panel). Es la
+  única pieza que responde a "¿la gente puede trabajar?" en vez de "¿el
+  servidor contesta?".
 
 ### Comandos
 
@@ -79,6 +97,7 @@ npm test              # Vitest, una pasada
 npm run test:watch    # Vitest en modo watch
 npm run test:coverage # Vitest + informe de cobertura en coverage/
 npm run check:migrations # nombres de supabase/migrations
+npm run check:invariants # frontera Supabase, .env.example, secretos, refs, HTML crudo
 npm run e2e           # Playwright (necesita `supabase start` levantado)
 npm run ci            # todos los gates, igual que en GitHub Actions
 ```
