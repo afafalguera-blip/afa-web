@@ -17,6 +17,10 @@ on:
           - migraciones
           - funciones
           - migraciones-y-funciones
+      funcion:
+        description: 'Función a desplegar (vacío = todas). Desplegarlas todas reaplica la política verify_jwt de config.toml a funciones que quizá se subieron a mano con --no-verify-jwt.'
+        type: string
+        default: ''
 
 env:
   # No es un secreto: ya aparece en vercel.json y en las URLs públicas de storage.
@@ -176,6 +180,8 @@ jobs:
         if: contains(github.event.inputs.que_desplegar, 'migraciones')
         run: supabase db push
 
+      # Sin nombre despliega todas, que es lo que había antes. Con nombre, solo
+      # esa: subir una función nueva no tiene por qué tocar las seis.
       - name: Desplegar Edge Functions
         if: contains(github.event.inputs.que_desplegar, 'funciones')
-        run: supabase functions deploy --project-ref "$PROJECT_REF"
+        run: supabase functions deploy ${{ github.event.inputs.funcion }} --project-ref "$PROJECT_REF"
