@@ -238,23 +238,29 @@ jobs:
             (SELECT count(*) FROM cron.job WHERE jobname = 'weekly-usage-alert'  AND active) AS cron_usage;
           SQL
 
+          # En dos llamadas a propósito: pg_net no manda la petición hasta que la
+          # transacción hace commit, así que esperar dentro de la misma consulta
+          # devuelve siempre NULL y parece que ha fallado cuando no ha salido aún.
           echo "--- llamada real a activity-alert con el secreto de vault (manda un correo)"
-          consultar <<SQL
-          WITH peticion AS (
-            SELECT net.http_post(
-              url     := 'https://$PROJECT_REF.supabase.co/functions/v1/activity-alert?test=true',
-              headers := jsonb_build_object(
-                'Content-Type',   'application/json',
-                'x-alert-secret', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'usage_alert_secret' LIMIT 1)
-              ),
-              body    := '{}'::jsonb
-            ) AS id
-          ), espera AS (
-            SELECT id FROM peticion, pg_sleep(10)
+          id=$(consultar <<SQL | jq -r '.[0].id'
+          SELECT net.http_post(
+            url     := 'https://$PROJECT_REF.supabase.co/functions/v1/activity-alert?test=true',
+            headers := jsonb_build_object(
+              'Content-Type',   'application/json',
+              'x-alert-secret', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'usage_alert_secret' LIMIT 1)
+            ),
+            body    := '{}'::jsonb
+          ) AS id;
+          SQL
           )
-          SELECT r.status_code, left(r.content, 300) AS respuesta
-            FROM espera e
-            LEFT JOIN net._http_response r ON r.id = e.id;
+          echo "petición pg_net número $id"
+          sleep 15
+
+          echo "--- respuesta que recibió la base de datos"
+          consultar <<SQL
+          SELECT status_code, left(content, 300) AS respuesta
+            FROM net._http_response
+           WHERE id = $id;
           SQL
 
           echo "--- 200 = el aviso funciona de punta a punta. 401 = el valor de vault no coincide con USAGE_ALERT_SECRET."
