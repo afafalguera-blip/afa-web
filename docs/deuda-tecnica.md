@@ -267,9 +267,9 @@ completo con una petición a `/rest/v1/inscripcions_history`. Sin sesión.
 - **Fijado** en [`scripts/check-rls.sql`](../scripts/check-rls.sql): el workflow
   `Supabase` bloquea el merge si vuelve a aparecer una política de lectura
   abierta a `anon` sobre una tabla con datos personales.
-- **Pendiente**: aplicar la migración a producción (Actions → Supabase → Run
-  workflow → `migraciones`). Hasta entonces la tabla sigue abierta en la base
-  real.
+- **Aplicado a producción el 2026-08-14** y comprobado desde fuera con la anon
+  key: `activities` devuelve datos (la clave vale) e `inscripcions_history`
+  devuelve `[]`.
 
 Cómo se comprueba desde fuera, sin credenciales de admin:
 
@@ -293,24 +293,51 @@ comprobarlo**: Supabase → Edge Functions → `usage-alert` → Logs, filtrando
 lunes a las 08:00 UTC. Si hay 401, la solución es la misma que lleva
 `activity-alert`: `verify_jwt = false` en `supabase/config.toml` y redesplegar.
 
+Lo que sí está confirmado (2026-08-14, `supabase secrets list`): el secreto
+`USAGE_ALERT_SECRET` **existe** en las Edge Functions. Lo que falta por
+verificar es que el valor guardado en `vault` con el nombre `usage_alert_secret`
+—el que leen los dos crons— sea **el mismo**. Si no coincide, la cabecera
+`x-alert-secret` no cuadra y las dos funciones responden 401 sin avisar de
+nada. Se comprueba en el editor SQL de Supabase:
+
+```sql
+SELECT name FROM vault.decrypted_secrets WHERE name = 'usage_alert_secret';
+SELECT jobname, schedule, active FROM cron.job
+ WHERE jobname IN ('weekly-usage-alert', 'daily-activity-alert');
+```
+
+Y al día siguiente, en los logs de `activity-alert`: una línea `Activity OK` es
+que todo el circuito funciona; un 401 es que el valor no coincide.
+
 Es el caso de libro de una comprobación que ha dejado de comprobar: sigue
 apareciendo como monitorización montada y no vigila nada.
 
-## 11. La instantánea del esquema aún no está armada
+## 11. ~~La instantánea del esquema no estaba armada~~ — hecho el 2026-08-14
 
-`.github/workflows/supabase.yml` vuelca el esquema que producen las migraciones
-y lo compara con `supabase/schema.snapshot.sql`. Ese fichero **todavía no
-existe**: no se puede generar sin Docker y sin levantar Supabase.
+`supabase/schema.snapshot.sql` ya existe: lo generó el propio workflow (4.568
+líneas) aplicando las 56 migraciones sobre un Supabase limpio. El job compara
+el volcado con la instantánea en cada PR que toque `supabase/`, y desde el
+primer run devuelve "Esquema idéntico a la instantánea" — así que el volcado es
+determinista y la comparación no va a dar falsos positivos por ruido de orden.
 
-Mientras falte, el paso avisa (`::warning::`) y no bloquea, así que **la red
-anti-deriva no está activa**. Para armarla, una sola vez:
+Cuando un cambio de esquema sea intencionado, se actualiza la instantánea en el
+mismo PR que la migración. Si no, el job se pone en rojo.
 
-1. Actions → Supabase → Run workflow (o abrir cualquier PR que toque `supabase/`).
-2. Descargar el artefacto `esquema-construido`.
-3. Revisar el SQL y hacer commit como `supabase/schema.snapshot.sql`.
+## 11 bis. El despliegue de migraciones estaba bloqueado — resuelto el 2026-08-14
 
-A partir de ahí, cualquier cambio de esquema que no venga en una migración pone
-el job en rojo.
+Se descubrió al aplicar de verdad las primeras migraciones desde la CLI:
+`supabase db push` se negaba con *"Remote migration versions not found in local
+migrations directory"*. El historial remoto tenía 54 versiones creadas desde el
+panel que este repositorio no ha tenido nunca.
+
+El punto 7 daba por hecho que eran inofensivas porque "`db push` solo mira las
+locales que faltan". No es así: la CLI aborta. Es decir, el despliegue
+automatizado de esquema nunca había funcionado, y solo se supo al usarlo.
+
+Retiradas con `migration repair --status reverted` (solo toca la tabla de
+metadatos; ni una tabla, función o política cambió). La lista y el porqué están
+en [`supabase/legacy-remote-versions.txt`](../supabase/legacy-remote-versions.txt),
+y el paso vive en el workflow bajo la opción `reparar-historico`.
 
 ## 12. Cinco pantallas hablan con Supabase sin pasar por `services/`
 
