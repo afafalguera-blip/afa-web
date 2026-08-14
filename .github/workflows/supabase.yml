@@ -18,6 +18,7 @@ on:
           - funciones
           - migraciones-y-funciones
           - reparar-historico
+          - probar-avisos
       funcion:
         description: 'Función a desplegar (vacío = todas). Desplegarlas todas reaplica la política verify_jwt de config.toml a funciones que quizá se subieron a mano con --no-verify-jwt.'
         type: string
@@ -206,6 +207,58 @@ jobs:
 
       # Sin nombre despliega todas, que es lo que había antes. Con nombre, solo
       # esa: subir una función nueva no tiene por qué tocar las seis.
+      # Dispara la llamada EXACTAMENTE como la hace pg_cron: mismo secreto leído
+      # de vault, misma cabecera. Es la única forma de saber si el aviso llegará
+      # de verdad, porque el fallo típico no da error en ningún sitio: el valor
+      # guardado en vault y el secreto de la función no coinciden, la función
+      # responde 401 y el correo no sale nunca.
+      #
+      # Con ?test=true la función fuerza el camino del aviso, así que ESTO MANDA
+      # UN CORREO REAL a NOTIFICATION_EMAILS. No toca alert_state, así que no
+      # interfiere con el aviso de verdad.
+      - name: Probar los avisos de extremo a extremo
+        if: github.event.inputs.que_desplegar == 'probar-avisos'
+        run: |
+          set -euo pipefail
+
+          consultar() {
+            jq -Rs '{query: .}' > /tmp/payload.json
+            curl -sS -X POST "https://api.supabase.com/v1/projects/$PROJECT_REF/database/query" \
+              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary @/tmp/payload.json
+            echo
+          }
+
+          echo "--- ¿existe el secreto en vault y están los crons activos?"
+          consultar <<'SQL'
+          SELECT
+            (SELECT count(*) FROM vault.decrypted_secrets WHERE name = 'usage_alert_secret') AS secreto_en_vault,
+            (SELECT count(*) FROM cron.job WHERE jobname = 'daily-activity-alert' AND active) AS cron_activity,
+            (SELECT count(*) FROM cron.job WHERE jobname = 'weekly-usage-alert'  AND active) AS cron_usage;
+          SQL
+
+          echo "--- llamada real a activity-alert con el secreto de vault (manda un correo)"
+          consultar <<SQL
+          WITH peticion AS (
+            SELECT net.http_post(
+              url     := 'https://$PROJECT_REF.supabase.co/functions/v1/activity-alert?test=true',
+              headers := jsonb_build_object(
+                'Content-Type',   'application/json',
+                'x-alert-secret', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'usage_alert_secret' LIMIT 1)
+              ),
+              body    := '{}'::jsonb
+            ) AS id
+          ), espera AS (
+            SELECT id FROM peticion, pg_sleep(10)
+          )
+          SELECT r.status_code, left(r.content, 300) AS respuesta
+            FROM espera e
+            LEFT JOIN net._http_response r ON r.id = e.id;
+          SQL
+
+          echo "--- 200 = el aviso funciona de punta a punta. 401 = el valor de vault no coincide con USAGE_ALERT_SECRET."
+
       - name: Desplegar Edge Functions
         if: contains(github.event.inputs.que_desplegar, 'funciones')
         run: supabase functions deploy ${{ github.event.inputs.funcion }} --project-ref "$PROJECT_REF"
