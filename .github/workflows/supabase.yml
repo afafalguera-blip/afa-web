@@ -17,6 +17,7 @@ on:
           - migraciones
           - funciones
           - migraciones-y-funciones
+          - reparar-historico
       funcion:
         description: 'Función a desplegar (vacío = todas). Desplegarlas todas reaplica la política verify_jwt de config.toml a funciones que quizá se subieron a mano con --no-verify-jwt.'
         type: string
@@ -172,6 +173,22 @@ jobs:
       # migraciones tiene el repo y cuáles la base de datos remota.
       - name: Comparar migraciones locales y remotas
         run: supabase migration list --linked
+
+      # Retira del historial remoto las versiones que creó el panel y que este
+      # repositorio no ha tenido nunca. Sin esto, `db push` se niega a trabajar
+      # ("Remote migration versions not found in local migrations directory") y
+      # el despliegue de migraciones está bloqueado.
+      #
+      # Solo toca supabase_migrations.schema_migrations: no borra ni cambia
+      # ninguna tabla, función ni política. El motivo completo y la lista están
+      # en supabase/legacy-remote-versions.txt.
+      - name: Reparar histórico remoto
+        if: github.event.inputs.que_desplegar == 'reparar-historico'
+        run: |
+          set -euo pipefail
+          versiones=$(grep -vE '^\s*(#|$)' supabase/legacy-remote-versions.txt | tr '\n' ' ')
+          echo "Retirando $(echo $versiones | wc -w) versiones del historial remoto."
+          supabase migration repair --status reverted $versiones
 
       # Sin --include-all a propósito: ese flag reaplica migraciones anteriores
       # a la última remota, y el histórico tiene versiones de 8 dígitos que

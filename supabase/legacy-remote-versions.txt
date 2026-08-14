@@ -1,0 +1,79 @@
+# Versiones que constan aplicadas en producción y no existen en este repositorio.
+#
+# DE DÓNDE SALEN
+# Durante meses el esquema se construyó desde el panel de Supabase y desde la
+# Management API, no con la CLI. Cada uno de esos cambios dejó una fila en
+# supabase_migrations.schema_migrations con una versión que el repositorio no ha
+# tenido nunca. El 2026-08-11 se registraron además las 53 versiones del repo,
+# así que la tabla acabó con dos historiales disjuntos.
+#
+# POR QUÉ IMPORTA
+# `supabase db push` se niega a trabajar si el remoto tiene versiones que no
+# están en local: "Remote migration versions not found in local migrations
+# directory". Es decir, el despliegue de migraciones estaba bloqueado y no se
+# supo hasta que se intentó de verdad (2026-08-14).
+#
+# QUÉ SE HACE CON ELLAS
+# `supabase migration repair --status reverted` las quita del historial remoto.
+# Solo toca esa tabla de metadatos: no borra ni modifica ni una tabla, función o
+# política. El esquema que crearon sigue exactamente donde estaba, y ahora está
+# descrito por las migraciones del repositorio (ver 20240101000000_esquema_base.sql,
+# volcado de producción, y supabase/schema.snapshot.sql).
+#
+# Se ejecuta desde Actions → Supabase → Run workflow → `reparar-historico`.
+# Este fichero se conserva como registro de qué se retiró y por qué.
+
+20251210085016
+20251210085406
+20251210091446
+20260127225242
+20260127230005
+20260130122049
+20260130140001
+20260131094444
+20260131094755
+20260131095126
+20260131095431
+20260131100009
+20260201005634
+20260225100548
+20260225101240
+20260225102847
+20260225102849
+20260225102913
+20260225102914
+20260225102915
+20260225102928
+20260225103050
+20260225103115
+20260225103120
+20260225103122
+20260225103146
+20260225103156
+20260225103224
+20260225103248
+20260225103947
+20260225103949
+20260225105311
+20260225105320
+20260225132539
+20260225141213
+20260225141503
+20260226214030
+20260226220027
+20260303181011
+20260303181019
+20260303181026
+20260303181525
+20260303184319
+20260303220809
+20260303221023
+20260304090606
+20260315213915
+20260315214702
+20260323112401
+20260323141615
+20260326164152
+20260417121822
+20260417123100
+20260417124527
