@@ -293,21 +293,19 @@ comprobarlo**: Supabase → Edge Functions → `usage-alert` → Logs, filtrando
 lunes a las 08:00 UTC. Si hay 401, la solución es la misma que lleva
 `activity-alert`: `verify_jwt = false` en `supabase/config.toml` y redesplegar.
 
-Lo que sí está confirmado (2026-08-14, `supabase secrets list`): el secreto
-`USAGE_ALERT_SECRET` **existe** en las Edge Functions. Lo que falta por
-verificar es que el valor guardado en `vault` con el nombre `usage_alert_secret`
-—el que leen los dos crons— sea **el mismo**. Si no coincide, la cabecera
-`x-alert-secret` no cuadra y las dos funciones responden 401 sin avisar de
-nada. Se comprueba en el editor SQL de Supabase:
+**Descartada la duda del secreto** (2026-08-14): la prueba de extremo a extremo
+`probar-avisos` dispara la llamada igual que el cron, con el valor de `vault`, y
+`activity-alert` respondió **200**. Es decir, el secreto de `vault` y el
+`USAGE_ALERT_SECRET` de las Edge Functions **coinciden**, y ese no puede ser el
+motivo de que `usage-alert` no avise.
 
-```sql
-SELECT name FROM vault.decrypted_secrets WHERE name = 'usage_alert_secret';
-SELECT jobname, schedule, active FROM cron.job
- WHERE jobname IN ('weekly-usage-alert', 'daily-activity-alert');
-```
+Queda solo la hipótesis de `verify_jwt`: si esa función se subió con la
+verificación activa, la plataforma la rechaza antes de ejecutar una línea de
+código. Los logs de la función lo dirán.
 
-Y al día siguiente, en los logs de `activity-alert`: una línea `Activity OK` es
-que todo el circuito funciona; un 401 es que el valor no coincide.
+**Cómo probar cualquiera de los dos avisos cuando haga falta**: Actions →
+Supabase → Run workflow → `probar-avisos`. Manda un correo real y enseña el
+código HTTP que recibió la base de datos.
 
 Es el caso de libro de una comprobación que ha dejado de comprobar: sigue
 apareciendo como monitorización montada y no vigila nada.
