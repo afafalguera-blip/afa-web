@@ -14,10 +14,14 @@ import { ConfigService } from '../services/ConfigService';
 import { useToast } from '../components/common/Toast';
 import { useConfirm } from '../components/common/ConfirmDialog';
 import { STATUS_FILTER } from '../constants/status';
+import type { DuplicateMap } from '../logic/inscriptionDuplicates';
 import type { Inscription, InscriptionFilters, InscriptionStatus } from '../types/inscription';
 
 const DEFAULT_PAGE_SIZE = 25;
 const SEARCH_DEBOUNCE_MS = 350;
+
+/** Constante de módulo: un `{}` en línea cambiaría de identidad en cada render. */
+const NO_DUPLICATES: DuplicateMap = {};
 
 const EMPTY_FILTERS: InscriptionFilters = {
   course: '',
@@ -50,6 +54,12 @@ export interface UseInscriptionsReturn {
 
   /** Distinct activity labels of the cohort, for the activity dropdown. */
   activityOptions: string[];
+  /**
+   * Inscripciones repetidas del curso escolar entero, por id. Distingue el
+   * duplicado exacto (mismo formulario dos veces) de la misma familia con
+   * inscripciones distintas — que es lo que se confunde y se borra.
+   */
+  duplicates: DuplicateMap;
   /** Labels of the configurable custom questions, keyed by question key. */
   customLabels: Record<string, string>;
 
@@ -82,6 +92,8 @@ export function useInscriptions(): UseInscriptionsReturn {
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const [activityOptions, setActivityOptions] = useState<string[]>([]);
+  const [duplicates, setDuplicates] = useState<DuplicateMap>(NO_DUPLICATES);
+  const [cohortVersion, setCohortVersion] = useState(0);
   const [customLabels, setCustomLabels] = useState<Record<string, string>>({});
 
   // Resolve the cohort list once and default to the active season.
@@ -183,19 +195,27 @@ export function useInscriptions(): UseInscriptionsReturn {
     };
   }, [load]);
 
-  // Activity dropdown options depend only on the cohort.
+  // Las actividades del desplegable y la detección de repetidas salen del curso
+  // escolar entero, no de la página: dos envíos de la misma familia con días de
+  // diferencia caen en páginas distintas.
+  //
+  // `cohortVersion` lo bumpean las mutaciones. Sin eso, borrar una de dos filas
+  // repetidas dejaba a la otra marcada como repetida hasta recargar la página:
+  // el aviso más peligroso que puede haber es el que ya no es cierto.
   useEffect(() => {
     if (!cohortReady) return;
     let cancelled = false;
-    AdminInscriptionsService.getActivityOptions(academicYear || undefined)
-      .then((options) => {
-        if (!cancelled) setActivityOptions(options);
+    AdminInscriptionsService.getCohortIndex(academicYear || undefined)
+      .then((index) => {
+        if (cancelled) return;
+        setActivityOptions(index.activityOptions);
+        setDuplicates(index.duplicates);
       })
-      .catch((err) => console.error('Error loading activity options:', err));
+      .catch((err) => console.error('Error loading cohort index:', err));
     return () => {
       cancelled = true;
     };
-  }, [cohortReady, academicYear]);
+  }, [cohortReady, academicYear, cohortVersion]);
 
   const setFilter = useCallback(
     <K extends keyof InscriptionFilters>(key: K, value: InscriptionFilters[K]) => {
@@ -210,19 +230,55 @@ export function useInscriptions(): UseInscriptionsReturn {
 
   const removeInscription = useCallback(
     async (inscription: Inscription): Promise<boolean> => {
-      const childNames = inscription.students
-        .map((s) => `${s.name} ${s.surname}`.trim())
-        .filter(Boolean)
-        .join(', ');
-      const itemName = [inscription.parent_name, childNames].filter(Boolean).join(' — ');
+      // Qué se lleva por delante, criatura a criatura y con sus actividades:
+      // una fila es una FAMILIA entera, y el diálogo anterior solo decía
+      // "la inscripció", que es justo lo que hace pensar que sobra.
+      const childLines = inscription.students.map((student) => {
+        const name = `${student.name ?? ''} ${student.surname ?? ''}`.trim();
+        const activities = (student.activities ?? []).filter(Boolean).join(', ');
+        return activities ? `${name} (${activities})` : name;
+      });
+      const itemName =
+        [inscription.parent_name, childLines.join(' · ')].filter(Boolean).join(' — ') ||
+        `#${inscription.id}`;
+
+      // Con la clave ajena ON DELETE RESTRICT, borrar una inscripción con pagos
+      // falla en Postgres. Preguntarlo antes evita el error críptico y, sobre
+      // todo, dice qué hacer en su lugar.
+      let paymentCount = 0;
+      try {
+        paymentCount = await AdminInscriptionsService.countPaymentsFor(inscription.id);
+      } catch (err) {
+        // Que no se pueda contar no debe bloquear el borrado: si de verdad hay
+        // pagos, la clave ajena lo para igual y el catch de abajo lo explica.
+        console.error('Error counting payments for inscription:', err);
+      }
+
+      if (paymentCount > 0) {
+        // `n` y no `count`: con `count`, i18next intenta resolver la forma
+        // plural (`_one` / `_other`) y estas claves no la tienen.
+        toast.error(t('admin.inscriptions.delete_blocked_payments', { n: paymentCount }));
+        return false;
+      }
+
+      const duplicate = duplicates[inscription.id];
+      const warning =
+        duplicate?.kind === 'family'
+          ? t('admin.inscriptions.delete_warn_family')
+          : duplicate?.kind === 'exact'
+            ? t('admin.inscriptions.delete_warn_exact')
+            : '';
 
       const accepted = await confirm({
         title: t('admin.inscriptions.delete_title', 'Eliminar inscripció'),
-        message: t(
-          'admin.inscriptions.delete_confirm',
-          'Aquesta acció no es pot desfer. Segur que vols eliminar la inscripció?'
-        ),
-        itemName: itemName || `#${inscription.id}`,
+        message: [
+          t('admin.inscriptions.delete_confirm_children', { n: inscription.students.length }),
+          warning,
+          t('admin.inscriptions.delete_confirm_recover'),
+        ]
+          .filter(Boolean)
+          .join(' '),
+        itemName,
         confirmLabel: t('common.delete', 'Eliminar'),
         destructive: true,
       });
@@ -231,15 +287,25 @@ export function useInscriptions(): UseInscriptionsReturn {
       try {
         await AdminInscriptionsService.deleteInscription(inscription.id);
         toast.success(t('admin.inscriptions.delete_success', 'Inscripció eliminada'));
+        setCohortVersion((version) => version + 1);
         await load();
         return true;
       } catch (err) {
         console.error('Error deleting inscription:', err);
-        toast.error(t('admin.inscriptions.delete_error', 'Error en eliminar la inscripció'));
+        // 23503 = foreign_key_violation: hay pagos apuntando a esta inscripción.
+        // Debería haberlo cazado el recuento de arriba; esto es la red por si el
+        // recuento falló o alguien registró un pago mientras el diálogo estaba
+        // abierto.
+        const code = (err as { code?: string } | null)?.code;
+        toast.error(
+          code === '23503'
+            ? t('admin.inscriptions.delete_blocked_fk')
+            : t('admin.inscriptions.delete_error', 'Error en eliminar la inscripció')
+        );
         return false;
       }
     },
-    [confirm, load, t, toast]
+    [confirm, duplicates, load, t, toast]
   );
 
   const saveInscription = useCallback(
@@ -249,6 +315,8 @@ export function useInscriptions(): UseInscriptionsReturn {
         setInscriptions((prev) =>
           prev.map((item) => (item.id === id ? ({ ...item, ...updates } as Inscription) : item))
         );
+        // Editar criaturas o actividades puede crear o deshacer una repetición.
+        if (updates.students) setCohortVersion((version) => version + 1);
         toast.success(t('admin.inscriptions.update_success', 'Inscripció actualitzada'));
         return true;
       } catch (err) {
@@ -297,6 +365,7 @@ export function useInscriptions(): UseInscriptionsReturn {
     setAcademicYear,
     academicYears,
     activityOptions,
+    duplicates,
     customLabels,
     reload: load,
     removeInscription,

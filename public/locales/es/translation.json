@@ -727,7 +727,9 @@
       "back_home": "Volver al inicio",
       "error_terms": "Debes aceptar las condiciones para continuar.",
       "error_activities": "Todos los alumnos deben tener al menos una actividad seleccionada.",
-      "error_generic": "Ha habido un error al enviar el formulario."
+      "error_generic": "Ha habido un error al enviar el formulario.",
+      "error_duplicate": "Esta inscripción ya la tenemos registrada: los mismos niños con las mismas actividades. No hace falta volver a enviarla. Si quieres apuntar a otro niño o añadir una actividad, escríbenos.",
+      "error_rate_limit": "Has enviado el formulario varias veces seguidas. Espera un minuto y vuelve a intentarlo; si ya te ha llegado el correo de confirmación, la inscripción está hecha."
     },
     "activity_modal": {
       "grades": "Cursos",
@@ -985,7 +987,17 @@
       "status_error": "Error al actualizar el estado",
       "status_success": "Estado actualizado",
       "suspended_label": "Suspendido temporalmente",
-      "view_details": "Ver detalles"
+      "view_details": "Ver detalles",
+      "delete_confirm_children": "Se eliminará la inscripción entera de esta familia, con sus niños y niñas ({{n}}).",
+      "delete_confirm_recover": "No se puede deshacer desde el panel; queda una copia en el histórico durante 90 días.",
+      "delete_warn_family": "ATENCIÓN: esta familia tiene más inscripciones, pero con niños o actividades DISTINTAS. No es una repetición: si la eliminas, se pierde lo que solo está aquí.",
+      "delete_warn_exact": "Hay otra inscripción de esta familia con exactamente los mismos niños y las mismas actividades: sí parece el mismo formulario enviado dos veces.",
+      "delete_blocked_payments": "Esta inscripción tiene pagos asociados ({{n}}) y no se puede eliminar. Cámbiale el estado a Baja: así deja de contar y los pagos no se pierden.",
+      "delete_blocked_fk": "No se puede eliminar: hay pagos asociados a esta inscripción. Cámbiale el estado a Baja.",
+      "duplicate_exact": "Duplicado exacto",
+      "duplicate_exact_hint": "Hay otra inscripción con exactamente los mismos niños y las mismas actividades.",
+      "duplicate_family": "+{{n}} de la familia",
+      "duplicate_family_hint": "Esta familia tiene más inscripciones, pero con niños o actividades distintas. No elimines ninguna sin compararlas."
     },
     "payments": {
       "title": "Pagos",

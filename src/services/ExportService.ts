@@ -19,6 +19,16 @@ interface jsPDFExtended extends jsPDF {
   };
 }
 
+/**
+ * Filtros activos en el momento de exportar. Solo los que recortan a nivel de
+ * criatura: el resto (curso escolar, estado, búsqueda) ya vienen aplicados en
+ * las inscripciones que se pasan.
+ */
+export interface ExportScope {
+  activity?: string;
+  course?: string;
+}
+
 interface FlattenedInscriptionRow {
   name: string;
   surname: string;
@@ -53,8 +63,19 @@ export const ExportService = {
   /**
    * One row per child (and, in `basic` mode, per child × activity so the
    * attendance lists can be grouped by activity).
+   *
+   * `scope` son los filtros que el admin tenía puestos al exportar. Hace falta
+   * porque el filtrado previo es a nivel de FAMILIA: `filterInscriptionList`
+   * deja pasar la inscripción entera si CUALQUIERA de sus criaturas encaja. Sin
+   * recortar aquí, la «Llista de grups» de Patinatge salía con los hermanos que
+   * hacen anglès y con las demás actividades de cada criatura — una lista de
+   * clase con niños que no van a esa clase.
    */
-  getFlattenedData(inscriptions: Inscription[], fields: 'basic' | 'full'): FlattenedInscriptionRow[] {
+  getFlattenedData(
+    inscriptions: Inscription[],
+    fields: 'basic' | 'full',
+    scope: ExportScope = {}
+  ): FlattenedInscriptionRow[] {
     const rows: FlattenedInscriptionRow[] = [];
     const shouldSort = fields === 'basic';
 
@@ -76,7 +97,14 @@ export const ExportService = {
       };
 
       toFlat([ins]).forEach((student) => {
-        const activities = student.activities || [];
+        if (scope.course && student.course !== scope.course) return;
+
+        const allActivities = student.activities || [];
+        // Con filtro de actividad, la criatura solo entra si la hace, y solo
+        // con esa: es lo que el filtro dice y lo que la lista de clase necesita.
+        if (scope.activity && !allActivities.includes(scope.activity)) return;
+        const activities = scope.activity ? [scope.activity] : allActivities;
+
         const base = {
           name: student.name,
           surname: student.surname,
@@ -129,9 +157,10 @@ export const ExportService = {
   exportInscriptionsExcel(
     inscriptions: Inscription[],
     fields: 'basic' | 'full' = 'full',
-    filename: string = 'inscripcions'
+    filename: string = 'inscripcions',
+    scope: ExportScope = {}
   ) {
-    const rows = this.getFlattenedData(inscriptions, fields);
+    const rows = this.getFlattenedData(inscriptions, fields, scope);
 
     let exportData: Record<string, string | number | boolean>[] = [];
 
@@ -174,9 +203,14 @@ export const ExportService = {
     XLSX.writeFile(workbook, `${filename}_${fields}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
   },
 
-  exportInscriptionsPDF(inscriptions: Inscription[], fields: 'basic' | 'full' = 'full', filename: string = 'inscripcions') {
+  exportInscriptionsPDF(
+    inscriptions: Inscription[],
+    fields: 'basic' | 'full' = 'full',
+    filename: string = 'inscripcions',
+    scope: ExportScope = {}
+  ) {
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
-    const rows = this.getFlattenedData(inscriptions, fields); // Explode by activity if list mode
+    const rows = this.getFlattenedData(inscriptions, fields, scope); // Explode by activity if list mode
 
     const pageWidth = doc.internal.pageSize.getWidth();
 

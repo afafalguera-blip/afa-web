@@ -94,9 +94,12 @@ export function InscriptionsFilters({
         aria-label={t('admin.inscriptions.filter_status', 'Estat')}
         className={controlClass}
       >
+        {/* Solo 'alta' y 'baja': son los únicos valores que acepta
+            `inscripcions_status_check`. «Pendent» se filtraba contra Postgres
+            con .eq('status','pending') y devolvía siempre cero filas — un
+            filtro que parecía decir «no hay ninguna pendiente». */}
         <option value={STATUS_FILTER.ALL}>{t('admin.inscriptions.status_all', 'Tots els estats')}</option>
         <option value="alta">{t('admin.inscriptions.status.alta', 'Alta')}</option>
-        <option value="pending">{t('admin.inscriptions.status.pending', 'Pendent')}</option>
         <option value="baja">{t('admin.inscriptions.status.baja', 'Baixa')}</option>
       </select>
 

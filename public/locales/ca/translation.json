@@ -727,7 +727,9 @@
       "back_home": "Tornar a l'inici",
       "error_terms": "Has d'acceptar les condicions per continuar.",
       "error_activities": "Tots els alumnes han de tenir almenys una activitat seleccionada.",
-      "error_generic": "Hi ha hagut un error en enviar el formulari."
+      "error_generic": "Hi ha hagut un error en enviar el formulari.",
+      "error_duplicate": "Aquesta inscripció ja la tenim registrada: les mateixes criatures amb les mateixes activitats. No cal tornar-la a enviar. Si vols apuntar una altra criatura o afegir una activitat, escriu-nos.",
+      "error_rate_limit": "Has enviat el formulari diverses vegades seguides. Espera un minut i torna-ho a provar; si ja t'ha arribat el correu de confirmació, la inscripció ja està feta."
     },
     "activity_modal": {
       "grades": "Cursos",
@@ -985,7 +987,17 @@
       "status_error": "Error en actualitzar l'estat",
       "status_success": "Estat actualitzat",
       "suspended_label": "Suspès temporalment",
-      "view_details": "Veure detalls"
+      "view_details": "Veure detalls",
+      "delete_confirm_children": "S'eliminarà la inscripció sencera d'aquesta família, amb les seves criatures ({{n}}).",
+      "delete_confirm_recover": "No es pot desfer des del panell; en queda una còpia a l'històric durant 90 dies.",
+      "delete_warn_family": "ATENCIÓ: aquesta família té més inscripcions, però amb criatures o activitats DIFERENTS. No és una repetició: si l'elimines, es perd el que només hi ha aquí.",
+      "delete_warn_exact": "Hi ha una altra inscripció d'aquesta família amb exactament les mateixes criatures i activitats: sí que sembla el mateix formulari enviat dues vegades.",
+      "delete_blocked_payments": "Aquesta inscripció té pagaments associats ({{n}}) i no es pot eliminar. Canvia-li l'estat a Baixa: així deixa de comptar i els pagaments no es perden.",
+      "delete_blocked_fk": "No es pot eliminar: hi ha pagaments associats a aquesta inscripció. Canvia-li l'estat a Baixa.",
+      "duplicate_exact": "Duplicat exacte",
+      "duplicate_exact_hint": "Hi ha una altra inscripció amb exactament les mateixes criatures i activitats.",
+      "duplicate_family": "+{{n}} de la família",
+      "duplicate_family_hint": "Aquesta família té més inscripcions, però amb criatures o activitats diferents. No eliminis cap sense comparar-les."
     },
     "payments": {
       "title": "Pagaments",

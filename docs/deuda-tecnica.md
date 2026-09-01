@@ -358,3 +358,60 @@ servicio, borrar las entradas de la lista y esta sección.
   Vercel. Confunden sobre cuál es el deploy real.
 - No hay entorno de staging: se trabaja siempre contra el proyecto Supabase de
   producción. Por eso el job `desplegar` de `supabase.yml` es manual.
+
+## 14. Borrar una inscripción era demasiado fácil y demasiado definitivo — resuelto el 2026-09-01
+
+Se borró una inscripción del panel creyendo que estaba repetida. Se recuperó de
+`audit_logs`, pero la revisión del proceso completo (formulario público →
+listado → borrado → pagos) sacó seis cosas encadenadas:
+
+1. **Una fila es una FAMILIA, no una criatura.** El listado enseña padre/madre,
+   DNI, correo y teléfono en grande y las criaturas en 13px. Dos envíos de la
+   misma familia se ven idénticos aunque tengan hijos distintos, y la única
+   diferencia real queda en la columna que menos se mira.
+2. **Nada impedía ni señalaba las repeticiones.** El formulario hacía un INSERT
+   pelado; una familia que no ve el correo de confirmación reenvía y crea una
+   segunda fila. El panel no las marcaba.
+3. **`payments.inscripcion_id` no tenía clave ajena.** Borrar una inscripción
+   dejaba sus pagos apuntando a un id inexistente, sin avisar.
+4. **`remove_baja_payments_for_month` casaba por correo** cuando el pago no
+   tenía `inscripcion_id`: una familia con una inscripción de baja y otra de
+   alta con el mismo correo perdía también los pagos de la activa.
+5. **El filtro y el selector de estado ofrecían «Pendent»**, que
+   `inscripcions_status_check` no acepta: filtrar devolvía siempre cero filas y
+   guardar reventaba contra la restricción.
+6. **La exportación filtrada por actividad arrastraba de más.** El filtro previo
+   es por familia (`filterInscriptionList` deja pasar la inscripción si
+   *cualquiera* de sus criaturas encaja), así que la «Llista de grups» de una
+   actividad salía con hermanos que no la hacen.
+
+Y la red de seguridad es invisible a un `grep`: `trg_audit_inscripcions`, que es
+lo único que permite recuperar un borrado, sí está versionado, pero lo crea
+`20260801140000_audit_logs_definition.sql` dentro de un `FOREACH` con el nombre
+montado por concatenación (`'trg_audit_' || v_table`). El literal no aparece en
+ningún fichero, así que buscarlo da cero y la conclusión natural —falsa— es que
+se creó a mano y que un `db reset` lo perdería. Costó un rato de más durante
+esta misma revisión. `inscripcions_history`, que parece el sitio donde mirar, sí
+está vacía de verdad: solo la escriben dos RPC que el frontend no llama.
+
+**Qué se hizo**: [`20260901120000_inscripcions_integritat.sql`](../supabase/migrations/20260901120000_inscripcions_integritat.sql)
+(freno al duplicado exacto con SQLSTATE P0409,
+clave ajena `ON DELETE RESTRICT` en `payments`, arreglo del borrado por correo,
+`create_inscripcions_backup()` fuera del alcance de `anon`),
+[`src/logic/inscriptionDuplicates.ts`](../src/logic/inscriptionDuplicates.ts)
+(distingue «el mismo formulario dos veces» de «la misma familia con otra
+criatura», que es toda la decisión) y
+[`scripts/recuperar-inscripcio-esborrada.sql`](../scripts/recuperar-inscripcio-esborrada.sql).
+
+**Lo que queda abierto**:
+
+- La clave ajena entró `NOT VALID`: puede haber pagos huérfanos de borrados
+  anteriores. El bloque 4 del script los lista; cuando devuelva cero filas, toca
+  `VALIDATE CONSTRAINT` en una migración nueva.
+- `audit_logs` se purga a los 90 días. Pasado ese plazo, un borrado no se
+  recupera. Si algún día importa conservarlos más, hay que decidirlo antes, no
+  después.
+- `InscriptionStatus` en TypeScript sigue admitiendo `active`, `pending` y
+  `suspended`, que la base no guarda. Los desplegables ya no los ofrecen, pero
+  el tipo miente. **Criterio de cierre**: reducirlo a `'alta' | 'baja'` y
+  arreglar lo que se rompa.

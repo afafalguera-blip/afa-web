@@ -275,6 +275,39 @@ $$;
 ALTER FUNCTION "public"."check_form_submission_rate_limit"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."check_inscripcio_duplicada"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_existent uuid;
+BEGIN
+  SELECT id INTO v_existent
+    FROM public.inscripcions
+   WHERE academic_year IS NOT DISTINCT FROM NEW.academic_year
+     AND lower(btrim(coalesce(parent_email_1, ''))) = lower(btrim(coalesce(NEW.parent_email_1, '')))
+     AND students = NEW.students
+   LIMIT 1;
+
+  IF v_existent IS NOT NULL THEN
+    -- P0409: lo mapea el formulario público para decirle a la familia que ya
+    -- la tenemos apuntada, en vez de soltarle el error de Postgres.
+    RAISE EXCEPTION 'Inscripció duplicada: ja existeix la inscripció % amb les mateixes dades', v_existent
+      USING ERRCODE = 'P0409';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."check_inscripcio_duplicada"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."check_inscripcio_duplicada"() IS 'BEFORE INSERT en inscripcions: rechaza la repetición exacta (mismo curso escolar, mismo correo y mismo students). No toca los duplicados legítimos de una familia con varias criaturas. Lanza SQLSTATE P0409.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."check_inscripcio_rate_limit"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -361,6 +394,10 @@ $$;
 
 
 ALTER FUNCTION "public"."create_inscripcions_backup"() OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."create_inscripcions_backup"() IS 'MUERTA: no la llama ni el frontend ni ningún cron. Solo service_role. Crearía una copia de todas las inscripciones SIN RLS. Ver el bloque 5 de 20260901120000_inscripcions_integritat.sql.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."create_shop_complex_order_v1"("p_customer_name" "text", "p_customer_email" "text", "p_customer_phone" "text", "p_total_amount" numeric, "p_items" "jsonb", "p_user_id" "uuid" DEFAULT NULL::"uuid", "p_language" "text" DEFAULT 'ca'::"text", "p_is_member" boolean DEFAULT false) RETURNS "uuid"
@@ -1340,9 +1377,21 @@ CREATE OR REPLACE FUNCTION "public"."remove_baja_payments_for_month"("p_month" i
 declare v_removed int := 0;
 begin
   with bajas as (
-    select id, lower(coalesce(parent_email_1,'')) e1, lower(coalesce(parent_email_2,'')) e2
+    select id,
+           lower(btrim(coalesce(parent_email_1, ''))) e1,
+           lower(btrim(coalesce(parent_email_2, ''))) e2
     from inscripcions
-    where coalesce(status,'pendiente') = 'baja'
+    where coalesce(status, 'alta') = 'baja'
+  ),
+  -- Correos que además aparecen en alguna inscripción que sigue de alta. Un
+  -- pago sin inscripcion_id con uno de estos correos es ambiguo: puede ser del
+  -- hermano que no se ha dado de baja.
+  correus_actius as (
+    select lower(btrim(coalesce(parent_email_1, ''))) e
+      from inscripcions where coalesce(status, 'alta') <> 'baja'
+    union
+    select lower(btrim(coalesce(parent_email_2, ''))) e
+      from inscripcions where coalesce(status, 'alta') <> 'baja'
   ),
   del as (
     delete from payments p
@@ -1351,18 +1400,24 @@ begin
       and p.payment_year  = p_year
       and (
             (p.inscripcion_id is not null and p.inscripcion_id = b.id)
-         or (p.inscripcion_id is null and lower(coalesce(p.parent_email,'')) in (b.e1, b.e2))
+         or (p.inscripcion_id is null
+             and lower(btrim(coalesce(p.parent_email, ''))) in (b.e1, b.e2)
+             and lower(btrim(coalesce(p.parent_email, ''))) not in (select e from correus_actius))
       )
     returning 1
   )
   select count(*) into v_removed from del;
 
-  return query select coalesce(v_removed,0);
+  return query select coalesce(v_removed, 0);
 end;
 $$;
 
 
 ALTER FUNCTION "public"."remove_baja_payments_for_month"("p_month" integer, "p_year" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."remove_baja_payments_for_month"("p_month" integer, "p_year" integer) IS 'Borra los pagos del mes de las familias de baja. El atajo por correo (pagos sin inscripcion_id) se salta los correos que también tiene alguna inscripción de alta, para no llevarse los pagos del hermano que sigue apuntado.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."rollover_acollida_payments"("p_from_month" integer, "p_from_year" integer, "p_to_month" integer, "p_to_year" integer) RETURNS TABLE("success" boolean, "message" "text", "payments_generated" integer)
@@ -2069,6 +2124,10 @@ CREATE TABLE IF NOT EXISTS "public"."inscripcions" (
 ALTER TABLE "public"."inscripcions" OWNER TO "postgres";
 
 
+COMMENT ON TABLE "public"."inscripcions" IS 'Una fila = UNA FAMILIA con 1..3 criaturas dentro de `students` (JSONB), no una criatura. Borrar la fila se lleva a todas sus criaturas por delante; para retirar a una familia usa status = ''baja''. El borrado queda copiado en audit_logs.old_data 90 días (trigger trg_audit_inscripcions).';
+
+
+
 COMMENT ON COLUMN "public"."inscripcions"."academic_year" IS 'Course cohort, e.g. 2026-27. Stamped from site_config.season on insert.';
 
 
@@ -2090,6 +2149,10 @@ CREATE TABLE IF NOT EXISTS "public"."inscripcions_history" (
 
 
 ALTER TABLE "public"."inscripcions_history" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."inscripcions_history" IS 'NO es la traza de cambios: solo la escriben las RPC dar_de_alta_inscripcion / dar_de_baja_inscripcion, que el frontend nunca llama. Para recuperar una inscripción borrada o ver quién la cambió, mira audit_logs (table_name = ''inscripcions'').';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."menjador_menus" (
@@ -3041,6 +3104,10 @@ CREATE OR REPLACE TRIGGER "trg_inscripcio_academic_year" BEFORE INSERT ON "publi
 
 
 
+CREATE OR REPLACE TRIGGER "trg_inscripcio_duplicada" BEFORE INSERT ON "public"."inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."check_inscripcio_duplicada"();
+
+
+
 CREATE OR REPLACE TRIGGER "trg_inscripcio_rate_limit" BEFORE INSERT ON "public"."inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."check_inscripcio_rate_limit"();
 
 
@@ -3139,6 +3206,15 @@ ALTER TABLE ONLY "public"."news"
 
 ALTER TABLE ONLY "public"."payment_history"
     ADD CONSTRAINT "payment_history_payment_id_fkey" FOREIGN KEY ("payment_id") REFERENCES "public"."payments"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."payments"
+    ADD CONSTRAINT "payments_inscripcion_id_fkey" FOREIGN KEY ("inscripcion_id") REFERENCES "public"."inscripcions"("id") ON DELETE RESTRICT NOT VALID;
+
+
+
+COMMENT ON CONSTRAINT "payments_inscripcion_id_fkey" ON "public"."payments" IS 'RESTRICT: una inscripción con pagos no se borra, se da de baja. NOT VALID mientras queden huérfanos de borrados anteriores a 2026-09-01.';
 
 
 
@@ -3952,6 +4028,12 @@ GRANT ALL ON FUNCTION "public"."check_form_submission_rate_limit"() TO "service_
 
 
 
+GRANT ALL ON FUNCTION "public"."check_inscripcio_duplicada"() TO "anon";
+GRANT ALL ON FUNCTION "public"."check_inscripcio_duplicada"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_inscripcio_duplicada"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."check_inscripcio_rate_limit"() TO "anon";
 GRANT ALL ON FUNCTION "public"."check_inscripcio_rate_limit"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."check_inscripcio_rate_limit"() TO "service_role";
@@ -3964,8 +4046,7 @@ GRANT ALL ON FUNCTION "public"."client_errors_resumen"("p_dias" integer) TO "ser
 
 
 
-GRANT ALL ON FUNCTION "public"."create_inscripcions_backup"() TO "anon";
-GRANT ALL ON FUNCTION "public"."create_inscripcions_backup"() TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."create_inscripcions_backup"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."create_inscripcions_backup"() TO "service_role";
 
 
