@@ -286,7 +286,7 @@ BEGIN
     FROM public.inscripcions
    WHERE academic_year IS NOT DISTINCT FROM NEW.academic_year
      AND lower(btrim(coalesce(parent_email_1, ''))) = lower(btrim(coalesce(NEW.parent_email_1, '')))
-     AND students = NEW.students
+     AND public.inscripcio_signatura(students) = public.inscripcio_signatura(NEW.students)
    LIMIT 1;
 
   IF v_existent IS NOT NULL THEN
@@ -304,7 +304,7 @@ $$;
 ALTER FUNCTION "public"."check_inscripcio_duplicada"() OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."check_inscripcio_duplicada"() IS 'BEFORE INSERT en inscripcions: rechaza la repetición exacta (mismo curso escolar, mismo correo y mismo students). No toca los duplicados legítimos de una familia con varias criaturas. Lanza SQLSTATE P0409.';
+COMMENT ON FUNCTION "public"."check_inscripcio_duplicada"() IS 'BEFORE INSERT en inscripcions: rechaza la repetición del mismo formulario (mismo curso escolar, mismo correo y misma huella de criaturas, ver inscripcio_signatura). No toca los duplicados legítimos de una familia con varias criaturas. Lanza SQLSTATE P0409.';
 
 
 
@@ -1144,6 +1144,39 @@ $$;
 
 
 ALTER FUNCTION "public"."increment_clicks"("p_slug" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."inscripcio_signatura"("p_students" "jsonb") RETURNS "text"
+    LANGUAGE "sql" IMMUTABLE
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+  SELECT coalesce(string_agg(fila, '||' ORDER BY fila), '')
+    FROM (
+      SELECT regexp_replace(
+               btrim(lower(coalesce(s ->> 'name', '')) || ' ' || lower(coalesce(s ->> 'surname', ''))),
+               '\s+', ' ', 'g')
+             || '#' || btrim(lower(coalesce(s ->> 'course', '')))
+             || '#' || coalesce(
+                  (SELECT string_agg(act, '|' ORDER BY act)
+                     FROM (SELECT btrim(lower(value)) AS act
+                             FROM jsonb_array_elements_text(
+                                    CASE WHEN jsonb_typeof(s -> 'activities') = 'array'
+                                         THEN s -> 'activities'
+                                         ELSE '[]'::jsonb END)) a
+                    WHERE act <> ''),
+                  '')
+             AS fila
+        FROM jsonb_array_elements(
+               CASE WHEN jsonb_typeof(p_students) = 'array' THEN p_students ELSE '[]'::jsonb END) s
+    ) files;
+$$;
+
+
+ALTER FUNCTION "public"."inscripcio_signatura"("p_students" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."inscripcio_signatura"("p_students" "jsonb") IS 'Huella normalizada de las criaturas de una inscripción (minúsculas, sin espacios de sobra, actividades y criaturas ordenadas). GEMELA de studentsSignature() en src/logic/inscriptionDuplicates.ts: si se toca una, se toca la otra.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."is_activity_excluded"("p_activity" "text") RETURNS boolean
@@ -4195,6 +4228,12 @@ GRANT ALL ON FUNCTION "public"."hash_password"("password" "text") TO "service_ro
 GRANT ALL ON FUNCTION "public"."increment_clicks"("p_slug" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."increment_clicks"("p_slug" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."increment_clicks"("p_slug" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."inscripcio_signatura"("p_students" "jsonb") TO "anon";
+GRANT ALL ON FUNCTION "public"."inscripcio_signatura"("p_students" "jsonb") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."inscripcio_signatura"("p_students" "jsonb") TO "service_role";
 
 
 

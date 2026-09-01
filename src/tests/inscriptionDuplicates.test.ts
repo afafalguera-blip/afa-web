@@ -44,6 +44,32 @@ describe('studentsSignature', () => {
     );
   });
 
+  it('caso real: un espacio al final del nombre no crea una inscripción distinta', () => {
+    // Familia Peña Basciani, curso 2026-27. Envió el mismo formulario tres
+    // veces (17 jul, 28 ago 15:46, 28 ago 15:50) para la misma criatura. Las
+    // dos del 28 de agosto solo se diferenciaban en estos espacios finales, y
+    // por eso el freno de la base —que comparaba el JSONB crudo— no habría
+    // parado la tercera. Ver 20260901190000_inscripcio_signatura.sql.
+    const conEspacios = studentsSignature([
+      {
+        name: 'Gianluca Matteo ',
+        surname: 'Pironi Peña ',
+        course: 'I5',
+        activities: ['Multi-esport (Ed. infantil)'],
+      },
+    ]);
+    const sinEspacios = studentsSignature([
+      {
+        name: 'Gianluca Matteo',
+        surname: 'Pironi Peña',
+        course: 'I5',
+        activities: ['Multi-esport (Ed. infantil)'],
+      },
+    ]);
+
+    expect(conEspacios).toBe(sinEspacios);
+  });
+
   it('una actividad de más sí cambia la huella', () => {
     expect(studentsSignature([student({ activities: ['Anglès'] })])).not.toBe(
       studentsSignature([student({ activities: ['Anglès', 'Futbol'] })])
