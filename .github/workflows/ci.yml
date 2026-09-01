@@ -36,6 +36,21 @@ jobs:
       - name: Tests
         run: npm run test:coverage
 
+      # Estos dos existían desde el 2026-08-14 y NO los ejecutaba ningún
+      # workflow: estaban solo en el script `ci` de package.json, o sea, solo
+      # corrían si alguien se acordaba de lanzarlos en local. Un guardián que
+      # nadie ejecuta no guarda nada.
+      #
+      # `check:invariants` es el que impide que se cuele un token sbp_ o una
+      # clave service_role en un commit, entre otras cinco cosas.
+      # `i18n:audit` casca cuando el código usa una clave que no está en los
+      # tres idiomas: sin él, la pantalla enseña la clave cruda en producción.
+      - name: Invariantes del repositorio
+        run: npm run check:invariants
+
+      - name: Paridad de traducciones
+        run: npm run i18n:audit
+
       # Vite inyecta estas variables en tiempo de build. En CI solo se comprueba
       # que el bundle compila, así que valen valores falsos: el artefacto no se
       # despliega (de eso se encarga Vercel con sus propios secrets).
