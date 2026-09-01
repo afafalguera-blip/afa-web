@@ -59,7 +59,17 @@ const contactKeys = (inscription: Inscription): string[] => {
  * huella piden exactamente lo mismo.
  *
  * Ordena criaturas y actividades: que la familia teclee a los hermanos en otro
- * orden no las convierte en inscripciones distintas.
+ * orden no las convierte en inscripciones distintas. Y normaliza espacios y
+ * mayúsculas, que es lo que distingue este caso de una comparación literal:
+ * en producción hay dos envíos de la misma familia que solo se diferencian en
+ * un espacio al final del nombre.
+ *
+ * GEMELA de `public.inscripcio_signatura(jsonb)`, en
+ * supabase/migrations/20260901190000_inscripcio_signatura.sql. Las dos tienen
+ * que dar lo mismo para los mismos datos: esta decide qué etiqueta se pinta en
+ * el panel, la de la base decide qué envío se rechaza. Que discrepen
+ * significaría avisar de algo que no se frena, o al revés. Si se toca una, se
+ * toca la otra.
  */
 export function studentsSignature(students: InscriptionStudent[]): string {
   return students
