@@ -11,17 +11,26 @@
 -- supabase/schema.snapshot.sql). No borra ni modifica ninguna fila.
 
 -- ---------------------------------------------------------------------------
--- 1. La única copia de una inscripción borrada, versionada
+-- 1. Qué es una fila de `inscripcions`, y dónde está la copia de un borrado
 --
--- QUÉ PASABA: `trg_audit_inscripcions` existía en producción pero no en
--- ninguna migración — se creó a mano. Es lo que vuelca la fila entera a
--- `audit_logs.old_data` al borrarla, y por tanto lo único que permite
--- recuperarla (ver scripts/recuperar-inscripcio-esborrada.sql). Un
--- `supabase db reset`, o levantar el entorno de CI desde las migraciones,
--- reconstruía la base SIN el trigger: el borrado dejaba de tener vuelta atrás
--- y nadie se enteraba hasta necesitarlo.
+-- `trg_audit_inscripcions` es lo que vuelca la fila entera a
+-- `audit_logs.old_data` antes de que desaparezca, y por tanto lo único que
+-- permite recuperar un borrado (ver scripts/recuperar-inscripcio-esborrada.sql).
 --
--- `handle_audit_log()` la define 20260801140000_audit_logs_definition.sql.
+-- SÍ está versionado, pero no se puede encontrar buscándolo: lo crea
+-- 20260801140000_audit_logs_definition.sql dentro de un FOREACH sobre una lista
+-- de tablas, con el nombre montado por concatenación (`'trg_audit_' ||
+-- v_table`). El literal `trg_audit_inscripcions` no aparece en ningún fichero
+-- del repositorio, así que un `grep` da cero y la conclusión natural es que el
+-- trigger se creó a mano en el panel y que un `db reset` lo perdería. Es falso,
+-- y comprobarlo cuesta un rato.
+--
+-- Este CREATE OR REPLACE es idempotente y no cambia el esquema (la instantánea
+-- lo confirma: no aparece en el diff). Se queda solo para que el nombre exista
+-- como texto en el repositorio y la próxima búsqueda lo encuentre.
+--
+-- El COMMENT de abajo es lo que de verdad faltaba: nada decía que una fila es
+-- una familia entera.
 -- ---------------------------------------------------------------------------
 
 CREATE OR REPLACE TRIGGER "trg_audit_inscripcions"

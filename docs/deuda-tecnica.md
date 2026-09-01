@@ -385,13 +385,17 @@ listado → borrado → pagos) sacó seis cosas encadenadas:
    *cualquiera* de sus criaturas encaja), así que la «Llista de grups» de una
    actividad salía con hermanos que no la hacen.
 
-Y la red de seguridad no estaba versionada: `trg_audit_inscripcions`, que es lo
-único que permite recuperar un borrado, existía solo en producción — creado a
-mano, fuera de las migraciones. `inscripcions_history`, que parece el sitio
-donde mirar, está vacía: solo la escriben dos RPC que el frontend no llama.
+Y la red de seguridad es invisible a un `grep`: `trg_audit_inscripcions`, que es
+lo único que permite recuperar un borrado, sí está versionado, pero lo crea
+`20260801140000_audit_logs_definition.sql` dentro de un `FOREACH` con el nombre
+montado por concatenación (`'trg_audit_' || v_table`). El literal no aparece en
+ningún fichero, así que buscarlo da cero y la conclusión natural —falsa— es que
+se creó a mano y que un `db reset` lo perdería. Costó un rato de más durante
+esta misma revisión. `inscripcions_history`, que parece el sitio donde mirar, sí
+está vacía de verdad: solo la escriben dos RPC que el frontend no llama.
 
 **Qué se hizo**: [`20260901120000_inscripcions_integritat.sql`](../supabase/migrations/20260901120000_inscripcions_integritat.sql)
-(trigger de auditoría versionado, freno al duplicado exacto con SQLSTATE P0409,
+(freno al duplicado exacto con SQLSTATE P0409,
 clave ajena `ON DELETE RESTRICT` en `payments`, arreglo del borrado por correo,
 `create_inscripcions_backup()` fuera del alcance de `anon`),
 [`src/logic/inscriptionDuplicates.ts`](../src/logic/inscriptionDuplicates.ts)
