@@ -331,8 +331,21 @@ export default function InscriptionPage() {
 
     } catch (err) {
       console.error(err);
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage || t('inscription.form.error_generic'));
+      // Los códigos los levantan los triggers de `inscripcions`. Sin traducirlos,
+      // la familia veía el texto crudo de Postgres («Inscripció duplicada: ja
+      // existeix...») y lo normal era volver a darle a enviar.
+      const code = (err as { code?: string } | null)?.code;
+
+      if (code === 'P0409') {
+        // trg_inscripcio_duplicada: ya existe esta misma inscripción.
+        setError(t('inscription.form.error_duplicate'));
+      } else if (code === 'P0429') {
+        // trg_inscripcio_rate_limit.
+        setError(t('inscription.form.error_rate_limit'));
+      } else {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        setError(errorMessage || t('inscription.form.error_generic'));
+      }
     } finally {
       setLoading(false);
     }

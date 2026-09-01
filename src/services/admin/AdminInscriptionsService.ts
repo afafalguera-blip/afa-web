@@ -4,7 +4,8 @@ import {
   filterInscriptionList,
   normalizeInscriptions,
 } from '../../logic/inscriptionFilters';
-import { STATUS_FILTER } from '../../constants/status';
+import { findDuplicates, type DuplicateMap } from '../../logic/inscriptionDuplicates';
+import { INSCRIPTION_STATUS, STATUS_FILTER } from '../../constants/status';
 import type { Inscription, InscriptionRaw, InscriptionStatus } from '../../types/inscription';
 
 export interface GetInscriptionsParams {
@@ -52,6 +53,14 @@ export interface GetInscriptionsResult {
 const usesClientFilters = (params: GetInscriptionsParams): boolean =>
   Boolean(params.search?.trim() || params.activity || params.course);
 
+/** Lo que se sabe del curso escolar entero, más allá de la página visible. */
+export interface CohortIndex {
+  /** Etiquetas de actividad distintas, para el desplegable del filtro. */
+  activityOptions: string[];
+  /** Inscripciones repetidas, por id. Solo lleva las que lo están. */
+  duplicates: DuplicateMap;
+}
+
 export interface InscriptionStats {
   /** Number of `inscripcions` rows (families), not children. */
   totalInscriptions: number;
@@ -97,13 +106,38 @@ const runWithTableFallback = async <T>(
   throw lastError;
 };
 
-/** Columns Postgres can filter on directly (everything else lives in JSONB). */
-const serverFilterColumns = (params: GetInscriptionsParams): Record<string, string> => {
-  const columns: Record<string, string> = {};
-  if (params.academicYear) columns.academic_year = params.academicYear;
-  if (params.status && params.status !== STATUS_FILTER.ALL) columns.status = params.status;
-  return columns;
+interface ServerFilter {
+  column: string;
+  op: 'eq' | 'neq';
+  value: string;
+}
+
+/**
+ * Columns Postgres can filter on directly (everything else lives in JSONB).
+ *
+ * `STATUS_FILTER.ACTIVE` NO es un valor de la columna: la base solo guarda
+ * 'alta' y 'baja' (`inscripcions_status_check`), y 'active' significa
+ * «cualquiera que no sea baja» — así lo entienden `filterInscriptions` y
+ * `filterInscriptionList`. Empujarlo como `.eq('status','active')` devolvía
+ * cero filas sin ningún error: un listado vacío que parece un curso sin
+ * inscripciones. Se traduce a `.neq('status','baja')`, que es lo que quiere
+ * decir.
+ */
+const serverFilters = (params: GetInscriptionsParams): ServerFilter[] => {
+  const filters: ServerFilter[] = [];
+  if (params.academicYear) {
+    filters.push({ column: 'academic_year', op: 'eq', value: params.academicYear });
+  }
+  if (params.status && params.status !== STATUS_FILTER.ALL) {
+    filters.push(
+      params.status === STATUS_FILTER.ACTIVE
+        ? { column: 'status', op: 'neq', value: INSCRIPTION_STATUS.BAJA }
+        : { column: 'status', op: 'eq', value: params.status }
+    );
+  }
+  return filters;
 };
+
 
 export const AdminInscriptionsService = {
   /**
@@ -126,8 +160,10 @@ export const AdminInscriptionsService = {
     const result = await runWithTableFallback<{ rows: InscriptionRaw[]; count: number }>(
       async (table) => {
         let query = supabase.from(table).select('*', { count: 'exact' });
-        for (const [column, value] of Object.entries(serverFilterColumns(params))) {
-          query = query.eq(column, value);
+        for (const filter of serverFilters(params)) {
+          query = filter.op === 'neq'
+            ? query.neq(filter.column, filter.value)
+            : query.eq(filter.column, filter.value);
         }
 
         const response = await query.order('created_at', { ascending: false }).range(from, to);
@@ -153,8 +189,10 @@ export const AdminInscriptionsService = {
   async getAllInscriptions(params: GetInscriptionsParams = {}): Promise<Inscription[]> {
     const rows = await runWithTableFallback<InscriptionRaw[]>(async (table) => {
       let query = supabase.from(table).select('*');
-      for (const [column, value] of Object.entries(serverFilterColumns(params))) {
-        query = query.eq(column, value);
+      for (const filter of serverFilters(params)) {
+        query = filter.op === 'neq'
+          ? query.neq(filter.column, filter.value)
+          : query.eq(filter.column, filter.value);
       }
       const response = await query.order('created_at', { ascending: false });
       return { data: (response.data || []) as InscriptionRaw[], error: response.error };
@@ -170,18 +208,29 @@ export const AdminInscriptionsService = {
   },
 
   /**
-   * Distinct activity labels of a cohort, for the activity filter dropdown.
-   * Selects only the `students` column so it stays far cheaper than a full
-   * `select('*')` scan.
+   * Lo que hay que saber del curso escolar entero, no de la página visible:
+   * las actividades que existen (para el desplegable) y qué inscripciones están
+   * repetidas (para avisar antes de borrar).
+   *
+   * Va en UNA consulta y con las cinco columnas justas: la detección de
+   * repetidas necesita mirar todo el curso —dos envíos de la misma familia con
+   * días de diferencia caen en páginas distintas— y hacerlo con `select('*')`
+   * significaría descargar los datos de salud de todas las criaturas para
+   * pintar dos etiquetas.
    */
-  async getActivityOptions(academicYear?: string): Promise<string[]> {
+  async getCohortIndex(academicYear?: string): Promise<CohortIndex> {
     const rows = await runWithTableFallback<InscriptionRaw[]>(async (table) => {
-      let query = supabase.from(table).select('students');
+      let query = supabase.from(table).select('id, created_at, parent_dni, parent_email_1, students');
       if (academicYear) query = query.eq('academic_year', academicYear);
       const response = await query;
       return { data: (response.data || []) as InscriptionRaw[], error: response.error };
     });
-    return collectActivityOptions(normalizeInscriptions(rows));
+
+    const inscriptions = normalizeInscriptions(rows);
+    return {
+      activityOptions: collectActivityOptions(inscriptions),
+      duplicates: findDuplicates(inscriptions),
+    };
   },
 
   /**
@@ -235,6 +284,23 @@ export const AdminInscriptionsService = {
     const years = new Set<string>();
     for (const r of data) if (r.academic_year) years.add(r.academic_year);
     return Array.from(years).sort().reverse();
+  },
+
+  /**
+   * Cuántos pagos apuntan a esta inscripción. Se consulta ANTES de ofrecer el
+   * borrado: desde 20260901120000_inscripcions_integritat.sql la clave ajena
+   * es ON DELETE RESTRICT, así que borrar una inscripción con pagos falla en
+   * Postgres. Preguntarlo antes convierte un error críptico en una frase que
+   * dice qué pasa y qué hacer en su lugar.
+   */
+  async countPaymentsFor(inscriptionId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('payments')
+      .select('id', { count: 'exact', head: true })
+      .eq('inscripcion_id', inscriptionId);
+
+    if (error) throw error;
+    return count ?? 0;
   },
 
   async deleteInscription(id: string) {

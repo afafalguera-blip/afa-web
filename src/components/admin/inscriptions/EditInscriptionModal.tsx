@@ -19,7 +19,11 @@ interface EditInscriptionModalProps {
   activityOptions?: string[];
 }
 
-const STATUS_OPTIONS: InscriptionStatus[] = ['alta', 'pending', 'baja'];
+/**
+ * Los únicos que acepta `inscripcions_status_check` en la base. Guardar
+ * «Pendent» fallaba con una violación de la restricción, no con un aviso.
+ */
+const STATUS_OPTIONS: InscriptionStatus[] = ['alta', 'baja'];
 
 const inputClass =
   'w-full px-3 py-2 rounded-md border border-neutral-300 bg-white text-[13px] text-neutral-900 outline-none focus:ring-2 focus:ring-neutral-900/20 focus:border-neutral-400 transition-colors';

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, FileSpreadsheet, Pencil, Trash2, Users } from 'lucide-react';
+import { AlertTriangle, Copy, Eye, FileSpreadsheet, Pencil, Trash2, Users } from 'lucide-react';
 
 import { AdminPageHeader } from '../../../components/admin/common/AdminPageHeader';
 import {
@@ -27,6 +27,13 @@ const STATUS_BADGE: Record<string, string> = {
   baja: 'bg-red-100 text-red-800'
 };
 
+/**
+ * Los únicos estados que acepta la base: `inscripcions_status_check` es
+ * CHECK (status IN ('alta','baja')). Ofrecer «Pendent» aquí no lo creaba, solo
+ * hacía que el UPDATE reventara contra la restricción con un toast de error.
+ */
+const EDITABLE_STATUSES: InscriptionStatus[] = ['alta', 'baja'];
+
 const courseLabel = (code?: string): string =>
   code && isCourseCode(code) ? COURSE_BY_CODE[code].label : code || '';
 
@@ -50,6 +57,7 @@ export default function InscriptionsPage() {
     setAcademicYear,
     academicYears,
     activityOptions,
+    duplicates,
     customLabels,
     reload,
     removeInscription,
@@ -69,10 +77,15 @@ export default function InscriptionsPage() {
       // The export must cover every filtered record, not just the visible page.
       const rows = await fetchAllFiltered();
       const fields = type === 'full' ? 'full' : 'basic';
+      // Los filtros van también al aplanado: `fetchAllFiltered` filtra por
+      // FAMILIA (entra la inscripción si alguna criatura encaja), así que sin
+      // esto la exportación de una actividad arrastraba hermanos y actividades
+      // que no se habían pedido.
+      const scope = { activity: filters.activity || undefined, course: filters.course || undefined };
       if (format === 'excel') {
-        ExportService.exportInscriptionsExcel(rows, fields, 'Inscripcions_AFA');
+        ExportService.exportInscriptionsExcel(rows, fields, 'Inscripcions_AFA', scope);
       } else {
-        ExportService.exportInscriptionsPDF(rows, fields, 'Inscripcions_AFA');
+        ExportService.exportInscriptionsPDF(rows, fields, 'Inscripcions_AFA', scope);
       }
       setExportOpen(false);
     } catch (err) {
@@ -88,17 +101,45 @@ export default function InscriptionsPage() {
       {
         key: 'parent',
         header: t('admin.inscriptions.table.parent', 'Família'),
-        render: (row) => (
-          <div className="min-w-0">
-            <div className="font-medium text-neutral-900">{row.parent_name || '—'}</div>
-            <div className="text-[12px] text-neutral-500">{row.parent_dni}</div>
-            {row.afa_member && (
-              <span className="inline-flex mt-1 px-2 py-0.5 rounded-full bg-admin-accent text-white text-[10px] font-semibold uppercase">
-                {t('admin.inscriptions.member_badge', 'Soci AFA')}
-              </span>
-            )}
-          </div>
-        )
+        render: (row) => {
+          const duplicate = duplicates[row.id];
+          return (
+            <div className="min-w-0">
+              <div className="font-medium text-neutral-900">{row.parent_name || '—'}</div>
+              <div className="text-[12px] text-neutral-500">{row.parent_dni}</div>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {row.afa_member && (
+                  <span className="inline-flex px-2 py-0.5 rounded-full bg-admin-accent text-white text-[10px] font-semibold uppercase">
+                    {t('admin.inscriptions.member_badge', 'Soci AFA')}
+                  </span>
+                )}
+                {/* Sin esto, dos files d'una mateixa família es veuen idèntiques
+                    (mateix nom, DNI, correu i telèfon) i l'única diferència real
+                    —quines criatures— queda a la columna del costat en lletra
+                    petita. Distingir «el mateix formulari dues vegades» de «la
+                    mateixa família amb una altra criatura» és tota la decisió. */}
+                {duplicate?.kind === 'exact' && (
+                  <span
+                    title={t('admin.inscriptions.duplicate_exact_hint')}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold uppercase"
+                  >
+                    <Copy className="w-3 h-3" />
+                    {t('admin.inscriptions.duplicate_exact')}
+                  </span>
+                )}
+                {duplicate?.kind === 'family' && (
+                  <span
+                    title={t('admin.inscriptions.duplicate_family_hint')}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[10px] font-semibold uppercase"
+                  >
+                    <AlertTriangle className="w-3 h-3" />
+                    {t('admin.inscriptions.duplicate_family', { n: duplicate.others.length })}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        }
       },
       {
         key: 'contact',
@@ -179,10 +220,12 @@ export default function InscriptionsPage() {
               aria-label={t('admin.inscriptions.change_status', "Canviar l'estat")}
               className="h-7 rounded-md border border-neutral-200 bg-white px-1.5 text-[11px] text-neutral-600"
             >
-              <option value="alta">{t('admin.inscriptions.status.alta', 'Alta')}</option>
-              <option value="pending">{t('admin.inscriptions.status.pending', 'Pendent')}</option>
-              <option value="baja">{t('admin.inscriptions.status.baja', 'Baixa')}</option>
-              {!['alta', 'pending', 'baja'].includes(row.status) && (
+              {EDITABLE_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {t(`admin.inscriptions.status.${status}`, status)}
+                </option>
+              ))}
+              {!EDITABLE_STATUSES.includes(row.status) && (
                 <option value={row.status}>{t(`admin.inscriptions.status.${row.status}`, row.status)}</option>
               )}
             </select>
@@ -236,7 +279,7 @@ export default function InscriptionsPage() {
         )
       }
     ],
-    [changeStatus, customLabels, removeInscription, t]
+    [changeStatus, customLabels, duplicates, removeInscription, t]
   );
 
   return (

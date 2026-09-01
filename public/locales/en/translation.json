@@ -726,7 +726,9 @@
       "back_home": "Back to Home",
       "error_terms": "You must accept the conditions to continue.",
       "error_activities": "All students must have at least one activity selected.",
-      "error_generic": "There was an error submitting the form."
+      "error_generic": "There was an error submitting the form.",
+      "error_duplicate": "We already have this enrolment on file: the same children with the same activities. There is no need to send it again. To enrol another child or add an activity, get in touch.",
+      "error_rate_limit": "You have submitted the form several times in a row. Wait a minute and try again; if the confirmation email has already arrived, the enrolment is done."
     },
     "activity_modal": {
       "grades": "Grades",
@@ -1189,7 +1191,17 @@
       "status_error": "Error updating the status",
       "status_success": "Status updated",
       "suspended_label": "Temporarily suspended",
-      "view_details": "View details"
+      "view_details": "View details",
+      "delete_confirm_children": "This will delete the family's whole enrolment, including their children ({{n}}).",
+      "delete_confirm_recover": "It cannot be undone from the panel; a copy stays in the audit log for 90 days.",
+      "delete_warn_family": "WARNING: this family has other enrolments, but with DIFFERENT children or activities. This is not a repeat: deleting it loses what only exists here.",
+      "delete_warn_exact": "Another enrolment from this family has exactly the same children and activities: this does look like the same form submitted twice.",
+      "delete_blocked_payments": "This enrolment has payments attached ({{n}}) and cannot be deleted. Set its status to Baja instead: it stops counting and the payments are kept.",
+      "delete_blocked_fk": "Cannot delete: there are payments attached to this enrolment. Set its status to Baja instead.",
+      "duplicate_exact": "Exact duplicate",
+      "duplicate_exact_hint": "Another enrolment has exactly the same children and activities.",
+      "duplicate_family": "+{{n}} from this family",
+      "duplicate_family_hint": "This family has other enrolments, but with different children or activities. Do not delete any without comparing them first."
     },
     "news": {
       "content_placeholder": "Write the news content...",
