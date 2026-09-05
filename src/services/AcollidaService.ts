@@ -1,5 +1,10 @@
 import { supabase } from '../lib/supabase';
-import type { AcollidaRate, AcollidaInscriptionInput, AcollidaCapacity } from '../types/acollida';
+import type {
+  AcollidaRate,
+  AcollidaInscriptionInput,
+  AcollidaCapacity,
+  SchoolClosedDay,
+} from '../types/acollida';
 
 /** Postgres error code raised by `check_acollida_rate_limit()`. */
 const RATE_LIMIT_CODE = 'P0429';
@@ -27,6 +32,18 @@ export const AcollidaService = {
     const { data, error } = await supabase.from('acollida_capacity').select('*');
     if (error) throw error;
     return (data || []) as AcollidaCapacity[];
+  },
+
+  /** Days with no school between two dates: the form must not offer them. */
+  async getClosedDays(from: string, to: string): Promise<SchoolClosedDay[]> {
+    const { data, error } = await supabase
+      .from('school_closed_days')
+      .select('*')
+      .gte('day', from)
+      .lte('day', to)
+      .order('day');
+    if (error) throw error;
+    return (data || []) as SchoolClosedDay[];
   },
 
   /**

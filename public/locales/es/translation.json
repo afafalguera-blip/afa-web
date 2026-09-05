@@ -1404,7 +1404,8 @@
       "tabs": {
         "requests": "Solicitudes",
         "rates": "Tarifas",
-        "occupancy": "Ocupación"
+        "occupancy": "Ocupación",
+        "calendar": "Calendario escolar"
       },
       "col_active": "Activa",
       "active_yes": "Ofertada",
@@ -1868,6 +1869,27 @@
       "seats": "Plazas de la sala",
       "seats_hint": "Las tres franjas de mañana comparten sala: entre las 8:30 y las 9 están todas a la vez, así que las plazas son del grupo y no de cada franja. Subirlas es la manera de dejar entrar una excepción.",
       "split": "{{monthly}} mes · {{occasional}} sueltos"
+    },
+    "school_calendar": {
+      "add_range": "Marcar el periodo",
+      "closed_count": "{{count}} días sin cole",
+      "hint": "Un día marcado desaparece de la rejilla de ocupación y el formulario no deja pedirlo.",
+      "kind": "Motivo",
+      "kind_break": "Vacaciones",
+      "kind_free": "Libre disposición",
+      "kind_holiday": "Festivo",
+      "kind_other": "Otros",
+      "label": "Nombre (opcional)",
+      "label_placeholder": "Vacaciones de Navidad",
+      "load_error": "No se ha podido cargar el calendario.",
+      "no_closed": "Ningún día marcado",
+      "no_school": "Sin cole",
+      "open": "Con cole",
+      "range_from": "Del",
+      "range_hint": "Los fines de semana se saltan solos. En el calendario de abajo, cada día se cierra y se abre con un clic.",
+      "range_saved": "{{count}} días marcados",
+      "range_to": "Al",
+      "save_error": "No se ha podido guardar el día."
     }
   },
   "common": {
@@ -2207,6 +2229,7 @@
     "calendar_day_full": "Completo",
     "weekday_full": "Completo: entraréis en la lista de espera",
     "waitlist_notice": "Alguno de los días que habéis elegido ya tiene las plazas llenas. Podéis enviar la solicitud igualmente: quedaréis en lista de espera y os avisaremos en cuanto haya una baja.",
-    "success_body_waitlist": "Alguno de los días estaba completo, así que quedáis en lista de espera de esos días. Os avisaremos en cuanto haya una baja; el resto de días siguen el camino normal."
+    "success_body_waitlist": "Alguno de los días estaba completo, así que quedáis en lista de espera de esos días. Os avisaremos en cuanto haya una baja; el resto de días siguen el camino normal.",
+    "calendar_day_closed": "No hay cole"
   }
 }

@@ -60,3 +60,24 @@ export function monthMatrix(year: number, month: number, today: Date): (Calendar
   for (let i = 0; i < cells.length; i += 5) rows.push(cells.slice(i, i + 5));
   return rows;
 }
+
+/**
+ * Working days (mon-fri) between two ISO dates, both included.
+ *
+ * Used to turn "the Christmas break" into the days it really is. Weekends are
+ * dropped because nothing is ever scheduled on them, and a list full of
+ * saturdays hides the days somebody has to check.
+ */
+export function workingDaysBetween(from: string, to: string): string[] {
+  const days: string[] = [];
+  const cursor = new Date(`${from}T12:00:00`);
+  const end = new Date(`${to}T12:00:00`);
+
+  while (cursor <= end) {
+    const weekday = cursor.getDay();
+    if (weekday >= 1 && weekday <= 5) days.push(toIsoDate(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return days;
+}

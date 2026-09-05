@@ -1404,7 +1404,8 @@
       "tabs": {
         "requests": "Sol·licituds",
         "rates": "Tarifes",
-        "occupancy": "Ocupació"
+        "occupancy": "Ocupació",
+        "calendar": "Calendari escolar"
       },
       "col_active": "Activa",
       "active_yes": "Oferta",
@@ -1868,6 +1869,27 @@
       "seats": "Places de la sala",
       "seats_hint": "Les tres franges de matí comparteixen sala: entre les 8:30 i les 9 hi són totes alhora, així que les places són del grup i no de cada franja. Pujar-les és la manera de deixar entrar una excepció.",
       "split": "{{monthly}} mes · {{occasional}} solts"
+    },
+    "school_calendar": {
+      "add_range": "Marcar el període",
+      "closed_count": "{{count}} dies sense escola",
+      "hint": "Un dia marcat desapareix de la graella d'ocupació i el formulari no el deixa demanar.",
+      "kind": "Motiu",
+      "kind_break": "Vacances",
+      "kind_free": "Lliure disposició",
+      "kind_holiday": "Festiu",
+      "kind_other": "Altres",
+      "label": "Nom (opcional)",
+      "label_placeholder": "Vacances de Nadal",
+      "load_error": "No s'ha pogut carregar el calendari.",
+      "no_closed": "Cap dia marcat",
+      "no_school": "Sense escola",
+      "open": "Amb escola",
+      "range_from": "Del",
+      "range_hint": "Els caps de setmana se salten sols. Al calendari de sota, cada dia es tanca i s'obre amb un clic.",
+      "range_saved": "{{count}} dies marcats",
+      "range_to": "Al",
+      "save_error": "No s'ha pogut desar el dia."
     }
   },
   "common": {
@@ -2207,6 +2229,7 @@
     "calendar_day_full": "Complet",
     "weekday_full": "Complet: entrareu a la llista d'espera",
     "waitlist_notice": "Algun dels dies que heu triat ja té les places plenes. Podeu enviar la sol·licitud igualment: quedareu a la llista d'espera i us avisarem a la primera baixa.",
-    "success_body_waitlist": "Algun dels dies estava complet, així que quedeu a la llista d'espera d'aquests dies. Us avisarem a la primera baixa; la resta de dies segueixen el camí normal."
+    "success_body_waitlist": "Algun dels dies estava complet, així que quedeu a la llista d'espera d'aquests dies. Us avisarem a la primera baixa; la resta de dies segueixen el camí normal.",
+    "calendar_day_closed": "No hi ha escola"
   }
 }
