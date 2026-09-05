@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { childMonthlyTotal, datesInMonth, unitPrice } from '../logic/acollidaPricing';
+import { childMonthlyTotal, datesInMonth, occasionalCharge, unitPrice } from '../logic/acollidaPricing';
 import { rosterByWeekday, weekdayOfIsoDate } from '../logic/acollidaRoster';
 import type { AcollidaInscription } from '../types/acollida';
 
@@ -116,5 +116,33 @@ describe('rosterByWeekday', () => {
       inscription({ id: 'b', child_name: 'Ada', child_surname: 'Bosch', weekdays: [2] }),
     ]);
     expect(roster[2].map((e) => e.inscription.child_name)).toEqual(['Ada', 'Zoe']);
+  });
+});
+
+describe('occasionalCharge', () => {
+  it('charges day by day while that is cheaper than the month', () => {
+    expect(occasionalCharge(rate, true, 3)).toEqual({ amount: 30, capped: false });
+    expect(occasionalCharge(rate, false, 3)).toEqual({ amount: 42, capped: false });
+  });
+
+  it('never charges more than the monthly fee', () => {
+    // 13 days x 10 EUR = 130 EUR, twice the 64 EUR month. The family pays 64.
+    expect(occasionalCharge(rate, true, 13)).toEqual({ amount: 64, capped: true });
+    expect(occasionalCharge(rate, false, 13)).toEqual({ amount: 68, capped: true });
+  });
+
+  it('caps from the first day the days add up to more than the month', () => {
+    expect(occasionalCharge(rate, true, 6)).toEqual({ amount: 60, capped: false });
+    expect(occasionalCharge(rate, true, 7)).toEqual({ amount: 64, capped: true });
+  });
+
+  it('charges nothing for no days, and stays null without an occasional price', () => {
+    expect(occasionalCharge(rate, true, 0)).toEqual({ amount: 0, capped: false });
+    expect(occasionalCharge({ ...rate, preu_soci_ocasional: null }, true, 4)).toBeNull();
+  });
+
+  it('is what childMonthlyTotal bills for a month of odd days', () => {
+    const dates = ['2026-10-01', '2026-10-02', '2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09'];
+    expect(childMonthlyTotal(rate, true, 'ocasional', dates, 10, 2026)).toBe(64);
   });
 });

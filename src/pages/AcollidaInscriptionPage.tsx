@@ -10,14 +10,14 @@ import {
   Loader2,
   Plus,
   Trash2,
-  X,
 } from 'lucide-react';
 
 import { SEO } from '../components/common/SEO';
 import { AcollidaService, AcollidaRateLimitError } from '../services/AcollidaService';
 import { useContentTranslation } from '../hooks/useContentTranslation';
 import { COURSES } from '../constants/courses';
-import { childMonthlyTotal, formatEuro, unitPrice } from '../logic/acollidaPricing';
+import { formatEuro, occasionalCharge, unitPrice } from '../logic/acollidaPricing';
+import { OccasionalDatesPicker } from '../features/acollida/components/OccasionalDatesPicker';
 import {
   ACOLLIDA_WEEKDAYS,
   WEEKDAY_I18N_KEYS,
@@ -54,6 +54,25 @@ const emptyChild = (): ChildDraft => ({
   weekdays: [...ACOLLIDA_WEEKDAYS],
   dates: [],
 });
+
+/**
+ * A second or third child starts as a copy of the previous one: same slot, same
+ * modality, same days. Brothers and sisters are dropped off together — asking
+ * the family to answer the same three questions again is asking them to repeat
+ * themselves, and the name and course, the only two things that really differ,
+ * stay empty and waiting.
+ */
+const siblingDraft = (previous: ChildDraft | undefined, rates: AcollidaRate[]): ChildDraft => {
+  const base = emptyChild();
+  if (!previous) return { ...base, rateId: rates.length === 1 ? rates[0].id : '' };
+  return {
+    ...base,
+    rateId: previous.rateId,
+    modality: previous.modality,
+    weekdays: [...previous.weekdays],
+    dates: [...previous.dates],
+  };
+};
 
 const card = 'bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-6 sm:p-8';
 const inputClass =
@@ -121,20 +140,6 @@ export default function AcollidaInscriptionPage() {
     );
   };
 
-  const addDate = (index: number, date: string) => {
-    if (!date) return;
-    setChildren((prev) =>
-      prev.map((child, i) =>
-        i === index && !child.dates.includes(date)
-          ? { ...child, dates: [...child.dates, date].sort() }
-          : child,
-      ),
-    );
-  };
-
-  const removeDate = (index: number, date: string) => {
-    updateChild(index, { dates: children[index].dates.filter((d) => d !== date) });
-  };
 
   /**
    * Monthly total for the family. Occasional sign-ups are priced per day, so
@@ -158,9 +163,9 @@ export default function AcollidaInscriptionPage() {
         if (price == null) complete = false;
         else total += price;
       } else {
-        const price = unitPrice(rate, isMember, 'ocasional');
-        if (price == null) complete = false;
-        else total += price * child.dates.length;
+        const charge = occasionalCharge(rate, isMember, child.dates.length);
+        if (charge == null) complete = false;
+        else total += charge.amount;
       }
     }
 
@@ -353,11 +358,9 @@ export default function AcollidaInscriptionPage() {
             {/* One block per child. */}
             {children.map((child, index) => {
               const rate = rateById.get(child.rateId);
-              const monthly =
-                rate && isMember !== null
-                  ? childMonthlyTotal(rate, isMember, child.modality, child.dates, undefined, undefined)
-                  : null;
+              const monthly = rate && isMember !== null ? unitPrice(rate, isMember, 'mensual') : null;
               const dayPrice = rate && isMember !== null ? unitPrice(rate, isMember, 'ocasional') : null;
+              const charge = rate && isMember !== null ? occasionalCharge(rate, isMember, child.dates.length) : null;
 
               return (
                 <section key={index} className={card}>
@@ -378,6 +381,12 @@ export default function AcollidaInscriptionPage() {
                       </button>
                     )}
                   </div>
+
+                  {index > 0 && (
+                    <p className="-mt-2 mb-5 text-xs text-slate-500 dark:text-slate-400">
+                      {t('acollida_form.sibling_copied', "Hem copiat la franja i els dies de l'infant anterior. Canvia'ls si aquest infant els fa diferents.")}
+                    </p>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -519,40 +528,29 @@ export default function AcollidaInscriptionPage() {
                   ) : (
                     <div className="mt-5">
                       <span className={labelClass}>{t('acollida_form.dates', 'Quins dies concrets?')}</span>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {child.dates.map((date) => (
-                          <span key={date} className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-semibold">
-                            {new Date(`${date}T12:00:00`).toLocaleDateString(i18n.resolvedLanguage || 'ca', { day: '2-digit', month: 'short' })}
-                            <button
-                              type="button"
-                              onClick={() => removeDate(index, date)}
-                              aria-label={t('acollida_form.remove_date', 'Treure la data')}
-                              className="p-0.5 rounded-full hover:bg-indigo-200/60"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          type="date"
-                          className={inputClass}
-                          aria-label={t('acollida_form.add_date', 'Afegir una data')}
-                          onChange={(e) => {
-                            addDate(index, e.target.value);
-                            e.target.value = '';
-                          }}
-                        />
-                      </div>
-                      {dayPrice != null && child.dates.length > 0 && (
-                        <p className="text-xs text-slate-500 mt-2">
-                          {t('acollida_form.occasional_total', '{{count}} dies × {{price}}', {
-                            count: child.dates.length,
-                            price: formatEuro(dayPrice),
-                          })}{' '}
-                          = <strong>{formatEuro(dayPrice * child.dates.length)}</strong>
-                        </p>
+                      <OccasionalDatesPicker
+                        value={child.dates}
+                        onChange={(dates) => updateChild(index, { dates })}
+                      />
+                      {charge != null && child.dates.length > 0 && (
+                        <div className="mt-3 text-sm">
+                          {charge.capped ? (
+                            <p className="rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/40 px-4 py-3 text-green-800 dark:text-green-300">
+                              {t('acollida_form.occasional_capped', 'Amb {{count}} dies ja superareu la quota del mes, així que us cobrem el mes sencer: {{amount}}.', {
+                                count: child.dates.length,
+                                amount: formatEuro(charge.amount),
+                              })}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-slate-500">
+                              {t('acollida_form.occasional_total', '{{count}} dies × {{price}}', {
+                                count: child.dates.length,
+                                price: formatEuro(dayPrice),
+                              })}{' '}
+                              = <strong>{formatEuro(charge.amount)}</strong>
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
@@ -570,7 +568,7 @@ export default function AcollidaInscriptionPage() {
             {children.length < MAX_CHILDREN && (
               <button
                 type="button"
-                onClick={() => setChildren((prev) => [...prev, { ...emptyChild(), rateId: rates.length === 1 ? rates[0].id : '' }])}
+                onClick={() => setChildren((prev) => [...prev, siblingDraft(prev[prev.length - 1], rates)])}
                 className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold hover:border-indigo-400 hover:text-indigo-600 transition"
               >
                 <Plus className="w-5 h-5" />

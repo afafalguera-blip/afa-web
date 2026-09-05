@@ -2181,6 +2181,13 @@
       "wed": "Miércoles",
       "thu": "Jueves",
       "fri": "Viernes"
-    }
+    },
+    "occasional_capped": "Con {{count}} días ya superáis la cuota del mes, así que os cobramos el mes entero: {{amount}}.",
+    "sibling_copied": "Hemos copiado la franja y los días del niño anterior. Cámbialos si este los hace distintos.",
+    "calendar_prev": "Mes anterior",
+    "calendar_next": "Mes siguiente",
+    "calendar_hint": "Toca los días que necesitéis. Puedes elegir de varios meses.",
+    "calendar_selected": "{{count}} días elegidos",
+    "calendar_clear": "Vaciar"
   }
 }

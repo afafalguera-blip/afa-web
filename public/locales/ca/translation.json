@@ -2181,6 +2181,13 @@
       "wed": "Dimecres",
       "thu": "Dijous",
       "fri": "Divendres"
-    }
+    },
+    "occasional_capped": "Amb {{count}} dies ja superareu la quota del mes, així que us cobrem el mes sencer: {{amount}}.",
+    "sibling_copied": "Hem copiat la franja i els dies de l'infant anterior. Canvia'ls si aquest infant els fa diferents.",
+    "calendar_prev": "Mes anterior",
+    "calendar_next": "Mes següent",
+    "calendar_hint": "Toca els dies que necessiteu. Pots triar-ne de diversos mesos.",
+    "calendar_selected": "{{count}} dies triats",
+    "calendar_clear": "Buidar"
   }
 }

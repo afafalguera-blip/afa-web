@@ -2180,6 +2180,13 @@
       "wed": "Wednesday",
       "thu": "Thursday",
       "fri": "Friday"
-    }
+    },
+    "occasional_capped": "{{count}} days already cost more than the monthly fee, so we charge the whole month: {{amount}}.",
+    "sibling_copied": "We copied the time slot and days from the previous child. Change them if this one differs.",
+    "calendar_prev": "Previous month",
+    "calendar_next": "Next month",
+    "calendar_hint": "Tap the days you need. You can pick days from several months.",
+    "calendar_selected": "{{count}} days selected",
+    "calendar_clear": "Clear"
   }
 }
