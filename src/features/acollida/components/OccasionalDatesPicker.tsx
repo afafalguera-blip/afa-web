@@ -11,6 +11,8 @@ interface Props {
   onChange: (dates: string[]) => void;
   /** Days with no seat left. Shown struck through and refused on tap. */
   fullDates?: string[];
+  /** Days with no school, by date: not offered at all. */
+  closedDays?: Record<string, string>;
   /** Called when the family taps a full day, so the form can offer the queue. */
   onFullDayTapped?: (iso: string) => void;
   /** Month on screen, so the caller can fetch that month's occupancy. */
@@ -24,7 +26,14 @@ interface Props {
  * pick — booking eight days meant opening the same calendar eight times, and
  * the days already chosen were nowhere to be seen while choosing the next one.
  */
-export function OccasionalDatesPicker({ value, onChange, fullDates = [], onFullDayTapped, onMonthChange }: Props) {
+export function OccasionalDatesPicker({
+  value,
+  onChange,
+  fullDates = [],
+  closedDays = {},
+  onFullDayTapped,
+  onMonthChange,
+}: Props) {
   const { t, i18n } = useTranslation();
   const today = useMemo(() => new Date(), []);
   const [cursor, setCursor] = useState(() => ({ year: today.getFullYear(), month: today.getMonth() + 1 }));
@@ -44,6 +53,7 @@ export function OccasionalDatesPicker({ value, onChange, fullDates = [], onFullD
   });
 
   const toggle = (iso: string) => {
+    if (closedDays[iso]) return;
     if (full.has(iso) && !selected.has(iso)) {
       onFullDayTapped?.(iso);
       return;
@@ -96,22 +106,28 @@ export function OccasionalDatesPicker({ value, onChange, fullDates = [], onFullD
             {week.map((cell, cellIndex) => {
               if (!cell) return <span key={`empty-${cellIndex}`} />;
               const isSelected = selected.has(cell.iso);
+              const closedLabel = closedDays[cell.iso];
               const isFull = full.has(cell.iso) && !isSelected;
               return (
                 <button
                   key={cell.iso}
                   type="button"
                   onClick={() => toggle(cell.iso)}
-                  disabled={cell.past}
+                  disabled={cell.past || Boolean(closedLabel)}
                   aria-pressed={isSelected}
                   aria-disabled={isFull}
-                  title={isFull ? t('acollida_form.calendar_day_full', 'Complet') : undefined}
+                  title={
+                    closedLabel ||
+                    (isFull ? t('acollida_form.calendar_day_full', 'Complet') : undefined)
+                  }
                   className={`py-2.5 rounded-xl text-sm font-semibold transition ${
                     isSelected
                       ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
                       : cell.past
                         ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
-                        : isFull
+                        : closedLabel
+                          ? 'text-slate-300 dark:text-slate-700 bg-slate-100/70 dark:bg-slate-800/40 cursor-not-allowed'
+                          : isFull
                           ? 'text-slate-400 dark:text-slate-600 line-through bg-slate-50 dark:bg-slate-800/60'
                           : 'text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'
                   }`}

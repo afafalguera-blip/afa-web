@@ -149,3 +149,23 @@ export const EMPTY_ACOLLIDA_FILTERS: AcollidaFilters = {
   weekday: '',
   status: '',
 };
+
+/**
+ * A day with no school. Lives at centre level, not inside the acollida: the
+ * same closed day rules out the menjador and the extraescolars too.
+ */
+export type SchoolClosureKind = 'festiu' | 'lliure_disposicio' | 'vacances' | 'altres';
+
+export const SCHOOL_CLOSURE_KINDS: SchoolClosureKind[] = [
+  'festiu',
+  'lliure_disposicio',
+  'vacances',
+  'altres',
+];
+
+export interface SchoolClosedDay {
+  day: string;
+  kind: SchoolClosureKind;
+  label: string | null;
+  academic_year: string | null;
+}

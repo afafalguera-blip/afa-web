@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Baby, ClipboardList, Euro, Users } from 'lucide-react';
+import { Baby, CalendarOff, ClipboardList, Euro, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
 import { RequestsTab } from './acollida/RequestsTab';
 import { RatesTab } from './acollida/RatesTab';
 import { OccupancyTab } from './acollida/OccupancyTab';
+import { SchoolCalendarTab } from './acollida/SchoolCalendarTab';
 
-type Tab = 'requests' | 'occupancy' | 'rates';
+type Tab = 'requests' | 'occupancy' | 'calendar' | 'rates';
 
 interface TabDef {
     id: Tab;
@@ -25,6 +26,7 @@ interface TabDef {
 const TABS: TabDef[] = [
     { id: 'requests', icon: ClipboardList, labelKey: 'admin.acollida.tabs.requests', labelDefault: 'Sol·licituds' },
     { id: 'occupancy', icon: Users, labelKey: 'admin.acollida.tabs.occupancy', labelDefault: 'Ocupació' },
+    { id: 'calendar', icon: CalendarOff, labelKey: 'admin.acollida.tabs.calendar', labelDefault: 'Calendari escolar' },
     { id: 'rates', icon: Euro, labelKey: 'admin.acollida.tabs.rates', labelDefault: 'Tarifes' },
 ];
 
@@ -59,7 +61,15 @@ export default function AcollidaManager() {
                 ))}
             </div>
 
-            {tab === 'requests' ? <RequestsTab /> : tab === 'occupancy' ? <OccupancyTab /> : <RatesTab />}
+            {tab === 'requests' ? (
+                <RequestsTab />
+            ) : tab === 'occupancy' ? (
+                <OccupancyTab />
+            ) : tab === 'calendar' ? (
+                <SchoolCalendarTab />
+            ) : (
+                <RatesTab />
+            )}
         </div>
     );
 }

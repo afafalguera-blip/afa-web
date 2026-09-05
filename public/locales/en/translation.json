@@ -1403,7 +1403,8 @@
       "tabs": {
         "requests": "Requests",
         "rates": "Rates",
-        "occupancy": "Occupancy"
+        "occupancy": "Occupancy",
+        "calendar": "School calendar"
       },
       "col_active": "Active",
       "active_yes": "Offered",
@@ -1867,6 +1868,27 @@
       "seats": "Seats in the room",
       "seats_hint": "The three morning slots share one room: between 8:30 and 9 they are all there at once, so the seats belong to the group and not to each slot. Raising them is how an exception gets in.",
       "split": "{{monthly}} monthly · {{occasional}} days out"
+    },
+    "school_calendar": {
+      "add_range": "Mark the period",
+      "closed_count": "{{count}} days with no school",
+      "hint": "A marked day disappears from the occupancy grid and the form will not take it.",
+      "kind": "Reason",
+      "kind_break": "Break",
+      "kind_free": "School holiday",
+      "kind_holiday": "Public holiday",
+      "kind_other": "Other",
+      "label": "Name (optional)",
+      "label_placeholder": "Christmas break",
+      "load_error": "Could not load the calendar.",
+      "no_closed": "No days marked",
+      "no_school": "No school",
+      "open": "School day",
+      "range_from": "From",
+      "range_hint": "Weekends are skipped for you. In the calendar below, one click closes or opens a day.",
+      "range_saved": "{{count}} days marked",
+      "range_to": "To",
+      "save_error": "Could not save the day."
     }
   },
   "common": {
@@ -2206,6 +2228,7 @@
     "calendar_day_full": "Full",
     "weekday_full": "Full: you would join the waiting list",
     "waitlist_notice": "Some of the days you picked have no seats left. You can send the request anyway: you will join the waiting list and we will write as soon as a place frees up.",
-    "success_body_waitlist": "Some of the days were full, so you are on the waiting list for those days. We will write as soon as a place frees up; the other days follow the usual route."
+    "success_body_waitlist": "Some of the days were full, so you are on the waiting list for those days. We will write as soon as a place frees up; the other days follow the usual route.",
+    "calendar_day_closed": "No school"
   }
 }

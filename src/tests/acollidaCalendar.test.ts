@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { monthMatrix, shiftMonth, toIsoDate } from '../logic/acollidaCalendar';
+import { monthMatrix, shiftMonth, toIsoDate, workingDaysBetween } from '../logic/acollidaCalendar';
 
 const TODAY = new Date(2026, 9, 15); // 15 October 2026
 
@@ -44,5 +44,28 @@ describe('monthMatrix', () => {
   it('handles a month that starts on a monday without padding', () => {
     const june = monthMatrix(2026, 6, TODAY);
     expect(june[0][0]?.iso).toBe('2026-06-01');
+  });
+});
+
+describe('workingDaysBetween', () => {
+  it('turns a holiday range into the days it really is', () => {
+    // The christmas break as a calendar states it: 23 December to 7 January.
+    const days = workingDaysBetween('2026-12-23', '2027-01-07');
+    // Seven working days in December (23, 24, 25, 28, 29, 30, 31) and five in
+    // January (1, 4, 5, 6, 7).
+    expect(days).toHaveLength(12);
+    expect(days[0]).toBe('2026-12-23');
+    expect(days.at(-1)).toBe('2027-01-07');
+    expect(days).not.toContain('2026-12-26'); // saturday
+    expect(days).not.toContain('2026-12-27'); // sunday
+  });
+
+  it('keeps a single working day and drops a single weekend one', () => {
+    expect(workingDaysBetween('2026-11-02', '2026-11-02')).toEqual(['2026-11-02']);
+    expect(workingDaysBetween('2026-11-07', '2026-11-08')).toEqual([]);
+  });
+
+  it('returns nothing when the range runs backwards', () => {
+    expect(workingDaysBetween('2026-12-10', '2026-12-01')).toEqual([]);
   });
 });

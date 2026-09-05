@@ -103,6 +103,9 @@ export default function AcollidaInscriptionPage() {
    */
   const [fullDays, setFullDays] = useState<Record<string, string[]>>({});
 
+  /** Closed days by date, with the reason for the tooltip. School-wide. */
+  const [closedDays, setClosedDays] = useState<Record<string, string>>({});
+
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedToWaitlist, setSubmittedToWaitlist] = useState(false);
@@ -143,7 +146,17 @@ export default function AcollidaInscriptionPage() {
     const from = `${year}-${String(month).padStart(2, '0')}-01`;
     const to = toIsoDate(new Date(year, month, 0));
     try {
-      const days = await AcollidaService.getFullDays(rateId, from, to);
+      const [days, closed] = await Promise.all([
+        AcollidaService.getFullDays(rateId, from, to),
+        AcollidaService.getClosedDays(from, to),
+      ]);
+      setClosedDays((prev) => {
+        const next = { ...prev };
+        for (const row of closed) {
+          next[row.day] = row.label || t('acollida_form.calendar_day_closed', 'No hi ha escola');
+        }
+        return next;
+      });
       setFullDays((prev) => ({
         ...prev,
         [rateId]: [...new Set([...(prev[rateId] || []), ...days])],
@@ -153,7 +166,7 @@ export default function AcollidaInscriptionPage() {
       // for a full day and the AFA puts it on the waiting list, as before.
       console.error('Error fetching acollida occupancy:', err);
     }
-  }, []);
+  }, [t]);
 
   // The month a monthly sign-up would start in decides which weekdays are left.
   useEffect(() => {
@@ -601,6 +614,7 @@ export default function AcollidaInscriptionPage() {
                         value={child.dates}
                         onChange={(dates) => updateChild(index, { dates })}
                         fullDates={childFullDays}
+                        closedDays={closedDays}
                         onFullDayTapped={(iso) => updateChild(index, { dates: [...child.dates, iso].sort() })}
                         onMonthChange={(year, month) => loadFullDays(child.rateId, year, month)}
                       />

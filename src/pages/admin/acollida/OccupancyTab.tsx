@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Save, Users } from 'lucide-react';
 
 import { AdminAcollidaInscriptionsService } from '../../../services/admin/AdminAcollidaInscriptionsService';
+import { AdminSchoolCalendarService } from '../../../services/admin/AdminSchoolCalendarService';
 import { monthMatrix, shiftMonth, toIsoDate } from '../../../logic/acollidaCalendar';
 import { occupancyLevel } from '../../../logic/acollidaCapacity';
 import {
@@ -10,6 +11,7 @@ import {
   type AcollidaCapacity,
   type AcollidaCapacityGroup,
   type AcollidaOccupancyDay,
+  type SchoolClosedDay,
 } from '../../../types/acollida';
 
 const GROUP_LABELS: Record<AcollidaCapacityGroup, { key: string; fallback: string }> = {
@@ -32,6 +34,7 @@ export function OccupancyTab() {
   const [group, setGroup] = useState<AcollidaCapacityGroup>('mati');
   const [days, setDays] = useState<AcollidaOccupancyDay[]>([]);
   const [capacity, setCapacity] = useState<AcollidaCapacity[]>([]);
+  const [closed, setClosed] = useState<SchoolClosedDay[]>([]);
   const [seatsDraft, setSeatsDraft] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,12 +46,14 @@ export function OccupancyTab() {
     try {
       const from = `${cursor.year}-${String(cursor.month).padStart(2, '0')}-01`;
       const to = toIsoDate(new Date(cursor.year, cursor.month, 0));
-      const [occupancy, seats] = await Promise.all([
+      const [occupancy, seats, closedDays] = await Promise.all([
         AdminAcollidaInscriptionsService.getOccupancy(from, to),
         AdminAcollidaInscriptionsService.getCapacity(),
+        AdminSchoolCalendarService.getRange(from, to),
       ]);
       setDays(occupancy);
       setCapacity(seats);
+      setClosed(closedDays);
     } catch (err) {
       console.error('Error loading acollida occupancy:', err);
       setError(t('admin.acollida_occupancy.load_error', "No s'ha pogut carregar l'ocupació."));
@@ -76,6 +81,11 @@ export function OccupancyTab() {
   }, [days, group]);
 
   const rows = useMemo(() => monthMatrix(cursor.year, cursor.month, today), [cursor, today]);
+  const closedByDay = useMemo(() => {
+    const map = new Map<string, SchoolClosedDay>();
+    for (const row of closed) map.set(row.day, row);
+    return map;
+  }, [closed]);
 
   const saveSeats = async () => {
     const seats = Number(seatsDraft);
@@ -205,7 +215,24 @@ export function OccupancyTab() {
                 {week.map((cell, cellIndex) => {
                   if (!cell) return <span key={`empty-${cellIndex}`} />;
                   const day = byDay.get(cell.iso);
+                  const closedDay = closedByDay.get(cell.iso);
                   const level = day ? occupancyLevel(day) : 'free';
+
+                  // A closed day is not an empty one: there is no service at all.
+                  if (closedDay) {
+                    return (
+                      <div
+                        key={cell.iso}
+                        className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 p-2 text-center"
+                      >
+                        <p className="text-xs font-bold text-slate-400">{cell.day}</p>
+                        <p className="text-[10px] leading-tight text-slate-400 truncate">
+                          {closedDay.label || t('admin.school_calendar.no_school', 'Sense escola')}
+                        </p>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div
                       key={cell.iso}
