@@ -819,7 +819,8 @@ CREATE OR REPLACE FUNCTION "public"."generate_acollida_payments"("p_month" integ
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
-  v_ins record; v_due date; v_amount numeric; v_days int; v_count int := 0; v_year_str text;
+  v_ins record; v_due date; v_amount numeric; v_month_price numeric;
+  v_days int; v_count int := 0; v_year_str text;
 BEGIN
   IF NOT public.is_admin() THEN
     RETURN QUERY SELECT false, 'No autoritzat', 0; RETURN;
@@ -846,7 +847,14 @@ BEGIN
       FROM unnest(v_ins.occasional_dates) d
       WHERE extract(month FROM d)::int = p_month AND extract(year FROM d)::int = p_year;
       IF coalesce(v_days, 0) = 0 THEN CONTINUE; END IF;
+
       v_amount := coalesce(public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, true), 0) * v_days;
+
+      -- El techo: a partir de aqui salia mas barato el mes entero.
+      v_month_price := public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
+      IF v_month_price IS NOT NULL AND v_amount > v_month_price THEN
+        v_amount := v_month_price;
+      END IF;
     END IF;
 
     IF coalesce(v_amount, 0) <= 0 THEN CONTINUE; END IF;
