@@ -2179,9 +2179,9 @@
     "per_month": "month",
     "per_day": "day",
     "answer_member_first": "Answer the member question to see the price",
-    "modality": "How will you use it?",
-    "modality_monthly": "Every month",
-    "modality_occasional": "Single days",
+    "modality": "How often will they come?",
+    "modality_monthly": "Always the same days",
+    "modality_occasional": "Only a few specific days",
     "weekdays": "Which days?",
     "dates": "Which exact days?",
     "add_date": "Add a date",
@@ -2229,6 +2229,9 @@
     "weekday_full": "Full: you would join the waiting list",
     "waitlist_notice": "Some of the days you picked have no seats left. You can send the request anyway: you will join the waiting list and we will write as soon as a place frees up.",
     "success_body_waitlist": "Some of the days were full, so you are on the waiting list for those days. We will write as soon as a place frees up; the other days follow the usual route.",
-    "calendar_day_closed": "No school"
+    "calendar_day_closed": "No school",
+    "modality_monthly_hint": "Monthly fee. It renews each month without asking again.",
+    "modality_occasional_hint": "Charged per day, and never more than the monthly fee.",
+    "weekdays_hint": "The monthly fee is the same whether you tick two days or five. We use it to know how many children to expect each day and to hold your place."
   }
 }

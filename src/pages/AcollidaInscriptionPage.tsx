@@ -555,23 +555,36 @@ export default function AcollidaInscriptionPage() {
 
                   {/* Modality, and only the question that its answer needs. */}
                   <div className="mt-6">
-                    <span className={labelClass}>{t('acollida_form.modality', 'Com el fareu servir?')}</span>
-                    <div className="flex gap-3">
+                    <span className={labelClass}>{t('acollida_form.modality', 'Cada quan vindrà?')}</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {(['mensual', 'ocasional'] as AcollidaModality[]).map((value) => (
                         <button
                           key={value}
                           type="button"
                           onClick={() => updateChild(index, { modality: value })}
                           aria-pressed={child.modality === value}
-                          className={`flex-1 px-4 py-3 rounded-xl border-2 font-semibold transition ${
+                          className={`px-4 py-3 rounded-xl border-2 text-left transition ${
                             child.modality === value
-                              ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                              : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                              ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                              : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
                           }`}
                         >
-                          {value === 'mensual'
-                            ? t('acollida_form.modality_monthly', 'Cada mes')
-                            : t('acollida_form.modality_occasional', 'Dies solts')}
+                          <span
+                            className={`block font-bold ${
+                              child.modality === value
+                                ? 'text-indigo-700 dark:text-indigo-300'
+                                : 'text-slate-700 dark:text-slate-300'
+                            }`}
+                          >
+                            {value === 'mensual'
+                              ? t('acollida_form.modality_monthly', 'Vindrà sempre els mateixos dies')
+                              : t('acollida_form.modality_occasional', 'Només alguns dies concrets')}
+                          </span>
+                          <span className="block text-xs text-slate-500 mt-1">
+                            {value === 'mensual'
+                              ? t('acollida_form.modality_monthly_hint', 'Quota mensual. Es renova cada mes sense tornar-ho a demanar.')
+                              : t('acollida_form.modality_occasional_hint', 'Es paga per dia, i mai més que la quota del mes.')}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -580,6 +593,12 @@ export default function AcollidaInscriptionPage() {
                   {child.modality === 'mensual' ? (
                     <div className="mt-5">
                       <span className={labelClass}>{t('acollida_form.weekdays', 'Quins dies?')}</span>
+                      <p className="-mt-1 mb-3 text-xs text-slate-500">
+                        {t(
+                          'acollida_form.weekdays_hint',
+                          'La quota del mes és la mateixa tant si en marqueu dos com si en marqueu cinc. Ens serveix per saber quants infants hi haurà cada dia i per guardar-vos la plaça.',
+                        )}
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {ACOLLIDA_WEEKDAYS.map((day) => {
                           const checked = child.weekdays.includes(day);

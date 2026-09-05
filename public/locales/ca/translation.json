@@ -2180,9 +2180,9 @@
     "per_month": "mes",
     "per_day": "dia",
     "answer_member_first": "Respon la pregunta de soci per veure el preu",
-    "modality": "Com el fareu servir?",
-    "modality_monthly": "Cada mes",
-    "modality_occasional": "Dies solts",
+    "modality": "Cada quan vindrà?",
+    "modality_monthly": "Vindrà sempre els mateixos dies",
+    "modality_occasional": "Només alguns dies concrets",
     "weekdays": "Quins dies?",
     "dates": "Quins dies concrets?",
     "add_date": "Afegir una data",
@@ -2230,6 +2230,9 @@
     "weekday_full": "Complet: entrareu a la llista d'espera",
     "waitlist_notice": "Algun dels dies que heu triat ja té les places plenes. Podeu enviar la sol·licitud igualment: quedareu a la llista d'espera i us avisarem a la primera baixa.",
     "success_body_waitlist": "Algun dels dies estava complet, així que quedeu a la llista d'espera d'aquests dies. Us avisarem a la primera baixa; la resta de dies segueixen el camí normal.",
-    "calendar_day_closed": "No hi ha escola"
+    "calendar_day_closed": "No hi ha escola",
+    "modality_monthly_hint": "Quota mensual. Es renova cada mes sense tornar-ho a demanar.",
+    "modality_occasional_hint": "Es paga per dia, i mai més que la quota del mes.",
+    "weekdays_hint": "La quota del mes és la mateixa tant si en marqueu dos com si en marqueu cinc. Ens serveix per saber quants infants hi haurà cada dia i per guardar-vos la plaça."
   }
 }
