@@ -388,6 +388,33 @@ COMMENT ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "
 
 
 
+CREATE OR REPLACE FUNCTION "public"."acollida_month_coverage"("p_month" integer, "p_year" integer) RETURNS TABLE("capacity_group" "text", "confirmed" integer, "revenue" numeric, "monthly_cost" numeric)
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+  SELECT
+    c.capacity_group,
+    count(i.id)::int AS confirmed,
+    coalesce(sum(public.acollida_month_amount(i.id, p_month, p_year)), 0) AS revenue,
+    c.monthly_cost
+  FROM public.acollida_capacity c
+  LEFT JOIN public.acollida_rates r ON r.capacity_group = c.capacity_group
+  LEFT JOIN public.acollida_inscripcions i
+    ON i.rate_id = r.id
+   AND i.status = 'confirmada'
+   AND i.academic_year = public.academic_year_for(p_month, p_year)
+  GROUP BY c.capacity_group, c.monthly_cost
+  ORDER BY c.capacity_group;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_month_coverage"("p_month" integer, "p_year" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."acollida_month_coverage"("p_month" integer, "p_year" integer) IS 'Ingrés previst del mes contra el cost del monitoratge, per sala. Surt de la mateixa funció que genera els rebuts.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") RETURNS TABLE("day" "date", "capacity_group" "text", "monthly" integer, "occasional" integer, "total" integer, "seats" integer, "free" integer)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
@@ -2430,6 +2457,7 @@ CREATE TABLE IF NOT EXISTS "public"."acollida_capacity" (
     "capacity_group" "text" NOT NULL,
     "seats" integer NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "monthly_cost" numeric DEFAULT 0 NOT NULL,
     CONSTRAINT "acollida_capacity_group_check" CHECK (("capacity_group" = ANY (ARRAY['mati'::"text", 'tarda'::"text"]))),
     CONSTRAINT "acollida_capacity_seats_check" CHECK (("seats" >= 0))
 );
@@ -2439,6 +2467,10 @@ ALTER TABLE "public"."acollida_capacity" OWNER TO "postgres";
 
 
 COMMENT ON TABLE "public"."acollida_capacity" IS 'Places de cada sala. Editable des de /admin/acollida: pujar-la un dia puntual és la manera de deixar entrar una excepció, no saltar-se el límit.';
+
+
+
+COMMENT ON COLUMN "public"."acollida_capacity"."monthly_cost" IS 'Cost mensual del monitoratge d''aquesta sala, en euros. És fix: no depèn de quants infants vinguin, i per això una plaça buida és diners que ningú paga.';
 
 
 
@@ -5109,6 +5141,12 @@ GRANT ALL ON FUNCTION "public"."acollida_monitor_search"("p_token" "text", "p_qu
 REVOKE ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_month_coverage"("p_month" integer, "p_year" integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_month_coverage"("p_month" integer, "p_year" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_month_coverage"("p_month" integer, "p_year" integer) TO "service_role";
 
 
 

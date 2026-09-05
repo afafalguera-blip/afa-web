@@ -1860,7 +1860,14 @@
       "status_full": "Ese día ya no quedan plazas: {{detail}}"
     },
     "acollida_occupancy": {
+      "cost": "Coste al mes (€)",
       "counts_hint": "Solo cuentan las solicitudes confirmadas: una pendiente no reserva plaza.",
+      "coverage_hint": "El coste es fijo: el monitoraje vale lo mismo vengan diez niños o dos, así que cada plaza vacía es dinero que nadie paga. El ingreso sale de la misma función que genera los recibos.",
+      "coverage_line": "{{confirmed}} confirmadas · {{revenue}} previstos · coste {{cost}}",
+      "coverage_missing": "Faltan {{count}} cuotas mensuales para cubrirlo",
+      "coverage_ok": "El mes se paga solo; a partir de aquí es margen.",
+      "coverage_title": "¿Cubre el mes su coste?",
+      "coverage_unset": "Pon el coste del monitoraje para verlo.",
       "full_days": "{{count}} días completos",
       "group_afternoon": "Tarde",
       "group_morning": "Mañana",

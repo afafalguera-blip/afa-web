@@ -1860,7 +1860,14 @@
       "status_full": "Aquell dia ja no queden places: {{detail}}"
     },
     "acollida_occupancy": {
+      "cost": "Cost al mes (€)",
       "counts_hint": "Només compten les sol·licituds confirmades: una de pendent no reserva plaça.",
+      "coverage_hint": "El cost és fix: el monitoratge val el mateix vinguin deu infants o dos, així que cada plaça buida són diners que ningú paga. L'ingrés surt de la mateixa funció que genera els rebuts.",
+      "coverage_line": "{{confirmed}} confirmades · {{revenue}} previstos · cost {{cost}}",
+      "coverage_missing": "Falten {{count}} quotes mensuals per cobrir-lo",
+      "coverage_ok": "El mes es paga sol; a partir d'aquí és marge.",
+      "coverage_title": "Cobreix el mes el seu cost?",
+      "coverage_unset": "Posa el cost del monitoratge per veure-ho.",
       "full_days": "{{count}} dies complets",
       "group_afternoon": "Tarda",
       "group_morning": "Matí",
