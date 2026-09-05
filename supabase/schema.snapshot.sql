@@ -148,6 +148,54 @@ $$;
 ALTER FUNCTION "public"."acollida_inscripcio_defaults"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) RETURNS numeric
+    LANGUAGE "plpgsql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE
+  v_ins record;
+  v_amount numeric;
+  v_month_price numeric;
+  v_days int;
+BEGIN
+  SELECT * INTO v_ins FROM public.acollida_inscripcions WHERE id = p_inscripcio_id;
+  IF NOT FOUND THEN RETURN NULL; END IF;
+
+  IF v_ins.modality = 'mensual' THEN
+    -- Encara no ha comencat: aquest mes no es cobra.
+    IF v_ins.start_year IS NOT NULL AND v_ins.start_month IS NOT NULL
+       AND (v_ins.start_year * 12 + v_ins.start_month) > (p_year * 12 + p_month) THEN
+      RETURN 0;
+    END IF;
+    RETURN public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
+  END IF;
+
+  SELECT count(*) INTO v_days
+  FROM unnest(v_ins.occasional_dates) d
+  WHERE extract(month FROM d)::int = p_month AND extract(year FROM d)::int = p_year;
+
+  IF coalesce(v_days, 0) = 0 THEN RETURN 0; END IF;
+
+  v_amount := coalesce(public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, true), 0) * v_days;
+
+  -- El sostre: a partir d'aqui sortia mes barat el mes sencer.
+  v_month_price := public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
+  IF v_month_price IS NOT NULL AND v_amount > v_month_price THEN
+    v_amount := v_month_price;
+  END IF;
+
+  RETURN v_amount;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) IS 'Import d''una sol·licitud en un mes, amb el sostre de la quota mensual. Únic lloc on es decideix: el generador de rebuts el crida.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") RETURNS TABLE("day" "date", "capacity_group" "text", "monthly" integer, "occasional" integer, "total" integer, "seats" integer, "free" integer)
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
@@ -1087,8 +1135,7 @@ CREATE OR REPLACE FUNCTION "public"."generate_acollida_payments"("p_month" integ
     SET "search_path" TO 'public', 'pg_temp'
     AS $$
 DECLARE
-  v_ins record; v_due date; v_amount numeric; v_month_price numeric;
-  v_days int; v_count int := 0; v_year_str text;
+  v_ins record; v_due date; v_amount numeric; v_count int := 0; v_year_str text;
 BEGIN
   IF NOT public.is_admin() THEN
     RETURN QUERY SELECT false, 'No autoritzat', 0; RETURN;
@@ -1098,33 +1145,14 @@ BEGIN
   v_year_str := public.academic_year_for(p_month, p_year);
 
   FOR v_ins IN
-    SELECT i.*, r.horari
+    SELECT i.id, i.child_name, i.child_surname, i.course, i.parent_name, i.parent_email,
+           i.parent_phone, i.afa_member, r.horari
     FROM public.acollida_inscripcions i
     JOIN public.acollida_rates r ON r.id = i.rate_id
     WHERE i.status = 'confirmada'
       AND i.academic_year = v_year_str
   LOOP
-    IF v_ins.modality = 'mensual' THEN
-      IF v_ins.start_year IS NOT NULL AND v_ins.start_month IS NOT NULL
-         AND (v_ins.start_year * 12 + v_ins.start_month) > (p_year * 12 + p_month) THEN
-        CONTINUE;
-      END IF;
-      v_amount := public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
-    ELSE
-      SELECT count(*) INTO v_days
-      FROM unnest(v_ins.occasional_dates) d
-      WHERE extract(month FROM d)::int = p_month AND extract(year FROM d)::int = p_year;
-      IF coalesce(v_days, 0) = 0 THEN CONTINUE; END IF;
-
-      v_amount := coalesce(public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, true), 0) * v_days;
-
-      -- El techo: a partir de aqui salia mas barato el mes entero.
-      v_month_price := public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
-      IF v_month_price IS NOT NULL AND v_amount > v_month_price THEN
-        v_amount := v_month_price;
-      END IF;
-    END IF;
-
+    v_amount := public.acollida_month_amount(v_ins.id, p_month, p_year);
     IF coalesce(v_amount, 0) <= 0 THEN CONTINUE; END IF;
 
     INSERT INTO public.payments(
@@ -3558,6 +3586,14 @@ CREATE OR REPLACE TRIGGER "on_shop_order_insert" AFTER INSERT ON "public"."shop_
 
 
 
+CREATE OR REPLACE TRIGGER "send-acollida-email-webhook" AFTER INSERT ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://zaxbtnjkidqwzqsehvld.supabase.co/functions/v1/send-acollida-email', 'POST', '{"Content-type":"application/json","Authorization":"Bearer <SERVICE_ROLE_KEY>"}', '{}', '5000');
+
+
+
+CREATE OR REPLACE TRIGGER "send-acollida-promoted-webhook" AFTER UPDATE ON "public"."acollida_inscripcions" FOR EACH ROW WHEN ((("old"."status" = 'llista_espera'::"text") AND ("new"."status" = 'confirmada'::"text"))) EXECUTE FUNCTION "supabase_functions"."http_request"('https://zaxbtnjkidqwzqsehvld.supabase.co/functions/v1/send-acollida-email', 'POST', '{"Content-type":"application/json","Authorization":"Bearer <SERVICE_ROLE_KEY>"}', '{}', '5000');
+
+
+
 CREATE OR REPLACE TRIGGER "send-inscription-email-webhook" AFTER INSERT ON "public"."inscripcions" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://zaxbtnjkidqwzqsehvld.supabase.co/functions/v1/send-inscription-email', 'POST', '{"Content-type":"application/json","Authorization":"Bearer <SERVICE_ROLE_KEY>"}', '{}', '5000');
 
 
@@ -4647,6 +4683,12 @@ GRANT ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from"
 GRANT ALL ON FUNCTION "public"."acollida_inscripcio_defaults"() TO "anon";
 GRANT ALL ON FUNCTION "public"."acollida_inscripcio_defaults"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."acollida_inscripcio_defaults"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) TO "service_role";
 
 
 
