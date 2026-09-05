@@ -74,7 +74,6 @@ const FRONTERA_EXCEPCIONES = new Map([
   // Deuda heredada, inventariada el 2026-08-14 en docs/deuda-tecnica.md.
   ['src/components/common/NotificationBell.tsx', 'deuda 2026-08-14: lee notificaciones directamente'],
   ['src/components/public/FeaturedProjects.tsx', 'deuda 2026-08-14: lee proyectos destacados directamente'],
-  ['src/pages/AcollidaPage.tsx', 'deuda 2026-08-14: consulta tarifas directamente'],
   ['src/pages/auth/LoginPage.tsx', 'deuda 2026-08-14: usa auth directamente'],
   ['src/pages/InscriptionPage.tsx', 'deuda 2026-08-14: envía la inscripción directamente'],
 ]);

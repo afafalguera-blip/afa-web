@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formService } from '../services/formService';
 import { resolveTemplateText, resolveField } from '../utils/resolveTranslations';
+import { displayAnswer } from '../utils/answerDisplay';
 import type { FormTemplate, FormSubmission, FormField } from '../types/formTypes';
 import {
   ArrowLeft,
@@ -77,6 +78,24 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
     [exportableColumns, excludedCols],
   );
 
+  /**
+   * El texto sobre el que busca el buscador: lo guardado Y lo que se ve. Las
+   * respuestas anteriores a 2026-09-05 están en el idioma de quien rellenó el
+   * formulario, así que buscar solo por la etiqueta traducida las escondería.
+   */
+  const searchableText = useCallback(
+    (sub: FormSubmission) =>
+      visibleFields
+        .map((f) => {
+          const val = sub.answers[f.id];
+          const raw = Array.isArray(val) ? val.join(' ') : String(val ?? '');
+          return `${raw} ${displayAnswer(form, f, val, activeLang)}`;
+        })
+        .join(' ')
+        .toLowerCase(),
+    [visibleFields, form, activeLang],
+  );
+
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(searchTerm), SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
@@ -107,14 +126,13 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
         if (sortByField === DATE_COL) {
           return dir * (new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime());
         }
-        const valA = a.answers[sortByField];
-        const valB = b.answers[sortByField];
-        const strA = Array.isArray(valA) ? valA.join(', ') : String(valA ?? '');
-        const strB = Array.isArray(valB) ? valB.join(', ') : String(valB ?? '');
+        const field = visibleFields.find((f) => f.id === sortByField);
+        const strA = field ? displayAnswer(form, field, a.answers[sortByField], activeLang) : '';
+        const strB = field ? displayAnswer(form, field, b.answers[sortByField], activeLang) : '';
         return dir * strA.localeCompare(strB, 'ca', { sensitivity: 'base' });
       });
     },
-    [sortByField, sortDirection],
+    [sortByField, sortDirection, visibleFields, form, activeLang],
   );
 
   const load = useCallback(async () => {
@@ -136,15 +154,7 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
 
       const all = await fetchAll();
       const q = debouncedSearch.trim().toLowerCase();
-      const filtered = q
-        ? all.filter((sub) =>
-            visibleFields.some((f) => {
-              const val = sub.answers[f.id];
-              const str = Array.isArray(val) ? val.join(' ') : String(val ?? '');
-              return str.toLowerCase().includes(q);
-            }),
-          )
-        : all;
+      const filtered = q ? all.filter((sub) => searchableText(sub).includes(q)) : all;
       const sorted = sortRows(filtered);
       const from = (page - 1) * pageSize;
       setRows(sorted.slice(from, from + pageSize));
@@ -161,7 +171,7 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
     pageSize,
     sortDirection,
     debouncedSearch,
-    visibleFields,
+    searchableText,
     fetchAll,
     sortRows,
     t,
@@ -204,12 +214,8 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
     }
   };
 
-  const formatCellValue = (f: FormField, val: unknown): string => {
-    if (val == null || val === '') return '-';
-    if (f.type === 'file') return String(val);
-    if (Array.isArray(val)) return val.length === 0 ? '-' : val.join(', ');
-    return String(val);
-  };
+  const formatCellValue = (f: FormField, val: unknown): string =>
+    displayAnswer(form, f, val, activeLang) || '-';
 
   const handleFileClick = async (path: string) => {
     if (!path) return;
@@ -237,15 +243,7 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
   const buildExportData = useCallback(async () => {
     const all = await fetchAll();
     const q = debouncedSearch.trim().toLowerCase();
-    const filtered = q
-      ? all.filter((sub) =>
-          visibleFields.some((f) => {
-            const val = sub.answers[f.id];
-            const str = Array.isArray(val) ? val.join(' ') : String(val ?? '');
-            return str.toLowerCase().includes(q);
-          }),
-        )
-      : all;
+    const filtered = q ? all.filter((sub) => searchableText(sub).includes(q)) : all;
     const sorted = sortRows(filtered);
     const headers = [
       '#',
@@ -257,7 +255,7 @@ export default function FormSubmissionsViewer({ form, onBack }: Props) {
     ]);
     return { headers, body, count: sorted.length };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchAll, debouncedSearch, visibleFields, sortRows, exportableColumns, selectedColumnIds]);
+  }, [fetchAll, debouncedSearch, searchableText, sortRows, exportableColumns, selectedColumnIds]);
 
   const exportToCSV = async () => {
     if (selectedColumnIds.length === 0) return;
