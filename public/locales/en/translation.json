@@ -1817,7 +1817,7 @@
       "filter_weekday": "Day of the week",
       "all_weekdays": "Any day",
       "status": {
-        "pendent": "Pending",
+        "pendent": "Pending (review)",
         "confirmada": "Confirmed",
         "baixa": "Cancelled",
         "llista_espera": "Waiting list"
@@ -2157,7 +2157,7 @@
     "seo_description": "Request a place in the AFA Falguera drop-off care service: choose the time slot, the days and get your confirmation.",
     "eyebrow": "Drop-off care",
     "title": "Request a place",
-    "intro": "Three minutes. Fill it in once per family, even if you have more than one child.",
+    "intro": "Three minutes. Fill it in once per family, even with more than one child. Places go in order of arrival: if any are left, the place is yours as soon as you send the form.",
     "contact_title": "Contact details",
     "parent_name": "Parent or guardian's full name",
     "email": "Email",
@@ -2195,8 +2195,8 @@
     "summary_label": "Estimated total",
     "summary_hint": "The AFA confirms the place and the amount before charging anything.",
     "submit": "Send the request",
-    "success_title": "Request received",
-    "success_body": "We'll write to you to confirm the place and the rate. If anything needs changing, get in touch with the AFA.",
+    "success_title": "Place confirmed",
+    "success_body": "There was room, so the place is already yours: places go in order of arrival. If anything needs changing, write to the AFA.",
     "back_to_info": "Back to the service information",
     "error_rates": "We couldn't load the rates. Please try again in a moment.",
     "error_parent_name": "The parent or guardian's name is missing.",
@@ -2227,11 +2227,12 @@
     "calendar_clear": "Clear",
     "calendar_day_full": "Full",
     "weekday_full": "Full: you would join the waiting list",
-    "waitlist_notice": "Some of the days you picked have no seats left. You can send the request anyway: you will join the waiting list and we will write as soon as a place frees up.",
-    "success_body_waitlist": "Some of the days were full, so you are on the waiting list for those days. We will write as soon as a place frees up; the other days follow the usual route.",
+    "waitlist_notice": "Some of the days you picked have no seats left. You can send the request anyway: you join the queue in order of arrival and move up on your own at the first cancellation.",
+    "success_body_waitlist": "Some of the days you asked for were full. You are in the queue in order of arrival and will move up on your own as soon as a place frees up; we will let you know.",
     "calendar_day_closed": "No school",
     "modality_monthly_hint": "Monthly fee. It renews each month without asking again.",
     "modality_occasional_hint": "Charged per day, and never more than the monthly fee.",
-    "weekdays_hint": "The monthly fee is the same whether you tick two days or five. We use it to know how many children to expect each day and to hold your place."
+    "weekdays_hint": "The monthly fee is the same whether you tick two days or five. We use it to know how many children to expect each day and to hold your place.",
+    "success_title_waitlist": "You are on the waiting list"
   }
 }
