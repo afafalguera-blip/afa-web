@@ -2180,9 +2180,9 @@
     "per_month": "mes",
     "per_day": "día",
     "answer_member_first": "Responde la pregunta de socio para ver el precio",
-    "modality": "¿Cómo lo vais a usar?",
-    "modality_monthly": "Cada mes",
-    "modality_occasional": "Días sueltos",
+    "modality": "¿Cada cuánto vendrá?",
+    "modality_monthly": "Vendrá siempre los mismos días",
+    "modality_occasional": "Solo algunos días concretos",
     "weekdays": "¿Qué días?",
     "dates": "¿Qué días concretos?",
     "add_date": "Añadir una fecha",
@@ -2230,6 +2230,9 @@
     "weekday_full": "Completo: entraréis en la lista de espera",
     "waitlist_notice": "Alguno de los días que habéis elegido ya tiene las plazas llenas. Podéis enviar la solicitud igualmente: quedaréis en lista de espera y os avisaremos en cuanto haya una baja.",
     "success_body_waitlist": "Alguno de los días estaba completo, así que quedáis en lista de espera de esos días. Os avisaremos en cuanto haya una baja; el resto de días siguen el camino normal.",
-    "calendar_day_closed": "No hay cole"
+    "calendar_day_closed": "No hay cole",
+    "modality_monthly_hint": "Cuota mensual. Se renueva cada mes sin volver a pedirlo.",
+    "modality_occasional_hint": "Se paga por día, y nunca más que la cuota del mes.",
+    "weekdays_hint": "La cuota del mes es la misma tanto si marcáis dos días como cinco. Nos sirve para saber cuántos niños habrá cada día y para guardaros la plaza."
   }
 }
