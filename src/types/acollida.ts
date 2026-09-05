@@ -34,6 +34,8 @@ export interface AcollidaRate {
 export interface AcollidaCapacity {
   capacity_group: AcollidaCapacityGroup;
   seats: number;
+  /** Euros a month. Fixed: it does not move with how many children come. */
+  monthly_cost: number;
   updated_at?: string;
 }
 

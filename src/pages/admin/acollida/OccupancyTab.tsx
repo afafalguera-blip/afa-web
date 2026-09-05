@@ -7,6 +7,15 @@ import { AdminSchoolCalendarService } from '../../../services/admin/AdminSchoolC
 import { monthMatrix, shiftMonth, toIsoDate } from '../../../logic/acollidaCalendar';
 import { occupancyLevel } from '../../../logic/acollidaCapacity';
 import {
+  coverageLevel,
+  coveragePercent,
+  placesToBreakEven,
+  type Coverage,
+} from '../../../logic/acollidaCoverage';
+import { formatEuro, unitPrice } from '../../../logic/acollidaPricing';
+import { AdminAcollidaService } from '../../../services/admin/AdminAcollidaService';
+import type { AcollidaRate } from '../../../types/acollida';
+import {
   ACOLLIDA_CAPACITY_GROUPS,
   type AcollidaCapacity,
   type AcollidaCapacityGroup,
@@ -35,6 +44,9 @@ export function OccupancyTab() {
   const [days, setDays] = useState<AcollidaOccupancyDay[]>([]);
   const [capacity, setCapacity] = useState<AcollidaCapacity[]>([]);
   const [closed, setClosed] = useState<SchoolClosedDay[]>([]);
+  const [coverage, setCoverage] = useState<Coverage[]>([]);
+  const [rates, setRates] = useState<AcollidaRate[]>([]);
+  const [costDraft, setCostDraft] = useState('');
   const [seatsDraft, setSeatsDraft] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,14 +58,18 @@ export function OccupancyTab() {
     try {
       const from = `${cursor.year}-${String(cursor.month).padStart(2, '0')}-01`;
       const to = toIsoDate(new Date(cursor.year, cursor.month, 0));
-      const [occupancy, seats, closedDays] = await Promise.all([
+      const [occupancy, seats, closedDays, months, rateRows] = await Promise.all([
         AdminAcollidaInscriptionsService.getOccupancy(from, to),
         AdminAcollidaInscriptionsService.getCapacity(),
         AdminSchoolCalendarService.getRange(from, to),
+        AdminAcollidaInscriptionsService.getCoverage(cursor.month, cursor.year),
+        AdminAcollidaService.getAll(),
       ]);
       setDays(occupancy);
       setCapacity(seats);
       setClosed(closedDays);
+      setCoverage(months);
+      setRates(rateRows as AcollidaRate[]);
     } catch (err) {
       console.error('Error loading acollida occupancy:', err);
       setError(t('admin.acollida_occupancy.load_error', "No s'ha pogut carregar l'ocupació."));
@@ -66,11 +82,25 @@ export function OccupancyTab() {
     load();
   }, [load]);
 
-  const seatsOfGroup = capacity.find((c) => c.capacity_group === group)?.seats ?? 0;
+  const capacityOfGroup = capacity.find((c) => c.capacity_group === group);
+  const seatsOfGroup = capacityOfGroup?.seats ?? 0;
+  const costOfGroup = capacityOfGroup?.monthly_cost ?? 0;
+  const coverageOfGroup = coverage.find((c) => c.capacity_group === group);
 
   useEffect(() => {
     setSeatsDraft(String(seatsOfGroup));
-  }, [seatsOfGroup, group]);
+    setCostDraft(String(costOfGroup));
+  }, [seatsOfGroup, costOfGroup, group]);
+
+  /**
+   * The dearest monthly fee of the room, which is what "one more place" is
+   * worth at best: the gap is easier to close than this number suggests, never
+   * harder, so nobody plans on an optimistic figure.
+   */
+  const bestMonthlyFee = useMemo(() => {
+    const groupRates = rates.filter((r) => r.capacity_group === group);
+    return groupRates.reduce((max, rate) => Math.max(max, unitPrice(rate, true, 'mensual') ?? 0), 0);
+  }, [rates, group]);
 
   const byDay = useMemo(() => {
     const map = new Map<string, AcollidaOccupancyDay>();
@@ -89,10 +119,12 @@ export function OccupancyTab() {
 
   const saveSeats = async () => {
     const seats = Number(seatsDraft);
-    if (!Number.isInteger(seats) || seats < 0) return;
+    const cost = Number(costDraft);
+    if (!Number.isInteger(seats) || seats < 0 || !Number.isFinite(cost) || cost < 0) return;
     setSaving(true);
     try {
-      await AdminAcollidaInscriptionsService.setCapacity(group, seats);
+      if (seats !== seatsOfGroup) await AdminAcollidaInscriptionsService.setCapacity(group, seats);
+      if (cost !== costOfGroup) await AdminAcollidaInscriptionsService.setMonthlyCost(group, cost);
       await load();
     } catch (err) {
       console.error('Error saving acollida capacity:', err);
@@ -143,10 +175,27 @@ export function OccupancyTab() {
                 className="w-24 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-slate-900 dark:text-white"
               />
             </div>
+            <div>
+              <label
+                className="block text-xs font-semibold text-slate-500 mb-1"
+                htmlFor="acollida_cost"
+              >
+                {t('admin.acollida_occupancy.cost', 'Cost al mes (€)')}
+              </label>
+              <input
+                id="acollida_cost"
+                type="number"
+                min={0}
+                step="0.01"
+                value={costDraft}
+                onChange={(e) => setCostDraft(e.target.value)}
+                className="w-28 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-slate-900 dark:text-white"
+              />
+            </div>
             <button
               type="button"
               onClick={saveSeats}
-              disabled={saving || seatsDraft === String(seatsOfGroup)}
+              disabled={saving || (seatsDraft === String(seatsOfGroup) && costDraft === String(costOfGroup))}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-bold transition-colors"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -162,6 +211,72 @@ export function OccupancyTab() {
           )}
         </p>
       </div>
+
+      {coverageOfGroup && (
+        <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+          {(() => {
+            const level = coverageLevel(coverageOfGroup);
+            const percent = coveragePercent(coverageOfGroup);
+            const missing = placesToBreakEven(coverageOfGroup, bestMonthlyFee);
+
+            const tone =
+              level === 'covered'
+                ? { bar: 'bg-green-500', text: 'text-green-700 dark:text-green-300' }
+                : level === 'close'
+                  ? { bar: 'bg-amber-500', text: 'text-amber-700 dark:text-amber-300' }
+                  : { bar: 'bg-red-500', text: 'text-red-700 dark:text-red-300' };
+
+            return (
+              <>
+                <div className="flex items-baseline justify-between gap-3 flex-wrap">
+                  <p className="font-black text-slate-900 dark:text-white">
+                    {t('admin.acollida_occupancy.coverage_title', 'Cobreix el mes el seu cost?')}
+                  </p>
+                  {level === 'unset' ? (
+                    <p className="text-sm text-slate-500">
+                      {t('admin.acollida_occupancy.coverage_unset', 'Posa el cost del monitoratge per veure-ho.')}
+                    </p>
+                  ) : (
+                    <p className={`text-sm font-bold ${tone.text}`}>{percent}%</p>
+                  )}
+                </div>
+
+                {level !== 'unset' && (
+                  <>
+                    <div className="mt-3 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                      <div
+                        className={`h-full ${tone.bar} transition-all`}
+                        style={{ width: `${Math.min(100, percent)}%` }}
+                      />
+                    </div>
+
+                    <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+                      {t('admin.acollida_occupancy.coverage_line', '{{confirmed}} confirmades · {{revenue}} previstos · cost {{cost}}', {
+                        confirmed: coverageOfGroup.confirmed,
+                        revenue: formatEuro(coverageOfGroup.revenue),
+                        cost: formatEuro(coverageOfGroup.monthly_cost),
+                      })}
+                    </p>
+
+                    <p className={`mt-1 text-sm font-semibold ${tone.text}`}>
+                      {missing > 0
+                        ? t('admin.acollida_occupancy.coverage_missing', 'Falten {{count}} quotes mensuals per cobrir-lo', { count: missing })
+                        : t('admin.acollida_occupancy.coverage_ok', "El mes es paga sol; a partir d'aquí és marge.")}
+                    </p>
+                  </>
+                )}
+
+                <p className="mt-3 text-xs text-slate-500">
+                  {t(
+                    'admin.acollida_occupancy.coverage_hint',
+                    "El cost és fix: el monitoratge val el mateix vinguin deu infants o dos, així que cada plaça buida són diners que ningú paga. L'ingrés surt de la mateixa funció que genera els rebuts.",
+                  )}
+                </p>
+              </>
+            );
+          })()}
+        </section>
+      )}
 
       {error && (
         <div className="flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/40 rounded-2xl p-4">

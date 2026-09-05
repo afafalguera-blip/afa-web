@@ -1859,7 +1859,14 @@
       "status_full": "That day has no seats left: {{detail}}"
     },
     "acollida_occupancy": {
+      "cost": "Cost per month (€)",
       "counts_hint": "Only confirmed requests count: a pending one holds no seat.",
+      "coverage_hint": "The cost is fixed: monitoring costs the same whether ten children come or two, so every empty place is money nobody pays. The revenue comes from the same function that writes the receipts.",
+      "coverage_line": "{{confirmed}} confirmed · {{revenue}} expected · cost {{cost}}",
+      "coverage_missing": "{{count}} more monthly fees would cover it",
+      "coverage_ok": "The month pays for itself; everything above this is margin.",
+      "coverage_title": "Does the month cover its cost?",
+      "coverage_unset": "Enter the monitoring cost to see this.",
       "full_days": "{{count}} full days",
       "group_afternoon": "Afternoon",
       "group_morning": "Morning",

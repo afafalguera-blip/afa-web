@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import type { Coverage } from '../../logic/acollidaCoverage';
 import type {
   AcollidaCapacity,
   AcollidaCapacityGroup,
@@ -172,6 +173,29 @@ export const AdminAcollidaInscriptionsService = {
       .update({ seats, updated_at: new Date().toISOString() })
       .eq('capacity_group', group);
     if (error) throw error;
+  },
+
+  async setMonthlyCost(group: AcollidaCapacityGroup, monthlyCost: number): Promise<void> {
+    const { error } = await supabase
+      .from('acollida_capacity')
+      .update({ monthly_cost: monthlyCost, updated_at: new Date().toISOString() })
+      .eq('capacity_group', group);
+    if (error) throw error;
+  },
+
+  /**
+   * What the confirmed sign-ups of a month add up to, against what the room
+   * costs. Both figures come from the database, and the revenue from the very
+   * function that writes the receipts — a forecast computed some other way
+   * would end up disagreeing with the bill.
+   */
+  async getCoverage(month: number, year: number): Promise<Coverage[]> {
+    const { data, error } = await supabase.rpc('acollida_month_coverage', {
+      p_month: month,
+      p_year: year,
+    });
+    if (error) throw error;
+    return (data || []) as Coverage[];
   },
 
   async update(id: string, patch: Partial<AcollidaInscription>): Promise<void> {
