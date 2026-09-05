@@ -152,6 +152,7 @@ CREATE OR REPLACE FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to"
     SELECT d::date AS day
     FROM generate_series(p_from, p_to, interval '1 day') d
     WHERE extract(isodow FROM d) BETWEEN 1 AND 5
+      AND NOT EXISTS (SELECT 1 FROM public.school_closed_days c WHERE c.day = d::date)
   ),
   groups AS (
     SELECT capacity_group, seats FROM public.acollida_capacity
@@ -409,6 +410,35 @@ $$;
 
 
 ALTER FUNCTION "public"."check_acollida_capacity"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."check_acollida_closed_days"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE v_day date;
+BEGIN
+  IF NEW.modality <> 'ocasional' OR coalesce(array_length(NEW.occasional_dates, 1), 0) = 0 THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT c.day INTO v_day
+  FROM public.school_closed_days c
+  WHERE c.day = ANY (NEW.occasional_dates)
+  ORDER BY c.day
+  LIMIT 1;
+
+  IF v_day IS NOT NULL THEN
+    RAISE EXCEPTION 'No hi ha escola el %', to_char(v_day, 'DD/MM/YYYY')
+      USING ERRCODE = 'P0101';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."check_acollida_closed_days"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."check_acollida_rate_limit"() RETURNS "trigger"
@@ -2799,6 +2829,27 @@ COMMENT ON TABLE "public"."projects" IS 'Stores AFA projects and initiatives';
 
 
 
+CREATE TABLE IF NOT EXISTS "public"."school_closed_days" (
+    "day" "date" NOT NULL,
+    "kind" "text" DEFAULT 'festiu'::"text" NOT NULL,
+    "label" "text",
+    "academic_year" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "school_closed_days_kind_check" CHECK (("kind" = ANY (ARRAY['festiu'::"text", 'lliure_disposicio'::"text", 'vacances'::"text", 'altres'::"text"])))
+);
+
+
+ALTER TABLE "public"."school_closed_days" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."school_closed_days" IS 'Dies sense escola. Un dia que hi és aquí no té acollida: ni es pot demanar al formulari ni compta a la graella d''ocupació.';
+
+
+
+COMMENT ON COLUMN "public"."school_closed_days"."kind" IS 'festiu (oficial o local) | lliure_disposicio (les 4 del centre) | vacances | altres.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."shop_order_items" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "order_id" "uuid",
@@ -3104,6 +3155,11 @@ ALTER TABLE ONLY "public"."projects"
 
 
 
+ALTER TABLE ONLY "public"."school_closed_days"
+    ADD CONSTRAINT "school_closed_days_pkey" PRIMARY KEY ("day");
+
+
+
 ALTER TABLE ONLY "public"."shop_order_items"
     ADD CONSTRAINT "shop_order_items_pkey" PRIMARY KEY ("id");
 
@@ -3352,6 +3408,10 @@ CREATE INDEX "idx_projects_status" ON "public"."projects" USING "btree" ("status
 
 
 
+CREATE INDEX "idx_school_closed_days_year" ON "public"."school_closed_days" USING "btree" ("academic_year");
+
+
+
 CREATE INDEX "idx_shop_order_items_order_id" ON "public"."shop_order_items" USING "btree" ("order_id");
 
 
@@ -3433,6 +3493,10 @@ CREATE OR REPLACE TRIGGER "tr_sync_stock" AFTER INSERT OR DELETE OR UPDATE ON "p
 
 
 CREATE OR REPLACE TRIGGER "tr_update_order_total" AFTER INSERT OR DELETE OR UPDATE ON "public"."shop_order_items" FOR EACH ROW EXECUTE FUNCTION "public"."update_shop_order_total"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_acollida_closed_days" BEFORE INSERT OR UPDATE ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."check_acollida_closed_days"();
 
 
 
@@ -3932,6 +3996,10 @@ CREATE POLICY "Admins can write acollida capacity" ON "public"."acollida_capacit
 
 
 
+CREATE POLICY "Admins can write closed days" ON "public"."school_closed_days" TO "authenticated" USING ("public"."is_admin"()) WITH CHECK ("public"."is_admin"());
+
+
+
 CREATE POLICY "Admins delete bank imports" ON "public"."bank_imports" FOR DELETE TO "authenticated" USING ("public"."is_admin"());
 
 
@@ -4043,6 +4111,10 @@ CREATE POLICY "Anyone can read active projects" ON "public"."projects" FOR SELEC
 
 
 CREATE POLICY "Anyone can read announcements" ON "public"."site_announcements" FOR SELECT USING (true);
+
+
+
+CREATE POLICY "Anyone can read closed days" ON "public"."school_closed_days" FOR SELECT TO "authenticated", "anon" USING (true);
 
 
 
@@ -4253,6 +4325,9 @@ CREATE POLICY "profiles_update_own" ON "public"."profiles" FOR UPDATE TO "authen
 
 
 ALTER TABLE "public"."projects" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."school_closed_days" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."shop_order_items" ENABLE ROW LEVEL SECURITY;
@@ -4542,6 +4617,12 @@ GRANT ALL ON FUNCTION "public"."book_price_for"("p_course" "text") TO "service_r
 GRANT ALL ON FUNCTION "public"."check_acollida_capacity"() TO "anon";
 GRANT ALL ON FUNCTION "public"."check_acollida_capacity"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."check_acollida_capacity"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."check_acollida_closed_days"() TO "anon";
+GRANT ALL ON FUNCTION "public"."check_acollida_closed_days"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_acollida_closed_days"() TO "service_role";
 
 
 
@@ -5100,6 +5181,12 @@ GRANT ALL ON TABLE "public"."profiles" TO "service_role";
 GRANT ALL ON TABLE "public"."projects" TO "anon";
 GRANT ALL ON TABLE "public"."projects" TO "authenticated";
 GRANT ALL ON TABLE "public"."projects" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."school_closed_days" TO "anon";
+GRANT ALL ON TABLE "public"."school_closed_days" TO "authenticated";
+GRANT ALL ON TABLE "public"."school_closed_days" TO "service_role";
 
 
 
