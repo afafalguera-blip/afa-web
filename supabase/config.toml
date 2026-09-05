@@ -401,8 +401,9 @@ verify_jwt = false
 
 # El resto se invocan siempre con un JWT válido, así que mantienen la
 # verificación activada:
-#   send-contact-email / send-order-email / send-inscription-email → webhooks de
-#     la base de datos, que envían el service_role en Authorization.
+#   send-contact-email / send-order-email / send-inscription-email /
+#     send-acollida-email → webhooks de la base de datos, que envían el
+#     service_role en Authorization.
 #   translate → el panel de admin, con el access_token de la sesión.
 #
 # OJO con `usage-alert`: su cron (20260417010000_usage_alert_cron.sql) tampoco
