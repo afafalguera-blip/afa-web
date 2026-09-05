@@ -148,38 +148,230 @@ $$;
 ALTER FUNCTION "public"."acollida_inscripcio_defaults"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."acollida_link_child"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE v_id uuid;
+BEGIN
+  IF NEW.child_id IS NOT NULL THEN RETURN NEW; END IF;
+
+  SELECT id INTO v_id FROM public.children
+  WHERE match_key = lower(btrim(NEW.child_name)) || ' ' || lower(btrim(NEW.child_surname))
+    AND course = NEW.course;
+
+  IF v_id IS NULL THEN
+    INSERT INTO public.children (name, surname, course, family_email, family_phone, afa_member, source)
+    VALUES (btrim(NEW.child_name), btrim(NEW.child_surname), NEW.course,
+            NEW.parent_email, NEW.parent_phone, NEW.afa_member, 'acollida')
+    ON CONFLICT (match_key, course) DO UPDATE SET updated_at = now()
+    RETURNING id INTO v_id;
+  END IF;
+
+  NEW.child_id := v_id;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_link_child"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_monitor_link_id"("p_token" "text") RETURNS "uuid"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE v_id uuid;
+BEGIN
+  IF coalesce(length(p_token), 0) < 20 THEN
+    RAISE EXCEPTION 'Enllaç no vàlid' USING ERRCODE = 'P0102';
+  END IF;
+
+  SELECT id INTO v_id FROM public.acollida_monitor_links
+  WHERE token = p_token AND active;
+
+  IF v_id IS NULL THEN
+    RAISE EXCEPTION 'Enllaç no vàlid' USING ERRCODE = 'P0102';
+  END IF;
+
+  UPDATE public.acollida_monitor_links SET last_used_at = now() WHERE id = v_id;
+  RETURN v_id;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_monitor_link_id"("p_token" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_monitor_mark"("p_token" "text", "p_day" "date", "p_child_id" "uuid", "p_present" boolean, "p_rate_id" "uuid" DEFAULT NULL::"uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE v_link uuid;
+BEGIN
+  v_link := public.acollida_monitor_link_id(p_token);
+
+  IF p_day > current_date OR p_day < current_date - 1 THEN
+    RAISE EXCEPTION 'Només es pot passar llista d''avui o d''ahir' USING ERRCODE = 'P0103';
+  END IF;
+
+  IF p_present THEN
+    INSERT INTO public.acollida_attendance (day, child_id, rate_id, source, link_id)
+    VALUES (p_day, p_child_id, p_rate_id, 'monitor', v_link)
+    ON CONFLICT ON CONSTRAINT uq_acollida_attendance
+    DO UPDATE SET rate_id = coalesce(EXCLUDED.rate_id, public.acollida_attendance.rate_id);
+  ELSE
+    DELETE FROM public.acollida_attendance WHERE day = p_day AND child_id = p_child_id;
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_monitor_mark"("p_token" "text", "p_day" "date", "p_child_id" "uuid", "p_present" boolean, "p_rate_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_monitor_roster"("p_token" "text", "p_day" "date") RETURNS TABLE("child_id" "uuid", "name" "text", "surname" "text", "course" "text", "expected" boolean, "present" boolean, "rate_id" "uuid", "slot" "text", "modality" "text")
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE v_group text;
+BEGIN
+  SELECT l.capacity_group INTO v_group
+  FROM public.acollida_monitor_links l
+  WHERE l.id = public.acollida_monitor_link_id(p_token);
+
+  RETURN QUERY
+  WITH expected AS (
+    SELECT DISTINCT ON (c.id)
+      c.id AS child_id, i.rate_id, r.horari, i.modality
+    FROM public.acollida_inscripcions i
+    JOIN public.children c ON c.id = i.child_id
+    JOIN public.acollida_rates r ON r.id = i.rate_id
+    WHERE i.status = 'confirmada'
+      AND r.capacity_group = v_group
+      AND (
+        (i.modality = 'mensual'
+          AND extract(isodow FROM p_day)::smallint = ANY (i.weekdays)
+          AND (i.start_year IS NULL OR i.start_month IS NULL
+               OR (i.start_year * 12 + i.start_month)
+                  <= (extract(year FROM p_day)::int * 12 + extract(month FROM p_day)::int)))
+        OR (i.modality = 'ocasional' AND p_day = ANY (i.occasional_dates))
+      )
+    ORDER BY c.id, i.created_at
+  ),
+  marked AS (
+    SELECT a.child_id, a.rate_id FROM public.acollida_attendance a WHERE a.day = p_day
+  )
+  SELECT
+    c.id, c.name, c.surname, c.course,
+    (e.child_id IS NOT NULL) AS expected,
+    (m.child_id IS NOT NULL) AS present,
+    coalesce(m.rate_id, e.rate_id) AS rate_id,
+    e.horari AS slot,
+    e.modality
+  FROM public.children c
+  LEFT JOIN expected e ON e.child_id = c.id
+  LEFT JOIN marked m ON m.child_id = c.id
+  WHERE e.child_id IS NOT NULL OR m.child_id IS NOT NULL
+  ORDER BY c.surname, c.name;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_monitor_roster"("p_token" "text", "p_day" "date") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_monitor_search"("p_token" "text", "p_query" "text") RETURNS TABLE("child_id" "uuid", "name" "text", "surname" "text", "course" "text")
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+BEGIN
+  PERFORM public.acollida_monitor_link_id(p_token);
+
+  IF coalesce(length(btrim(p_query)), 0) < 3 THEN
+    RETURN;
+  END IF;
+
+  RETURN QUERY
+  SELECT c.id, c.name, c.surname, c.course
+  FROM public.children c
+  WHERE c.active
+    AND (c.name ILIKE '%' || btrim(p_query) || '%' OR c.surname ILIKE '%' || btrim(p_query) || '%')
+  ORDER BY c.surname, c.name
+  LIMIT 25;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_monitor_search"("p_token" "text", "p_query" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) RETURNS numeric
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
     AS $$
 DECLARE
   v_ins record;
-  v_amount numeric;
+  v_amount numeric := 0;
   v_month_price numeric;
+  v_day_price numeric;
   v_days int;
+  v_extra int;
+  v_has_attendance boolean;
 BEGIN
   SELECT * INTO v_ins FROM public.acollida_inscripcions WHERE id = p_inscripcio_id;
   IF NOT FOUND THEN RETURN NULL; END IF;
 
+  v_month_price := public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
+  v_day_price := coalesce(public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, true), 0);
+
+  SELECT EXISTS (
+    SELECT 1 FROM public.acollida_attendance a
+    WHERE a.child_id = v_ins.child_id
+      AND extract(month FROM a.day)::int = p_month
+      AND extract(year FROM a.day)::int = p_year
+  ) INTO v_has_attendance;
+
   IF v_ins.modality = 'mensual' THEN
-    -- Encara no ha comencat: aquest mes no es cobra.
+    -- Encara no ha començat: aquest mes no es cobra.
     IF v_ins.start_year IS NOT NULL AND v_ins.start_month IS NOT NULL
        AND (v_ins.start_year * 12 + v_ins.start_month) > (p_year * 12 + p_month) THEN
       RETURN 0;
     END IF;
-    RETURN public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
+
+    v_amount := coalesce(v_month_price, 0);
+
+    -- Dies marcats que cauen fora dels seus dies de la setmana.
+    IF v_has_attendance AND v_ins.child_id IS NOT NULL THEN
+      SELECT count(*) INTO v_extra
+      FROM public.acollida_attendance a
+      WHERE a.child_id = v_ins.child_id
+        AND extract(month FROM a.day)::int = p_month
+        AND extract(year FROM a.day)::int = p_year
+        AND NOT (extract(isodow FROM a.day)::smallint = ANY (v_ins.weekdays));
+
+      v_amount := v_amount + coalesce(v_extra, 0) * v_day_price;
+    END IF;
+
+  ELSE
+    IF v_has_attendance AND v_ins.child_id IS NOT NULL THEN
+      SELECT count(*) INTO v_days
+      FROM public.acollida_attendance a
+      WHERE a.child_id = v_ins.child_id
+        AND extract(month FROM a.day)::int = p_month
+        AND extract(year FROM a.day)::int = p_year;
+    ELSE
+      -- Ningú va passar llista: es cobra el que la família va demanar.
+      SELECT count(*) INTO v_days
+      FROM unnest(v_ins.occasional_dates) d
+      WHERE extract(month FROM d)::int = p_month AND extract(year FROM d)::int = p_year;
+    END IF;
+
+    IF coalesce(v_days, 0) = 0 THEN RETURN 0; END IF;
+    v_amount := v_days * v_day_price;
   END IF;
 
-  SELECT count(*) INTO v_days
-  FROM unnest(v_ins.occasional_dates) d
-  WHERE extract(month FROM d)::int = p_month AND extract(year FROM d)::int = p_year;
-
-  IF coalesce(v_days, 0) = 0 THEN RETURN 0; END IF;
-
-  v_amount := coalesce(public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, true), 0) * v_days;
-
-  -- El sostre: a partir d'aqui sortia mes barat el mes sencer.
-  v_month_price := public.acollida_price_for(v_ins.rate_id, v_ins.afa_member, false);
+  -- El sostre, sempre l'últim: ni la suma d'extres pot passar de la quota.
   IF v_month_price IS NOT NULL AND v_amount > v_month_price THEN
     v_amount := v_month_price;
   END IF;
@@ -341,6 +533,30 @@ $$;
 
 
 ALTER FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_unbilled_attendance"("p_month" integer, "p_year" integer) RETURNS TABLE("child_id" "uuid", "name" "text", "surname" "text", "course" "text", "days" integer, "first_day" "date", "last_day" "date")
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+  SELECT c.id, c.name, c.surname, c.course,
+         count(*)::int AS days, min(a.day) AS first_day, max(a.day) AS last_day
+  FROM public.acollida_attendance a
+  JOIN public.children c ON c.id = a.child_id
+  WHERE extract(month FROM a.day)::int = p_month
+    AND extract(year FROM a.day)::int = p_year
+    AND NOT EXISTS (
+      SELECT 1 FROM public.acollida_inscripcions i
+      WHERE i.child_id = a.child_id
+        AND i.status = 'confirmada'
+        AND i.academic_year = public.academic_year_for(p_month, p_year)
+    )
+  GROUP BY c.id, c.name, c.surname, c.course
+  ORDER BY c.surname, c.name;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_unbilled_attendance"("p_month" integer, "p_year" integer) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."activity_monthly_price"("p_activity" "text", "p_is_member" boolean) RETURNS numeric
@@ -735,6 +951,17 @@ $$;
 
 
 ALTER FUNCTION "public"."check_inscripcio_rate_limit"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."children_touch"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+BEGIN NEW.updated_at := now(); RETURN NEW; END;
+$$;
+
+
+ALTER FUNCTION "public"."children_touch"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."client_errors_resumen"("p_dias" integer DEFAULT 7) RETURNS TABLE("fingerprint" "text", "kind" "text", "message" "text", "veces" bigint, "afectados" bigint, "primera_vez" timestamp with time zone, "ultima_vez" timestamp with time zone, "resueltos" bigint)
@@ -2180,6 +2407,25 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
+CREATE TABLE IF NOT EXISTS "public"."acollida_attendance" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "day" "date" NOT NULL,
+    "child_id" "uuid" NOT NULL,
+    "rate_id" "uuid",
+    "source" "text" DEFAULT 'monitor'::"text" NOT NULL,
+    "link_id" "uuid",
+    CONSTRAINT "acollida_attendance_source_check" CHECK (("source" = ANY (ARRAY['monitor'::"text", 'admin'::"text"])))
+);
+
+
+ALTER TABLE "public"."acollida_attendance" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."acollida_attendance" IS 'Assistència real a l''acollida, una fila per infant i dia. El rebut de final de mes en surt: la quota mensual no la mou, però els dies solts es cobren pels que va marcar la monitora.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."acollida_capacity" (
     "capacity_group" "text" NOT NULL,
     "seats" integer NOT NULL,
@@ -2217,6 +2463,7 @@ CREATE TABLE IF NOT EXISTS "public"."acollida_inscripcions" (
     "notes" "text",
     "status" "text" DEFAULT 'pendent'::"text" NOT NULL,
     "form_language" "text" DEFAULT 'ca'::"text" NOT NULL,
+    "child_id" "uuid",
     CONSTRAINT "acollida_inscripcions_modality_check" CHECK (("modality" = ANY (ARRAY['mensual'::"text", 'ocasional'::"text"]))),
     CONSTRAINT "acollida_inscripcions_month_check" CHECK ((("start_month" IS NULL) OR (("start_month" >= 1) AND ("start_month" <= 12)))),
     CONSTRAINT "acollida_inscripcions_status_check" CHECK (("status" = ANY (ARRAY['pendent'::"text", 'confirmada'::"text", 'baixa'::"text", 'llista_espera'::"text"]))),
@@ -2240,6 +2487,25 @@ COMMENT ON COLUMN "public"."acollida_inscripcions"."occasional_dates" IS 'Dates 
 
 
 COMMENT ON COLUMN "public"."acollida_inscripcions"."status" IS 'confirmada (té plaça; s''aprova sola per ordre d''arribada) | llista_espera (el dia era ple) | pendent (l''AFA l''ha tornada a obrir a mà) | baixa.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."acollida_monitor_links" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "token" "text" NOT NULL,
+    "label" "text" DEFAULT 'Monitoratge'::"text" NOT NULL,
+    "capacity_group" "text" DEFAULT 'mati'::"text" NOT NULL,
+    "active" boolean DEFAULT true NOT NULL,
+    "last_used_at" timestamp with time zone,
+    CONSTRAINT "acollida_monitor_links_group_check" CHECK (("capacity_group" = ANY (ARRAY['mati'::"text", 'tarda'::"text"])))
+);
+
+
+ALTER TABLE "public"."acollida_monitor_links" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."acollida_monitor_links" IS 'Enllaços sense contrasenya per passar llista. Donen accés a noms de menors: es revoquen desmarcant «actiu», i el token no es reutilitza mai.';
 
 
 
@@ -2464,6 +2730,35 @@ CREATE TABLE IF NOT EXISTS "public"."board_members" (
 
 
 ALTER TABLE "public"."board_members" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."children" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "name" "text" NOT NULL,
+    "surname" "text" NOT NULL,
+    "course" "text" NOT NULL,
+    "family_email" "text",
+    "family_phone" "text",
+    "afa_member" boolean,
+    "active" boolean DEFAULT true NOT NULL,
+    "source" "text" DEFAULT 'manual'::"text" NOT NULL,
+    "notes" "text",
+    "match_key" "text" GENERATED ALWAYS AS ((("lower"("btrim"("name")) || ' '::"text") || "lower"("btrim"("surname")))) STORED,
+    CONSTRAINT "children_source_check" CHECK (("source" = ANY (ARRAY['manual'::"text", 'import'::"text", 'acollida'::"text", 'inscripcions'::"text"])))
+);
+
+
+ALTER TABLE "public"."children" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."children" IS 'Cens d''infants del centre. És l''única llista que existeix: fins ara cada inscripció es guardava els seus noms i ningú els podia creuar.';
+
+
+
+COMMENT ON COLUMN "public"."children"."match_key" IS 'nom i cognoms en minúscules i sense espais de sobra, per no duplicar el mateix infant escrit de dues maneres.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."client_errors" (
@@ -3081,6 +3376,11 @@ CREATE TABLE IF NOT EXISTS "public"."site_config" (
 ALTER TABLE "public"."site_config" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "public"."acollida_attendance"
+    ADD CONSTRAINT "acollida_attendance_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."acollida_capacity"
     ADD CONSTRAINT "acollida_capacity_pkey" PRIMARY KEY ("capacity_group");
 
@@ -3088,6 +3388,16 @@ ALTER TABLE ONLY "public"."acollida_capacity"
 
 ALTER TABLE ONLY "public"."acollida_inscripcions"
     ADD CONSTRAINT "acollida_inscripcions_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."acollida_monitor_links"
+    ADD CONSTRAINT "acollida_monitor_links_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."acollida_monitor_links"
+    ADD CONSTRAINT "acollida_monitor_links_token_key" UNIQUE ("token");
 
 
 
@@ -3143,6 +3453,11 @@ ALTER TABLE ONLY "public"."bank_imports"
 
 ALTER TABLE ONLY "public"."board_members"
     ADD CONSTRAINT "board_members_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."children"
+    ADD CONSTRAINT "children_pkey" PRIMARY KEY ("id");
 
 
 
@@ -3301,12 +3616,29 @@ ALTER TABLE ONLY "public"."site_config"
 
 
 
+ALTER TABLE ONLY "public"."acollida_attendance"
+    ADD CONSTRAINT "uq_acollida_attendance" UNIQUE ("day", "child_id");
+
+
+
 ALTER TABLE ONLY "public"."payments"
     ADD CONSTRAINT "uq_payments_student_month" UNIQUE ("student_name", "student_surname", "course", "concept", "payment_month", "payment_year");
 
 
 
 CREATE INDEX "events_date_range_idx" ON "public"."events" USING "btree" ("event_date", "end_date");
+
+
+
+CREATE INDEX "idx_acollida_attendance_child" ON "public"."acollida_attendance" USING "btree" ("child_id", "day");
+
+
+
+CREATE INDEX "idx_acollida_attendance_day" ON "public"."acollida_attendance" USING "btree" ("day");
+
+
+
+CREATE INDEX "idx_acollida_ins_child" ON "public"."acollida_inscripcions" USING "btree" ("child_id");
 
 
 
@@ -3387,6 +3719,14 @@ CREATE INDEX "idx_bank_imports_hash" ON "public"."bank_imports" USING "btree" ("
 
 
 CREATE INDEX "idx_board_members_order" ON "public"."board_members" USING "btree" ("is_visible", "display_order");
+
+
+
+CREATE INDEX "idx_children_active" ON "public"."children" USING "btree" ("active");
+
+
+
+CREATE INDEX "idx_children_course" ON "public"."children" USING "btree" ("course");
 
 
 
@@ -3566,6 +3906,10 @@ CREATE INDEX "payments_parent_email_idx" ON "public"."payments" USING "btree" ("
 
 
 
+CREATE UNIQUE INDEX "uq_children_match" ON "public"."children" USING "btree" ("match_key", "course");
+
+
+
 CREATE OR REPLACE TRIGGER "events_fill_end_date_trg" BEFORE INSERT OR UPDATE ON "public"."events" FOR EACH ROW EXECUTE FUNCTION "public"."events_fill_end_date"();
 
 
@@ -3615,6 +3959,10 @@ CREATE OR REPLACE TRIGGER "trg_acollida_closed_days" BEFORE INSERT OR UPDATE ON 
 
 
 CREATE OR REPLACE TRIGGER "trg_acollida_inscripcio_defaults" BEFORE INSERT OR UPDATE ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."acollida_inscripcio_defaults"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_acollida_link_child" BEFORE INSERT OR UPDATE OF "child_name", "child_surname", "course" ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."acollida_link_child"();
 
 
 
@@ -3734,6 +4082,10 @@ CREATE OR REPLACE TRIGGER "trg_board_members_updated_at" BEFORE UPDATE ON "publi
 
 
 
+CREATE OR REPLACE TRIGGER "trg_children_touch" BEFORE UPDATE ON "public"."children" FOR EACH ROW EXECUTE FUNCTION "public"."children_touch"();
+
+
+
 CREATE OR REPLACE TRIGGER "trg_contact_message_rate_limit" BEFORE INSERT ON "public"."contact_messages" FOR EACH ROW EXECUTE FUNCTION "public"."check_contact_message_rate_limit"();
 
 
@@ -3811,6 +4163,21 @@ CREATE OR REPLACE TRIGGER "update_projects_updated_at" BEFORE UPDATE ON "public"
 
 
 CREATE OR REPLACE TRIGGER "update_site_announcements_updated_at" BEFORE UPDATE ON "public"."site_announcements" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at"();
+
+
+
+ALTER TABLE ONLY "public"."acollida_attendance"
+    ADD CONSTRAINT "acollida_attendance_child_id_fkey" FOREIGN KEY ("child_id") REFERENCES "public"."children"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."acollida_attendance"
+    ADD CONSTRAINT "acollida_attendance_rate_id_fkey" FOREIGN KEY ("rate_id") REFERENCES "public"."acollida_rates"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."acollida_inscripcions"
+    ADD CONSTRAINT "acollida_inscripcions_child_id_fkey" FOREIGN KEY ("child_id") REFERENCES "public"."children"("id") ON DELETE SET NULL;
 
 
 
@@ -4174,6 +4541,18 @@ CREATE POLICY "Admins insert payer aliases" ON "public"."payer_aliases" FOR INSE
 
 
 
+CREATE POLICY "Admins manage attendance" ON "public"."acollida_attendance" TO "authenticated" USING ("public"."is_admin"()) WITH CHECK ("public"."is_admin"());
+
+
+
+CREATE POLICY "Admins manage children" ON "public"."children" TO "authenticated" USING ("public"."is_admin"()) WITH CHECK ("public"."is_admin"());
+
+
+
+CREATE POLICY "Admins manage monitor links" ON "public"."acollida_monitor_links" TO "authenticated" USING ("public"."is_admin"()) WITH CHECK ("public"."is_admin"());
+
+
+
 CREATE POLICY "Admins read all forms" ON "public"."forms" FOR SELECT TO "authenticated" USING ("public"."is_admin"());
 
 
@@ -4320,10 +4699,16 @@ CREATE POLICY "Users can view their own order items" ON "public"."shop_order_ite
 
 
 
+ALTER TABLE "public"."acollida_attendance" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."acollida_capacity" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."acollida_inscripcions" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."acollida_monitor_links" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."acollida_rates" ENABLE ROW LEVEL SECURITY;
@@ -4355,6 +4740,9 @@ ALTER TABLE "public"."bank_imports" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."board_members" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."children" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."client_errors" ENABLE ROW LEVEL SECURITY;
@@ -4686,6 +5074,38 @@ GRANT ALL ON FUNCTION "public"."acollida_inscripcio_defaults"() TO "service_role
 
 
 
+GRANT ALL ON FUNCTION "public"."acollida_link_child"() TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_link_child"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_link_child"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_monitor_link_id"("p_token" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_monitor_link_id"("p_token" "text") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_monitor_mark"("p_token" "text", "p_day" "date", "p_child_id" "uuid", "p_present" boolean, "p_rate_id" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_monitor_mark"("p_token" "text", "p_day" "date", "p_child_id" "uuid", "p_present" boolean, "p_rate_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_monitor_mark"("p_token" "text", "p_day" "date", "p_child_id" "uuid", "p_present" boolean, "p_rate_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_monitor_mark"("p_token" "text", "p_day" "date", "p_child_id" "uuid", "p_present" boolean, "p_rate_id" "uuid") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_monitor_roster"("p_token" "text", "p_day" "date") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_monitor_roster"("p_token" "text", "p_day" "date") TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_monitor_roster"("p_token" "text", "p_day" "date") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_monitor_roster"("p_token" "text", "p_day" "date") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_monitor_search"("p_token" "text", "p_query" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_monitor_search"("p_token" "text", "p_query" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_monitor_search"("p_token" "text", "p_query" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_monitor_search"("p_token" "text", "p_query" "text") TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."acollida_month_amount"("p_inscripcio_id" "uuid", "p_month" integer, "p_year" integer) TO "service_role";
@@ -4718,6 +5138,12 @@ GRANT ALL ON FUNCTION "public"."acollida_price_for"("p_rate_id" "uuid", "p_is_me
 REVOKE ALL ON FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_unbilled_attendance"("p_month" integer, "p_year" integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_unbilled_attendance"("p_month" integer, "p_year" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_unbilled_attendance"("p_month" integer, "p_year" integer) TO "service_role";
 
 
 
@@ -4799,6 +5225,12 @@ GRANT ALL ON FUNCTION "public"."check_inscripcio_duplicada"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."check_inscripcio_rate_limit"() TO "anon";
 GRANT ALL ON FUNCTION "public"."check_inscripcio_rate_limit"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."check_inscripcio_rate_limit"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."children_touch"() TO "anon";
+GRANT ALL ON FUNCTION "public"."children_touch"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."children_touch"() TO "service_role";
 
 
 
@@ -5139,6 +5571,12 @@ GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."acollida_attendance" TO "anon";
+GRANT ALL ON TABLE "public"."acollida_attendance" TO "authenticated";
+GRANT ALL ON TABLE "public"."acollida_attendance" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."acollida_capacity" TO "anon";
 GRANT ALL ON TABLE "public"."acollida_capacity" TO "authenticated";
 GRANT ALL ON TABLE "public"."acollida_capacity" TO "service_role";
@@ -5148,6 +5586,12 @@ GRANT ALL ON TABLE "public"."acollida_capacity" TO "service_role";
 GRANT ALL ON TABLE "public"."acollida_inscripcions" TO "anon";
 GRANT ALL ON TABLE "public"."acollida_inscripcions" TO "authenticated";
 GRANT ALL ON TABLE "public"."acollida_inscripcions" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."acollida_monitor_links" TO "anon";
+GRANT ALL ON TABLE "public"."acollida_monitor_links" TO "authenticated";
+GRANT ALL ON TABLE "public"."acollida_monitor_links" TO "service_role";
 
 
 
@@ -5207,6 +5651,12 @@ GRANT ALL ON TABLE "public"."bank_imports" TO "service_role";
 GRANT ALL ON TABLE "public"."board_members" TO "anon";
 GRANT ALL ON TABLE "public"."board_members" TO "authenticated";
 GRANT ALL ON TABLE "public"."board_members" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."children" TO "anon";
+GRANT ALL ON TABLE "public"."children" TO "authenticated";
+GRANT ALL ON TABLE "public"."children" TO "service_role";
 
 
 

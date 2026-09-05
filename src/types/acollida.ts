@@ -169,3 +169,52 @@ export interface SchoolClosedDay {
   label: string | null;
   academic_year: string | null;
 }
+
+/** One child in the centre's roll. The only list of children that exists. */
+export interface Child {
+  id: string;
+  name: string;
+  surname: string;
+  course: string;
+  family_email: string | null;
+  family_phone: string | null;
+  afa_member: boolean | null;
+  active: boolean;
+  source: 'manual' | 'import' | 'acollida' | 'inscripcions';
+  notes: string | null;
+}
+
+/** A row of the monitor's list for one day. Names only — never contact data. */
+export interface AcollidaRosterRow {
+  child_id: string;
+  name: string;
+  surname: string;
+  course: string;
+  expected: boolean;
+  present: boolean;
+  rate_id: string | null;
+  slot: string | null;
+  modality: AcollidaModality | null;
+}
+
+/** A password-less link that opens the day's list. Revocable, never reused. */
+export interface AcollidaMonitorLink {
+  id: string;
+  token: string;
+  label: string;
+  capacity_group: AcollidaCapacityGroup;
+  active: boolean;
+  created_at: string;
+  last_used_at: string | null;
+}
+
+/** A child who came without a confirmed sign-up, for the AFA to sort out. */
+export interface AcollidaUnbilledRow {
+  child_id: string;
+  name: string;
+  surname: string;
+  course: string;
+  days: number;
+  first_day: string;
+  last_day: string;
+}
