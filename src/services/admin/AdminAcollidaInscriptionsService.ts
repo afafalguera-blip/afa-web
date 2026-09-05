@@ -1,5 +1,12 @@
 import { supabase } from '../../lib/supabase';
-import type { AcollidaFilters, AcollidaInscription, AcollidaStatus } from '../../types/acollida';
+import type {
+  AcollidaCapacity,
+  AcollidaCapacityGroup,
+  AcollidaFilters,
+  AcollidaInscription,
+  AcollidaOccupancyDay,
+  AcollidaStatus,
+} from '../../types/acollida';
 
 const TABLE = 'acollida_inscripcions';
 const DEFAULT_PAGE_SIZE = 25;
@@ -20,8 +27,19 @@ export interface AcollidaStats {
   total: number;
   confirmed: number;
   pending: number;
+  waiting: number;
   monthly: number;
   occasional: number;
+}
+
+/** Raised by `check_acollida_capacity()` when a confirmation would overbook. */
+const CAPACITY_CODE = 'P0100';
+
+export class AcollidaFullError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AcollidaFullError';
+  }
 }
 
 export interface GenerateResult {
@@ -115,13 +133,44 @@ export const AdminAcollidaInscriptionsService = {
       total: rows.length,
       confirmed: rows.filter((r) => r.status === 'confirmada').length,
       pending: rows.filter((r) => r.status === 'pendent').length,
+      waiting: rows.filter((r) => r.status === 'llista_espera').length,
       monthly: rows.filter((r) => r.modality === 'mensual').length,
       occasional: rows.filter((r) => r.modality === 'ocasional').length,
     };
   },
 
+  /**
+   * Confirming is the moment a seat is taken, so it is the moment the room can
+   * turn out to be full: the database refuses and says which day, and the
+   * screen shows that sentence instead of a generic failure.
+   */
   async setStatus(id: string, status: AcollidaStatus): Promise<void> {
     const { error } = await supabase.from(TABLE).update({ status }).eq('id', id);
+    if (!error) return;
+    if ((error as { code?: string }).code === CAPACITY_CODE) {
+      throw new AcollidaFullError(error.message);
+    }
+    throw error;
+  },
+
+  /** Day-by-day occupancy of every room, for the admin calendar. */
+  async getOccupancy(from: string, to: string): Promise<AcollidaOccupancyDay[]> {
+    const { data, error } = await supabase.rpc('acollida_occupancy', { p_from: from, p_to: to });
+    if (error) throw error;
+    return (data || []) as AcollidaOccupancyDay[];
+  },
+
+  async getCapacity(): Promise<AcollidaCapacity[]> {
+    const { data, error } = await supabase.from('acollida_capacity').select('*');
+    if (error) throw error;
+    return (data || []) as AcollidaCapacity[];
+  },
+
+  async setCapacity(group: AcollidaCapacityGroup, seats: number): Promise<void> {
+    const { error } = await supabase
+      .from('acollida_capacity')
+      .update({ seats, updated_at: new Date().toISOString() })
+      .eq('capacity_group', group);
     if (error) throw error;
   },
 

@@ -27,13 +27,40 @@ export interface AcollidaRate {
   order_index: number;
   /** Offered on the public form. A rate with sign-ups is deactivated, not deleted. */
   active: boolean;
+  capacity_group: AcollidaCapacityGroup;
+}
+
+/** Seats of one room. Raising it is how an exception gets in, on the record. */
+export interface AcollidaCapacity {
+  capacity_group: AcollidaCapacityGroup;
+  seats: number;
+  updated_at?: string;
+}
+
+/** One row of `acollida_occupancy()`: how full a room is on a given day. */
+export interface AcollidaOccupancyDay {
+  day: string;
+  capacity_group: AcollidaCapacityGroup;
+  monthly: number;
+  occasional: number;
+  total: number;
+  seats: number;
+  free: number;
 }
 
 export type AcollidaModality = 'mensual' | 'ocasional';
-export type AcollidaStatus = 'pendent' | 'confirmada' | 'baixa';
+export type AcollidaStatus = 'pendent' | 'confirmada' | 'baixa' | 'llista_espera';
+
+/**
+ * Which room a time slot shares. The three morning slots all end at 9H, so
+ * between 8:30 and 9 they are the same ten children in the same room: seats
+ * belong to the group, never to the slot.
+ */
+export type AcollidaCapacityGroup = 'mati' | 'tarda';
 
 export const ACOLLIDA_MODALITIES: AcollidaModality[] = ['mensual', 'ocasional'];
-export const ACOLLIDA_STATUSES: AcollidaStatus[] = ['pendent', 'confirmada', 'baixa'];
+export const ACOLLIDA_STATUSES: AcollidaStatus[] = ['pendent', 'confirmada', 'llista_espera', 'baixa'];
+export const ACOLLIDA_CAPACITY_GROUPS: AcollidaCapacityGroup[] = ['mati', 'tarda'];
 
 /** Monday..Friday. Stored as numbers so a listing by day is language-proof. */
 export const ACOLLIDA_WEEKDAYS = [1, 2, 3, 4, 5] as const;

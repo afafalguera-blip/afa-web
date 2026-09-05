@@ -78,6 +78,9 @@ export function RatesTab() {
                 preu_no_soci_mes: 0,
                 preu_no_soci_ocasional: null,
                 active: true,
+                // Morning by default: it is where all but the June/September
+                // slots live, and the group decides which seats the slot shares.
+                capacity_group: 'mati',
                 order_index: prev.length
             }
         ]);

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Baby, ClipboardList, Euro } from 'lucide-react';
+import { Baby, ClipboardList, Euro, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { AdminPageHeader } from '../../components/admin/common/AdminPageHeader';
 import { RequestsTab } from './acollida/RequestsTab';
 import { RatesTab } from './acollida/RatesTab';
+import { OccupancyTab } from './acollida/OccupancyTab';
 
-type Tab = 'requests' | 'rates';
+type Tab = 'requests' | 'occupancy' | 'rates';
 
 interface TabDef {
     id: Tab;
@@ -23,6 +24,7 @@ interface TabDef {
  */
 const TABS: TabDef[] = [
     { id: 'requests', icon: ClipboardList, labelKey: 'admin.acollida.tabs.requests', labelDefault: 'Sol·licituds' },
+    { id: 'occupancy', icon: Users, labelKey: 'admin.acollida.tabs.occupancy', labelDefault: 'Ocupació' },
     { id: 'rates', icon: Euro, labelKey: 'admin.acollida.tabs.rates', labelDefault: 'Tarifes' },
 ];
 
@@ -57,7 +59,7 @@ export default function AcollidaManager() {
                 ))}
             </div>
 
-            {tab === 'requests' ? <RequestsTab /> : <RatesTab />}
+            {tab === 'requests' ? <RequestsTab /> : tab === 'occupancy' ? <OccupancyTab /> : <RatesTab />}
         </div>
     );
 }
