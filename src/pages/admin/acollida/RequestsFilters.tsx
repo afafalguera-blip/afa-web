@@ -127,6 +127,7 @@ export function RequestsFilters({
         <option value="">{t('admin.inscriptions.status_all', 'Tots els estats')}</option>
         <option value="pendent">{t('admin.acollida_requests.status.pendent', 'Pendent')}</option>
         <option value="confirmada">{t('admin.acollida_requests.status.confirmada', 'Confirmada')}</option>
+        <option value="llista_espera">{t('admin.acollida_requests.status.llista_espera', "Llista d'espera")}</option>
         <option value="baixa">{t('admin.acollida_requests.status.baixa', 'Baixa')}</option>
       </select>
 

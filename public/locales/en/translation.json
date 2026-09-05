@@ -1402,7 +1402,8 @@
       "subtitle_v2": "Family requests and the price of each time slot.",
       "tabs": {
         "requests": "Requests",
-        "rates": "Rates"
+        "rates": "Rates",
+        "occupancy": "Occupancy"
       },
       "col_active": "Active",
       "active_yes": "Offered",
@@ -1817,7 +1818,8 @@
       "status": {
         "pendent": "Pending",
         "confirmada": "Confirmed",
-        "baixa": "Cancelled"
+        "baixa": "Cancelled",
+        "llista_espera": "Waiting list"
       },
       "col_child": "Child",
       "col_course": "Year",
@@ -1851,7 +1853,20 @@
       "generated": "{{count}} receipts generated",
       "generate_error": "The receipts could not be generated.",
       "month": "Month",
-      "year": "Year"
+      "year": "Year",
+      "status_full": "That day has no seats left: {{detail}}"
+    },
+    "acollida_occupancy": {
+      "counts_hint": "Only confirmed requests count: a pending one holds no seat.",
+      "full_days": "{{count}} full days",
+      "group_afternoon": "Afternoon",
+      "group_morning": "Morning",
+      "load_error": "Could not load the occupancy.",
+      "no_full_days": "No full days",
+      "save_error": "Could not save the seats.",
+      "seats": "Seats in the room",
+      "seats_hint": "The three morning slots share one room: between 8:30 and 9 they are all there at once, so the seats belong to the group and not to each slot. Raising them is how an exception gets in.",
+      "split": "{{monthly}} monthly · {{occasional}} days out"
     }
   },
   "common": {
@@ -2187,6 +2202,10 @@
     "calendar_next": "Next month",
     "calendar_hint": "Tap the days you need. You can pick days from several months.",
     "calendar_selected": "{{count}} days selected",
-    "calendar_clear": "Clear"
+    "calendar_clear": "Clear",
+    "calendar_day_full": "Full",
+    "weekday_full": "Full: you would join the waiting list",
+    "waitlist_notice": "Some of the days you picked have no seats left. You can send the request anyway: you will join the waiting list and we will write as soon as a place frees up.",
+    "success_body_waitlist": "Some of the days were full, so you are on the waiting list for those days. We will write as soon as a place frees up; the other days follow the usual route."
   }
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -9,6 +9,12 @@ interface Props {
   /** Selected days, yyyy-mm-dd. */
   value: string[];
   onChange: (dates: string[]) => void;
+  /** Days with no seat left. Shown struck through and refused on tap. */
+  fullDates?: string[];
+  /** Called when the family taps a full day, so the form can offer the queue. */
+  onFullDayTapped?: (iso: string) => void;
+  /** Month on screen, so the caller can fetch that month's occupancy. */
+  onMonthChange?: (year: number, month: number) => void;
 }
 
 /**
@@ -18,13 +24,18 @@ interface Props {
  * pick — booking eight days meant opening the same calendar eight times, and
  * the days already chosen were nowhere to be seen while choosing the next one.
  */
-export function OccasionalDatesPicker({ value, onChange }: Props) {
+export function OccasionalDatesPicker({ value, onChange, fullDates = [], onFullDayTapped, onMonthChange }: Props) {
   const { t, i18n } = useTranslation();
   const today = useMemo(() => new Date(), []);
   const [cursor, setCursor] = useState(() => ({ year: today.getFullYear(), month: today.getMonth() + 1 }));
 
   const rows = useMemo(() => monthMatrix(cursor.year, cursor.month, today), [cursor, today]);
   const selected = useMemo(() => new Set(value), [value]);
+  const full = useMemo(() => new Set(fullDates), [fullDates]);
+
+  useEffect(() => {
+    onMonthChange?.(cursor.year, cursor.month);
+  }, [cursor, onMonthChange]);
   const locale = i18n.resolvedLanguage || 'ca';
 
   const monthLabel = new Date(cursor.year, cursor.month - 1, 1).toLocaleDateString(locale, {
@@ -33,6 +44,10 @@ export function OccasionalDatesPicker({ value, onChange }: Props) {
   });
 
   const toggle = (iso: string) => {
+    if (full.has(iso) && !selected.has(iso)) {
+      onFullDayTapped?.(iso);
+      return;
+    }
     onChange(selected.has(iso) ? value.filter((d) => d !== iso) : [...value, iso].sort());
   };
 
@@ -81,6 +96,7 @@ export function OccasionalDatesPicker({ value, onChange }: Props) {
             {week.map((cell, cellIndex) => {
               if (!cell) return <span key={`empty-${cellIndex}`} />;
               const isSelected = selected.has(cell.iso);
+              const isFull = full.has(cell.iso) && !isSelected;
               return (
                 <button
                   key={cell.iso}
@@ -88,12 +104,16 @@ export function OccasionalDatesPicker({ value, onChange }: Props) {
                   onClick={() => toggle(cell.iso)}
                   disabled={cell.past}
                   aria-pressed={isSelected}
+                  aria-disabled={isFull}
+                  title={isFull ? t('acollida_form.calendar_day_full', 'Complet') : undefined}
                   className={`py-2.5 rounded-xl text-sm font-semibold transition ${
                     isSelected
                       ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
                       : cell.past
                         ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed'
-                        : 'text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'
+                        : isFull
+                          ? 'text-slate-400 dark:text-slate-600 line-through bg-slate-50 dark:bg-slate-800/60'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'
                   }`}
                 >
                   {cell.day}

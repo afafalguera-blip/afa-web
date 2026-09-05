@@ -10,7 +10,11 @@ import { useToast } from '../../../components/common/Toast';
 import { useConfirm } from '../../../components/common/ConfirmDialog';
 import { RequestsFilters } from './RequestsFilters';
 
-import { AdminAcollidaInscriptionsService, type AcollidaStats } from '../../../services/admin/AdminAcollidaInscriptionsService';
+import {
+  AcollidaFullError,
+  AdminAcollidaInscriptionsService,
+  type AcollidaStats,
+} from '../../../services/admin/AdminAcollidaInscriptionsService';
 import { AdminAcollidaService } from '../../../services/admin/AdminAcollidaService';
 import { COURSE_BY_CODE, isCourseCode } from '../../../constants/courses';
 import { childMonthlyTotal, formatEuro } from '../../../logic/acollidaPricing';
@@ -28,6 +32,7 @@ import {
 const STATUS_BADGE: Record<AcollidaStatus, string> = {
   pendent: 'bg-amber-100 text-amber-800',
   confirmada: 'bg-green-100 text-green-800',
+  llista_espera: 'bg-sky-100 text-sky-800',
   baixa: 'bg-red-100 text-red-800',
 };
 
@@ -145,6 +150,14 @@ export function RequestsTab() {
       setStats(freshStats);
     } catch (err) {
       console.error(err);
+      if (err instanceof AcollidaFullError) {
+        toast.error(
+          t('admin.acollida_requests.status_full', 'Aquell dia ja no queden places: {{detail}}', {
+            detail: err.message,
+          }),
+        );
+        return;
+      }
       toast.error(t('admin.acollida_requests.status_error', 'No s\'ha pogut canviar l\'estat.'));
     }
   };
@@ -416,6 +429,7 @@ export function RequestsTab() {
         >
           <option value="pendent">{t('admin.acollida_requests.status.pendent', 'Pendent')}</option>
           <option value="confirmada">{t('admin.acollida_requests.status.confirmada', 'Confirmada')}</option>
+          <option value="llista_espera">{t('admin.acollida_requests.status.llista_espera', "Llista d'espera")}</option>
           <option value="baixa">{t('admin.acollida_requests.status.baixa', 'Baixa')}</option>
         </select>
       ),
@@ -455,6 +469,7 @@ export function RequestsTab() {
             <StatPill icon={<Users className="w-3.5 h-3.5" />} label={t('admin.acollida_requests.stat_total', 'Sol·licituds')} value={stats.total} />
             <StatPill label={t('admin.acollida_requests.status.confirmada', 'Confirmada')} value={stats.confirmed} tone="bg-green-50 text-green-700" />
             <StatPill label={t('admin.acollida_requests.status.pendent', 'Pendent')} value={stats.pending} tone="bg-amber-50 text-amber-700" />
+            <StatPill label={t('admin.acollida_requests.status.llista_espera', "Llista d'espera")} value={stats.waiting} tone="bg-sky-50 text-sky-700" />
             <StatPill label={t('admin.acollida_requests.modality_monthly', 'Mensual')} value={stats.monthly} />
             <StatPill label={t('admin.acollida_requests.modality_occasional', 'Dies solts')} value={stats.occasional} />
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,8 @@ import { useContentTranslation } from '../hooks/useContentTranslation';
 import { COURSES } from '../constants/courses';
 import { formatEuro, occasionalCharge, unitPrice } from '../logic/acollidaPricing';
 import { OccasionalDatesPicker } from '../features/acollida/components/OccasionalDatesPicker';
+import { availableWeekdays } from '../logic/acollidaCapacity';
+import { toIsoDate } from '../logic/acollidaCalendar';
 import {
   ACOLLIDA_WEEKDAYS,
   WEEKDAY_I18N_KEYS,
@@ -94,8 +96,16 @@ export default function AcollidaInscriptionPage() {
   const [notes, setNotes] = useState('');
   const [consent, setConsent] = useState(false);
 
+  /**
+   * Full days, keyed by rate. Two children on the same slot share the answer,
+   * and the key is the rate because the seats belong to the room the slot is
+   * in, not to the child.
+   */
+  const [fullDays, setFullDays] = useState<Record<string, string[]>>({});
+
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedToWaitlist, setSubmittedToWaitlist] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -122,6 +132,40 @@ export default function AcollidaInscriptionPage() {
   }, [t]);
 
   const rateById = useMemo(() => new Map(rates.map((r) => [r.id, r])), [rates]);
+
+  /**
+   * Asks the database which days of a month have no seat left. Cheap enough to
+   * repeat on every month change, and it must be fresh: a place taken while the
+   * family was filling the form has to show up before they send it.
+   */
+  const loadFullDays = useCallback(async (rateId: string, year: number, month: number) => {
+    if (!rateId) return;
+    const from = `${year}-${String(month).padStart(2, '0')}-01`;
+    const to = toIsoDate(new Date(year, month, 0));
+    try {
+      const days = await AcollidaService.getFullDays(rateId, from, to);
+      setFullDays((prev) => ({
+        ...prev,
+        [rateId]: [...new Set([...(prev[rateId] || []), ...days])],
+      }));
+    } catch (err) {
+      // A failed lookup must not block the sign-up: worst case the family asks
+      // for a full day and the AFA puts it on the waiting list, as before.
+      console.error('Error fetching acollida occupancy:', err);
+    }
+  }, []);
+
+  // The month a monthly sign-up would start in decides which weekdays are left.
+  useEffect(() => {
+    const today = new Date();
+    for (const rateId of new Set(children.map((c) => c.rateId).filter(Boolean))) {
+      loadFullDays(rateId, today.getFullYear(), today.getMonth() + 1);
+      const next = today.getMonth() === 11
+        ? { y: today.getFullYear() + 1, m: 1 }
+        : { y: today.getFullYear(), m: today.getMonth() + 2 };
+      loadFullDays(rateId, next.y, next.m);
+    }
+  }, [children, loadFullDays]);
 
   const updateChild = (index: number, patch: Partial<ChildDraft>) => {
     setChildren((prev) => prev.map((child, i) => (i === index ? { ...child, ...patch } : child)));
@@ -202,6 +246,17 @@ export default function AcollidaInscriptionPage() {
     setSubmitting(true);
     setError(null);
 
+    // The database has the last word on the status — the room can fill up while
+    // the form is open — but this is what we knew when the family pressed send.
+    setSubmittedToWaitlist(
+      children.some((child) => {
+        const days = fullDays[child.rateId] || [];
+        return child.modality === 'ocasional'
+          ? child.dates.some((d) => days.includes(d))
+          : child.weekdays.some((d) => !availableWeekdays(days).includes(d));
+      }),
+    );
+
     const rows: AcollidaInscriptionInput[] = children.map((child) => ({
       child_name: child.name.trim(),
       child_surname: child.surname.trim(),
@@ -251,7 +306,9 @@ export default function AcollidaInscriptionPage() {
               </div>
               <div className="p-6 sm:p-8 text-center space-y-4">
                 <p className="text-slate-600 dark:text-slate-300">
-                  {t('acollida_form.success_body', "Us escriurem per confirmar la plaça i la tarifa. Si heu de canviar alguna cosa, contacteu amb l'AFA.")}
+                  {submittedToWaitlist
+                    ? t('acollida_form.success_body_waitlist', "Algun dels dies estava complet, així que quedeu a la llista d'espera d'aquests dies. Us avisarem a la primera baixa; la resta de dies segueixen el camí normal.")
+                    : t('acollida_form.success_body', "Us escriurem per confirmar la plaça i la tarifa. Si heu de canviar alguna cosa, contacteu amb l'AFA.")}
                 </p>
                 <Link
                   to="/acollida"
@@ -361,6 +418,12 @@ export default function AcollidaInscriptionPage() {
               const monthly = rate && isMember !== null ? unitPrice(rate, isMember, 'mensual') : null;
               const dayPrice = rate && isMember !== null ? unitPrice(rate, isMember, 'ocasional') : null;
               const charge = rate && isMember !== null ? occasionalCharge(rate, isMember, child.dates.length) : null;
+              const childFullDays = fullDays[child.rateId] || [];
+              const freeWeekdays = availableWeekdays(childFullDays);
+              const wantsWaitlist =
+                child.modality === 'ocasional'
+                  ? child.dates.some((d) => childFullDays.includes(d))
+                  : child.weekdays.some((d) => !freeWeekdays.includes(d));
 
               return (
                 <section key={index} className={card}>
@@ -507,16 +570,22 @@ export default function AcollidaInscriptionPage() {
                       <div className="flex flex-wrap gap-2">
                         {ACOLLIDA_WEEKDAYS.map((day) => {
                           const checked = child.weekdays.includes(day);
+                          const isFull = child.rateId !== '' && !freeWeekdays.includes(day);
                           return (
                             <button
                               key={day}
                               type="button"
                               onClick={() => toggleWeekday(index, day)}
                               aria-pressed={checked}
+                              title={isFull ? t('acollida_form.weekday_full', "Complet: entrareu a la llista d'espera") : undefined}
                               className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition ${
-                                checked
-                                  ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                                  : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-300'
+                                checked && isFull
+                                  ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                                  : checked
+                                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                                    : isFull
+                                      ? 'border-slate-200 dark:border-slate-700 text-slate-400 line-through'
+                                      : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-300'
                               }`}
                             >
                               {t(WEEKDAY_I18N_KEYS[day])}
@@ -531,6 +600,9 @@ export default function AcollidaInscriptionPage() {
                       <OccasionalDatesPicker
                         value={child.dates}
                         onChange={(dates) => updateChild(index, { dates })}
+                        fullDates={childFullDays}
+                        onFullDayTapped={(iso) => updateChild(index, { dates: [...child.dates, iso].sort() })}
+                        onMonthChange={(year, month) => loadFullDays(child.rateId, year, month)}
                       />
                       {charge != null && child.dates.length > 0 && (
                         <div className="mt-3 text-sm">
@@ -553,6 +625,15 @@ export default function AcollidaInscriptionPage() {
                         </div>
                       )}
                     </div>
+                  )}
+
+                  {wantsWaitlist && (
+                    <p className="mt-5 flex items-start gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>
+                        {t('acollida_form.waitlist_notice', "Algun dels dies que heu triat ja té les places plenes. Podeu enviar la sol·licitud igualment: quedareu a la llista d'espera i us avisarem a la primera baixa.")}
+                      </span>
+                    </p>
                   )}
 
                   {monthly != null && child.modality === 'mensual' && (

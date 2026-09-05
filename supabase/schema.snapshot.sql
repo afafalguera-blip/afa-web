@@ -74,12 +74,36 @@ $$;
 ALTER FUNCTION "public"."academic_year_for"("p_month" integer, "p_year" integer) OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."acollida_inscripcio_defaults"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
+CREATE OR REPLACE FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") RETURNS SETOF "date"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
     AS $$
+  SELECT o.day
+  FROM public.acollida_occupancy(p_from, p_to) o
+  JOIN public.acollida_rates r ON r.id = p_rate_id
+  WHERE o.capacity_group = r.capacity_group
+    AND o.free <= 0;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") IS 'Dies sense plaça per a la sala d''aquesta tarifa. Només dates: cap dada de cap família surt d''aquí.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_inscripcio_defaults"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE
+  v_group text;
+  v_full boolean := false;
+  v_from date;
 BEGIN
   NEW.updated_at := now();
+
   IF TG_OP = 'INSERT' THEN
     IF coalesce(NEW.academic_year, '') = '' THEN
       NEW.academic_year := public.academic_year_for(
@@ -89,13 +113,88 @@ BEGIN
       NEW.start_month := extract(month FROM now())::int;
       NEW.start_year := extract(year FROM now())::int;
     END IF;
+
+    SELECT r.capacity_group INTO v_group FROM public.acollida_rates r WHERE r.id = NEW.rate_id;
+
+    IF NEW.modality = 'ocasional' THEN
+      SELECT EXISTS (
+        SELECT 1 FROM unnest(NEW.occasional_dates) d
+        WHERE d >= current_date
+          AND (SELECT o.free FROM public.acollida_occupancy(d, d) o
+               WHERE o.capacity_group = v_group) <= 0
+      ) INTO v_full;
+    ELSE
+      v_from := greatest(current_date, make_date(NEW.start_year, NEW.start_month, 1));
+      SELECT EXISTS (
+        SELECT 1 FROM public.acollida_occupancy(v_from, v_from + 30) o
+        WHERE o.capacity_group = v_group
+          AND extract(isodow FROM o.day)::smallint = ANY (NEW.weekdays)
+          AND o.free <= 0
+      ) INTO v_full;
+    END IF;
+
+    NEW.status := CASE WHEN v_full THEN 'llista_espera' ELSE 'pendent' END;
   END IF;
+
   RETURN NEW;
 END;
 $$;
 
 
 ALTER FUNCTION "public"."acollida_inscripcio_defaults"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") RETURNS TABLE("day" "date", "capacity_group" "text", "monthly" integer, "occasional" integer, "total" integer, "seats" integer, "free" integer)
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+  WITH days AS (
+    SELECT d::date AS day
+    FROM generate_series(p_from, p_to, interval '1 day') d
+    WHERE extract(isodow FROM d) BETWEEN 1 AND 5
+  ),
+  groups AS (
+    SELECT capacity_group, seats FROM public.acollida_capacity
+  ),
+  grid AS (
+    SELECT days.day, groups.capacity_group, groups.seats FROM days CROSS JOIN groups
+  ),
+  counts AS (
+    SELECT
+      grid.day,
+      grid.capacity_group,
+      grid.seats,
+      count(*) FILTER (
+        WHERE i.modality = 'mensual'
+          AND extract(isodow FROM grid.day)::smallint = ANY (i.weekdays)
+          AND (i.start_year IS NULL OR i.start_month IS NULL
+               OR (i.start_year * 12 + i.start_month)
+                  <= (extract(year FROM grid.day)::int * 12 + extract(month FROM grid.day)::int))
+      )::int AS monthly,
+      count(*) FILTER (
+        WHERE i.modality = 'ocasional' AND grid.day = ANY (i.occasional_dates)
+      )::int AS occasional
+    FROM grid
+    LEFT JOIN public.acollida_rates r ON r.capacity_group = grid.capacity_group
+    LEFT JOIN public.acollida_inscripcions i
+      ON i.rate_id = r.id AND i.status = 'confirmada'
+    GROUP BY grid.day, grid.capacity_group, grid.seats
+  )
+  SELECT
+    day, capacity_group, monthly, occasional,
+    monthly + occasional AS total,
+    seats,
+    greatest(seats - (monthly + occasional), 0) AS free
+  FROM counts
+  ORDER BY day, capacity_group;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") IS 'Ocupació per dia i sala. Només compten les sol·licituds confirmades: una pendent no reserva res.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."acollida_price_for"("p_rate_id" "uuid", "p_is_member" boolean, "p_occasional" boolean) RETURNS numeric
@@ -249,6 +348,67 @@ $$;
 
 
 ALTER FUNCTION "public"."book_price_for"("p_course" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."check_acollida_capacity"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE
+  v_group text;
+  v_seats int;
+  v_full_day date;
+  v_horizon_from date;
+  v_horizon_to date;
+BEGIN
+  IF NEW.status <> 'confirmada' OR (TG_OP = 'UPDATE' AND OLD.status = 'confirmada') THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT r.capacity_group INTO v_group FROM public.acollida_rates r WHERE r.id = NEW.rate_id;
+  SELECT c.seats INTO v_seats FROM public.acollida_capacity c WHERE c.capacity_group = v_group;
+  IF v_seats IS NULL THEN
+    RETURN NEW; -- Grupo sin aforo declarado: nada que hacer cumplir.
+  END IF;
+
+  IF NEW.modality = 'ocasional' THEN
+    -- Solo los días que esta solicitud pide.
+    SELECT d INTO v_full_day
+    FROM unnest(NEW.occasional_dates) d
+    WHERE d >= current_date
+      AND (
+        SELECT o.free FROM public.acollida_occupancy(d, d) o WHERE o.capacity_group = v_group
+      ) <= 0
+    ORDER BY d
+    LIMIT 1;
+  ELSE
+    -- Un alta mensual se repite cada semana: basta con que un día del próximo
+    -- mes esté lleno para que no quepa.
+    v_horizon_from := greatest(current_date, make_date(
+      coalesce(NEW.start_year, extract(year FROM current_date)::int),
+      coalesce(NEW.start_month, extract(month FROM current_date)::int), 1));
+    v_horizon_to := v_horizon_from + 30;
+
+    SELECT o.day INTO v_full_day
+    FROM public.acollida_occupancy(v_horizon_from, v_horizon_to) o
+    WHERE o.capacity_group = v_group
+      AND extract(isodow FROM o.day)::smallint = ANY (NEW.weekdays)
+      AND o.free <= 0
+    ORDER BY o.day
+    LIMIT 1;
+  END IF;
+
+  IF v_full_day IS NOT NULL THEN
+    RAISE EXCEPTION 'Acollida completa el % (% places)', to_char(v_full_day, 'DD/MM/YYYY'), v_seats
+      USING ERRCODE = 'P0100';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."check_acollida_capacity"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."check_acollida_rate_limit"() RETURNS "trigger"
@@ -1884,6 +2044,22 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
+CREATE TABLE IF NOT EXISTS "public"."acollida_capacity" (
+    "capacity_group" "text" NOT NULL,
+    "seats" integer NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "acollida_capacity_group_check" CHECK (("capacity_group" = ANY (ARRAY['mati'::"text", 'tarda'::"text"]))),
+    CONSTRAINT "acollida_capacity_seats_check" CHECK (("seats" >= 0))
+);
+
+
+ALTER TABLE "public"."acollida_capacity" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."acollida_capacity" IS 'Places de cada sala. Editable des de /admin/acollida: pujar-la un dia puntual és la manera de deixar entrar una excepció, no saltar-se el límit.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."acollida_inscripcions" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1907,7 +2083,7 @@ CREATE TABLE IF NOT EXISTS "public"."acollida_inscripcions" (
     "form_language" "text" DEFAULT 'ca'::"text" NOT NULL,
     CONSTRAINT "acollida_inscripcions_modality_check" CHECK (("modality" = ANY (ARRAY['mensual'::"text", 'ocasional'::"text"]))),
     CONSTRAINT "acollida_inscripcions_month_check" CHECK ((("start_month" IS NULL) OR (("start_month" >= 1) AND ("start_month" <= 12)))),
-    CONSTRAINT "acollida_inscripcions_status_check" CHECK (("status" = ANY (ARRAY['pendent'::"text", 'confirmada'::"text", 'baixa'::"text"]))),
+    CONSTRAINT "acollida_inscripcions_status_check" CHECK (("status" = ANY (ARRAY['pendent'::"text", 'confirmada'::"text", 'baixa'::"text", 'llista_espera'::"text"]))),
     CONSTRAINT "acollida_inscripcions_weekdays_check" CHECK (("weekdays" <@ ARRAY[(1)::smallint, (2)::smallint, (3)::smallint, (4)::smallint, (5)::smallint]))
 );
 
@@ -1927,7 +2103,7 @@ COMMENT ON COLUMN "public"."acollida_inscripcions"."occasional_dates" IS 'Dates 
 
 
 
-COMMENT ON COLUMN "public"."acollida_inscripcions"."status" IS 'pendent (rebuda) | confirmada (plaça donada, entra als rebuts) | baixa.';
+COMMENT ON COLUMN "public"."acollida_inscripcions"."status" IS 'pendent (rebuda) | confirmada (ocupa plaça i entra als rebuts) | llista_espera (el dia era ple) | baixa.';
 
 
 
@@ -1944,7 +2120,9 @@ CREATE TABLE IF NOT EXISTS "public"."acollida_rates" (
     "horari_ca" "text",
     "horari_es" "text",
     "horari_en" "text",
-    "active" boolean DEFAULT true NOT NULL
+    "active" boolean DEFAULT true NOT NULL,
+    "capacity_group" "text" DEFAULT 'mati'::"text" NOT NULL,
+    CONSTRAINT "acollida_rates_capacity_group_check" CHECK (("capacity_group" = ANY (ARRAY['mati'::"text", 'tarda'::"text"])))
 );
 
 
@@ -1956,6 +2134,10 @@ COMMENT ON COLUMN "public"."acollida_rates"."preu_soci_mes" IS 'Preu mensual per
 
 
 COMMENT ON COLUMN "public"."acollida_rates"."active" IS 'Franja oferta al formulari públic. Una tarifa amb sol·licituds no es pot esborrar: es desactiva.';
+
+
+
+COMMENT ON COLUMN "public"."acollida_rates"."capacity_group" IS 'Sala que comparteix la franja. Les de matí acaben totes a les 9H i coincideixen, així que les places són del grup i no de la franja.';
 
 
 
@@ -2742,6 +2924,11 @@ CREATE TABLE IF NOT EXISTS "public"."site_config" (
 ALTER TABLE "public"."site_config" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "public"."acollida_capacity"
+    ADD CONSTRAINT "acollida_capacity_pkey" PRIMARY KEY ("capacity_group");
+
+
+
 ALTER TABLE ONLY "public"."acollida_inscripcions"
     ADD CONSTRAINT "acollida_inscripcions_pkey" PRIMARY KEY ("id");
 
@@ -3257,6 +3444,10 @@ CREATE OR REPLACE TRIGGER "trg_acollida_rate_limit" BEFORE INSERT ON "public"."a
 
 
 
+CREATE OR REPLACE TRIGGER "trg_acollida_zz_capacity" BEFORE INSERT OR UPDATE ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."check_acollida_capacity"();
+
+
+
 CREATE OR REPLACE TRIGGER "trg_audit_acollida_rates" AFTER INSERT OR DELETE OR UPDATE ON "public"."acollida_rates" FOR EACH ROW EXECUTE FUNCTION "public"."handle_audit_log"();
 
 
@@ -3737,6 +3928,10 @@ CREATE POLICY "Admins can update menjador_rates" ON "public"."menjador_rates" FO
 
 
 
+CREATE POLICY "Admins can write acollida capacity" ON "public"."acollida_capacity" TO "authenticated" USING ("public"."is_admin"()) WITH CHECK ("public"."is_admin"());
+
+
+
 CREATE POLICY "Admins delete bank imports" ON "public"."bank_imports" FOR DELETE TO "authenticated" USING ("public"."is_admin"());
 
 
@@ -3835,6 +4030,10 @@ CREATE POLICY "Anyone can insert contact messages" ON "public"."contact_messages
 
 
 
+CREATE POLICY "Anyone can read acollida capacity" ON "public"."acollida_capacity" FOR SELECT TO "authenticated", "anon" USING (true);
+
+
+
 CREATE POLICY "Anyone can read active faqs" ON "public"."faqs" FOR SELECT USING (("is_active" = true));
 
 
@@ -3925,6 +4124,9 @@ CREATE POLICY "Users can view their own order items" ON "public"."shop_order_ite
    FROM "public"."shop_orders"
   WHERE (("shop_orders"."id" = "shop_order_items"."order_id") AND ("shop_orders"."user_id" = ( SELECT "auth"."uid"() AS "uid"))))));
 
+
+
+ALTER TABLE "public"."acollida_capacity" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."acollida_inscripcions" ENABLE ROW LEVEL SECURITY;
@@ -4274,9 +4476,22 @@ GRANT ALL ON FUNCTION "public"."academic_year_for"("p_month" integer, "p_year" i
 
 
 
+REVOKE ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."acollida_inscripcio_defaults"() TO "anon";
 GRANT ALL ON FUNCTION "public"."acollida_inscripcio_defaults"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."acollida_inscripcio_defaults"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date") TO "service_role";
 
 
 
@@ -4321,6 +4536,12 @@ REVOKE ALL ON FUNCTION "public"."book_price_for"("p_course" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."book_price_for"("p_course" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."book_price_for"("p_course" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."book_price_for"("p_course" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."check_acollida_capacity"() TO "anon";
+GRANT ALL ON FUNCTION "public"."check_acollida_capacity"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_acollida_capacity"() TO "service_role";
 
 
 
@@ -4688,6 +4909,12 @@ GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "service_role";
 
 
 
+
+
+
+GRANT ALL ON TABLE "public"."acollida_capacity" TO "anon";
+GRANT ALL ON TABLE "public"."acollida_capacity" TO "authenticated";
+GRANT ALL ON TABLE "public"."acollida_capacity" TO "service_role";
 
 
 

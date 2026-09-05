@@ -1403,7 +1403,8 @@
       "subtitle_v2": "Solicitudes de las familias y precios de cada franja.",
       "tabs": {
         "requests": "Solicitudes",
-        "rates": "Tarifas"
+        "rates": "Tarifas",
+        "occupancy": "Ocupación"
       },
       "col_active": "Activa",
       "active_yes": "Ofertada",
@@ -1818,7 +1819,8 @@
       "status": {
         "pendent": "Pendiente",
         "confirmada": "Confirmada",
-        "baixa": "Baja"
+        "baixa": "Baja",
+        "llista_espera": "Lista de espera"
       },
       "col_child": "Niño/a",
       "col_course": "Curso",
@@ -1852,7 +1854,20 @@
       "generated": "{{count}} recibos generados",
       "generate_error": "No se han podido generar los recibos.",
       "month": "Mes",
-      "year": "Año"
+      "year": "Año",
+      "status_full": "Ese día ya no quedan plazas: {{detail}}"
+    },
+    "acollida_occupancy": {
+      "counts_hint": "Solo cuentan las solicitudes confirmadas: una pendiente no reserva plaza.",
+      "full_days": "{{count}} días completos",
+      "group_afternoon": "Tarde",
+      "group_morning": "Mañana",
+      "load_error": "No se ha podido cargar la ocupación.",
+      "no_full_days": "Ningún día completo",
+      "save_error": "No se han podido guardar las plazas.",
+      "seats": "Plazas de la sala",
+      "seats_hint": "Las tres franjas de mañana comparten sala: entre las 8:30 y las 9 están todas a la vez, así que las plazas son del grupo y no de cada franja. Subirlas es la manera de dejar entrar una excepción.",
+      "split": "{{monthly}} mes · {{occasional}} sueltos"
     }
   },
   "common": {
@@ -2188,6 +2203,10 @@
     "calendar_next": "Mes siguiente",
     "calendar_hint": "Toca los días que necesitéis. Puedes elegir de varios meses.",
     "calendar_selected": "{{count}} días elegidos",
-    "calendar_clear": "Vaciar"
+    "calendar_clear": "Vaciar",
+    "calendar_day_full": "Completo",
+    "weekday_full": "Completo: entraréis en la lista de espera",
+    "waitlist_notice": "Alguno de los días que habéis elegido ya tiene las plazas llenas. Podéis enviar la solicitud igualmente: quedaréis en lista de espera y os avisaremos en cuanto haya una baja.",
+    "success_body_waitlist": "Alguno de los días estaba completo, así que quedáis en lista de espera de esos días. Os avisaremos en cuanto haya una baja; el resto de días siguen el camino normal."
   }
 }
