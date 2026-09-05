@@ -337,17 +337,18 @@ metadatos; ni una tabla, función o política cambió). La lista y el porqué es
 en [`supabase/legacy-remote-versions.txt`](../supabase/legacy-remote-versions.txt),
 y el paso vive en el workflow bajo la opción `reparar-historico`.
 
-## 12. Cinco pantallas hablan con Supabase sin pasar por `services/`
+## 12. Cuatro pantallas hablan con Supabase sin pasar por `services/`
 
-`NotificationBell`, `FeaturedProjects`, `AcollidaPage`, `LoginPage` e
-`InscriptionPage` importan el cliente directamente. Consecuencia práctica: sus
+`NotificationBell`, `FeaturedProjects`, `LoginPage` e
+`InscriptionPage` importan el cliente directamente. `AcollidaPage` salió de la
+lista el 2026-09-05: ahora lee las tarifas por `AcollidaService`. Consecuencia práctica: sus
 consultas no las cubre ningún test —los tests de servicio son los que verifican
 qué se manda a PostgREST— y un filtro olvidado devuelve filas de otras familias
 sin dar ningún error.
 
 Están inventariadas como excepciones **con motivo** en
 [`scripts/check-invariants.mjs`](../scripts/check-invariants.mjs), y el guardián
-impide que aparezcan más. **Criterio de cierre**: cuando las cinco tengan su
+impide que aparezcan más. **Criterio de cierre**: cuando las cuatro que quedan tengan su
 servicio, borrar las entradas de la lista y esta sección.
 
 ## 13. Cosas menores

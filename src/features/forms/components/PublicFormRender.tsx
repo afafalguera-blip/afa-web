@@ -130,6 +130,18 @@ function FileUploadField({ label, required, value, onChange, error, formSlug }: 
   );
 }
 
+/**
+ * What a choice SUBMITS, as opposed to what it shows.
+ *
+ * The label is translated; the value is always the source-language (es) option,
+ * so an answer means the same thing whichever language the family used. It is
+ * also what makes conditional fields work: `logic.value` is written against the
+ * source options in the builder, so comparing against a translated label would
+ * silently hide the dependent field for every visitor who switched language.
+ */
+const optionValue = (rawField: FormField, index: number, fallback: string): string =>
+  rawField.options?.[index] ?? fallback;
+
 const generateZodSchema = (fields: FormField[]) => {
   const schemaShape: Record<string, z.ZodTypeAny> = {};
 
@@ -410,7 +422,7 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
                         {t('forms.public.select_placeholder')}
                       </option>
                       {field.options?.map((opt, i) => (
-                        <option key={i} value={opt}>
+                        <option key={i} value={optionValue(rawField, i, opt)}>
                           {opt}
                         </option>
                       ))}
@@ -428,7 +440,7 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
                           <input
                             type="radio"
                             id={`${field.id}_opt_${i}`}
-                            value={opt}
+                            value={optionValue(rawField, i, opt)}
                             {...register(field.id)}
                             className="focus:ring-blue-500 h-5 w-5 text-blue-600 border-gray-300"
                           />
@@ -451,7 +463,7 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
                           <input
                             type="checkbox"
                             id={`${field.id}_opt_${i}`}
-                            value={opt}
+                            value={optionValue(rawField, i, opt)}
                             {...register(field.id)}
                             className="focus:ring-blue-500 h-5 w-5 text-blue-600 border-gray-300 rounded"
                           />
@@ -532,7 +544,7 @@ function DynamicFormInstance({ template, isPreview = false }: { template: FormTe
                         >
                           <input
                             type="checkbox"
-                            value={day}
+                            value={optionValue(rawField, i, day)}
                             {...register(field.id)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />

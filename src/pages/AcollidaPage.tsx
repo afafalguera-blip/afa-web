@@ -3,21 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Clock, Users, Sparkles, Calendar, Info, Mail, ClipboardList } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEO } from '../components/common/SEO';
-import { supabase } from '../lib/supabase';
+import { AcollidaService } from '../services/AcollidaService';
+import { formatEuro } from '../logic/acollidaPricing';
+import type { AcollidaRate } from '../types/acollida';
 import { useContentTranslation } from '../hooks/useContentTranslation';
-
-interface AcollidaRate {
-    id?: string;
-    horari: string;
-    horari_ca?: string;
-    horari_es?: string;
-    horari_en?: string;
-    preu_soci_mes: string;
-    preu_soci_ocasional: string | null;
-    preu_no_soci_mes: string;
-    preu_no_soci_ocasional: string | null;
-    order_index?: number;
-}
 
 function pickIcon(horari: string) {
     const h = horari.toLowerCase();
@@ -37,12 +26,8 @@ export default function AcollidaPage() {
         let cancelled = false;
         (async () => {
             try {
-                const { data, error } = await supabase
-                    .from('acollida_rates')
-                    .select('*')
-                    .order('order_index', { ascending: true });
-                if (error) throw error;
-                if (!cancelled && data) setRates(data);
+                const data = await AcollidaService.getRates();
+                if (!cancelled) setRates(data);
             } catch (err) {
                 console.error('Error fetching acollida rates:', err);
             } finally {
@@ -79,7 +64,7 @@ export default function AcollidaPage() {
                             </p>
                             <div className="mt-7">
                                 <Link
-                                    to="/f/acollida"
+                                    to="/acollida/inscripcio"
                                     className="inline-flex items-center gap-2 bg-white text-indigo-700 px-7 py-3.5 rounded-2xl font-bold hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 shadow-lg"
                                 >
                                     <ClipboardList className="w-5 h-5" />
@@ -207,7 +192,7 @@ export default function AcollidaPage() {
                         </div>
                         <div className="pt-1">
                             <Link
-                                to="/f/acollida"
+                                to="/acollida/inscripcio"
                                 className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/30"
                             >
                                 <ClipboardList className="w-5 h-5" />
@@ -272,8 +257,8 @@ function InfoCard({ icon, title, body, accent }: InfoCardProps) {
 interface PricePillProps {
     label: string;
     accent: 'indigo' | 'slate';
-    monthly: string;
-    occasional: string | null;
+    monthly: number;
+    occasional: number | null;
     monthlyLabel: string;
     occasionalLabel: string;
 }
@@ -287,14 +272,14 @@ function PricePill({ label, accent, monthly, occasional, monthlyLabel, occasiona
             </p>
             <div className="flex items-baseline gap-1.5 mb-1">
                 <span className={`text-2xl font-black leading-none ${isPrimary ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-900 dark:text-white'}`}>
-                    {monthly}
+                    {formatEuro(monthly)}
                 </span>
                 <span className="text-[10px] font-bold text-slate-500 uppercase">{monthlyLabel}</span>
             </div>
-            {occasional && (
+            {occasional != null && (
                 <div className="pt-2 mt-2 border-t border-slate-200/60 dark:border-slate-700/40 flex items-baseline gap-1.5">
                     <span className={`text-sm font-bold leading-none ${isPrimary ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-300'}`}>
-                        {occasional}
+                        {formatEuro(occasional)}
                     </span>
                     <span className="text-[10px] font-bold text-slate-500 uppercase">{occasionalLabel}</span>
                 </div>

@@ -33,6 +33,7 @@ const HistoryPage = lazy(() => import('./pages/HistoryPage'));
 const AssembleaPage = lazy(() => import('./pages/AssembleaPage'));
 const MenjadorPage = lazy(() => import('./pages/MenjadorPage'));
 const AcollidaPage = lazy(() => import('./pages/AcollidaPage'));
+const AcollidaInscriptionPage = lazy(() => import('./pages/AcollidaInscriptionPage'));
 const ShopLanding = lazy(() => import('./features/shop/pages/ShopLanding').then(m => ({ default: m.ShopLanding })));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
 const PublicFormPage = lazy(() => import('./features/forms/pages/PublicFormPage'));
@@ -102,6 +103,7 @@ function App() {
                     <Route path="assemblea" element={<AssembleaPage />} />
                     <Route path="menjador" element={<MenjadorPage />} />
                     <Route path="acollida" element={<AcollidaPage />} />
+                    <Route path="acollida/inscripcio" element={<AcollidaInscriptionPage />} />
                   </Route>
 
                   <Route path="/admin/login" element={<Navigate to="/login" replace />} />
