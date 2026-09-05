@@ -116,6 +116,10 @@ BEGIN
 
     SELECT r.capacity_group INTO v_group FROM public.acollida_rates r WHERE r.id = NEW.rate_id;
 
+    -- Una sala, una fila. Dues sol·licituds de la mateixa sala no es compten
+    -- l'una a l'altra si arriben alhora; les de sales diferents no s'esperen.
+    PERFORM pg_advisory_xact_lock(hashtext('acollida_capacity:' || coalesce(v_group, '')));
+
     IF NEW.modality = 'ocasional' THEN
       SELECT EXISTS (
         SELECT 1 FROM unnest(NEW.occasional_dates) d
@@ -133,7 +137,7 @@ BEGIN
       ) INTO v_full;
     END IF;
 
-    NEW.status := CASE WHEN v_full THEN 'llista_espera' ELSE 'pendent' END;
+    NEW.status := CASE WHEN v_full THEN 'llista_espera' ELSE 'confirmada' END;
   END IF;
 
   RETURN NEW;
@@ -198,6 +202,48 @@ COMMENT ON FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "date"
 
 
 
+CREATE OR REPLACE FUNCTION "public"."acollida_on_place_freed"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE v_group text;
+BEGIN
+  IF TG_OP = 'UPDATE' AND NOT (OLD.status = 'confirmada' AND NEW.status <> 'confirmada') THEN
+    RETURN NULL;
+  END IF;
+  IF TG_OP = 'DELETE' AND OLD.status <> 'confirmada' THEN
+    RETURN NULL;
+  END IF;
+
+  SELECT r.capacity_group INTO v_group FROM public.acollida_rates r WHERE r.id = OLD.rate_id;
+  IF v_group IS NOT NULL THEN
+    PERFORM public.acollida_promote_waitlist(v_group);
+  END IF;
+
+  RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_on_place_freed"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_on_seats_raised"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+BEGIN
+  IF NEW.seats > OLD.seats THEN
+    PERFORM public.acollida_promote_waitlist(NEW.capacity_group);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_on_seats_raised"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."acollida_price_for"("p_rate_id" "uuid", "p_is_member" boolean, "p_occasional" boolean) RETURNS numeric
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
@@ -214,6 +260,39 @@ $$;
 
 
 ALTER FUNCTION "public"."acollida_price_for"("p_rate_id" "uuid", "p_is_member" boolean, "p_occasional" boolean) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") RETURNS integer
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE
+  v_row record;
+  v_promoted int := 0;
+BEGIN
+  FOR v_row IN
+    SELECT i.id
+    FROM public.acollida_inscripcions i
+    JOIN public.acollida_rates r ON r.id = i.rate_id
+    WHERE i.status = 'llista_espera'
+      AND r.capacity_group = p_group
+    ORDER BY i.created_at
+  LOOP
+    BEGIN
+      UPDATE public.acollida_inscripcions SET status = 'confirmada' WHERE id = v_row.id;
+      v_promoted := v_promoted + 1;
+    EXCEPTION WHEN OTHERS THEN
+      -- No hi cabia: es queda a la cua, sense el seu lloc.
+      CONTINUE;
+    END;
+  END LOOP;
+
+  RETURN v_promoted;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."activity_monthly_price"("p_activity" "text", "p_is_member" boolean) RETURNS numeric
@@ -369,11 +448,12 @@ BEGIN
   SELECT r.capacity_group INTO v_group FROM public.acollida_rates r WHERE r.id = NEW.rate_id;
   SELECT c.seats INTO v_seats FROM public.acollida_capacity c WHERE c.capacity_group = v_group;
   IF v_seats IS NULL THEN
-    RETURN NEW; -- Grupo sin aforo declarado: nada que hacer cumplir.
+    RETURN NEW;
   END IF;
 
+  PERFORM pg_advisory_xact_lock(hashtext('acollida_capacity:' || coalesce(v_group, '')));
+
   IF NEW.modality = 'ocasional' THEN
-    -- Solo los días que esta solicitud pide.
     SELECT d INTO v_full_day
     FROM unnest(NEW.occasional_dates) d
     WHERE d >= current_date
@@ -383,8 +463,6 @@ BEGIN
     ORDER BY d
     LIMIT 1;
   ELSE
-    -- Un alta mensual se repite cada semana: basta con que un día del próximo
-    -- mes esté lleno para que no quepa.
     v_horizon_from := greatest(current_date, make_date(
       coalesce(NEW.start_year, extract(year FROM current_date)::int),
       coalesce(NEW.start_month, extract(month FROM current_date)::int), 1));
@@ -2133,7 +2211,7 @@ COMMENT ON COLUMN "public"."acollida_inscripcions"."occasional_dates" IS 'Dates 
 
 
 
-COMMENT ON COLUMN "public"."acollida_inscripcions"."status" IS 'pendent (rebuda) | confirmada (ocupa plaça i entra als rebuts) | llista_espera (el dia era ple) | baixa.';
+COMMENT ON COLUMN "public"."acollida_inscripcions"."status" IS 'confirmada (té plaça; s''aprova sola per ordre d''arribada) | llista_espera (el dia era ple) | pendent (l''AFA l''ha tornada a obrir a mà) | baixa.';
 
 
 
@@ -3504,7 +3582,15 @@ CREATE OR REPLACE TRIGGER "trg_acollida_inscripcio_defaults" BEFORE INSERT OR UP
 
 
 
+CREATE OR REPLACE TRIGGER "trg_acollida_place_freed" AFTER DELETE OR UPDATE ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."acollida_on_place_freed"();
+
+
+
 CREATE OR REPLACE TRIGGER "trg_acollida_rate_limit" BEFORE INSERT ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."check_acollida_rate_limit"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_acollida_seats_raised" AFTER UPDATE ON "public"."acollida_capacity" FOR EACH ROW EXECUTE FUNCTION "public"."acollida_on_seats_raised"();
 
 
 
@@ -4570,8 +4656,26 @@ GRANT ALL ON FUNCTION "public"."acollida_occupancy"("p_from" "date", "p_to" "dat
 
 
 
+GRANT ALL ON FUNCTION "public"."acollida_on_place_freed"() TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_on_place_freed"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_on_place_freed"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."acollida_on_seats_raised"() TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_on_seats_raised"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_on_seats_raised"() TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."acollida_price_for"("p_rate_id" "uuid", "p_is_member" boolean, "p_occasional" boolean) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."acollida_price_for"("p_rate_id" "uuid", "p_is_member" boolean, "p_occasional" boolean) TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_promote_waitlist"("p_group" "text") TO "service_role";
 
 
 
