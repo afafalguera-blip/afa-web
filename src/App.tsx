@@ -34,6 +34,7 @@ const AssembleaPage = lazy(() => import('./pages/AssembleaPage'));
 const MenjadorPage = lazy(() => import('./pages/MenjadorPage'));
 const AcollidaPage = lazy(() => import('./pages/AcollidaPage'));
 const AcollidaInscriptionPage = lazy(() => import('./pages/AcollidaInscriptionPage'));
+const AcollidaAttendancePage = lazy(() => import('./pages/AcollidaAttendancePage'));
 const ShopLanding = lazy(() => import('./features/shop/pages/ShopLanding').then(m => ({ default: m.ShopLanding })));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
 const PublicFormPage = lazy(() => import('./features/forms/pages/PublicFormPage'));
@@ -105,6 +106,10 @@ function App() {
                     <Route path="acollida" element={<AcollidaPage />} />
                     <Route path="acollida/inscripcio" element={<AcollidaInscriptionPage />} />
                   </Route>
+
+                  {/* Fora del layout públic a propòsit: és una pantalla de mòbil
+                      per passar llista a la porta, sense menú ni peu de pàgina. */}
+                  <Route path="/acollida/llista/:token" element={<AcollidaAttendancePage />} />
 
                   <Route path="/admin/login" element={<Navigate to="/login" replace />} />
                   <Route path="/admin" element={<AdminLayout />}>

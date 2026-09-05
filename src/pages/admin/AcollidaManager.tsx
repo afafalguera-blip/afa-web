@@ -8,8 +8,9 @@ import { RequestsTab } from './acollida/RequestsTab';
 import { RatesTab } from './acollida/RatesTab';
 import { OccupancyTab } from './acollida/OccupancyTab';
 import { SchoolCalendarTab } from './acollida/SchoolCalendarTab';
+import { ChildrenTab } from './acollida/ChildrenTab';
 
-type Tab = 'requests' | 'occupancy' | 'calendar' | 'rates';
+type Tab = 'requests' | 'occupancy' | 'children' | 'calendar' | 'rates';
 
 interface TabDef {
     id: Tab;
@@ -26,6 +27,7 @@ interface TabDef {
 const TABS: TabDef[] = [
     { id: 'requests', icon: ClipboardList, labelKey: 'admin.acollida.tabs.requests', labelDefault: 'Sol·licituds' },
     { id: 'occupancy', icon: Users, labelKey: 'admin.acollida.tabs.occupancy', labelDefault: 'Ocupació' },
+    { id: 'children', icon: Baby, labelKey: 'admin.acollida.tabs.children', labelDefault: 'Cens i llistes' },
     { id: 'calendar', icon: CalendarOff, labelKey: 'admin.acollida.tabs.calendar', labelDefault: 'Calendari escolar' },
     { id: 'rates', icon: Euro, labelKey: 'admin.acollida.tabs.rates', labelDefault: 'Tarifes' },
 ];
@@ -65,6 +67,8 @@ export default function AcollidaManager() {
                 <RequestsTab />
             ) : tab === 'occupancy' ? (
                 <OccupancyTab />
+            ) : tab === 'children' ? (
+                <ChildrenTab />
             ) : tab === 'calendar' ? (
                 <SchoolCalendarTab />
             ) : (
