@@ -314,14 +314,16 @@ export default function AcollidaInscriptionPage() {
                   <CheckCircle2 className="w-9 h-9" />
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white">
-                  {t('acollida_form.success_title', 'Sol·licitud rebuda')}
+                  {submittedToWaitlist
+                    ? t('acollida_form.success_title_waitlist', "Sou a la llista d'espera")
+                    : t('acollida_form.success_title', 'Plaça confirmada')}
                 </h1>
               </div>
               <div className="p-6 sm:p-8 text-center space-y-4">
                 <p className="text-slate-600 dark:text-slate-300">
                   {submittedToWaitlist
-                    ? t('acollida_form.success_body_waitlist', "Algun dels dies estava complet, així que quedeu a la llista d'espera d'aquests dies. Us avisarem a la primera baixa; la resta de dies segueixen el camí normal.")
-                    : t('acollida_form.success_body', "Us escriurem per confirmar la plaça i la tarifa. Si heu de canviar alguna cosa, contacteu amb l'AFA.")}
+                    ? t('acollida_form.success_body_waitlist', "Algun dels dies que heu demanat estava complet. Quedeu a la cua per ordre d'arribada i hi entrareu sols a la primera baixa; us avisarem quan passi.")
+                    : t('acollida_form.success_body', "Hi havia lloc, així que la plaça ja és vostra: les places es donen per ordre d'arribada. Si heu de canviar alguna cosa, contacteu amb l'AFA.")}
                 </p>
                 <Link
                   to="/acollida"
@@ -356,7 +358,7 @@ export default function AcollidaInscriptionPage() {
               {t('acollida_form.title', 'Demanar plaça')}
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              {t('acollida_form.intro', "Tres minuts. Ompliu una sola vegada per família, encara que tingueu més d'un infant.")}
+              {t('acollida_form.intro', "Tres minuts. Ompliu una sola vegada per família, encara que tingueu més d'un infant. Les places es donen per ordre d'arribada: si en queden, la plaça és vostra en enviar el formulari.")}
             </p>
           </header>
 
@@ -664,7 +666,7 @@ export default function AcollidaInscriptionPage() {
                     <p className="mt-5 flex items-start gap-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/40 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <span>
-                        {t('acollida_form.waitlist_notice', "Algun dels dies que heu triat ja té les places plenes. Podeu enviar la sol·licitud igualment: quedareu a la llista d'espera i us avisarem a la primera baixa.")}
+                        {t('acollida_form.waitlist_notice', "Algun dels dies que heu triat ja té les places plenes. Podeu enviar la sol·licitud igualment: quedareu a la cua per ordre d'arribada i hi entrareu sols a la primera baixa.")}
                       </span>
                     </p>
                   )}

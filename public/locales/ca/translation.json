@@ -1818,7 +1818,7 @@
       "filter_weekday": "Dia de la setmana",
       "all_weekdays": "Qualsevol dia",
       "status": {
-        "pendent": "Pendent",
+        "pendent": "Pendent (revisió)",
         "confirmada": "Confirmada",
         "baixa": "Baixa",
         "llista_espera": "Llista d'espera"
@@ -2158,7 +2158,7 @@
     "seo_description": "Demana plaça al servei d'acollida de l'AFA Falguera: tria la franja, els dies i rep la confirmació.",
     "eyebrow": "Servei d'acollida",
     "title": "Demanar plaça",
-    "intro": "Tres minuts. Ompliu una sola vegada per família, encara que tingueu més d'un infant.",
+    "intro": "Tres minuts. Ompliu una sola vegada per família, encara que tingueu més d'un infant. Les places es donen per ordre d'arribada: si en queden, la plaça és vostra en enviar el formulari.",
     "contact_title": "Dades de contacte",
     "parent_name": "Nom i cognoms del pare, mare o tutor/a",
     "email": "Correu electrònic",
@@ -2196,8 +2196,8 @@
     "summary_label": "Total estimat",
     "summary_hint": "L'AFA confirma la plaça i l'import abans de cobrar res.",
     "submit": "Enviar la sol·licitud",
-    "success_title": "Sol·licitud rebuda",
-    "success_body": "Us escriurem per confirmar la plaça i la tarifa. Si heu de canviar alguna cosa, contacteu amb l'AFA.",
+    "success_title": "Plaça confirmada",
+    "success_body": "Hi havia lloc, així que la plaça ja és vostra: les places es donen per ordre d'arribada. Si heu de canviar alguna cosa, contacteu amb l'AFA.",
     "back_to_info": "Tornar a la informació del servei",
     "error_rates": "No hem pogut carregar les tarifes. Torna-ho a provar en un moment.",
     "error_parent_name": "Falta el nom del pare, mare o tutor/a.",
@@ -2228,11 +2228,12 @@
     "calendar_clear": "Buidar",
     "calendar_day_full": "Complet",
     "weekday_full": "Complet: entrareu a la llista d'espera",
-    "waitlist_notice": "Algun dels dies que heu triat ja té les places plenes. Podeu enviar la sol·licitud igualment: quedareu a la llista d'espera i us avisarem a la primera baixa.",
-    "success_body_waitlist": "Algun dels dies estava complet, així que quedeu a la llista d'espera d'aquests dies. Us avisarem a la primera baixa; la resta de dies segueixen el camí normal.",
+    "waitlist_notice": "Algun dels dies que heu triat ja té les places plenes. Podeu enviar la sol·licitud igualment: quedareu a la cua per ordre d'arribada i hi entrareu sols a la primera baixa.",
+    "success_body_waitlist": "Algun dels dies que heu demanat estava complet. Quedeu a la cua per ordre d'arribada i hi entrareu sols a la primera baixa; us avisarem quan passi.",
     "calendar_day_closed": "No hi ha escola",
     "modality_monthly_hint": "Quota mensual. Es renova cada mes sense tornar-ho a demanar.",
     "modality_occasional_hint": "Es paga per dia, i mai més que la quota del mes.",
-    "weekdays_hint": "La quota del mes és la mateixa tant si en marqueu dos com si en marqueu cinc. Ens serveix per saber quants infants hi haurà cada dia i per guardar-vos la plaça."
+    "weekdays_hint": "La quota del mes és la mateixa tant si en marqueu dos com si en marqueu cinc. Ens serveix per saber quants infants hi haurà cada dia i per guardar-vos la plaça.",
+    "success_title_waitlist": "Sou a la llista d'espera"
   }
 }
