@@ -1,4 +1,4 @@
-import { Instagram, Twitter, Facebook } from "lucide-react";
+import { Instagram, Twitter, Facebook } from "../../../components/icons/brand";
 import type { SocialConfig } from "../../../services/ConfigService";
 import { useSettingsT } from "./useSettingsT";
 

@@ -13,9 +13,9 @@ import {
   CheckCircle2,
   HelpCircle,
   Megaphone,
-  Mail,
-  Instagram
+  Mail
 } from 'lucide-react';
+import { Instagram } from '../components/icons/brand';
 import { Link } from 'react-router-dom';
 import { ConfigService, type SocialConfig } from '../services/ConfigService';
 import { useHomepageConfig } from '../hooks/useHomepageConfig';

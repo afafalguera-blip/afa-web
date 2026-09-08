@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
+import { Instagram } from "../../components/icons/brand";
 import {
     Save,
     Settings,
     HelpCircle,
     Loader2,
     Mail,
-    Instagram,
     Info,
     FileLock2,
     Cookie,

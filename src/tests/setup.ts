@@ -1,5 +1,7 @@
 /// <reference types="vitest/globals" />
-import '@testing-library/jest-dom';
+// jest-dom 7 dejó de augmentar Vitest desde la raíz del paquete: sin el sufijo
+// /vitest los matchers existen en tiempo de ejecución pero no en los tipos.
+import '@testing-library/jest-dom/vitest';
 
 // jsdom no calcula layout, así que `offsetParent` es null hasta para elementos
 // perfectamente visibles. El Modal lo usa para descartar lo oculto al atrapar el

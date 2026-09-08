@@ -162,7 +162,7 @@ export const ExportService = {
   ) {
     const rows = this.getFlattenedData(inscriptions, fields, scope);
 
-    let exportData: Record<string, string | number | boolean>[] = [];
+    let exportData: Record<string, string | number | boolean>[];
 
     if (fields === 'basic') {
       exportData = rows.map(r => ({

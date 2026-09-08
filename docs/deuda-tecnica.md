@@ -416,3 +416,44 @@ criatura», que es toda la decisión) y
   `suspended`, que la base no guarda. Los desplegables ya no los ofrecen, pero
   el tipo miente. **Criterio de cierre**: reducirlo a `'alta' | 'baja'` y
   arreglar lo que se rompa.
+
+## 15. Tailwind 4 y TypeScript 7 quedan pendientes — 2026-09-08
+
+El grupo `dev-tooling` de Dependabot subió de golpe 19 paquetes, dos de ellos
+majors que no son un bump sino una migración. Se mergearon con CI en rojo y
+`main` quedó roto durante unos minutos; producción no llegó a verse afectada
+porque el `buildCommand` de Vercel es `npm run ci` y el despliegue no llegó a
+publicarse.
+
+**Qué se revirtió**
+
+| Paquete | Se dejó en | Por qué |
+|---|---|---|
+| `tailwindcss` | `^3.4.19` | La v4 cambia el motor: la configuración se declara en CSS, `@tailwind base/components/utilities` desaparece y el plugin de PostCSS pasa a ser `@tailwindcss/postcss`. Con la v4 instalada el build **no compila** |
+| `typescript` | `~5.9.3` | `typescript-eslint` 8.69 no soporta TS 7.0: `eslint` aborta al arrancar, así que el gate entero cae |
+
+Ambos están ahora en el `ignore` de [dependabot.yml](../.github/dependabot.yml)
+para majors, con el motivo escrito. El resto de los 19 (eslint 10, vitest 5,
+jsdom 30, jest-dom 7, @types/node 26, playwright, sharp…) **sí** se quedó.
+
+**Qué hubo que arreglar para que el resto entrara**
+
+- `lucide-react` 1.0 borró todos los logotipos de marca del paquete. Instagram,
+  Twitter y Facebook se reconstruyen en
+  [src/components/icons/brand.tsx](../src/components/icons/brand.tsx) con
+  `createLucideIcon` y los trazos de lucide 0.x: siguen siendo `LucideIcon`, con
+  las mismas props y el mismo grosor de línea.
+- `@testing-library/jest-dom` 7 dejó de augmentar Vitest desde la raíz: hay que
+  importar `@testing-library/jest-dom/vitest` o los matchers existen en runtime
+  pero no en los tipos.
+- ESLint 10 estrena `no-useless-assignment` (dos asignaciones muertas reales) y
+  `eslint-plugin-react-refresh` 0.5 exige que un contexto no comparta fichero
+  con su proveedor: `AuthContext` se separó en
+  [AuthContextValue.ts](../src/core/contexts/AuthContextValue.ts). Cuidado con
+  el nombre: en Windows `authContext.ts` y `AuthContext.tsx` chocan por
+  mayúsculas y `tsc` lo rechaza.
+
+**Criterio de cierre**: Tailwind 4 en su propia rama, con revisión visual de
+todas las pantallas (el rediseño de la paleta y `@apply` son lo que más se
+mueve). TypeScript 7, cuando `typescript-eslint` lo soporte —
+[issue 10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940).

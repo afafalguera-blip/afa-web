@@ -70,7 +70,7 @@ function extractSlug(requestUrl: URL): string | null {
   const rawSlug = segments[0] ?? requestUrl.searchParams.get("slug") ?? "";
   if (!rawSlug) return null;
 
-  let decodedSlug = rawSlug;
+  let decodedSlug: string;
   try {
     decodedSlug = decodeURIComponent(rawSlug);
   } catch {

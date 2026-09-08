@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Mail, Clock, Instagram, AlertCircle } from 'lucide-react';
+import { Mail, Clock, AlertCircle } from 'lucide-react';
+import { Instagram } from '../../icons/brand';
 import type { ContactConfig, SocialConfig } from '../../../services/ConfigService';
 
 interface ContactInfoProps {
