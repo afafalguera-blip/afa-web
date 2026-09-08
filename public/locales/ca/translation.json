@@ -2279,5 +2279,14 @@
     "modality_occasional_hint": "Es paga per dia, i mai més que la quota del mes.",
     "weekdays_hint": "La quota del mes és la mateixa tant si en marqueu dos com si en marqueu cinc. Ens serveix per saber quants infants hi haurà cada dia i per guardar-vos la plaça.",
     "success_title_waitlist": "Sou a la llista d'espera"
+  },
+  "pwa": {
+    "install": {
+      "title": "Instal·la l'app de l'AFA",
+      "body": "Afegeix la web a la pantalla d'inici i obre-la com una app, sense navegador.",
+      "action": "Instal·lar",
+      "dismiss": "Ara no",
+      "ios_body": "Obre el menú Compartir del navegador i tria «Afegeix a la pantalla d'inici»."
+    }
   }
 }

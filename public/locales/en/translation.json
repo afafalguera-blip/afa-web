@@ -2278,5 +2278,14 @@
     "modality_occasional_hint": "Charged per day, and never more than the monthly fee.",
     "weekdays_hint": "The monthly fee is the same whether you tick two days or five. We use it to know how many children to expect each day and to hold your place.",
     "success_title_waitlist": "You are on the waiting list"
+  },
+  "pwa": {
+    "install": {
+      "title": "Install the AFA app",
+      "body": "Add the site to your home screen and open it like an app, without the browser.",
+      "action": "Install",
+      "dismiss": "Not now",
+      "ios_body": "Open your browser's Share menu and choose «Add to Home Screen»."
+    }
   }
 }

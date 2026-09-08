@@ -38,6 +38,31 @@ plazo:
 5. **i18n First**: Todos los strings de la aplicación deben pasar por el sistema
    de internacionalización (`react-i18next`).
 
+## 📱 Instalable (PWA)
+
+La web se puede instalar en el móvil o el escritorio y funciona sin conexión con
+lo ya visitado. Lo genera `vite-plugin-pwa` (Workbox) en el build:
+
+- **Manifiesto**: se declara en `vite.config.ts`, no en un fichero suelto, para
+  que iconos, `theme_color` y `scope` no puedan quedar desincronizados del
+  build. Los iconos viven en `public/icons/` (192, 512 y una versión *maskable*
+  con fondo, obligatoria para que Android no recorte el logo dentro de su
+  máscara).
+- **Service worker**: `registerType: 'autoUpdate'`. Cada despliegue invalida el
+  precache y la pestaña abierta se actualiza sola; nadie se queda con una
+  versión vieja de la app pegada al icono.
+- **Qué se precachea**: solo el esqueleto estático (JS, CSS, HTML, fuentes). Las
+  imágenes de Supabase Storage y los catálogos i18n se cachean en runtime
+  (`StaleWhileRevalidate`), y las llamadas a la API de Supabase **no** las toca
+  el service worker: nunca se sirven datos de familias desde una caché.
+- **`navigateFallbackDenylist`**: `/storage/` queda fuera del fallback del SPA.
+  Sin eso, una imagen que fallara devolvería el `index.html` en vez de un 404.
+- **Aviso de instalación**: `src/components/public/InstallPrompt.tsx`. Usa
+  `beforeinstallprompt` en Chromium y, en iOS —donde ese evento no existe—
+  explica el gesto de «Afegeix a la pantalla d'inici». Se descarta para siempre
+  con localStorage y espera al consentimiento de cookies para no apilar dos
+  avisos en la misma esquina.
+
 ## 📡 Comunicación con Backend
 
 Utilizamos **Supabase** como backend-as-a-service. La capa de `services/` es la

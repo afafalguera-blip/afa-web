@@ -2279,5 +2279,14 @@
     "modality_occasional_hint": "Se paga por día, y nunca más que la cuota del mes.",
     "weekdays_hint": "La cuota del mes es la misma tanto si marcáis dos días como cinco. Nos sirve para saber cuántos niños habrá cada día y para guardaros la plaza.",
     "success_title_waitlist": "Estáis en lista de espera"
+  },
+  "pwa": {
+    "install": {
+      "title": "Instala la app del AFA",
+      "body": "Añade la web a la pantalla de inicio y ábrela como una app, sin navegador.",
+      "action": "Instalar",
+      "dismiss": "Ahora no",
+      "ios_body": "Abre el menú Compartir del navegador y elige «Añadir a pantalla de inicio»."
+    }
   }
 }

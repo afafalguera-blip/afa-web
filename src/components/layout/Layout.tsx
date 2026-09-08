@@ -7,6 +7,7 @@ import { SchoolSuppliesBackground } from './SchoolSuppliesBackground';
 import { AnnouncementBanner } from '../public/AnnouncementBanner';
 import { MaintenanceBanner } from '../public/MaintenanceBanner';
 import { CookieBanner } from '../public/CookieBanner';
+import { InstallPrompt } from '../public/InstallPrompt';
 import { Link } from 'react-router-dom';
 
 
@@ -46,6 +47,7 @@ export function Layout() {
       </div>
 
       <CookieBanner />
+      <InstallPrompt />
     </div>
   );
 }
