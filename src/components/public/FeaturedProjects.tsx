@@ -117,16 +117,16 @@ export const FeaturedProjects = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 10 }}
             viewport={{ once: true }}
-            className="inline-block p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 mb-4"
+            className="inline-block p-3 rounded-2xl bg-accent dark:bg-slate-800 mb-4"
           >
-            <Landmark className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+            <Landmark className="w-8 h-8 text-secondary dark:text-primary" />
           </motion.div>
 
           <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">
             {t('featured_projects.title')}
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-xl text-slate-500 dark:text-slate-400">
-            {t('featured_projects.subtitle_prefix')} <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{t('featured_projects.subtitle_highlight')}</span>.
+            {t('featured_projects.subtitle_prefix')} <span className="text-secondary dark:text-primary font-semibold">{t('featured_projects.subtitle_highlight')}</span>.
             {t('featured_projects.subtitle_suffix')}
           </p>
         </div>
@@ -140,7 +140,7 @@ export const FeaturedProjects = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
               onClick={() => setSelectedProject(project)}
-              className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-xl ring-1 ring-slate-900/5 transition-all hover:-translate-y-1 hover:shadow-2xl relative cursor-pointer z-10"
+              className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-900/5 transition-all hover:-translate-y-1 hover:shadow-md relative cursor-pointer z-10"
             >
               {isAdmin && (
                 <button
@@ -174,7 +174,7 @@ export const FeaturedProjects = () => {
               </div>
 
               <div className="flex flex-1 flex-col p-6">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
                   {project.title}
                 </h3>
                 <p className="mt-3 flex-auto text-base text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
@@ -182,7 +182,7 @@ export const FeaturedProjects = () => {
                 </p>
 
                 <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                  <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:gap-2 transition-all">
+                  <span className="text-sm font-medium text-secondary dark:text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
                     {t('common.read_more')} <ArrowRight size={16} />
                   </span>
                   {(project.participants || project.impact) && (

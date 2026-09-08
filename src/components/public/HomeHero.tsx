@@ -21,7 +21,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ isAdmin, heroConfig, heroRes
     const heroSrc = heroConfig?.image_url || (heroResolved ? branding.default_hero_url : null);
 
     return (
-        <div className="w-full h-40 lg:h-[300px] mb-6 lg:mb-8 relative rounded-2xl lg:rounded-3xl overflow-hidden mt-4 lg:mt-6 shadow-lg lg:shadow-xl mx-auto max-w-[calc(100%-3rem)] lg:max-w-none group">
+        <div className="w-full h-44 lg:h-[300px] mb-5 lg:mb-8 relative rounded-2xl overflow-hidden mt-4 lg:mt-6 shadow-md mx-auto max-w-[calc(100%-3rem)] lg:max-w-none group">
             {heroSrc ? (
                 <LazyImage
                     src={heroSrc}
@@ -32,19 +32,25 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ isAdmin, heroConfig, heroRes
             ) : (
                 <div className="w-full h-full bg-slate-200 animate-pulse" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 lg:p-8">
-                <h1 className="text-2xl lg:text-4xl font-bold text-white drop-shadow-md leading-tight">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent flex flex-col justify-end p-5 lg:p-8">
+                <h1 className="text-xl lg:text-4xl font-bold text-white drop-shadow-md leading-tight">
                     {heroConfig?.title || t('home.welcome_title') || "Benvinguts a l'AFA Falguera"}
                 </h1>
+                <p className="mt-1 text-sm lg:text-lg text-white/85 drop-shadow-sm">
+                    {t('home.welcome_subtitle', 'Escola, families i comunitat.')}
+                </p>
             </div>
 
+            {/* Solo el lapiz: el boton decia "Editar Hero" en grande y competia con el
+                titulo de la portada para las tres personas que pueden pulsarlo. */}
             {isAdmin && (
                 <button
                     onClick={onOpenModal}
-                    className="absolute top-4 right-4 z-30 bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-white p-2.5 rounded-full shadow-xl hover:scale-110 active:scale-95 transition-all flex items-center gap-2 px-4 backdrop-blur-sm border border-white/20"
+                    aria-label={t('common.edit', 'Editar')}
+                    title={t('common.edit', 'Editar')}
+                    className="absolute top-3 right-3 z-30 w-9 h-9 flex items-center justify-center bg-white/85 dark:bg-slate-900/85 rounded-full shadow-md backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95 transition-all"
                 >
-                    <Edit size={18} className="text-primary" />
-                    <span className="text-sm font-bold">Editar Hero</span>
+                    <Edit size={16} className="text-primary" />
                 </button>
             )}
         </div>

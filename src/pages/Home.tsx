@@ -7,6 +7,7 @@ import { AboutSettingsModal } from '../components/public/AboutSettingsModal';
 import { ConfigService, type HeroConfig, type AboutConfig, type ContactConfig } from '../services/ConfigService';
 import { SEO } from '../components/common/SEO';
 import { HomeHero } from '../components/public/HomeHero';
+import { QuickAccess } from '../components/public/QuickAccess';
 import { NewsSection } from '../features/news/components/NewsSection';
 import { EventsSection } from '../features/events/components/EventsSection';
 import { AboutSection } from '../components/public/AboutSection';
@@ -100,6 +101,8 @@ export function Home() {
         onOpenModal={() => setIsHeroModalOpen(true)}
       />
 
+      <QuickAccess />
+
       <NewsSection isAdmin={isAdmin} />
 
       <EventsSection />
@@ -112,12 +115,12 @@ export function Home() {
             rel="noopener noreferrer"
             className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
           >
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div className="w-12 h-12 bg-accent dark:bg-slate-700 text-secondary dark:text-primary rounded-[12px] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
               <span className="material-icons-round">description</span>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-secondary dark:text-primary uppercase tracking-wider">
                   {t('home.assemblea_banner.tag')}
                 </span>
                 <span className="text-slate-400 text-[10px] font-medium">{t('home.course_current')}</span>
@@ -133,12 +136,12 @@ export function Home() {
             to="/contacte"
             className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
           >
-            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+            <div className="w-12 h-12 bg-accent dark:bg-slate-700 text-secondary dark:text-primary rounded-[12px] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
               <span className="material-icons-round">mail</span>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-secondary dark:text-primary uppercase tracking-wider">
                   {t('home.contact_banner.tag')}
                 </span>
               </div>

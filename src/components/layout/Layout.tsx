@@ -21,8 +21,8 @@ export function Layout() {
       <DesktopNav />
       <MobileTopNav />
 
-      {/* Status bar spacer - Mobile only (adjusted for new TopNav) */}
-      <div className="h-16 w-full lg:hidden"></div>
+      {/* Reserva el alto de la barra fija: tiene que ir a la par con la h-14 de MobileTopNav. */}
+      <div className="h-14 w-full lg:hidden"></div>
 
       <MaintenanceBanner />
       <AnnouncementBanner />

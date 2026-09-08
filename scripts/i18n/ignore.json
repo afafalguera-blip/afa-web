@@ -105,6 +105,7 @@
   "common.create",
   "common.delete",
   "common.edit",
+  "common.language",
   "common.share",
   "documents.categories.general",
   "documents.categories.normativa",
