@@ -6,9 +6,9 @@ import type { AcollidaInscription } from '../types/acollida';
 /** The real "7:30H A 9H" row, which is what production charges. */
 const rate = {
   preu_soci_mes: 64,
-  preu_soci_ocasional: 10,
+  preu_soci_ocasional: 6.5,
   preu_no_soci_mes: 68,
-  preu_no_soci_ocasional: 14,
+  preu_no_soci_ocasional: 9.5,
 };
 
 const inscription = (over: Partial<AcollidaInscription> = {}): AcollidaInscription => ({
@@ -39,8 +39,8 @@ describe('unitPrice', () => {
   it('charges the member rate to members and the other one to everybody else', () => {
     expect(unitPrice(rate, true, 'mensual')).toBe(64);
     expect(unitPrice(rate, false, 'mensual')).toBe(68);
-    expect(unitPrice(rate, true, 'ocasional')).toBe(10);
-    expect(unitPrice(rate, false, 'ocasional')).toBe(14);
+    expect(unitPrice(rate, true, 'ocasional')).toBe(6.5);
+    expect(unitPrice(rate, false, 'ocasional')).toBe(9.5);
   });
 
   it('returns null when the slot has no occasional price, instead of falling back to the monthly one', () => {
@@ -65,8 +65,8 @@ describe('childMonthlyTotal', () => {
 
   it('bills an occasional sign-up per day of that month', () => {
     const dates = ['2026-06-08', '2026-06-09', '2026-07-02'];
-    expect(childMonthlyTotal(rate, true, 'ocasional', dates, 6, 2026)).toBe(20);
-    expect(childMonthlyTotal(rate, false, 'ocasional', dates, 7, 2026)).toBe(14);
+    expect(childMonthlyTotal(rate, true, 'ocasional', dates, 6, 2026)).toBe(13);
+    expect(childMonthlyTotal(rate, false, 'ocasional', dates, 7, 2026)).toBe(9.5);
   });
 
   it('has no monthly figure for an occasional sign-up without a month to count in', () => {
@@ -121,19 +121,19 @@ describe('rosterByWeekday', () => {
 
 describe('occasionalCharge', () => {
   it('charges day by day while that is cheaper than the month', () => {
-    expect(occasionalCharge(rate, true, 3)).toEqual({ amount: 30, capped: false });
-    expect(occasionalCharge(rate, false, 3)).toEqual({ amount: 42, capped: false });
+    expect(occasionalCharge(rate, true, 3)).toEqual({ amount: 19.5, capped: false });
+    expect(occasionalCharge(rate, false, 3)).toEqual({ amount: 28.5, capped: false });
   });
 
   it('never charges more than the monthly fee', () => {
-    // 13 days x 10 EUR = 130 EUR, twice the 64 EUR month. The family pays 64.
+    // 13 days x 6,50 EUR = 84,50 EUR, more than the 64 EUR month. The family pays 64.
     expect(occasionalCharge(rate, true, 13)).toEqual({ amount: 64, capped: true });
     expect(occasionalCharge(rate, false, 13)).toEqual({ amount: 68, capped: true });
   });
 
   it('caps from the first day the days add up to more than the month', () => {
-    expect(occasionalCharge(rate, true, 6)).toEqual({ amount: 60, capped: false });
-    expect(occasionalCharge(rate, true, 7)).toEqual({ amount: 64, capped: true });
+    expect(occasionalCharge(rate, true, 9)).toEqual({ amount: 58.5, capped: false });
+    expect(occasionalCharge(rate, true, 10)).toEqual({ amount: 64, capped: true });
   });
 
   it('charges nothing for no days, and stays null without an occasional price', () => {
@@ -142,7 +142,10 @@ describe('occasionalCharge', () => {
   });
 
   it('is what childMonthlyTotal bills for a month of odd days', () => {
-    const dates = ['2026-10-01', '2026-10-02', '2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09'];
+    const dates = [
+      '2026-10-01', '2026-10-02', '2026-10-05', '2026-10-06', '2026-10-07',
+      '2026-10-08', '2026-10-09', '2026-10-13', '2026-10-14', '2026-10-15',
+    ];
     expect(childMonthlyTotal(rate, true, 'ocasional', dates, 10, 2026)).toBe(64);
   });
 });

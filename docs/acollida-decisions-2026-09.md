@@ -189,9 +189,9 @@ cuesta?** Con porcentaje, barra y cuántas cuotas mensuales faltarían.
 
 | Franja | Socios / mes | Socios / día | No socios / mes | No socios / día |
 |---|---|---|---|---|
-| 7:30 a 9:00 | 64 € | 10 € | 68 € | 14 € |
-| 8:00 a 9:00 | 46 € | 7 € | 50 € | 11 € |
-| 8:30 a 9:00 | 27 € | 4 € | 31 € | 8 € |
+| 7:30 a 9:00 | 64 € | 6,50 € | 68 € | 9,50 € |
+| 8:00 a 9:00 | 46 € | 4,50 € | 50 € | 7 € |
+| 8:30 a 9:00 | 27 € | 3 € | 31 € | 4,50 € |
 | 15:25 a 16:25 · junio | 30 € | 4,50 € | 40 € | 6,50 € |
 | 15:25 a 16:25 · septiembre | 15 € | 4,50 € | 20 € | 6,50 € |
 
@@ -210,20 +210,26 @@ cuesta?** Con porcentaje, barra y cuántas cuotas mensuales faltarían.
 **El servicio solo se sostiene con la franja larga.** Las cortas no lo cubren ni
 llenas: viven del margen de las de 7:30.
 
-### Propuesta de bajada del día suelto (sin decidir)
+### Bajada del día suelto — decidida el 2026-09-08
 
 El argumento no es teórico: **las franjas de tarde ya cobran el día suelto a
 1,5 veces el prorrateo, y las de mañana al triple**. La propuesta aplica a las
 mañanas un criterio intermedio (×2), manteniendo el diferencial de socio:
 
-| Franja | Día hoy | Propuesto | Se topa a los |
-|---|---|---|---|
-| 7:30-9H · socia | 10 € | 6,50 € | 10 días |
-| 7:30-9H · no socia | 14 € | 9,50 € | 8 días |
-| 8-9H · socia | 7 € | 4,50 € | 11 días |
-| 8-9H · no socia | 11 € | 7 € | 8 días |
-| 8:30-9H · socia | 4 € | 3 € | 9 días |
-| 8:30-9H · no socia | 8 € | 4,50 € | 7 días |
+| Franja | Día antes | Día ahora |
+|---|---|---|
+| 7:30-9H · socia | 10 € | 6,50 € |
+| 7:30-9H · no socia | 14 € | 9,50 € |
+| 8-9H · socia | 7 € | 4,50 € |
+| 8-9H · no socia | 11 € | 7 € |
+| 8:30-9H · socia | 4 € | 3 € |
+| 8:30-9H · no socia | 8 € | 4,50 € |
+
+Aplicado en
+[20260908130000_acollida_baixada_dia_solt.sql](../supabase/migrations/20260908130000_acollida_baixada_dia_solt.sql).
+Las cuotas mensuales no se tocan. El importe de una solicitud ocasional se
+calcula al vuelo desde la tarifa, así que las que ya estén dentro pasan a
+facturar el precio nuevo.
 
 Se lee solo: *«si vienes medio mes, pagas el mes»* para socios; *«a partir de una
 semana y media»* para no socios.
