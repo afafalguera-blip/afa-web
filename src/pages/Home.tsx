@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FileText, Mail } from 'lucide-react';
 import { FeaturedProjects } from '../components/public/FeaturedProjects';
 import { useAuth } from '../hooks/useAuth';
 import { HeroSettingsModal } from '../components/public/HeroSettingsModal';
@@ -116,7 +117,7 @@ export function Home() {
             className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
           >
             <div className="w-12 h-12 bg-accent dark:bg-slate-700 text-secondary dark:text-primary rounded-[12px] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-              <span className="material-icons-round">description</span>
+              <FileText className="w-6 h-6" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
@@ -137,7 +138,7 @@ export function Home() {
             className="flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group"
           >
             <div className="w-12 h-12 bg-accent dark:bg-slate-700 text-secondary dark:text-primary rounded-[12px] flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-              <span className="material-icons-round">mail</span>
+              <Mail className="w-6 h-6" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">

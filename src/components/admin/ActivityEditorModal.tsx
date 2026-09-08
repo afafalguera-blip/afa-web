@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CATEGORY_ICON_NAMES } from '../common/categoryIcons';
 import { Upload, Save, Loader2, Plus, Trash2, X } from "lucide-react";
 import { ActivityService } from "../../services/ActivityService";
 import type { Activity } from "../../services/ActivityService";
@@ -452,7 +453,12 @@ export function ActivityEditorModal({ isOpen, onClose, activity, onSaved }: Acti
           </div>
           <div className="space-y-2">
             <label htmlFor="activity-icon" className="text-sm font-medium text-neutral-700">{t('admin.editor.icon')}</label>
-            <input id="activity-icon" className={INPUT_CLASS} value={formData.category_icon ?? ''} onChange={e => handleChange('category_icon', e.target.value)} placeholder="school" />
+            <input id="activity-icon" list="activity-icon-names" className={INPUT_CLASS} value={formData.category_icon ?? ''} onChange={e => handleChange('category_icon', e.target.value)} placeholder="school" />
+            {/* Los iconos ya no salen de una fuente de Google, sino de un mapa en
+                CategoryIcon: un nombre que no este ahi se pinta como birrete. */}
+            <datalist id="activity-icon-names">
+              {CATEGORY_ICON_NAMES.map(nombre => <option key={nombre} value={nombre} />)}
+            </datalist>
           </div>
         </div>
 
