@@ -136,6 +136,10 @@ export function NotificationBell() {
 
   const locale = i18n.language === 'ca' ? ca : es;
 
+  // Sin nada que avisar no se pinta. Una campana permanente con un punto rojo que
+  // nunca cambia deja de significar nada, y en el movil ocupa el sitio de la marca.
+  if (unreadCount === 0) return null;
+
   return (
     <div className="relative" ref={bellRef}>
       <button 

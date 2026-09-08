@@ -23,7 +23,8 @@
     "services": "Serveis",
     "services_subtitle": "Acollida i menjador",
     "more": "Més",
-    "more_subtitle": "Tot el que pots explorar"
+    "more_subtitle": "Tot el que pots explorar",
+    "admin": "Panell"
   },
   "nav_menu": {
     "extraescolars_desc": "Inscripcions i activitats",
@@ -301,7 +302,9 @@
       "title": "Vols parlar amb nosaltres?",
       "description": "Atenció presencial a l'espai AFA els dilluns (9:00-9:30), sempre sota demanda enviant un correu previ.",
       "button": "Formulari de Contacte"
-    }
+    },
+    "welcome_subtitle": "Escola, famílies i comunitat.",
+    "quick_access": "Accessos ràpids"
   },
   "contact_page": {
     "title": "Contacte",
@@ -1968,7 +1971,8 @@
     "no_results": "Sense resultats",
     "retry": "Tornar-ho a provar",
     "yes": "Sí",
-    "actions": "Accions"
+    "actions": "Accions",
+    "language": "Idioma"
   },
   "news_detail": {
     "not_found": "Notícia no trobada",

@@ -8,10 +8,20 @@ import { useHomepageConfig } from '../../../hooks/useHomepageConfig';
 import { MAINTENANCE_MODE } from '../../../utils/maintenance';
 import { MaintenancePlaceholder } from '../../../components/public/MaintenancePlaceholder';
 
+const PLACEHOLDER = 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop';
+
 interface NewsSectionProps {
     isAdmin: boolean;
 }
 
+/**
+ * Portada de noticias: una destacada y el resto en fila compacta.
+ *
+ * Antes eran tres tarjetas iguales en un carrusel horizontal. En el movil cada
+ * una ocupaba el 85% del ancho, la segunda asomaba cortada por el borde y para
+ * ver la tercera habia que arrastrar sin que nada lo indicara. Con una destacada
+ * y dos lineas debajo se ven las tres de golpe, y se lee cual es la importante.
+ */
 export const NewsSection: React.FC<NewsSectionProps> = ({ isAdmin }) => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
@@ -37,84 +47,108 @@ export const NewsSection: React.FC<NewsSectionProps> = ({ isAdmin }) => {
         fetchNews();
     }, []);
 
+    const title = (item: NewsArticle) => item.translations?.[i18n.language]?.title || item.title;
+    const excerpt = (item: NewsArticle) => item.translations?.[i18n.language]?.excerpt || item.excerpt;
+
+    const shortDate = (item: NewsArticle) => {
+        const raw = item.event_date || item.published_at || item.created_at;
+        if (!raw) return null;
+        return new Date(raw).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' });
+    };
+
+    const [featured, ...rest] = news;
+
     return (
-        <section className="mt-4 lg:mt-8">
-            <div className="px-6 flex items-center justify-between mb-4">
+        <section className="mt-2 lg:mt-8 px-6">
+            <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('home.news_title')}</h2>
                 <Link to="/noticies" className="text-sm font-semibold text-primary">{t('home.see_all')}</Link>
             </div>
 
-            <div className="flex overflow-x-auto px-6 gap-4 hide-scrollbar snap-x pb-4 lg:grid lg:grid-cols-3 lg:overflow-visible lg:pb-0">
-                {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="min-w-[85%] lg:min-w-0 bg-slate-100 dark:bg-slate-800 rounded-3xl h-64 animate-pulse"></div>
-                    ))
-                ) : MAINTENANCE_MODE || news.length === 0 ? (
-                    MAINTENANCE_MODE ? (
-                        <MaintenancePlaceholder compact />
-                    ) : (
-                        <div className="col-span-3 py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
-                            {t('common.no_news')}
+            {loading ? (
+                <div className="space-y-3">
+                    <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl h-56 animate-pulse" />
+                    <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl h-16 animate-pulse" />
+                    <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl h-16 animate-pulse" />
+                </div>
+            ) : MAINTENANCE_MODE ? (
+                <MaintenancePlaceholder compact />
+            ) : news.length === 0 ? (
+                <div className="py-12 text-center text-slate-500 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                    {t('common.no_news')}
+                </div>
+            ) : (
+                <div className="lg:grid lg:grid-cols-3 lg:gap-4 lg:items-start">
+                    <Link
+                        to={`/noticies/${featured.slug}`}
+                        className="block lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group relative"
+                    >
+                        {isAdmin && (
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate('/admin/news');
+                                }}
+                                aria-label={t('common.edit')}
+                                title={t('common.edit')}
+                                className="absolute top-3 right-3 z-20 w-9 h-9 flex items-center justify-center bg-white/85 dark:bg-slate-900/85 rounded-full shadow-md backdrop-blur-sm border border-white/30 hover:scale-110 active:scale-95 transition-all"
+                            >
+                                <Edit size={16} className="text-primary" />
+                            </button>
+                        )}
+
+                        <div className="h-44 lg:h-64 bg-slate-200 overflow-hidden">
+                            <LazyImage
+                                alt={title(featured)}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                src={featured.image_url || PLACEHOLDER}
+                            />
                         </div>
-                    )
-                ) : (
-                    news.map((item) => (
-                        <Link
-                            key={item.id}
-                            to={`/noticies/${item.slug}`}
-                            className="min-w-[85%] lg:min-w-0 snap-center bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-all group relative cursor-pointer z-10"
-                        >
-                            {isAdmin && (
-                                <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        navigate('/admin/news');
-                                    }}
-                                    className="absolute top-3 right-3 z-20 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:bg-blue-700 scale-0 group-hover:scale-100 transition-transform flex items-center gap-1 text-xs px-3"
-                                >
-                                    <Edit size={14} />
-                                    {t('common.edit')}
-                                </button>
-                            )}
 
-                            <div className="h-40 bg-slate-200 relative overflow-hidden">
-                                <LazyImage
-                                    alt={item.title}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                    src={item.image_url || 'https://images.unsplash.com/photo-1504711432869-5d39a110fdd7?q=80&w=2070&auto=format&fit=crop'}
-                                />
+                        <div className="p-4">
+                            <h3 className="font-bold text-lg leading-tight text-slate-900 dark:text-white line-clamp-2 group-hover:text-primary transition-colors">
+                                {title(featured)}
+                            </h3>
+                            <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+                                {excerpt(featured)}
+                            </p>
+                            <p className="mt-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                {[shortDate(featured), featured.sources].filter(Boolean).join(' · ')}
+                            </p>
+                        </div>
+                    </Link>
 
-                                {item.event_date && (
-                                    <div className="absolute top-3 right-3 bg-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-lg flex items-center gap-1.5 animate-pulse">
-                                        <span className="material-icons-round text-xs">event</span>
-                                        {new Date(item.event_date).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-4">
-                                <h3 className="font-bold text-lg leading-tight mb-2 text-slate-900 dark:text-white line-clamp-2 transition-colors group-hover:text-primary">
-                                    {item.translations?.[i18n.language]?.title || item.title}
-                                </h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
-                                    {item.translations?.[i18n.language]?.excerpt || item.excerpt}
-                                </p>
-                                {(item.sources || item.news_url) && (
-                                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[150px]">
-                                            {item.sources || 'Font externa'}
-                                        </span>
-                                        <div className="text-xs font-bold text-primary flex items-center gap-1">
-                                            Llegir més
-                                            <span className="material-icons-round text-xs">arrow_forward</span>
+                    {rest.length > 0 && (
+                        <ul className="mt-3 lg:mt-0 space-y-2">
+                            {rest.map((item) => (
+                                <li key={item.id}>
+                                    <Link
+                                        to={`/noticies/${item.slug}`}
+                                        className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-2.5 shadow-sm hover:shadow-md hover:border-primary/40 transition-all group"
+                                    >
+                                        <div className="w-14 h-14 shrink-0 rounded-[12px] overflow-hidden bg-slate-200">
+                                            <LazyImage
+                                                alt={title(item)}
+                                                className="w-full h-full object-cover"
+                                                src={item.image_url || PLACEHOLDER}
+                                            />
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        </Link>
-                    ))
-                )}
-            </div>
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                                                {title(item)}
+                                            </h3>
+                                            {shortDate(item) && (
+                                                <p className="mt-0.5 text-xs text-slate-400">{shortDate(item)}</p>
+                                            )}
+                                        </div>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            )}
         </section>
     );
 };

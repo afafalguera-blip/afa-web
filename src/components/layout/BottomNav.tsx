@@ -19,8 +19,10 @@ import {
   FileText,
   Mail,
   MessageSquare,
+  Shield,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../hooks/useAuth';
 
 type SheetKey = 'activities' | 'services' | 'more' | null;
 
@@ -53,6 +55,12 @@ const MORE_ITEMS: SheetItem[] = [
   { icon: MessageSquare, labelKey: 'nav.suggestions', fallback: 'Suggeriments', path: '/contacte?subject=Sugeriment', accent: 'bg-violet-500 text-white' },
 ];
 
+/**
+ * El panel solo lo ve quien puede entrar, y vive aqui y no en la cabecera: es la
+ * pantalla que menos se abre de toda la web, y arriba le quitaba sitio a la marca.
+ */
+const ADMIN_ITEM: SheetItem = { icon: Shield, labelKey: 'nav.admin', fallback: 'Panell', path: '/admin', accent: 'bg-blue-600 text-white' };
+
 const ACTIVITIES_PATHS = ['/extraescolars', '/quotes', '/calendari'];
 const SERVICES_PATHS = ['/acollida', '/menjador'];
 const MORE_PATHS = ['/sobre-afa', '/assemblea', '/historia', '/noticies', '/documents', '/contacte'];
@@ -63,6 +71,7 @@ export function BottomNav() {
   const { t: tStrict } = useTranslation();
   const t = tStrict as unknown as (key: string, fallback?: string) => string;
   const location = useLocation();
+  const { isAdmin } = useAuth();
   const [openSheet, setOpenSheet] = useState<SheetKey>(null);
 
   // Close sheet on route change
@@ -151,7 +160,7 @@ export function BottomNav() {
             title={t('nav.more', 'Més')}
             subtitle={t('nav.more_subtitle', 'Tot el que pots explorar')}
             onClose={() => setOpenSheet(null)}
-            items={MORE_ITEMS}
+            items={isAdmin ? [...MORE_ITEMS, ADMIN_ITEM] : MORE_ITEMS}
             t={t}
             grid
           />

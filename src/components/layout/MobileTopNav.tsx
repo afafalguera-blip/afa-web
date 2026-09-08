@@ -1,67 +1,92 @@
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import { NotificationBell } from '../common/NotificationBell';
-import { useAuth } from '../../hooks/useAuth';
 import { useBranding } from '../../hooks/useBranding';
-import { Shield } from 'lucide-react';
 
+const LANGS = ['ca', 'es', 'en'] as const;
+
+/**
+ * Barra superior del movil.
+ *
+ * Cabecera de una sola linea: marca a la izquierda, idioma y campana a la
+ * derecha. Antes eran tres capsulas de idioma siempre desplegadas, la campana y
+ * un escudo azul de admin; en 390 px de ancho eso es media pantalla de controles
+ * antes de que empiece el contenido. El idioma se pliega en un desplegable (la
+ * familia elige el suyo una vez, no cada visita) y el acceso al panel vive en
+ * «Mes», que es donde se busca lo que se usa poco.
+ */
 export function MobileTopNav() {
-  const { i18n } = useTranslation();
-  const { isAdmin } = useAuth();
+  const { i18n, t } = useTranslation();
   const branding = useBranding();
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
+  useEffect(() => {
+    if (!langOpen) return;
+    const close = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [langOpen]);
+
+  const current = LANGS.find((l) => i18n.language?.startsWith(l)) ?? 'ca';
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 z-50 flex items-center justify-between px-4 lg:hidden">
-      {/* Left: Branding & Greeting */}
-      <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
-        <div className="w-10 h-10 rounded-lg border border-slate-100 dark:border-slate-700 overflow-hidden bg-white shadow-sm shrink-0 flex items-center justify-center p-1">
-          <img
-            alt="AFA Logo"
-            className="max-w-full max-h-full object-contain"
-            src={branding.logo_url}
-          />
-        </div>
-        <div className="flex flex-col">
-          <span className="font-bold text-sm text-primary dark:text-white leading-none">{branding.site_name}</span>
-        </div>
+    <div className="fixed top-0 left-0 right-0 h-14 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 z-50 flex items-center justify-between px-4 lg:hidden">
+      <Link to="/" className="flex items-center gap-2.5 min-w-0 active:scale-95 transition-transform">
+        <img
+          alt="AFA Escola Falguera"
+          className="w-9 h-9 rounded-[12px] object-contain bg-white border border-slate-100 dark:border-slate-700 p-0.5 shrink-0"
+          src={branding.logo_url}
+        />
+        <span className="font-bold text-sm text-secondary dark:text-white leading-tight truncate">
+          {branding.site_name}
+        </span>
       </Link>
 
-      {/* Right: Actions */}
-      <div className="flex items-center gap-3">
-        {/* Languages (Compact & Rounded) */}
-        <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 p-1 rounded-full border border-slate-100 dark:border-slate-700">
-          {['ca', 'es', 'en'].map((lang) => (
-            <button
-              key={lang}
-              onClick={() => changeLanguage(lang)}
-              translate="no"
-              className={`notranslate text-[10px] font-bold px-2 py-1 rounded-full transition-all ${i18n.language === lang
-                ? 'bg-white dark:bg-slate-600 text-primary shadow-sm'
-                : 'text-slate-400 hover:text-slate-600'
-                }`}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="relative" ref={langRef}>
+          <button
+            type="button"
+            onClick={() => setLangOpen((v) => !v)}
+            aria-expanded={langOpen}
+            aria-label={t('common.language', 'Idioma')}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-[12px] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          >
+            <span translate="no" className="notranslate text-xs font-bold">
+              {current.toUpperCase()}
+            </span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${langOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {langOpen && (
+            <div className="absolute right-0 mt-2 w-20 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg overflow-hidden">
+              {LANGS.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  translate="no"
+                  onClick={() => {
+                    i18n.changeLanguage(lang);
+                    setLangOpen(false);
+                  }}
+                  className={`notranslate w-full px-3 py-2 text-xs font-bold text-left transition-colors ${
+                    lang === current
+                      ? 'bg-accent dark:bg-slate-800 text-primary'
+                      : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {lang.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Bell */}
         <NotificationBell />
-
-        {/* Admin Link */}
-        {isAdmin && (
-          <Link
-            to="/admin"
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-50 text-blue-600 border border-blue-100"
-            title="Admin"
-          >
-            <Shield className="w-5 h-5" />
-          </Link>
-        )}
       </div>
     </div>
   );

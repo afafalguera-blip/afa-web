@@ -23,7 +23,8 @@
     "services": "Services",
     "services_subtitle": "Drop-off care and lunch",
     "more": "More",
-    "more_subtitle": "Everything you can explore"
+    "more_subtitle": "Everything you can explore",
+    "admin": "Admin panel"
   },
   "nav_menu": {
     "extraescolars_desc": "Sign-ups and activities",
@@ -301,7 +302,9 @@
       "button": "Contact Form"
     },
     "member_active": "2024-2025 Year Active",
-    "member_status": "Member Status"
+    "member_status": "Member Status",
+    "welcome_subtitle": "School, families and community.",
+    "quick_access": "Quick links"
   },
   "contact_page": {
     "title": "Contact",
@@ -1967,7 +1970,8 @@
     "no_results": "No results",
     "retry": "Try again",
     "yes": "Yes",
-    "actions": "Actions"
+    "actions": "Actions",
+    "language": "Language"
   },
   "news_detail": {
     "not_found": "News not found",

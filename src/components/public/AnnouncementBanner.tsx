@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnnouncementService, type Announcement } from '../../services/AnnouncementService';
-import { Megaphone, ExternalLink } from 'lucide-react';
+import { Megaphone, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { MAINTENANCE_MODE } from '../../utils/maintenance';
@@ -32,17 +32,14 @@ export function AnnouncementBanner() {
         success: 'bg-emerald-500'
     }[announcement.type] || 'bg-primary';
 
+    // Una linea y con el texto recortado a proposito. Ocupaba dos lineas en el
+    // movil y en negrita grande: el aviso pesaba mas que el hero, que es lo que
+    // de verdad presenta la web.
     const content = (
-        <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex items-center justify-center gap-4">
-            <div className="flex items-center justify-center gap-3">
-                <span className="hidden sm:flex w-8 h-8 items-center justify-center bg-white/20 rounded-lg">
-                    <Megaphone size={16} className="text-white" />
-                </span>
-                <p className="text-sm sm:text-base font-bold text-center flex items-center gap-2">
-                    {message}
-                    {announcement.link && <ExternalLink size={14} className="opacity-70" />}
-                </p>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 py-1.5 sm:px-6 lg:px-8 flex items-center justify-center gap-2">
+            <Megaphone size={14} className="shrink-0 opacity-80" />
+            <p className="text-xs sm:text-sm font-semibold min-w-0 truncate">{message}</p>
+            {announcement.link && <ChevronRight size={16} className="shrink-0 opacity-80" />}
         </div>
     );
 

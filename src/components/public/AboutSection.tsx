@@ -26,7 +26,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
     return (
         <section className="px-6 mt-4 mb-12 relative z-10">
-            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm">
                 <div
                     onClick={() => setAboutExpanded(!aboutExpanded)}
                     className="w-full flex items-center justify-between p-5 text-left cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"

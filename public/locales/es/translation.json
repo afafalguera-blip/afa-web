@@ -23,7 +23,8 @@
     "services": "Servicios",
     "services_subtitle": "Acogida y comedor",
     "more": "Más",
-    "more_subtitle": "Todo lo que puedes explorar"
+    "more_subtitle": "Todo lo que puedes explorar",
+    "admin": "Panel"
   },
   "nav_menu": {
     "extraescolars_desc": "Inscripciones y actividades",
@@ -301,7 +302,9 @@
       "button": "Formulario de Contacto"
     },
     "member_active": "Curso 2024-2025 Activo",
-    "member_status": "Estatus de Socio"
+    "member_status": "Estatus de Socio",
+    "welcome_subtitle": "Escuela, familias y comunidad.",
+    "quick_access": "Accesos rápidos"
   },
   "contact_page": {
     "title": "Contacto",
@@ -1968,7 +1971,8 @@
     "no_results": "Sin resultados",
     "retry": "Reintentar",
     "yes": "Sí",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "language": "Idioma"
   },
   "news_detail": {
     "not_found": "Noticia no encontrada",
