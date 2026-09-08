@@ -19,7 +19,7 @@ function formatBytes(bytes: number | null | undefined): string {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-type Tab = 'menus' | 'prices' | 'info';
+type Tab = 'menus' | 'info';
 
 export default function MenjadorPage() {
     const { t, i18n } = useTranslation();
@@ -98,91 +98,97 @@ export default function MenjadorPage() {
                         {/* Tabs */}
                         <nav className="flex justify-center">
                             <div className="inline-flex bg-slate-100 dark:bg-slate-800 rounded-2xl p-1.5 gap-1">
-                                <TabButton active={tab === 'menus'} onClick={() => setTab('menus')} icon={<FileText className="w-4 h-4" />} label={t('menjador_page.tab_menus', 'Menús')} />
-                                <TabButton active={tab === 'prices'} onClick={() => setTab('prices')} icon={<span className="material-icons-round text-base">payments</span>} label={t('menjador_page.tab_prices', 'Preus')} />
+                                <TabButton active={tab === 'menus'} onClick={() => setTab('menus')} icon={<FileText className="w-4 h-4" />} label={t('menjador_page.tab_menus', 'Preus i menús')} />
                                 <TabButton active={tab === 'info'} onClick={() => setTab('info')} icon={<ListChecks className="w-4 h-4" />} label={t('menjador_page.tab_info', 'Informació')} />
                             </div>
                         </nav>
 
-                        {/* MENUS */}
+                        {/* PREUS I MENÚS. Eren dues pestanyes per a dues llistes de tres línies:
+                            qui entra aquí ve a mirar el preu o a baixar-se el PDF, i havia de
+                            triar pestanya per veure'n cadascun. */}
                         {tab === 'menus' && (
-                            <section className="space-y-4">
-                                <p className="text-slate-500 dark:text-slate-400 text-sm text-center">
-                                    {t('menjador_page.menus_subtitle', 'Descarrega els menús mensuals en PDF.')}
-                                </p>
-                                {menus.length === 0 ? (
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-10 text-center border border-dashed border-slate-200 dark:border-slate-700">
-                                        <FileText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                                        <p className="text-slate-500 text-sm">
-                                            {t('menjador_page.no_menus', 'Encara no hi ha menús publicats.')}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {menus.map(menu => (
-                                            <li key={menu.id}>
-                                                <a
-                                                    href={proxyStorageUrl(menu.file_url)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group"
-                                                >
-                                                    <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-xl flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                                                        <FileText className="w-6 h-6" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{menu.title}</p>
-                                                        <p className="text-xs text-slate-500 truncate">
-                                                            {formatPeriod(menu.month, menu.year)}
-                                                            {menu.size_bytes ? ` · ${formatBytes(menu.size_bytes)}` : ''}
-                                                        </p>
-                                                    </div>
-                                                    <Download className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors shrink-0" />
-                                                </a>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </section>
-                        )}
+                            <div className="space-y-12">
+                                <section className="space-y-4">
+                                    <h2 className="text-center text-lg font-bold text-slate-900 dark:text-white">
+                                        {t('menjador_page.prices_title', 'Preus')}
+                                    </h2>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm text-center">
+                                        {t('menjador_page.prices_subtitle', 'Es distingeix entre alumnat fix (mig mes o més + 1 dia) i alumnat esporàdic (dies solts).')}
+                                    </p>
+                                    {fix.length === 0 && esporadic.length === 0 ? (
+                                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-10 text-center border border-dashed border-slate-200 dark:border-slate-700">
+                                            <p className="text-slate-500 text-sm">
+                                                {t('menjador_page.no_rates', 'Sense tarifes configurades')}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                            <RatesCard
+                                                title={t('menjador_page.fix_title', 'Alumnat fix')}
+                                                subtitle={t('menjador_page.fix_subtitle', 'Mig mes o més + 1 dia')}
+                                                rates={fix}
+                                                accent="amber"
+                                                memberLabel={t('menjador_page.price_member', 'Soci')}
+                                                nonMemberLabel={t('menjador_page.price_non_member', 'No soci')}
+                                                empty={t('menjador_page.no_rates', 'Sense tarifes configurades')}
+                                                tContent={tContent}
+                                            />
+                                            <RatesCard
+                                                title={t('menjador_page.esporadic_title', 'Alumnat esporàdic')}
+                                                subtitle={t('menjador_page.esporadic_subtitle', 'Dies solts')}
+                                                rates={esporadic}
+                                                accent="indigo"
+                                                memberLabel={t('menjador_page.price_member', 'Soci')}
+                                                nonMemberLabel={t('menjador_page.price_non_member', 'No soci')}
+                                                empty={t('menjador_page.no_rates', 'Sense tarifes configurades')}
+                                                tContent={tContent}
+                                            />
+                                        </div>
+                                    )}
+                                </section>
 
-                        {/* PRICES */}
-                        {tab === 'prices' && (
-                            <section className="space-y-4">
-                                <p className="text-slate-500 dark:text-slate-400 text-sm text-center">
-                                    {t('menjador_page.prices_subtitle', 'Es distingeix entre alumnat fix (mig mes o més + 1 dia) i alumnat esporàdic (dies solts).')}
-                                </p>
-                                {fix.length === 0 && esporadic.length === 0 ? (
-                                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-10 text-center border border-dashed border-slate-200 dark:border-slate-700">
-                                        <p className="text-slate-500 text-sm">
-                                            {t('menjador_page.no_rates', 'Sense tarifes configurades')}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                        <RatesCard
-                                            title={t('menjador_page.fix_title', 'Alumnat fix')}
-                                            subtitle={t('menjador_page.fix_subtitle', 'Mig mes o més + 1 dia')}
-                                            rates={fix}
-                                            accent="amber"
-                                            memberLabel={t('menjador_page.price_member', 'Soci')}
-                                            nonMemberLabel={t('menjador_page.price_non_member', 'No soci')}
-                                            empty={t('menjador_page.no_rates', 'Sense tarifes configurades')}
-                                            tContent={tContent}
-                                        />
-                                        <RatesCard
-                                            title={t('menjador_page.esporadic_title', 'Alumnat esporàdic')}
-                                            subtitle={t('menjador_page.esporadic_subtitle', 'Dies solts')}
-                                            rates={esporadic}
-                                            accent="indigo"
-                                            memberLabel={t('menjador_page.price_member', 'Soci')}
-                                            nonMemberLabel={t('menjador_page.price_non_member', 'No soci')}
-                                            empty={t('menjador_page.no_rates', 'Sense tarifes configurades')}
-                                            tContent={tContent}
-                                        />
-                                    </div>
-                                )}
-                            </section>
+                                <section className="space-y-4">
+                                    <h2 className="text-center text-lg font-bold text-slate-900 dark:text-white">
+                                        {t('menjador_page.menus_title', 'Menús')}
+                                    </h2>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm text-center">
+                                        {t('menjador_page.menus_subtitle', 'Descarrega els menús mensuals en PDF.')}
+                                    </p>
+                                    {menus.length === 0 ? (
+                                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-10 text-center border border-dashed border-slate-200 dark:border-slate-700">
+                                            <FileText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                                            <p className="text-slate-500 text-sm">
+                                                {t('menjador_page.no_menus', 'Encara no hi ha menús publicats.')}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                            {menus.map(menu => (
+                                                <li key={menu.id}>
+                                                    <a
+                                                        href={proxyStorageUrl(menu.file_url)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group"
+                                                    >
+                                                        <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-xl flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                                            <FileText className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{menu.title}</p>
+                                                            <p className="text-xs text-slate-500 truncate">
+                                                                {formatPeriod(menu.month, menu.year)}
+                                                                {menu.size_bytes ? ` · ${formatBytes(menu.size_bytes)}` : ''}
+                                                            </p>
+                                                        </div>
+                                                        <Download className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors shrink-0" />
+                                                    </a>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </section>
+                            </div>
                         )}
 
                         {/* INFO */}
@@ -295,17 +301,28 @@ function RatesCard({ title, subtitle, rates, accent, memberLabel, nonMemberLabel
                         const note = tContent(rate, 'note');
                         return (
                             <div key={rate.id} className="border-t first:border-t-0 border-slate-100 dark:border-slate-700 pt-4 first:pt-0">
-                                {label && <p className="font-bold text-slate-800 dark:text-white text-sm mb-2">{label}</p>}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 text-center">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{memberLabel}</p>
-                                        <p className="text-xl font-black text-slate-800 dark:text-white">{rate.preu_soci}</p>
+                                {/* Amb una sola tarifa la capçalera de la targeta ja la nomena: repetir
+                                    l'etiqueta aqui nomes diu dues vegades el mateix. */}
+                                {label && rates.length > 1 && <p className="font-bold text-slate-800 dark:text-white text-sm mb-2">{label}</p>}
+                                {rate.preu_soci === rate.preu_no_soci ? (
+                                    // El menjador no fa recarrec a les families no socies: el preu el posa
+                                    // l'empresa del servei i es el mateix per a tothom. Dues columnes amb la
+                                    // mateixa xifra fan pensar que n'hi ha dos.
+                                    <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 text-center">
+                                        <p className="text-2xl font-black text-slate-800 dark:text-white">{rate.preu_soci}</p>
                                     </div>
-                                    <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 text-center">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{nonMemberLabel}</p>
-                                        <p className="text-xl font-black text-slate-800 dark:text-white">{rate.preu_no_soci}</p>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 text-center">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{memberLabel}</p>
+                                            <p className="text-xl font-black text-slate-800 dark:text-white">{rate.preu_soci}</p>
+                                        </div>
+                                        <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 text-center">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{nonMemberLabel}</p>
+                                            <p className="text-xl font-black text-slate-800 dark:text-white">{rate.preu_no_soci}</p>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                                 {note && (
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">{note}</p>
                                 )}
