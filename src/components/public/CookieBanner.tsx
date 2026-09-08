@@ -20,6 +20,13 @@ export function CookieBanner() {
         setIsVisible(false);
     };
 
+    // Rechazar tiene que costar lo mismo que aceptar: un boton al lado del otro.
+    // Antes solo se podia aceptar o irse a la pagina de cookies a configurar.
+    const handleRejectAll = () => {
+        CookieService.declineAll();
+        setIsVisible(false);
+    };
+
     if (!isVisible) return null;
 
     return (
@@ -47,16 +54,24 @@ export function CookieBanner() {
                             <Link to="/privacitat" className="text-primary hover:underline font-bold">Política de privacitat</Link> i{' '}
                             <Link to="/cookies" className="text-primary hover:underline font-bold">Cookies</Link>.
                         </p>
-                        <div className="flex gap-3 pt-2">
+                        <div className="flex gap-2 pt-2">
                             <button
                                 onClick={handleAcceptAll}
-                                className="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-xl hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20"
+                                className="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-[12px] hover:bg-primary/90 transition-all active:scale-95"
                             >
                                 Acceptar totes
                             </button>
+                            <button
+                                onClick={handleRejectAll}
+                                className="flex-1 bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-xs font-bold py-2.5 rounded-[12px] hover:bg-slate-100 dark:hover:bg-slate-600 transition-all active:scale-95"
+                            >
+                                Només les necessàries
+                            </button>
+                        </div>
+                        <div className="pt-1 text-center">
                             <Link
                                 to="/cookies"
-                                className="flex-1 bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-200 text-xs font-bold py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 transition-all text-center"
+                                className="text-[11px] font-semibold text-slate-400 hover:text-primary transition-colors"
                                 onClick={() => setIsVisible(false)}
                             >
                                 Configurar

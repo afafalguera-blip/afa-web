@@ -42,7 +42,11 @@ function trackedFiles() {
     encoding: 'utf8',
   })
     .split('\n')
-    .filter(Boolean);
+    .filter(Boolean)
+    // `git ls-files --cached` sigue listando un fichero borrado hasta que el
+    // borrado se pone en el indice. Sin esto, la guarda revienta con ENOENT en
+    // medio del trabajo, que es justo cuando hace falta.
+    .filter(f => existsSync(join(ROOT, f)));
 }
 
 function read(file) {

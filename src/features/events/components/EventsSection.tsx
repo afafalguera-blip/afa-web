@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ChevronRight } from 'lucide-react';
 import { EventsService, type CalendarEvent } from '../services/EventsService';
 import { useHomepageConfig } from '../../../hooks/useHomepageConfig';
 import { MAINTENANCE_MODE } from '../../../utils/maintenance';
@@ -78,7 +79,7 @@ export const EventsSection: React.FC = () => {
                                     </p>
                                 </div>
                                 <button className="p-2 text-slate-300 hover:text-slate-500 transition group-hover:bg-slate-100 dark:group-hover:bg-slate-700 rounded-full">
-                                    <span className="material-icons-round text-lg">chevron_right</span>
+                                    <ChevronRight className="w-5 h-5" />
                                 </button>
                             </div>
                         );

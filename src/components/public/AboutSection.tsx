@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit, Info } from 'lucide-react';
 import type { AboutConfig, ContactConfig } from '../../services/ConfigService';
 import { sanitizeRichTextHtml } from '../../utils/htmlSanitizer';
 
@@ -33,7 +33,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 >
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center text-primary">
-                            <span className="material-icons-round">info</span>
+                            <Info className="w-6 h-6" />
                         </div>
                         <h2 className="font-bold text-lg text-slate-900 dark:text-white">{t('home.about_title')}</h2>
                     </div>

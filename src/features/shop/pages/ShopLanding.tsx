@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ShopService } from '../services/ShopService';
 import type { ShopProduct } from '../types/shop';
-import { Search, ShoppingBag, ShoppingCart } from 'lucide-react'; // Retaining Search and ShoppingBag as they are used in the original code
+import { Search, ShoppingBag, ShoppingCart, Shirt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useContentTranslation } from '../../../hooks/useContentTranslation';
 import { ProductModal } from '../components/ProductModal';
@@ -167,7 +167,7 @@ export function ShopLanding() {
                   <LazyImage src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-slate-300">
-                    <span className="material-icons-round text-5xl">checkroom</span>
+                    <Shirt className="w-12 h-12" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none flex items-center justify-center">

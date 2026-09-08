@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, ShoppingCart } from 'lucide-react';
+import { Check, ShoppingCart, Shirt } from 'lucide-react';
 import type { ShopProduct } from '../types/shop';
 import { useCart } from '../contexts/CartContext';
 import { proxyStorageUrl } from '../../../utils/storageUrl';
@@ -77,7 +77,7 @@ export function ProductModal({ product, onClose, onGoToCart }: ProductModalProps
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="material-icons-round text-7xl text-slate-200" aria-hidden="true">checkroom</span>
+            <Shirt className="w-20 h-20 text-slate-200" aria-hidden="true" />
           )}
         </div>
 

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft } from 'lucide-react';
+import { ArrowLeft, Baby, Calendar, ChevronLeft, GraduationCap, Info, MapPin, Medal, Users } from 'lucide-react';
+import { CategoryIcon } from '../components/common/CategoryIcon';
 import { ActivityService, type Activity } from '../services/ActivityService';
 import { useContentTranslation } from '../hooks/useContentTranslation';
 import { SEO } from '../components/common/SEO';
@@ -53,7 +54,7 @@ export default function ActivityDetailPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center pt-24 px-4 text-center">
         <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
-          <span className="material-symbols-outlined text-4xl text-slate-300">school</span>
+          <GraduationCap className="w-10 h-10 text-slate-300" />
         </div>
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
           {t('inscription.activity_modal.not_found', 'Activitat no trobada')}
@@ -99,7 +100,7 @@ export default function ActivityDetailPage() {
             className="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-all active:scale-90"
             aria-label={t('inscription.activity_modal.back', 'Tornar')}
           >
-            <span className="material-symbols-outlined">arrow_back</span>
+            <ArrowLeft className="w-6 h-6" />
           </button>
         </div>
       </div>
@@ -109,14 +110,12 @@ export default function ActivityDetailPage() {
         {/* Category & Metadata Chips */}
         <div className="flex flex-wrap gap-2 mb-4">
           <div className="flex h-8 items-center justify-center gap-x-2 rounded-full bg-primary/20 dark:bg-primary/30 px-4">
-            <span className="material-symbols-outlined text-primary text-[18px]">
-              {activity.category_icon || 'school'}
-            </span>
+            <CategoryIcon icon={activity.category_icon} className="w-[18px] h-[18px] text-primary" />
             <p className="text-primary text-xs font-bold uppercase tracking-wider">{tContent(activity, 'category')}</p>
           </div>
           {activity.is_stem_approved && (
             <div className="flex h-8 items-center justify-center gap-x-2 rounded-full bg-white/50 dark:bg-white/10 px-4 backdrop-blur-sm border border-black/5 dark:border-white/5">
-              <span className="material-symbols-outlined text-[#667085] text-[18px]">military_tech</span>
+              <Medal className="w-[18px] h-[18px] text-[#667085]" />
               <p className="text-[#667085] dark:text-gray-300 text-xs font-medium">{t('inscription.activity_modal.stem_approved')}</p>
             </div>
           )}
@@ -147,17 +146,17 @@ export default function ActivityDetailPage() {
         {/* Quick Info Grid */}
         <div className="grid grid-cols-3 gap-3 mb-8">
           <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
-            <span className="material-symbols-outlined text-accent-terracotta mb-1">child_care</span>
+            <Baby className="w-6 h-6 text-accent-terracotta mb-1" />
             <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.grades')}</span>
             <span className="text-sm font-semibold dark:text-gray-200">{tContent(activity, 'grades')}</span>
           </div>
           <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
-            <span className="material-symbols-outlined text-accent-terracotta mb-1">location_on</span>
+            <MapPin className="w-6 h-6 text-accent-terracotta mb-1" />
             <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.location')}</span>
             <span className="text-sm font-semibold dark:text-gray-200 line-clamp-1">{tContent(activity, 'place') || 'Escola'}</span>
           </div>
           <div className="flex flex-col items-center justify-center rounded-xl bg-white dark:bg-gray-800/50 p-3 shadow-sm border border-black/5 dark:border-white/5 text-center">
-            <span className="material-symbols-outlined text-accent-terracotta mb-1">groups</span>
+            <Users className="w-6 h-6 text-accent-terracotta mb-1" />
             <span className="text-[10px] text-[#667085] uppercase font-bold tracking-tighter">{t('inscription.activity_modal.spots')}</span>
             <span className="text-sm font-semibold dark:text-gray-200">{activity.spots || t('inscription.activity_modal.spots_available')}</span>
           </div>
@@ -189,7 +188,7 @@ export default function ActivityDetailPage() {
                     >
                       <div className="flex items-center gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f2f4f7] dark:bg-gray-700 text-[#667085]">
-                          <span className="material-symbols-outlined text-[20px]">calendar_today</span>
+                          <Calendar className="w-5 h-5" />
                         </div>
                         <div>
                           <p className="font-bold text-sm dark:text-white">
@@ -216,7 +215,7 @@ export default function ActivityDetailPage() {
         {/* Important Notice */}
         {activity.important_note && (
           <div className="flex gap-3 p-4 rounded-xl bg-accent-terracotta/10 border border-accent-terracotta/20 mb-8">
-            <span className="material-symbols-outlined text-accent-terracotta">info</span>
+            <Info className="w-6 h-6 shrink-0 text-accent-terracotta" />
             <p className="text-xs text-[#8c5e4d] dark:text-accent-terracotta leading-snug">
               <span className="font-bold">{t('inscription.activity_modal.note_label')}</span> {tContent(activity, 'important_note')}
             </p>
