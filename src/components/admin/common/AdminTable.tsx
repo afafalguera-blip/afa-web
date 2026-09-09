@@ -15,6 +15,13 @@ export interface AdminTableProps<T> {
   loading?: boolean;
   emptyMessage?: string;
   footer?: React.ReactNode;
+  /**
+   * Numera las filas, empezando por este numero. En una tabla paginada se pasa
+   * el primero de la pagina —(pagina - 1) * tamano + 1— para que la numeracion
+   * sea la del listado entero y no vuelva a empezar en cada pagina: asi la
+   * ultima fila dice cuantas hay.
+   */
+  rowNumberStart?: number;
 }
 
 export function AdminTable<T>({
@@ -23,9 +30,12 @@ export function AdminTable<T>({
   keyExtractor,
   loading = false,
   emptyMessage,
-  footer
+  footer,
+  rowNumberStart
 }: AdminTableProps<T>) {
   const { t } = useTranslation();
+  const numerada = rowNumberStart !== undefined;
+  const totalColumnas = columns.length + (numerada ? 1 : 0);
 
   return (
     <div className="bg-white border border-neutral-200 rounded-lg">
@@ -33,6 +43,11 @@ export function AdminTable<T>({
         <table className="w-full text-left text-[13px]">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50">
+              {numerada && (
+                <th scope="col" className="px-4 py-2.5 font-semibold text-neutral-600 text-right w-12">
+                  #
+                </th>
+              )}
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -47,7 +62,7 @@ export function AdminTable<T>({
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-10 text-center text-neutral-500">
+                <td colSpan={totalColumnas} className="px-4 py-10 text-center text-neutral-500">
                   <Loader2 className="w-5 h-5 mx-auto animate-spin text-neutral-400" />
                   <span className="sr-only">{t('common.loading')}</span>
                 </td>
@@ -56,15 +71,20 @@ export function AdminTable<T>({
 
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-10 text-center text-neutral-500">
+                <td colSpan={totalColumnas} className="px-4 py-10 text-center text-neutral-500">
                   {emptyMessage ?? t('common.no_results', 'Sense resultats')}
                 </td>
               </tr>
             )}
 
             {!loading &&
-              rows.map((row) => (
+              rows.map((row, indice) => (
                 <tr key={keyExtractor(row)} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50">
+                  {numerada && (
+                    <td className="px-4 py-2.5 text-right align-middle tabular-nums text-neutral-400">
+                      {(rowNumberStart ?? 1) + indice}
+                    </td>
+                  )}
                   {columns.map((column) => (
                     <td key={column.key} className={`px-4 py-2.5 text-neutral-700 align-middle ${column.className ?? ''}`}>
                       {column.render(row)}
