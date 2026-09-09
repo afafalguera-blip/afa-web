@@ -322,6 +322,7 @@ export default function InscriptionsPage() {
         columns={columns}
         rows={inscriptions}
         keyExtractor={(row) => row.id}
+        rowNumberStart={(page - 1) * pageSize + 1}
         loading={isLoading}
         emptyMessage={t('admin.inscriptions.table.no_results', "No s'han trobat inscripcions")}
         footer={
