@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Copy, Eye, FileSpreadsheet, Pencil, Trash2, Users } from 'lucide-react';
 
@@ -17,7 +17,8 @@ import { InscriptionsFilters } from './InscriptionsFilters';
 import { useInscriptions } from '../../../hooks/useInscriptions';
 import { ExportService } from '../../../services/ExportService';
 import { COURSE_BY_CODE, isCourseCode } from '../../../constants/courses';
-import type { Inscription, InscriptionStatus } from '../../../types/inscription';
+import { toActivityRows } from '../../../logic/inscriptionFilters';
+import type { Inscription, InscriptionActivityRow, InscriptionStatus } from '../../../types/inscription';
 
 const STATUS_BADGE: Record<string, string> = {
   alta: 'bg-green-100 text-green-800',
@@ -66,10 +67,78 @@ export default function InscriptionsPage() {
     fetchAllFiltered
   } = useInscriptions();
 
+  /**
+   * Dos preguntas distintas, dos vistas.
+   *
+   * «Per familia» es la de gestionar: una fila es una inscripcion, que es lo que
+   * se edita, se da de baja y se borra. «Per activitat» es la de contar: una fila
+   * por criatura y actividad, que es lo que ocupa una plaza. Con una sola vista
+   * una de las dos preguntas se responde mal: agrupada, tres actividades cuentan
+   * como uno; partida, el boton de borrar aparece tres veces y se lleva las tres.
+   */
+  const [view, setView] = useState<'family' | 'activity'>('family');
+  const [allFiltered, setAllFiltered] = useState<Inscription[]>([]);
+  const [loadingAll, setLoadingAll] = useState(false);
+
   const [detailsTarget, setDetailsTarget] = useState<Inscription | null>(null);
   const [editTarget, setEditTarget] = useState<Inscription | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+
+  /**
+   * La vista por actividad se pagina sobre las filas aplanadas, no sobre las
+   * inscripciones, asi que necesita el cohorte entero: si aplanara solo la
+   * pagina, la numeracion mentiria en cuanto hubiera mas de una. Es la misma
+   * carga que hace la exportacion.
+   */
+  useEffect(() => {
+    if (view !== 'activity') return;
+    let cancelado = false;
+
+    const cargar = async () => {
+      setLoadingAll(true);
+      try {
+        const rows = await fetchAllFiltered();
+        if (!cancelado) setAllFiltered(rows);
+      } catch (err) {
+        console.error('Error loading inscriptions for the activity view:', err);
+        if (!cancelado) setAllFiltered([]);
+      } finally {
+        if (!cancelado) setLoadingAll(false);
+      }
+    };
+
+    cargar();
+    return () => { cancelado = true; };
+    // Solo `fetchAllFiltered`: ya lleva dentro los filtros y el curso escolar, y
+    // su identidad cambia cuando cambian. Listar aqui `filters.search` ademas
+    // dispararia una carga del cohorte entero en cada tecla, antes incluso de que
+    // el buscador aplicara su retardo.
+  }, [view, fetchAllFiltered]);
+
+  const activityRows = useMemo(
+    () => toActivityRows(allFiltered, {
+      activity: filters.activity || undefined,
+      course: filters.course || undefined,
+    }),
+    [allFiltered, filters.activity, filters.course]
+  );
+
+  const activityPageRows = useMemo(
+    () => activityRows.slice((page - 1) * pageSize, page * pageSize),
+    [activityRows, page, pageSize]
+  );
+
+  /** Para abrir la ficha desde una fila de actividad, que solo lleva el id. */
+  const inscriptionsById = useMemo(
+    () => new Map(allFiltered.map((item) => [item.id, item])),
+    [allFiltered]
+  );
+
+  const cambiarVista = (siguiente: 'family' | 'activity') => {
+    setView(siguiente);
+    setPage(1);
+  };
 
   const handleExport = async (format: ExportFormat, type: ExportType) => {
     setExporting(true);
@@ -282,6 +351,100 @@ export default function InscriptionsPage() {
     [changeStatus, customLabels, duplicates, removeInscription, t]
   );
 
+  const activityColumns = useMemo<AdminTableColumn<InscriptionActivityRow>[]>(
+    () => [
+      {
+        key: 'student',
+        header: t('admin.inscriptions.table.student', 'Alumne'),
+        render: (row) => (
+          <div className="min-w-0">
+            <div className="font-medium text-neutral-900">
+              {row.name} {row.surname}
+            </div>
+            <div className="text-[12px] text-neutral-500">{courseLabel(row.course)}</div>
+          </div>
+        )
+      },
+      {
+        key: 'activity',
+        header: t('admin.inscriptions.table.activity', 'Activitat'),
+        render: (row) =>
+          row.activity ? (
+            <span className="inline-flex px-2 py-0.5 rounded border border-neutral-200 bg-neutral-50 text-[12px] text-neutral-700">
+              {row.activity}
+            </span>
+          ) : (
+            <span className="text-[12px] text-neutral-400">
+              {t('admin.inscriptions.no_activities', 'Sense activitats')}
+            </span>
+          )
+      },
+      {
+        key: 'family',
+        header: t('admin.inscriptions.table.parent', 'Família'),
+        render: (row) => (
+          <div className="min-w-0 text-[12px] text-neutral-500">
+            <div className="text-[13px] text-neutral-800">{row.parent_name || '—'}</div>
+            <div className="break-all">{row.parent_email}</div>
+            <div>{row.parent_phone}</div>
+          </div>
+        )
+      },
+      {
+        key: 'status',
+        header: t('admin.inscriptions.table.status', 'Estat'),
+        render: (row) => (
+          <div className="flex flex-col items-start gap-1">
+            <span
+              className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                STATUS_BADGE[row.status] ?? 'bg-neutral-100 text-neutral-700'
+              }`}
+            >
+              {t(`admin.inscriptions.status.${row.status}`, row.status)}
+            </span>
+            {row.suspended && (
+              <span className="inline-flex px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">
+                {t('admin.inscriptions.suspended_badge', 'Suspès')}
+              </span>
+            )}
+          </div>
+        )
+      },
+      {
+        key: 'created_at',
+        header: t('admin.inscriptions.table.date', 'Data'),
+        className: 'whitespace-nowrap',
+        render: (row) => (
+          <span className="text-[12px] text-neutral-500">
+            {row.created_at ? new Date(row.created_at).toLocaleDateString('ca-ES') : '—'}
+          </span>
+        )
+      },
+      {
+        key: 'actions',
+        header: t('admin.inscriptions.table.actions', 'Accions'),
+        className: 'text-right',
+        // Solo la fitxa. Editar y borrar actuan sobre la inscripcion entera, y
+        // aqui una inscripcion son varias filas: el boton pareceria que se lleva
+        // solo esta actividad y se llevaria las tres.
+        render: (row) => (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setDetailsTarget(inscriptionsById.get(row.inscription_id) ?? null)}
+              title={t('admin.inscriptions.view_details', 'Veure detalls')}
+              aria-label={t('admin.inscriptions.view_details', 'Veure detalls')}
+              className="p-1.5 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+          </div>
+        )
+      }
+    ],
+    [inscriptionsById, t]
+  );
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <AdminPageHeader
@@ -312,29 +475,76 @@ export default function InscriptionsPage() {
         activityOptions={activityOptions}
       />
 
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="inline-flex rounded-md border border-neutral-200 bg-white p-0.5">
+          {(['family', 'activity'] as const).map((modo) => (
+            <button
+              key={modo}
+              type="button"
+              onClick={() => cambiarVista(modo)}
+              aria-pressed={view === modo}
+              className={`px-3 py-1.5 rounded text-[13px] font-medium transition-colors ${
+                view === modo
+                  ? 'bg-admin-active-bg text-admin-active-fg'
+                  : 'text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              {modo === 'family'
+                ? t('admin.inscriptions.view_by_family', 'Per família')
+                : t('admin.inscriptions.view_by_activity', 'Per activitat')}
+            </button>
+          ))}
+        </div>
+        <p className="text-[12px] text-neutral-500">
+          {view === 'family'
+            ? t('admin.inscriptions.view_family_note', "Una fila per inscripció: és el que s'edita i es dóna de baixa.")
+            : t('admin.inscriptions.view_activity_note', 'Una fila per criatura i activitat: és el que ocupa una plaça. Només lectura.')}
+        </p>
+      </div>
+
       {error && (
         <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
           {t('admin.inscriptions.load_error', 'Error carregant les inscripcions')}: {error}
         </p>
       )}
 
-      <AdminTable
-        columns={columns}
-        rows={inscriptions}
-        keyExtractor={(row) => row.id}
-        rowNumberStart={(page - 1) * pageSize + 1}
-        loading={isLoading}
-        emptyMessage={t('admin.inscriptions.table.no_results', "No s'han trobat inscripcions")}
-        footer={
-          <AdminPagination
-            page={page}
-            pageSize={pageSize}
-            total={total}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-          />
-        }
-      />
+      {view === 'family' ? (
+        <AdminTable
+          columns={columns}
+          rows={inscriptions}
+          keyExtractor={(row) => row.id}
+          rowNumberStart={(page - 1) * pageSize + 1}
+          loading={isLoading}
+          emptyMessage={t('admin.inscriptions.table.no_results', "No s'han trobat inscripcions")}
+          footer={
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          }
+        />
+      ) : (
+        <AdminTable
+          columns={activityColumns}
+          rows={activityPageRows}
+          keyExtractor={(row) => `${row.inscription_id}-${row.student_index}-${row.activity}`}
+          rowNumberStart={(page - 1) * pageSize + 1}
+          loading={loadingAll}
+          emptyMessage={t('admin.inscriptions.table.no_results', "No s'han trobat inscripcions")}
+          footer={
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              total={activityRows.length}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          }
+        />
+      )}
 
       <InscriptionDetailsModal
         inscription={detailsTarget}

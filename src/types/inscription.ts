@@ -128,6 +128,20 @@ export interface InscriptionFlat {
   extra_answers?: Record<string, string>;
 }
 
+/**
+ * Una fila por criatura Y actividad: lo que la pantalla de admin ensena en la
+ * vista «per activitat», y lo que hay que contar cuando la pregunta es cuantas
+ * plazas se han ocupado. Una inscripcion de una familia con dos criaturas a dos
+ * actividades cada una son cuatro de estas.
+ *
+ * Deriva de `InscriptionFlat`, no de la fila cruda: la unica manera de aplanar
+ * sigue siendo `toFlat()`.
+ */
+export interface InscriptionActivityRow extends InscriptionFlat {
+  /** Actividad de esta fila. Vacia si la criatura no tiene ninguna apuntada. */
+  activity: string;
+}
+
 /** Filters shared by the admin listing and the pure filtering helpers. */
 export interface InscriptionFilters {
   course: string;

@@ -939,7 +939,9 @@
         "date": "Fecha",
         "actions": "Acciones",
         "loading": "Cargando...",
-        "no_results": "No se han encontrado inscripciones."
+        "no_results": "No se han encontrado inscripciones.",
+        "student": "Alumno",
+        "activity": "Actividad"
       },
       "all_academic_years": "Todos los cursos escolares",
       "change_status": "Cambiar el estado",
@@ -999,7 +1001,11 @@
       "duplicate_exact": "Duplicado exacto",
       "duplicate_exact_hint": "Hay otra inscripción con exactamente los mismos niños y las mismas actividades.",
       "duplicate_family": "+{{n}} de la familia",
-      "duplicate_family_hint": "Esta familia tiene más inscripciones, pero con niños o actividades distintas. No elimines ninguna sin compararlas."
+      "duplicate_family_hint": "Esta familia tiene más inscripciones, pero con niños o actividades distintas. No elimines ninguna sin compararlas.",
+      "view_by_family": "Por familia",
+      "view_by_activity": "Por actividad",
+      "view_family_note": "Una fila por inscripción: es lo que se edita y se da de baja.",
+      "view_activity_note": "Una fila por niño y actividad: es lo que ocupa una plaza. Solo lectura."
     },
     "payments": {
       "title": "Pagos",
