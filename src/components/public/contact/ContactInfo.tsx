@@ -24,7 +24,7 @@ export function ContactInfo({ contact, social }: ContactInfoProps) {
                             {t('contact_page.schedule_title', 'Horari d\'atenció')}
                         </h3>
                         <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">
-                            {contact?.schedule || t('contact_page.schedule_mon', 'Dilluns de 16:30 a 18:00h')}
+                            {contact?.schedule || t('contact_page.schedule_on_demand', 'A demanda: escriviu-nos i concertem el dia')}
                         </p>
                     </div>
                 </div>
