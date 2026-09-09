@@ -1140,7 +1140,9 @@
         "no_results": "No sign-ups found.",
         "parent": "Parent/Guardian",
         "status": "Status",
-        "students": "Students"
+        "students": "Students",
+        "student": "Pupil",
+        "activity": "Activity"
       },
       "title": "Sign-ups",
       "update_error": "Error saving changes",
@@ -1203,7 +1205,11 @@
       "duplicate_exact": "Exact duplicate",
       "duplicate_exact_hint": "Another enrolment has exactly the same children and activities.",
       "duplicate_family": "+{{n}} from this family",
-      "duplicate_family_hint": "This family has other enrolments, but with different children or activities. Do not delete any without comparing them first."
+      "duplicate_family_hint": "This family has other enrolments, but with different children or activities. Do not delete any without comparing them first.",
+      "view_by_family": "By family",
+      "view_by_activity": "By activity",
+      "view_family_note": "One row per sign-up: this is what you edit and cancel.",
+      "view_activity_note": "One row per child and activity: this is what takes a place. Read only."
     },
     "news": {
       "content_placeholder": "Write the news content...",

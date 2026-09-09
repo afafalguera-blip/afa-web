@@ -10,6 +10,7 @@ import {
   filterInscriptions,
   flattenInscriptions,
   normalizeInscription,
+  toActivityRows,
   toFlat,
 } from '../logic/inscriptionFilters';
 import type {
@@ -449,5 +450,66 @@ describe('collectActivityOptions', () => {
 
   it('returns an empty array when there is nothing to collect', () => {
     expect(collectActivityOptions([])).toEqual([]);
+  });
+});
+
+// ========================================
+// toActivityRows
+// ========================================
+
+describe('toActivityRows', () => {
+  /**
+   * Es lo que responde «cuantas plazas hay ocupadas». Una inscripcion con dos
+   * criaturas a dos actividades cada una no es una: son cuatro.
+   */
+  const familia = createMockInscription({
+    students: [
+      { name: 'Joan', surname: 'García', course: '3PRI', activities: ['Futbol', 'Anglès'] },
+      { name: 'Rita', surname: 'García', course: 'I4', activities: ['Patinatge'] },
+    ],
+  });
+
+  it('parte cada actividad de cada criatura en su propia fila', () => {
+    const filas = toActivityRows([familia]);
+
+    expect(filas).toHaveLength(3);
+    expect(filas.map((f) => [f.name, f.activity])).toEqual([
+      ['Joan', 'Futbol'],
+      ['Joan', 'Anglès'],
+      ['Rita', 'Patinatge'],
+    ]);
+  });
+
+  it('con filtro de actividad deja solo esa, sin arrastrar hermanos ni las demas', () => {
+    const filas = toActivityRows([familia], { activity: 'Futbol' });
+
+    expect(filas).toHaveLength(1);
+    expect(filas[0].name).toBe('Joan');
+    expect(filas[0].activity).toBe('Futbol');
+  });
+
+  it('con filtro de curso deja fuera a las criaturas de otros cursos', () => {
+    const filas = toActivityRows([familia], { course: 'I4' });
+
+    expect(filas.map((f) => f.name)).toEqual(['Rita']);
+  });
+
+  it('una criatura sin actividades sigue saliendo, con la actividad vacia', () => {
+    const sinActividades = createMockInscription({
+      students: [{ name: 'Pau', surname: 'Roca', course: '1PRI', activities: [] }],
+    });
+
+    const filas = toActivityRows([sinActividades]);
+
+    expect(filas).toHaveLength(1);
+    expect(filas[0].activity).toBe('');
+  });
+
+  it('arrastra los datos de la familia a cada fila: la ficha se abre desde cualquiera', () => {
+    const [primera] = toActivityRows([familia]);
+
+    expect(primera.inscription_id).toBe('1');
+    expect(primera.parent_name).toBe('Anna García');
+    expect(primera.status).toBe('active');
   });
 });

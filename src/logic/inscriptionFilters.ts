@@ -8,6 +8,7 @@ import type {
   Inscription,
   InscriptionRaw,
   InscriptionFlat,
+  InscriptionActivityRow,
   InscriptionFilters,
   InscriptionStudent,
 } from '../types/inscription';
@@ -190,4 +191,42 @@ export function collectActivityOptions(inscriptions: Inscription[]): string[] {
     }
   }
   return Array.from(set).sort((a, b) => a.localeCompare(b, 'ca'));
+}
+
+/**
+ * Una fila por criatura y actividad.
+ *
+ * `scope` son los filtros que el admin tiene puestos. Hace falta porque el
+ * filtrado previo es a nivel de FAMILIA: la inscripcion entera pasa si CUALQUIERA
+ * de sus criaturas encaja. Sin recortar aqui, filtrar por Patinatge sacaria
+ * tambien a los hermanos que hacen ingles y las demas actividades de cada
+ * criatura, que es justo lo que la vista por actividad viene a evitar.
+ *
+ * Es la misma regla que aplica la exportacion en ExportService.getFlattenedData.
+ */
+export function toActivityRows(
+  inscriptions: Inscription[],
+  scope: { activity?: string; course?: string } = {}
+): InscriptionActivityRow[] {
+  const rows: InscriptionActivityRow[] = [];
+
+  for (const student of toFlat(inscriptions)) {
+    if (scope.course && student.course !== scope.course) continue;
+
+    const todas = Array.isArray(student.activities) ? student.activities : [];
+    if (scope.activity && !todas.includes(scope.activity)) continue;
+
+    const actividades = scope.activity ? [scope.activity] : todas;
+
+    // Una criatura sin ninguna actividad sigue siendo una inscripcion: si no
+    // saliera, desapareceria del listado sin que nadie lo notara.
+    if (actividades.length === 0) {
+      rows.push({ ...student, activity: '' });
+      continue;
+    }
+
+    for (const activity of actividades) rows.push({ ...student, activity });
+  }
+
+  return rows;
 }

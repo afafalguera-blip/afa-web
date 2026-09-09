@@ -939,7 +939,9 @@
         "date": "Data",
         "actions": "Accions",
         "loading": "Carregant...",
-        "no_results": "No s'han trobat inscripcions."
+        "no_results": "No s'han trobat inscripcions.",
+        "student": "Alumne",
+        "activity": "Activitat"
       },
       "all_academic_years": "Tots els cursos escolars",
       "change_status": "Canviar l'estat",
@@ -999,7 +1001,11 @@
       "duplicate_exact": "Duplicat exacte",
       "duplicate_exact_hint": "Hi ha una altra inscripció amb exactament les mateixes criatures i activitats.",
       "duplicate_family": "+{{n}} de la família",
-      "duplicate_family_hint": "Aquesta família té més inscripcions, però amb criatures o activitats diferents. No eliminis cap sense comparar-les."
+      "duplicate_family_hint": "Aquesta família té més inscripcions, però amb criatures o activitats diferents. No eliminis cap sense comparar-les.",
+      "view_by_family": "Per família",
+      "view_by_activity": "Per activitat",
+      "view_family_note": "Una fila per inscripció: és el que s'edita i es dóna de baixa.",
+      "view_activity_note": "Una fila per criatura i activitat: és el que ocupa una plaça. Només lectura."
     },
     "payments": {
       "title": "Pagaments",
