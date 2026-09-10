@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, Link2, Loader2, Plus, Search, Trash2, Upload } from 'lucide-react';
+import { AlertCircle, Check, Link2, Loader2, Pencil, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 
 import { useToast } from '../../../components/common/Toast';
 import { AdminChildrenService } from '../../../services/admin/AdminChildrenService';
+import type { RosterImportReport } from '../../../services/admin/AdminChildrenService';
+import { ConfigService } from '../../../services/ConfigService';
 import { findDuplicates, parseChildrenCsv } from '../../../logic/childrenImport';
 import { COURSES, COURSE_BY_CODE, isCourseCode } from '../../../constants/courses';
 import type { AcollidaMonitorLink, Child } from '../../../types/acollida';
@@ -39,7 +41,19 @@ export function ChildrenTab() {
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 
+  // De quin curs escolar és el llistat. Per defecte, el curs actiu: importar el
+  // llistat de setembre a l'any equivocat matricularia tota l'escola on no toca.
+  const [importYear, setImportYear] = useState('');
+  const [fullRoster, setFullRoster] = useState(false);
+  const [report, setReport] = useState<RosterImportReport | null>(null);
+
   const [draft, setDraft] = useState({ name: '', surname: '', course: '' });
+
+  // El llistat del centre no porta contacte: qui en surt entra sense correu ni
+  // telèfon i s'omple aquí quan la família el dona.
+  const [onlyMissing, setOnlyMissing] = useState(false);
+  const [editing, setEditing] = useState<{ id: string; email: string; phone: string } | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,9 +78,28 @@ export function ChildrenTab() {
     return () => clearTimeout(timer);
   }, [load, search]);
 
+  useEffect(() => {
+    let cancelled = false;
+    ConfigService.getSeasonConfig()
+      .then((season) => {
+        if (!cancelled && season?.active_year) setImportYear(season.active_year);
+      })
+      .catch((err) => console.error('Error loading season:', err));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // The roll filled itself from years of enrolments, so the same child can be
   // in it twice with two different courses. Nobody spots that scrolling.
   const duplicates = useMemo(() => findDuplicates(children), [children]);
+
+  const missingContact = useMemo(
+    () => children.filter((child) => !child.family_email && !child.family_phone),
+    [children],
+  );
+
+  const visible = onlyMissing ? missingContact : children;
 
   const byCourse = useMemo(() => {
     const counts = new Map<string, number>();
@@ -75,7 +108,13 @@ export function ChildrenTab() {
   }, [children]);
 
   const handleImport = async (file: File) => {
+    if (!importYear.trim()) {
+      toast.error(t('admin.children.import_no_year', 'Digues de quin curs escolar és el llistat.'));
+      return;
+    }
+
     setImporting(true);
+    setReport(null);
     try {
       const { rows, problems } = parseChildrenCsv(await file.text());
 
@@ -84,8 +123,24 @@ export function ChildrenTab() {
         return;
       }
 
-      const count = await AdminChildrenService.importMany(rows);
-      toast.success(t('admin.children.imported', '{{count}} infants importats', { count }));
+      const result = await AdminChildrenService.importRoster(importYear.trim(), rows, fullRoster);
+      setReport(result);
+      toast.success(
+        t('admin.children.imported', '{{count}} infants matriculats al {{year}}', {
+          count: result.matriculats,
+          year: result.academic_year,
+        }),
+      );
+
+      if (result.homonims > 0) {
+        toast.error(
+          t(
+            'admin.children.import_homonyms',
+            '{{count}} línies tenen el mateix nom i cognoms que una altra: només n\'ha entrat una. Revisa-les.',
+            { count: result.homonims },
+          ),
+        );
+      }
 
       if (problems.length > 0) {
         // Naming the lines is the whole point: a silent import hides the
@@ -116,6 +171,24 @@ export function ChildrenTab() {
     } catch (err) {
       console.error('Error creating child:', err);
       toast.error(t('admin.children.save_error', "No s'ha pogut desar l'infant."));
+    }
+  };
+
+  const saveContact = async () => {
+    if (!editing) return;
+    setSavingId(editing.id);
+    try {
+      await AdminChildrenService.update(editing.id, {
+        family_email: editing.email.trim() || null,
+        family_phone: editing.phone.trim() || null,
+      });
+      setEditing(null);
+      await load();
+    } catch (err) {
+      console.error('Error saving contact:', err);
+      toast.error(t('admin.children.save_error', "No s'ha pogut desar l'infant."));
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -227,6 +300,19 @@ export function ChildrenTab() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 mb-1" htmlFor="import_year">
+              {t('admin.children.import_year', 'Curs escolar del llistat')}
+            </label>
+            <input
+              id="import_year"
+              value={importYear}
+              onChange={(e) => setImportYear(e.target.value)}
+              placeholder="2026-27"
+              className={`${inputClass} w-28`}
+            />
+          </div>
+
           <input
             ref={fileInput}
             type="file"
@@ -248,12 +334,50 @@ export function ChildrenTab() {
           </button>
         </div>
 
+        <label className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <input
+            type="checkbox"
+            checked={fullRoster}
+            onChange={(e) => setFullRoster(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span>
+            {t(
+              'admin.children.import_full',
+              'És el llistat sencer del centre: dona de baixa qui no hi surti.',
+            )}{' '}
+            <span className="text-slate-400">
+              {t(
+                'admin.children.import_full_warning',
+                'No ho marquis si només importes un curs: donaries de baixa tota la resta.',
+              )}
+            </span>
+          </span>
+        </label>
+
         <p className="text-xs text-slate-500">
           {t(
             'admin.children.import_hint',
-            'El CSV necessita les columnes nom, cognoms i curs (correu i telèfon, opcionals). Serveix el que exporta l\'Excel del centre, amb comes o punt i coma. Tornar-lo a importar actualitza, no duplica.',
+            'El CSV necessita les columnes nom, cognoms i curs (número de llista, correu i telèfon, opcionals). Serveix el que exporta l\'Excel del centre, amb comes o punt i coma. Tornar-lo a importar actualitza, no duplica: el llistat mana sobre el nom i el curs, i mai esborra el contacte que ja tinguem.',
           )}
         </p>
+
+        {report && (
+          <dl className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center rounded-xl bg-slate-50 dark:bg-slate-950 p-3">
+            {[
+              { k: t('admin.children.report_read', 'Llegides'), v: report.llegides },
+              { k: t('admin.children.report_new', 'Nous'), v: report.nous },
+              { k: t('admin.children.report_updated', 'Actualitzats'), v: report.actualitzats },
+              { k: t('admin.children.report_enrolled', 'Matriculats'), v: report.matriculats },
+              { k: t('admin.children.report_deactivated', 'De baixa'), v: report.donats_baixa },
+            ].map((cell) => (
+              <div key={cell.k}>
+                <dt className="text-[11px] uppercase tracking-wide text-slate-400">{cell.k}</dt>
+                <dd className="text-lg font-bold text-slate-800 dark:text-slate-100">{cell.v}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
 
         <div className="flex items-end gap-2 flex-wrap pt-3 border-t border-slate-100 dark:border-slate-800">
           <input
@@ -322,8 +446,20 @@ export function ChildrenTab() {
       <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 flex-wrap">
           <p className="font-black text-slate-900 dark:text-white">
-            {t('admin.children.count', '{{count}} infants', { count: children.length })}
+            {t('admin.children.count', '{{count}} infants', { count: visible.length })}
           </p>
+          {missingContact.length > 0 && (
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+              <input
+                type="checkbox"
+                checked={onlyMissing}
+                onChange={(e) => setOnlyMissing(e.target.checked)}
+              />
+              {t('admin.children.only_missing_contact', 'Només els {{count}} sense contacte', {
+                count: missingContact.length,
+              })}
+            </label>
+          )}
           <p className="text-xs text-slate-500">
             {[...byCourse.entries()]
               .sort()
@@ -344,18 +480,82 @@ export function ChildrenTab() {
                 <tr className="text-left text-[11px] uppercase tracking-wider text-slate-500">
                   <th className="px-5 py-2 font-medium">{t('admin.children.name', 'Nom')}</th>
                   <th className="px-5 py-2 font-medium">{t('admin.children.course', 'Curs')}</th>
+                  <th className="px-5 py-2 font-medium">{t('admin.children.contact', 'Contacte')}</th>
                   <th className="px-5 py-2 font-medium">{t('admin.children.origin', 'Origen')}</th>
                   <th className="px-5 py-2" />
                 </tr>
               </thead>
               <tbody>
-                {children.map((child) => (
+                {visible.map((child) => (
                   <tr key={child.id} className="border-t border-slate-100 dark:border-slate-800">
                     <td className="px-5 py-2.5 font-semibold text-slate-800 dark:text-slate-100">
                       {child.surname}, {child.name}
                     </td>
                     <td className="px-5 py-2.5 text-slate-600 dark:text-slate-300">
                       {isCourseCode(child.course) ? COURSE_BY_CODE[child.course].label : child.course}
+                    </td>
+                    <td className="px-5 py-2.5">
+                      {editing?.id === child.id ? (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <input
+                            value={editing.email}
+                            onChange={(e) => setEditing({ ...editing, email: e.target.value })}
+                            placeholder={t('admin.children.email', 'Correu')}
+                            className={`${inputClass} py-1 w-52`}
+                          />
+                          <input
+                            value={editing.phone}
+                            onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
+                            placeholder={t('admin.children.phone', 'Telèfon')}
+                            className={`${inputClass} py-1 w-32`}
+                          />
+                          <button
+                            type="button"
+                            onClick={saveContact}
+                            disabled={savingId === child.id}
+                            aria-label={t('common.save', 'Desar')}
+                            className="text-green-600 disabled:opacity-50"
+                          >
+                            {savingId === child.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Check className="w-4 h-4" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditing(null)}
+                            aria-label={t('common.cancel', 'Cancel·lar')}
+                            className="text-slate-400 hover:text-slate-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditing({
+                              id: child.id,
+                              email: child.family_email || '',
+                              phone: child.family_phone || '',
+                            })
+                          }
+                          className="group inline-flex items-center gap-1.5 text-left text-xs"
+                        >
+                          <span
+                            className={
+                              child.family_email || child.family_phone
+                                ? 'text-slate-600 dark:text-slate-300'
+                                : 'text-amber-600 dark:text-amber-400 font-semibold'
+                            }
+                          >
+                            {[child.family_email, child.family_phone].filter(Boolean).join(' · ') ||
+                              t('admin.children.no_contact', 'Sense contacte')}
+                          </span>
+                          <Pencil className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500" />
+                        </button>
+                      )}
                     </td>
                     <td className="px-5 py-2.5 text-slate-500 text-xs">{SOURCE_LABELS[child.source]}</td>
                     <td className="px-5 py-2.5 text-right">
@@ -370,10 +570,12 @@ export function ChildrenTab() {
                     </td>
                   </tr>
                 ))}
-                {children.length === 0 && (
+                {visible.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-5 py-10 text-center text-slate-500">
-                      {t('admin.children.empty', 'Cap infant al cens encara.')}
+                    <td colSpan={5} className="px-5 py-10 text-center text-slate-500">
+                      {onlyMissing
+                        ? t('admin.children.all_with_contact', 'Tots els infants tenen contacte.')
+                        : t('admin.children.empty', 'Cap infant al cens encara.')}
                     </td>
                   </tr>
                 )}

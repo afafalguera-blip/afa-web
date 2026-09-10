@@ -12,9 +12,25 @@ describe('parseChildrenCsv', () => {
     const { rows, problems } = parseChildrenCsv(csv);
     expect(problems).toEqual([]);
     expect(rows).toEqual([
-      { name: 'Jan', surname: 'Puig Serra', course: '3PRI', family_email: 'marta@example.com', family_phone: null },
-      { name: 'Aina', surname: 'Roca', course: 'I4', family_email: null, family_phone: null },
+      { name: 'Jan', surname: 'Puig Serra', course: '3PRI', family_email: 'marta@example.com', family_phone: null, list_number: null },
+      { name: 'Aina', surname: 'Roca', course: 'I4', family_email: null, family_phone: null, list_number: null },
     ]);
+  });
+
+  it('survives the BOM Excel writes in front of the first heading', () => {
+    const { rows, problems } = parseChildrenCsv('\uFEFFCurs,Nom,Cognoms\nI3,Alba,Guillen Luque');
+    expect(problems).toEqual([]);
+    expect(rows[0]).toMatchObject({ name: 'Alba', course: 'I3' });
+  });
+
+  it('keeps the number on the school list when the file carries it', () => {
+    const csv = ['Curso,Número,Apellidos,Nombre', 'I3,7,"Resulaj Granada",Arilena', '1r,,"Abbas",Maryam'].join('\n');
+
+    const { rows, problems } = parseChildrenCsv(csv);
+    expect(problems).toEqual([]);
+    expect(rows[0]).toMatchObject({ name: 'Arilena', surname: 'Resulaj Granada', course: 'I3', list_number: 7 });
+    // Sense número no és un error: el llistat d'algun centre no en porta.
+    expect(rows[1]).toMatchObject({ course: '1PRI', list_number: null });
   });
 
   it('accepts commas, Spanish headings and quoted cells', () => {

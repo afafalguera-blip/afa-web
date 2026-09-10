@@ -17,6 +17,8 @@ export interface ParsedChild {
   course: string;
   family_email: string | null;
   family_phone: string | null;
+  /** Number on the school's own list, when the file carries it. */
+  list_number: number | null;
 }
 
 export interface ImportReport {
@@ -25,12 +27,13 @@ export interface ImportReport {
   problems: { line: number; reason: string }[];
 }
 
-const HEADERS: Record<keyof Omit<ParsedChild, 'family_email' | 'family_phone'> | 'email' | 'phone', string[]> = {
+const HEADERS: Record<'name' | 'surname' | 'course' | 'email' | 'phone' | 'number', string[]> = {
   name: ['nom', 'nombre', 'name', 'first name'],
   surname: ['cognoms', 'cognom', 'apellidos', 'apellido', 'surname', 'last name'],
   course: ['curs', 'curso', 'course', 'grade', 'nivell', 'nivel'],
   email: ['correu', 'email', 'e-mail', 'correo'],
   phone: ['telefon', 'telèfon', 'telefono', 'teléfono', 'phone', 'mobil', 'mòbil'],
+  number: ['numero', 'número', 'num', 'núm', 'number', 'n', 'no', 'ordre', 'orden', 'llista', 'lista'],
 };
 
 const normalise = (value: string): string =>
@@ -101,7 +104,10 @@ const toCourseCode = (raw: string): string | null => {
 };
 
 export function parseChildrenCsv(text: string): ImportReport {
-  const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '');
+  // Excel guarda el CSV amb un BOM (U+FEFF) al davant. Sense treure'l, la
+  // primera capçalera deixa de ser «curs» i el fitxer sencer es rebutja per
+  // columna que falta, sense que a la pantalla es vegi res estrany.
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.trim() !== '');
   const problems: { line: number; reason: string }[] = [];
   const rows: ParsedChild[] = [];
 
@@ -120,6 +126,7 @@ export function parseChildrenCsv(text: string): ImportReport {
   const courseCol = columnOf(HEADERS.course);
   const emailCol = columnOf(HEADERS.email);
   const phoneCol = columnOf(HEADERS.phone);
+  const numberCol = columnOf(HEADERS.number);
 
   if (nameCol === -1 || surnameCol === -1 || courseCol === -1) {
     return {
@@ -145,6 +152,7 @@ export function parseChildrenCsv(text: string): ImportReport {
 
     const email = emailCol === -1 ? '' : (cells[emailCol] || '').trim();
     const phone = phoneCol === -1 ? '' : (cells[phoneCol] || '').trim();
+    const listNumber = numberCol === -1 ? NaN : Number.parseInt((cells[numberCol] || '').trim(), 10);
 
     rows.push({
       name,
@@ -152,6 +160,7 @@ export function parseChildrenCsv(text: string): ImportReport {
       course,
       family_email: email.includes('@') ? email : null,
       family_phone: phone || null,
+      list_number: Number.isInteger(listNumber) && listNumber > 0 ? listNumber : null,
     });
   }
 
@@ -159,13 +168,13 @@ export function parseChildrenCsv(text: string): ImportReport {
 }
 
 /**
- * The same child written twice.
+ * The same name written twice.
  *
- * The roll is keyed by name AND course, so a child enrolled one year in 3PRI
- * and the next in 4PRI legitimately arrives as two rows — that is what let the
- * roll fill itself from years of enrolments, and it is also how the same child
- * ends up on two lists. Nobody can spot that scrolling 81 names, so it gets
- * surfaced and a person decides which row stays.
+ * Since the roll became one row per child (the course lives in
+ * `child_enrollments`), promotion no longer duplicates anybody. What is left is
+ * two real children who happen to be called the same: they collapse into one
+ * row on import, silently, and nobody spots that scrolling 186 names. So it
+ * gets surfaced and a person decides.
  */
 export function findDuplicates<T extends { name: string; surname: string; course: string }>(
   children: T[],

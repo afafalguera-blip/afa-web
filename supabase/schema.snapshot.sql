@@ -74,6 +74,26 @@ $$;
 ALTER FUNCTION "public"."academic_year_for"("p_month" integer, "p_year" integer) OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."acollida_enroll_child"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+BEGIN
+  IF NEW.child_id IS NULL THEN RETURN NULL; END IF;
+
+  INSERT INTO public.child_enrollments (child_id, academic_year, course, source)
+  VALUES (NEW.child_id, NEW.academic_year, NEW.course, 'acollida')
+  ON CONFLICT (child_id, academic_year) DO UPDATE
+    SET course = EXCLUDED.course, updated_at = now();
+
+  RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."acollida_enroll_child"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") RETURNS SETOF "date"
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_catalog'
@@ -154,21 +174,24 @@ CREATE OR REPLACE FUNCTION "public"."acollida_link_child"() RETURNS "trigger"
     AS $$
 DECLARE v_id uuid;
 BEGIN
-  IF NEW.child_id IS NOT NULL THEN RETURN NEW; END IF;
+  IF NEW.child_id IS NULL THEN
+    SELECT id INTO v_id FROM public.children
+    WHERE match_key = public.child_match_key(NEW.child_name, NEW.child_surname);
 
-  SELECT id INTO v_id FROM public.children
-  WHERE match_key = lower(btrim(NEW.child_name)) || ' ' || lower(btrim(NEW.child_surname))
-    AND course = NEW.course;
+    IF v_id IS NULL THEN
+      INSERT INTO public.children (name, surname, course, family_email, family_phone, afa_member, source)
+      VALUES (btrim(NEW.child_name), btrim(NEW.child_surname), NEW.course,
+              NEW.parent_email, NEW.parent_phone, NEW.afa_member, 'acollida')
+      ON CONFLICT (match_key) DO UPDATE SET
+        family_email = COALESCE(children.family_email, EXCLUDED.family_email),
+        family_phone = COALESCE(children.family_phone, EXCLUDED.family_phone),
+        updated_at = now()
+      RETURNING id INTO v_id;
+    END IF;
 
-  IF v_id IS NULL THEN
-    INSERT INTO public.children (name, surname, course, family_email, family_phone, afa_member, source)
-    VALUES (btrim(NEW.child_name), btrim(NEW.child_surname), NEW.course,
-            NEW.parent_email, NEW.parent_phone, NEW.afa_member, 'acollida')
-    ON CONFLICT (match_key, course) DO UPDATE SET updated_at = now()
-    RETURNING id INTO v_id;
+    NEW.child_id := v_id;
   END IF;
 
-  NEW.child_id := v_id;
   RETURN NEW;
 END;
 $$;
@@ -978,6 +1001,69 @@ $$;
 
 
 ALTER FUNCTION "public"."check_inscripcio_rate_limit"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."child_enrollments_touch"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+BEGIN NEW.updated_at := now(); RETURN NEW; END;
+$$;
+
+
+ALTER FUNCTION "public"."child_enrollments_touch"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."child_match_key"("p_name" "text", "p_surname" "text") RETURNS "text"
+    LANGUAGE "sql" IMMUTABLE
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+  SELECT regexp_replace(
+    translate(
+      lower(btrim(coalesce(p_name, '') || ' ' || coalesce(p_surname, ''))),
+      'áàäâãéèëêíìïîóòöôõúùüûñçÁÀÄÂÃÉÈËÊÍÌÏÎÓÒÖÔÕÚÙÜÛÑÇ',
+      'aaaaaeeeeiiiiooooouuuuncAAAAAEEEEIIIIOOOOOUUUUNC'
+    ),
+    '\s+', ' ', 'g'
+  );
+$$;
+
+
+ALTER FUNCTION "public"."child_match_key"("p_name" "text", "p_surname" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."child_match_key"("p_name" "text", "p_surname" "text") IS 'Clau de comparació d''un infant: nom i cognoms sense accents, en minúscules i amb un sol espai. La fan servir la columna generada de children, el trigger de l''acollida i l''importador del padró.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."children_sync_course"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE v_child uuid;
+BEGIN
+  -- En un trigger DELETE, NEW no existeix: llegir-lo peta.
+  IF TG_OP = 'DELETE' THEN
+    v_child := OLD.child_id;
+  ELSE
+    v_child := NEW.child_id;
+  END IF;
+
+  UPDATE public.children c
+  SET course = COALESCE(
+        (SELECT e.course FROM public.child_enrollments e
+          WHERE e.child_id = v_child
+          ORDER BY e.academic_year DESC LIMIT 1),
+        c.course
+      )
+  WHERE c.id = v_child;
+
+  RETURN NULL;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."children_sync_course"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."children_touch"() RETURNS "trigger"
@@ -1830,6 +1916,116 @@ $$;
 
 
 ALTER FUNCTION "public"."hash_password"("password" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."import_children_roster"("p_academic_year" "text", "p_rows" "jsonb", "p_deactivate_missing" boolean DEFAULT false) RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+DECLARE
+  v_total       int := 0;
+  v_unics       int := 0;
+  v_created     int := 0;
+  v_updated     int := 0;
+  v_enrolled    int := 0;
+  v_deactivated int := 0;
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Només un administrador pot importar el padró';
+  END IF;
+
+  IF p_academic_year IS NULL OR btrim(p_academic_year) = '' THEN
+    RAISE EXCEPTION 'Cal dir de quin curs escolar és el llistat';
+  END IF;
+
+  IF jsonb_typeof(p_rows) <> 'array' OR jsonb_array_length(p_rows) = 0 THEN
+    RAISE EXCEPTION 'El llistat és buit';
+  END IF;
+
+  CREATE TEMP TABLE _roster ON COMMIT DROP AS
+  SELECT btrim(coalesce(r->>'name', ''))    AS name,
+         btrim(coalesce(r->>'surname', '')) AS surname,
+         btrim(coalesce(r->>'course', ''))  AS course,
+         nullif(btrim(coalesce(r->>'list_number', '')), '')::smallint AS list_number,
+         nullif(btrim(coalesce(r->>'family_email', '')), '')          AS family_email,
+         nullif(btrim(coalesce(r->>'family_phone', '')), '')          AS family_phone
+  FROM jsonb_array_elements(p_rows) r;
+
+  DELETE FROM _roster WHERE name = '' OR surname = '' OR course = '';
+  SELECT count(*) INTO v_total FROM _roster;
+
+  -- Dos alumnes amb el mateix nom i cognoms col·lapsarien en un de sol, i
+  -- ningú se n'adonaria mirant 186 línies. Es queda un i el recompte ho diu.
+  CREATE TEMP TABLE _roster_unic ON COMMIT DROP AS
+  SELECT DISTINCT ON (public.child_match_key(name, surname)) *
+  FROM _roster
+  ORDER BY public.child_match_key(name, surname), list_number NULLS LAST;
+
+  SELECT count(*) INTO v_unics FROM _roster_unic;
+
+  WITH ins AS (
+    INSERT INTO public.children (name, surname, course, family_email, family_phone, source)
+    SELECT name, surname, course, family_email, family_phone, 'import' FROM _roster_unic
+    ON CONFLICT (match_key) DO UPDATE SET
+      name         = EXCLUDED.name,
+      surname      = EXCLUDED.surname,
+      -- El llistat no porta contacte: el que no es diu no esborra res.
+      family_email = COALESCE(children.family_email, EXCLUDED.family_email),
+      family_phone = COALESCE(children.family_phone, EXCLUDED.family_phone),
+      active       = true,
+      updated_at   = now()
+    RETURNING (xmax = 0) AS inserted
+  )
+  SELECT count(*) FILTER (WHERE inserted),
+         count(*) FILTER (WHERE NOT inserted)
+    INTO v_created, v_updated
+  FROM ins;
+
+  WITH enr AS (
+    INSERT INTO public.child_enrollments (child_id, academic_year, course, list_number, source)
+    SELECT c.id, btrim(p_academic_year), r.course, r.list_number, 'import'
+    FROM _roster_unic r
+    JOIN public.children c ON c.match_key = public.child_match_key(r.name, r.surname)
+    ON CONFLICT (child_id, academic_year) DO UPDATE SET
+      course      = EXCLUDED.course,
+      list_number = COALESCE(EXCLUDED.list_number, child_enrollments.list_number),
+      source      = 'import',
+      updated_at  = now()
+    RETURNING 1
+  )
+  SELECT count(*) INTO v_enrolled FROM enr;
+
+  -- Només quan qui importa diu que és el llistat sencer del centre. Amb un
+  -- llistat d'un sol curs, això donaria de baixa tota l'escola.
+  IF p_deactivate_missing THEN
+    UPDATE public.children c
+    SET active = false, updated_at = now()
+    WHERE c.active
+      AND NOT EXISTS (
+        SELECT 1 FROM public.child_enrollments e
+        WHERE e.child_id = c.id AND e.academic_year = btrim(p_academic_year)
+      );
+    GET DIAGNOSTICS v_deactivated = ROW_COUNT;
+  END IF;
+
+  RETURN jsonb_build_object(
+    'academic_year', btrim(p_academic_year),
+    'llegides',      v_total,
+    'homonims',      v_total - v_unics,
+    'nous',          v_created,
+    'actualitzats',  v_updated,
+    'matriculats',   v_enrolled,
+    'donats_baixa',  v_deactivated
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."import_children_roster"("p_academic_year" "text", "p_rows" "jsonb", "p_deactivate_missing" boolean) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."import_children_roster"("p_academic_year" "text", "p_rows" "jsonb", "p_deactivate_missing" boolean) IS 'Importa el llistat d''alumnes del centre per a un curs escolar: crea els infants que falten, respecta el contacte dels que ja hi són, els matricula a l''any indicat i (només si p_deactivate_missing) dona de baixa els que ja no surten al llistat. Retorna el recompte del que ha fet.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."increment_clicks"("p_slug" "text") RETURNS "void"
@@ -2764,6 +2960,30 @@ CREATE TABLE IF NOT EXISTS "public"."board_members" (
 ALTER TABLE "public"."board_members" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."child_enrollments" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "child_id" "uuid" NOT NULL,
+    "academic_year" "text" NOT NULL,
+    "course" "text" NOT NULL,
+    "list_number" smallint,
+    "source" "text" DEFAULT 'manual'::"text" NOT NULL,
+    CONSTRAINT "child_enrollments_source_check" CHECK (("source" = ANY (ARRAY['manual'::"text", 'import'::"text", 'acollida'::"text", 'inscripcions'::"text", 'backfill'::"text"])))
+);
+
+
+ALTER TABLE "public"."child_enrollments" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."child_enrollments" IS 'Què fa cada infant cada curs: any acadèmic, curs i número de llista. Abans el curs vivia dins de `children` i la promoció de setembre duplicava l''infant.';
+
+
+
+COMMENT ON COLUMN "public"."child_enrollments"."list_number" IS 'Número de llista al llistat del centre. Pot ser NULL: només el porten les files importades del llistat oficial.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."children" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -2777,7 +2997,7 @@ CREATE TABLE IF NOT EXISTS "public"."children" (
     "active" boolean DEFAULT true NOT NULL,
     "source" "text" DEFAULT 'manual'::"text" NOT NULL,
     "notes" "text",
-    "match_key" "text" GENERATED ALWAYS AS ((("lower"("btrim"("name")) || ' '::"text") || "lower"("btrim"("surname")))) STORED,
+    "match_key" "text" GENERATED ALWAYS AS ("public"."child_match_key"("name", "surname")) STORED,
     CONSTRAINT "children_source_check" CHECK (("source" = ANY (ARRAY['manual'::"text", 'import'::"text", 'acollida'::"text", 'inscripcions'::"text"])))
 );
 
@@ -2789,7 +3009,35 @@ COMMENT ON TABLE "public"."children" IS 'Cens d''infants del centre. És l''úni
 
 
 
-COMMENT ON COLUMN "public"."children"."match_key" IS 'nom i cognoms en minúscules i sense espais de sobra, per no duplicar el mateix infant escrit de dues maneres.';
+COMMENT ON COLUMN "public"."children"."course" IS 'DERIVADA: curs de la matrícula més recent (child_enrollments), mantinguda per trigger. Es conserva perquè el panell la llegeix; la font de veritat és child_enrollments.';
+
+
+
+COMMENT ON COLUMN "public"."children"."match_key" IS 'Nom i cognoms normalitzats per public.child_match_key(): sense accents, minúscules, un sol espai. És la identitat de l''infant; el curs viu a child_enrollments.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."children_backup_20260910" (
+    "id" "uuid",
+    "created_at" timestamp with time zone,
+    "updated_at" timestamp with time zone,
+    "name" "text",
+    "surname" "text",
+    "course" "text",
+    "family_email" "text",
+    "family_phone" "text",
+    "afa_member" boolean,
+    "active" boolean,
+    "source" "text",
+    "notes" "text",
+    "match_key" "text"
+);
+
+
+ALTER TABLE "public"."children_backup_20260910" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."children_backup_20260910" IS 'Còpia de `children` del 2026-09-10, just abans de partir la taula en persona (children) i matrícula (child_enrollments) i de deduplicar per la clau nova sense accents. Es pot esborrar quan el padró del curs 26-27 estigui importat i revisat, i com a molt tard el 2026-12-31.';
 
 
 
@@ -3488,6 +3736,11 @@ ALTER TABLE ONLY "public"."board_members"
 
 
 
+ALTER TABLE ONLY "public"."child_enrollments"
+    ADD CONSTRAINT "child_enrollments_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."children"
     ADD CONSTRAINT "children_pkey" PRIMARY KEY ("id");
 
@@ -3754,6 +4007,10 @@ CREATE INDEX "idx_board_members_order" ON "public"."board_members" USING "btree"
 
 
 
+CREATE INDEX "idx_child_enrollments_year_course" ON "public"."child_enrollments" USING "btree" ("academic_year", "course");
+
+
+
 CREATE INDEX "idx_children_active" ON "public"."children" USING "btree" ("active");
 
 
@@ -3938,7 +4195,11 @@ CREATE INDEX "payments_parent_email_idx" ON "public"."payments" USING "btree" ("
 
 
 
-CREATE UNIQUE INDEX "uq_children_match" ON "public"."children" USING "btree" ("match_key", "course");
+CREATE UNIQUE INDEX "uq_child_enrollment_year" ON "public"."child_enrollments" USING "btree" ("child_id", "academic_year");
+
+
+
+CREATE UNIQUE INDEX "uq_children_match" ON "public"."children" USING "btree" ("match_key");
 
 
 
@@ -3987,6 +4248,10 @@ CREATE OR REPLACE TRIGGER "tr_update_order_total" AFTER INSERT OR DELETE OR UPDA
 
 
 CREATE OR REPLACE TRIGGER "trg_acollida_closed_days" BEFORE INSERT OR UPDATE ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."check_acollida_closed_days"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_acollida_enroll_child" AFTER INSERT OR UPDATE OF "child_id", "course", "academic_year" ON "public"."acollida_inscripcions" FOR EACH ROW EXECUTE FUNCTION "public"."acollida_enroll_child"();
 
 
 
@@ -4114,6 +4379,14 @@ CREATE OR REPLACE TRIGGER "trg_board_members_updated_at" BEFORE UPDATE ON "publi
 
 
 
+CREATE OR REPLACE TRIGGER "trg_child_enrollments_touch" BEFORE UPDATE ON "public"."child_enrollments" FOR EACH ROW EXECUTE FUNCTION "public"."child_enrollments_touch"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_children_sync_course" AFTER INSERT OR DELETE OR UPDATE OF "course", "academic_year", "child_id" ON "public"."child_enrollments" FOR EACH ROW EXECUTE FUNCTION "public"."children_sync_course"();
+
+
+
 CREATE OR REPLACE TRIGGER "trg_children_touch" BEFORE UPDATE ON "public"."children" FOR EACH ROW EXECUTE FUNCTION "public"."children_touch"();
 
 
@@ -4235,6 +4508,11 @@ ALTER TABLE ONLY "public"."app_settings"
 
 ALTER TABLE ONLY "public"."audit_logs"
     ADD CONSTRAINT "audit_logs_changed_by_fkey" FOREIGN KEY ("changed_by") REFERENCES "public"."profiles"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."child_enrollments"
+    ADD CONSTRAINT "child_enrollments_child_id_fkey" FOREIGN KEY ("child_id") REFERENCES "public"."children"("id") ON DELETE CASCADE;
 
 
 
@@ -4581,6 +4859,10 @@ CREATE POLICY "Admins manage children" ON "public"."children" TO "authenticated"
 
 
 
+CREATE POLICY "Admins manage enrollments" ON "public"."child_enrollments" TO "authenticated" USING ("public"."is_admin"()) WITH CHECK ("public"."is_admin"());
+
+
+
 CREATE POLICY "Admins manage monitor links" ON "public"."acollida_monitor_links" TO "authenticated" USING ("public"."is_admin"()) WITH CHECK ("public"."is_admin"());
 
 
@@ -4774,7 +5056,13 @@ ALTER TABLE "public"."bank_imports" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."board_members" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."child_enrollments" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."children" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."children_backup_20260910" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."client_errors" ENABLE ROW LEVEL SECURITY;
@@ -5093,6 +5381,12 @@ GRANT ALL ON FUNCTION "public"."academic_year_for"("p_month" integer, "p_year" i
 
 
 
+GRANT ALL ON FUNCTION "public"."acollida_enroll_child"() TO "anon";
+GRANT ALL ON FUNCTION "public"."acollida_enroll_child"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."acollida_enroll_child"() TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") TO "anon";
 GRANT ALL ON FUNCTION "public"."acollida_full_days"("p_rate_id" "uuid", "p_from" "date", "p_to" "date") TO "authenticated";
@@ -5260,6 +5554,24 @@ GRANT ALL ON FUNCTION "public"."check_inscripcio_rate_limit"() TO "service_role"
 
 
 
+GRANT ALL ON FUNCTION "public"."child_enrollments_touch"() TO "anon";
+GRANT ALL ON FUNCTION "public"."child_enrollments_touch"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."child_enrollments_touch"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."child_match_key"("p_name" "text", "p_surname" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."child_match_key"("p_name" "text", "p_surname" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."child_match_key"("p_name" "text", "p_surname" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."children_sync_course"() TO "anon";
+GRANT ALL ON FUNCTION "public"."children_sync_course"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."children_sync_course"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."children_touch"() TO "anon";
 GRANT ALL ON FUNCTION "public"."children_touch"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."children_touch"() TO "service_role";
@@ -5395,6 +5707,12 @@ GRANT ALL ON FUNCTION "public"."handle_shop_order_inventory_on_status_change"() 
 
 REVOKE ALL ON FUNCTION "public"."hash_password"("password" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."hash_password"("password" "text") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."import_children_roster"("p_academic_year" "text", "p_rows" "jsonb", "p_deactivate_missing" boolean) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."import_children_roster"("p_academic_year" "text", "p_rows" "jsonb", "p_deactivate_missing" boolean) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."import_children_roster"("p_academic_year" "text", "p_rows" "jsonb", "p_deactivate_missing" boolean) TO "service_role";
 
 
 
@@ -5645,9 +5963,21 @@ GRANT ALL ON TABLE "public"."board_members" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."child_enrollments" TO "anon";
+GRANT ALL ON TABLE "public"."child_enrollments" TO "authenticated";
+GRANT ALL ON TABLE "public"."child_enrollments" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."children" TO "anon";
 GRANT ALL ON TABLE "public"."children" TO "authenticated";
 GRANT ALL ON TABLE "public"."children" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."children_backup_20260910" TO "anon";
+GRANT ALL ON TABLE "public"."children_backup_20260910" TO "authenticated";
+GRANT ALL ON TABLE "public"."children_backup_20260910" TO "service_role";
 
 
 

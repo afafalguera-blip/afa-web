@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { UploadCloud, Loader2, CheckCircle2, AlertTriangle, FileText } from 'lucide-react';
 import { Modal } from '../common/Modal';
 import { useToast } from '../common/Toast';
-import { parseN43, type N43Movement } from '../../utils/n43';
+import { parseStatementFile, type StatementFormat } from '../../utils/bankFile';
 import {
   BankReconciliationService as Recon,
   sha256Hex,
@@ -19,7 +19,16 @@ interface Props {
 
 type Stage = 'idle' | 'loading' | 'review' | 'applying' | 'done';
 
-const conceptLabel = (c: string) => PAYMENT_CONCEPT_LABELS[c as PaymentConcept] ?? c;
+// `botiga` is not a payments.concept: it is a pending shop order, reconciled
+// against the same statement because the same families pay it by transfer.
+const DEBT_LABELS: Record<string, string> = { ...PAYMENT_CONCEPT_LABELS, botiga: 'Tienda' };
+const conceptLabel = (c: string) => DEBT_LABELS[c as PaymentConcept] ?? c;
+
+const FORMAT_LABELS: Record<StatementFormat, string> = {
+  n43: 'Norma 43',
+  csv: 'Consulta de movimientos (CSV)',
+  sheet: 'Consulta de movimientos (Excel)',
+};
 const money = (n: number) => `${Number(n).toFixed(2)}€`;
 const payLabel = (p: PendingPayment) =>
   `${(p.parent_name || '—')} · ${p.student_name} ${p.student_surname} · ${conceptLabel(p.concept)} · ${money(p.amount)}`;
@@ -32,6 +41,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
   const [fileName, setFileName] = useState('');
   const [fileHash, setFileHash] = useState('');
   const [priorImport, setPriorImport] = useState<{ imported_at: string; applied_count: number } | null>(null);
+  const [format, setFormat] = useState<StatementFormat | null>(null);
 
   const [rows, setRows] = useState<ReconRow[]>([]);
   const [allPending, setAllPending] = useState<PendingPayment[]>([]);
@@ -42,7 +52,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
   const [appliedCount, setAppliedCount] = useState(0);
 
   const reset = () => {
-    setStage('idle'); setError(null); setFileName(''); setFileHash(''); setPriorImport(null);
+    setStage('idle'); setError(null); setFileName(''); setFileHash(''); setPriorImport(null); setFormat(null);
     setRows([]); setAllPending([]); setPaymentsById(new Map()); setSelected({});
     setMovTotal(0); setMovIncome(0); setAppliedCount(0);
   };
@@ -54,11 +64,10 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
     setStage('loading');
     setFileName(file.name);
     try {
-      const buffer = await file.arrayBuffer();
-      // Sabadell N43 is ISO-8859-1; decode accordingly so Ñ/accents survive.
-      const text = new TextDecoder('iso-8859-1').decode(buffer);
-      const movements: N43Movement[] = parseN43(text);
-      if (movements.length === 0) throw new Error('No se han encontrado movimientos. ¿Es un fichero Norma 43 válido?');
+      const { movements, buffer, format: detected } = await parseStatementFile(file);
+      if (movements.length === 0) {
+        throw new Error('No se han encontrado movimientos. Exporta el extracto desde BS Online como Norma 43 o como "Consulta de movimientos" (Excel/CSV).');
+      }
 
       const hash = await sha256Hex(buffer);
       const [prior, ctx] = await Promise.all([Recon.findImport(hash), Recon.loadContext()]);
@@ -69,6 +78,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
       reconRows.forEach((r, i) => { initSel[i] = [...r.suggestedPaymentIds]; });
 
       setFileHash(hash);
+      setFormat(detected);
       setPriorImport(prior);
       setRows(reconRows);
       setAllPending(ctx.payments);
@@ -105,11 +115,11 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
       const selections = rows
         .map((row, idx) => {
           const ids = selected[idx] || [];
-          const parentName = row.parentName
-            ?? (ids[0] ? paymentsById.get(ids[0])?.parent_name ?? null : null);
-          return { movement: row.movement, paymentIds: ids, parentName };
+          const debts = ids.map(id => paymentsById.get(id)).filter((d): d is PendingPayment => !!d);
+          const parentName = row.parentName ?? debts[0]?.parent_name ?? null;
+          return { movement: row.movement, debts, parentName };
         })
-        .filter(s => s.paymentIds.length > 0);
+        .filter(s => s.debts.length > 0);
 
       const matchedCount = rows.filter(r => r.confidence === 'high').length;
       const applied = await Recon.apply(selections, {
@@ -145,7 +155,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
     <Modal
       open={isOpen}
       onClose={close}
-      title="Importar extracto (Norma 43)"
+      title="Importar extracto bancario"
       size="xl"
       closeOnBackdrop={false}
       footer={
@@ -177,7 +187,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
       }
     >
       <div>
-        <p className="text-sm text-neutral-500 mb-4">Concilia transferencias recibidas con los recibos pendientes.</p>
+        <p className="text-sm text-neutral-500 mb-4">Concilia las transferencias recibidas con los recibos y los pedidos de tienda pendientes.</p>
         {error && (
           <div className="mb-4 bg-red-50 text-red-800 border-l-4 border-red-500 p-3 rounded-r-lg flex items-center gap-2 text-sm">
             <AlertTriangle className="w-4 h-4 shrink-0" /> {error}
@@ -194,13 +204,13 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
             >
               {stage === 'loading'
                 ? <><Loader2 className="w-8 h-8 animate-spin" /><span>Procesando {fileName}…</span></>
-                : <><UploadCloud className="w-8 h-8" /><span className="font-medium">Selecciona el fichero .n43 / .txt</span>
-                    <span className="text-xs text-neutral-400">Exporta desde BS Online como Norma 43 / Cuaderno 43</span></>}
+                : <><UploadCloud className="w-8 h-8" /><span className="font-medium">Selecciona el extracto (.xls, .csv o .n43)</span>
+                    <span className="text-xs text-neutral-400">Vale tanto «Consulta de movimientos» exportada a Excel/CSV como el fichero Norma 43</span></>}
             </button>
             <input
               ref={fileInput}
               type="file"
-              accept=".n43,.txt,text/plain"
+              accept=".n43,.q43,.c43,.txt,.csv,.xls,.xlsx"
               className="hidden"
               onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }}
             />
@@ -218,6 +228,7 @@ export function BankImportModal({ isOpen, onClose, onApplied }: Props) {
 
             <div className="flex flex-wrap gap-3 text-sm">
               <span className="flex items-center gap-1 text-neutral-600"><FileText className="w-4 h-4" /> {fileName}</span>
+              {format && <span className="px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">{FORMAT_LABELS[format]}</span>}
               <span className="px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">{movIncome} ingresos de {movTotal} mov.</span>
               <span className="px-2 py-0.5 rounded bg-green-50 text-green-700">Alta: {highN}</span>
               <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700">Revisar: {medN}</span>

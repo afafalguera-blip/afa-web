@@ -28,7 +28,8 @@ import {
   Utensils,
   FileText,
   HelpCircle,
-  ClipboardList
+  ClipboardList,
+  Wallet
 } from 'lucide-react';
 
 // AFA shell: forest-green sidebar over a cream content area.
@@ -135,6 +136,10 @@ export function AdminLayout() {
             <NavLink to="/admin/payments" onClick={closeSidebar} className={navClass}>
               <CreditCard className="w-[18px] h-[18px]" />
               {t('admin.sidebar.payments')}
+            </NavLink>
+            <NavLink to="/admin/estat-comptes" onClick={closeSidebar} className={navClass}>
+              <Wallet className="w-[18px] h-[18px]" />
+              {t('admin.sidebar.accounts')}
             </NavLink>
             <NavLink to="/admin/finances" onClick={closeSidebar} className={navClass}>
               <TrendingUp className="w-[18px] h-[18px]" />
