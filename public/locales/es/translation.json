@@ -1941,7 +1941,23 @@
       "save_error": "No se ha podido guardar el niño.",
       "search": "Buscar",
       "search_placeholder": "Nombre o apellido",
-      "surname": "Apellidos"
+      "surname": "Apellidos",
+      "import_no_year": "Di de qué curso escolar es el listado.",
+      "import_homonyms": "{{count}} líneas tienen el mismo nombre y apellidos que otra: solo ha entrado una. Revísalas.",
+      "import_year": "Curso escolar del listado",
+      "import_full": "Es el listado entero del centro: da de baja a quien no aparezca.",
+      "import_full_warning": "No lo marques si solo importas un curso: darías de baja a todos los demás.",
+      "report_read": "Leídas",
+      "report_new": "Nuevos",
+      "report_updated": "Actualizados",
+      "report_enrolled": "Matriculados",
+      "report_deactivated": "De baja",
+      "only_missing_contact": "Solo los {{count}} sin contacto",
+      "contact": "Contacto",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "no_contact": "Sin contacto",
+      "all_with_contact": "Todos los niños tienen contacto."
     }
   },
   "common": {
