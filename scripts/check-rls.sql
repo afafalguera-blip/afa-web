@@ -70,7 +70,11 @@ BEGIN
        'profiles', 'admin_users',
        'contact_messages', 'form_submissions',
        'audit_logs', 'client_errors',
-       'notifications', 'admin_tasks'
+       'notifications', 'admin_tasks',
+       -- El padró y la acollida: nombre, curso y asistencia diaria de menores.
+       -- Son los datos más sensibles que hay y faltaban en esta lista.
+       'children', 'child_enrollments',
+       'acollida_inscripcions', 'acollida_attendance', 'acollida_monitor_links'
      )
      AND cmd IN ('SELECT', 'ALL')
      AND permissive = 'PERMISSIVE'
@@ -138,4 +142,68 @@ BEGIN
   ELSE
     RAISE NOTICE 'Todas las funciones SECURITY DEFINER fijan search_path.';
   END IF;
+END $$;
+
+-- ---------------------------------------------------------------------------
+-- 5. Ninguna función SECURITY DEFINER nueva es ejecutable por `anon`.
+--
+-- Las tablas tienen RLS; las funciones no. Para una función el GRANT ES el
+-- permiso, y una SECURITY DEFINER corre con los privilegios de quien la creó:
+-- si `anon` puede llamarla, la RLS de dentro no la frena.
+--
+-- Ya pasó: 20260810000000_grants_por_defecto.sql hace
+--   GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO anon, ...
+-- y, al aplicarse después del hardening, devolvió EXECUTE a `anon` sobre
+-- funciones que borraban recibos (remove_baja_payments_for_month) o generaban
+-- cobros en masa. Lo arregla 20260910180000_rehacer_revokes_de_funcions.sql;
+-- este bloque es para que no vuelva a colarse sin que nadie lo vea.
+--
+-- Las funciones de trigger se excluyen: Postgres no deja llamarlas a mano.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+  expuestas text;
+BEGIN
+  SELECT string_agg(p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+                    E'\n  ' ORDER BY p.proname)
+    INTO expuestas
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.prosecdef
+     AND p.prorettype <> 'pg_catalog.trigger'::regtype
+     AND has_function_privilege('anon', p.oid, 'EXECUTE')
+     AND p.proname NOT IN (
+       -- Abiertas a propósito, cada una con su propio control dentro:
+       --   el enlace sin contraseña de la monitora de acollida (exige token
+       --   válido y activo, y no devuelve ningún dato de contacto),
+       'acollida_monitor_roster', 'acollida_monitor_search', 'acollida_monitor_mark',
+       --   los días completos, que el formulario público necesita para no
+       --   ofrecer una plaza que no existe,
+       'acollida_full_days',
+       --   el pedido de la tienda, que puede hacer quien no tiene cuenta
+       --   (comprueba que no se pida en nombre de otro usuario),
+       'create_shop_complex_order_v1',
+       --   el contador de clics de los enlaces cortos,
+       'increment_clicks',
+       --   e is_admin(), que para `anon` devuelve false y es lo que evalúan
+       --   las propias políticas.
+       'is_admin',
+       -- Operaciones de administración que comprueban is_admin() por dentro:
+       -- llamarlas sin sesión devuelve 'No autoritzat'. Se listan aquí porque
+       -- el GRANT en bloque las alcanza; el control real está en su código.
+       'admin_set_app_setting', 'admin_delete_app_setting', 'admin_get_app_setting_meta',
+       'soft_delete_form_submission',
+       'generate_book_payments', 'generate_soci_payments', 'rollover_acollida_payments'
+     );
+
+  IF expuestas IS NOT NULL THEN
+    RAISE EXCEPTION E'Funciones SECURITY DEFINER ejecutables por `anon`:\n  %\n'
+      'Corren con los permisos de su creador, así que la RLS no las para.\n'
+      'Añade REVOKE EXECUTE ... FROM PUBLIC, anon en una migración, o —si la\n'
+      'apertura es deliberada y la función comprueba quién llama— documenta el\n'
+      'motivo en la lista de excepciones de este bloque.', expuestas;
+  END IF;
+
+  RAISE NOTICE 'RLS: ninguna función SECURITY DEFINER inesperada abierta a anon.';
 END $$;
