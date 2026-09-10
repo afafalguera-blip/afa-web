@@ -32,6 +32,14 @@
 DROP TABLE IF EXISTS public.children_backup_20260910;
 CREATE TABLE public.children_backup_20260910 AS SELECT * FROM public.children;
 
+-- `CREATE TABLE ... AS SELECT` no hereta la RLS de l'origen: la còpia neix
+-- oberta. I amb els GRANT per defecte (20260810000000_grants_por_defecto.sql
+-- dona SELECT a `anon` sobre tot public), aquesta còpia —noms, cursos, correus
+-- i telèfons de menors— seria llegible amb la clau anon, que viatja dins del
+-- bundle de la web. Sense cap política: aquí no hi ha d'entrar ningú excepte
+-- service_role. Ho va aturar scripts/check-rls.sql abans d'arribar a producció.
+ALTER TABLE public.children_backup_20260910 ENABLE ROW LEVEL SECURITY;
+
 COMMENT ON TABLE public.children_backup_20260910 IS
   'Còpia de `children` del 2026-09-10, just abans de partir la taula en persona (children) i matrícula (child_enrollments) i de deduplicar per la clau nova sense accents. Es pot esborrar quan el padró del curs 26-27 estigui importat i revisat, i com a molt tard el 2026-12-31.';
 
