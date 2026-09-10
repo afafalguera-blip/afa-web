@@ -5480,8 +5480,6 @@ GRANT ALL ON FUNCTION "public"."acollida_unbilled_attendance"("p_month" integer,
 
 
 REVOKE ALL ON FUNCTION "public"."activity_monthly_price"("p_activity" "text", "p_is_member" boolean) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."activity_monthly_price"("p_activity" "text", "p_is_member" boolean) TO "anon";
-GRANT ALL ON FUNCTION "public"."activity_monthly_price"("p_activity" "text", "p_is_member" boolean) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."activity_monthly_price"("p_activity" "text", "p_is_member" boolean) TO "service_role";
 
 
@@ -5505,15 +5503,11 @@ GRANT ALL ON FUNCTION "public"."admin_set_app_setting"("p_key" "text", "p_value"
 
 
 REVOKE ALL ON FUNCTION "public"."afa_annual_fee"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."afa_annual_fee"() TO "anon";
-GRANT ALL ON FUNCTION "public"."afa_annual_fee"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."afa_annual_fee"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."book_price_for"("p_course" "text") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."book_price_for"("p_course" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."book_price_for"("p_course" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."book_price_for"("p_course" "text") TO "service_role";
 
 
@@ -5602,36 +5596,28 @@ GRANT ALL ON FUNCTION "public"."create_shop_complex_order_v1"("p_customer_name" 
 
 
 REVOKE ALL ON FUNCTION "public"."current_academic_year"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."current_academic_year"() TO "anon";
-GRANT ALL ON FUNCTION "public"."current_academic_year"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."current_academic_year"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."dar_de_alta_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."dar_de_alta_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."dar_de_alta_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."dar_de_alta_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."dar_de_baja_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."dar_de_baja_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."dar_de_baja_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."dar_de_baja_inscripcion"("p_inscripcion_id" "uuid", "p_motivo" "text", "p_changed_by" "text") TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."events_fill_end_date"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."events_fill_end_date"() TO "anon";
-GRANT ALL ON FUNCTION "public"."events_fill_end_date"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."events_fill_end_date"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."fn_create_payments_for_inscription"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."fn_create_payments_for_inscription"() TO "anon";
-GRANT ALL ON FUNCTION "public"."fn_create_payments_for_inscription"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."fn_create_payments_for_inscription"() TO "service_role";
 
 
@@ -5649,14 +5635,12 @@ GRANT ALL ON FUNCTION "public"."generate_book_payments"("p_year" integer) TO "se
 
 
 REVOKE ALL ON FUNCTION "public"."generate_monthly_payments"("p_month" integer, "p_year" integer) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."generate_monthly_payments"("p_month" integer, "p_year" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_monthly_payments"("p_month" integer, "p_year" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_monthly_payments"("p_month" integer, "p_year" integer) TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."generate_monthly_payments_only_active"("p_month" integer, "p_year" integer) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."generate_monthly_payments_only_active"("p_month" integer, "p_year" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_monthly_payments_only_active"("p_month" integer, "p_year" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_monthly_payments_only_active"("p_month" integer, "p_year" integer) TO "service_role";
 
@@ -5675,15 +5659,12 @@ GRANT ALL ON FUNCTION "public"."generate_soci_payments"("p_year" integer) TO "se
 
 
 REVOKE ALL ON FUNCTION "public"."get_db_size_bytes"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."get_db_size_bytes"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_db_size_bytes"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_db_size_bytes"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."get_fee_rules"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."get_fee_rules"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_fee_rules"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_fee_rules"() TO "service_role";
 
 
@@ -5694,50 +5675,37 @@ GRANT ALL ON FUNCTION "public"."get_last_activity"() TO "service_role";
 
 
 REVOKE ALL ON FUNCTION "public"."get_storage_size_bytes"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."get_storage_size_bytes"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_storage_size_bytes"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_storage_size_bytes"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."handle_audit_log"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."handle_audit_log"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_audit_log"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_audit_log"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."handle_new_contact_message"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."handle_new_contact_message"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_new_contact_message"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_new_contact_message"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."handle_new_shop_order"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."handle_new_shop_order"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_new_shop_order"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_new_shop_order"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."handle_new_user"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."handle_shop_order_inventory_on_status_change"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."handle_shop_order_inventory_on_status_change"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_shop_order_inventory_on_status_change"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_shop_order_inventory_on_status_change"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."hash_password"("password" "text") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."hash_password"("password" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."hash_password"("password" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."hash_password"("password" "text") TO "service_role";
 
 
@@ -5761,8 +5729,6 @@ GRANT ALL ON FUNCTION "public"."inscripcio_signatura"("p_students" "jsonb") TO "
 
 
 REVOKE ALL ON FUNCTION "public"."is_activity_excluded"("p_activity" "text") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."is_activity_excluded"("p_activity" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."is_activity_excluded"("p_activity" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."is_activity_excluded"("p_activity" "text") TO "service_role";
 
 
@@ -5810,7 +5776,6 @@ GRANT ALL ON FUNCTION "public"."record_payment_received"("p_student_name" "text"
 
 
 REVOKE ALL ON FUNCTION "public"."remove_baja_payments_for_month"("p_month" integer, "p_year" integer) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."remove_baja_payments_for_month"("p_month" integer, "p_year" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."remove_baja_payments_for_month"("p_month" integer, "p_year" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."remove_baja_payments_for_month"("p_month" integer, "p_year" integer) TO "service_role";
 
@@ -5829,8 +5794,6 @@ GRANT ALL ON FUNCTION "public"."set_board_members_updated_at"() TO "service_role
 
 
 REVOKE ALL ON FUNCTION "public"."set_finance_tx_academic_year"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."set_finance_tx_academic_year"() TO "anon";
-GRANT ALL ON FUNCTION "public"."set_finance_tx_academic_year"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_finance_tx_academic_year"() TO "service_role";
 
 
@@ -5842,8 +5805,6 @@ GRANT ALL ON FUNCTION "public"."set_forms_updated_at"() TO "service_role";
 
 
 REVOKE ALL ON FUNCTION "public"."set_inscripcio_academic_year"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."set_inscripcio_academic_year"() TO "anon";
-GRANT ALL ON FUNCTION "public"."set_inscripcio_academic_year"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_inscripcio_academic_year"() TO "service_role";
 
 
@@ -5855,15 +5816,11 @@ GRANT ALL ON FUNCTION "public"."set_payer_aliases_updated_at"() TO "service_role
 
 
 REVOKE ALL ON FUNCTION "public"."set_payment_academic_year"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."set_payment_academic_year"() TO "anon";
-GRANT ALL ON FUNCTION "public"."set_payment_academic_year"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_payment_academic_year"() TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."set_shop_order_academic_year"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."set_shop_order_academic_year"() TO "anon";
-GRANT ALL ON FUNCTION "public"."set_shop_order_academic_year"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_shop_order_academic_year"() TO "service_role";
 
 
@@ -5875,15 +5832,11 @@ GRANT ALL ON FUNCTION "public"."soft_delete_form_submission"("submission_id" "uu
 
 
 REVOKE ALL ON FUNCTION "public"."student_monthly_fee"("p_activities" "text"[], "p_is_member" boolean) FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."student_monthly_fee"("p_activities" "text"[], "p_is_member" boolean) TO "anon";
-GRANT ALL ON FUNCTION "public"."student_monthly_fee"("p_activities" "text"[], "p_is_member" boolean) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."student_monthly_fee"("p_activities" "text"[], "p_is_member" boolean) TO "service_role";
 
 
 
 REVOKE ALL ON FUNCTION "public"."sync_shop_variant_stock"() FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."sync_shop_variant_stock"() TO "anon";
-GRANT ALL ON FUNCTION "public"."sync_shop_variant_stock"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."sync_shop_variant_stock"() TO "service_role";
 
 
