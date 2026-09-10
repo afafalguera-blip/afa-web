@@ -1958,7 +1958,23 @@
       "save_error": "No s'ha pogut desar l'infant.",
       "search": "Buscar",
       "search_placeholder": "Nom o cognom",
-      "surname": "Cognoms"
+      "surname": "Cognoms",
+      "import_no_year": "Digues de quin curs escolar és el llistat.",
+      "import_homonyms": "{{count}} línies tenen el mateix nom i cognoms que una altra: només n'ha entrat una. Revisa-les.",
+      "import_year": "Curs escolar del llistat",
+      "import_full": "És el llistat sencer del centre: dona de baixa qui no hi surti.",
+      "import_full_warning": "No ho marquis si només importes un curs: donaries de baixa tota la resta.",
+      "report_read": "Llegides",
+      "report_new": "Nous",
+      "report_updated": "Actualitzats",
+      "report_enrolled": "Matriculats",
+      "report_deactivated": "De baixa",
+      "only_missing_contact": "Només els {{count}} sense contacte",
+      "contact": "Contacte",
+      "email": "Correu",
+      "phone": "Telèfon",
+      "no_contact": "Sense contacte",
+      "all_with_contact": "Tots els infants tenen contacte."
     }
   },
   "common": {

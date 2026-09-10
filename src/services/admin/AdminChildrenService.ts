@@ -10,14 +10,28 @@ export interface ChildDraft {
   course: string;
   family_email?: string | null;
   family_phone?: string | null;
+  list_number?: number | null;
+}
+
+/** What the roster import actually did, straight from the database. */
+export interface RosterImportReport {
+  academic_year: string;
+  llegides: number;
+  homonims: number;
+  nous: number;
+  actualitzats: number;
+  matriculats: number;
+  donats_baixa: number;
 }
 
 /**
  * The centre's roll of children, and the monitor links that read it.
  *
- * Importing is an upsert on name-and-course, so re-importing the school's list
- * after a correction updates instead of duplicating: the register has to keep
- * working while the list is being tidied up.
+ * Importing goes through `import_children_roster`, not through an upsert from
+ * here: it has to create who is missing, keep the contact details of who is
+ * already there, enrol everybody in the right school year and — only when it is
+ * the whole centre's list — deactivate whoever no longer appears. That is one
+ * transaction, and a transaction does not belong in the browser.
  */
 export const AdminChildrenService = {
   async getAll(search = ''): Promise<Child[]> {
@@ -45,14 +59,24 @@ export const AdminChildrenService = {
     if (error) throw error;
   },
 
-  /** Upserts on (name, course) — see the note above about re-importing. */
-  async importMany(rows: ChildDraft[]): Promise<number> {
-    if (rows.length === 0) return 0;
-    const { error } = await supabase
-      .from(TABLE)
-      .upsert(rows.map((r) => ({ ...r, source: 'import' })), { onConflict: 'match_key,course' });
+  /**
+   * The school's list for one academic year.
+   *
+   * `deactivateMissing` is off by default and the caller has to mean it: with a
+   * single course's list it would mark the rest of the school as gone.
+   */
+  async importRoster(
+    academicYear: string,
+    rows: ChildDraft[],
+    deactivateMissing = false,
+  ): Promise<RosterImportReport> {
+    const { data, error } = await supabase.rpc('import_children_roster', {
+      p_academic_year: academicYear,
+      p_rows: rows,
+      p_deactivate_missing: deactivateMissing,
+    });
     if (error) throw error;
-    return rows.length;
+    return data as RosterImportReport;
   },
 
   async getLinks(): Promise<AcollidaMonitorLink[]> {

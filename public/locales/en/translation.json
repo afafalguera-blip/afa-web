@@ -1957,7 +1957,23 @@
       "save_error": "Could not save the child.",
       "search": "Search",
       "search_placeholder": "Name or surname",
-      "surname": "Surname"
+      "surname": "Surname",
+      "import_no_year": "Say which school year the list belongs to.",
+      "import_homonyms": "{{count}} rows share a name and surname with another: only one went in. Check them.",
+      "import_year": "School year of the list",
+      "import_full": "It is the whole school's list: deactivate anyone who is not on it.",
+      "import_full_warning": "Do not tick this when importing a single year group: everyone else would be deactivated.",
+      "report_read": "Read",
+      "report_new": "New",
+      "report_updated": "Updated",
+      "report_enrolled": "Enrolled",
+      "report_deactivated": "Deactivated",
+      "only_missing_contact": "Only the {{count}} without contact details",
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "no_contact": "No contact",
+      "all_with_contact": "Every child has contact details."
     }
   },
   "common": {
