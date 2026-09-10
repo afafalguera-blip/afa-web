@@ -1,8 +1,18 @@
 import { supabase } from '../../lib/supabase';
-import { normalizeName, tokenKey, type N43Movement } from '../../utils/n43';
+import { normalizeName, tokenKey, type BankMovement } from '../../utils/bankStatement';
 
+/** Where an unpaid amount lives. Shop orders bill the same families. */
+export type DebtKind = 'payment' | 'shop_order';
+
+/**
+ * One thing a family still owes. `payments` rows (extraescolars, acollida,
+ * quota de soci, llibres) and pending `shop_orders` are reconciled against the
+ * same statement, so they share a shape; `kind` says which table to write back.
+ */
 export interface PendingPayment {
   id: string;
+  /** Defaults to 'payment' so existing callers and fixtures keep working. */
+  kind?: DebtKind;
   student_name: string;
   student_surname: string;
   course: string;
@@ -22,19 +32,24 @@ export interface PayerAlias {
 export type Confidence = 'high' | 'medium' | 'unmatched';
 
 export interface ReconRow {
-  movement: N43Movement;
+  movement: BankMovement;
   confidence: Confidence;
   /** Canonical parent_name this payer resolved to (null when unmatched). */
   parentName: string | null;
-  /** Payment ids pre-checked to be marked paid. */
+  /** Debt ids pre-checked to be marked paid. */
   suggestedPaymentIds: string[];
-  /** All still-available pending receipts for the matched parent (manual pick). */
+  /** All still-available pending debts for the matched parent (manual pick). */
   candidatePayments: PendingPayment[];
   /** Short human hint shown in the review table. */
   note: string;
 }
 
 const EPS = 0.005;
+
+/** Below this a cut name is too short to identify anybody on its own. */
+const MIN_PREFIX_LEN = 18;
+
+export const debtKind = (d: PendingPayment): DebtKind => d.kind ?? 'payment';
 
 /** SHA-256 hex of a file's bytes (dedup key for bank_imports). */
 export async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
@@ -61,6 +76,62 @@ function findSubset(items: PendingPayment[], target: number): PendingPayment[] |
   return null;
 }
 
+/**
+ * Families whose name the payer could be the cut-off start of. The listing
+ * export truncates the concept column, so "MARIA DE LOS ANGELES ALASTRE HERNAND"
+ * has to still find "Maria de los Angeles Alastre Hernandez" — and find it with
+ * the words in any order, because the bank and the inscription form disagree on
+ * whether the surname goes first.
+ *
+ * Only the last word may be partial: everything before it must match a whole
+ * word of the family name. That, plus requiring a unique winner, is what keeps
+ * this from marking the wrong family's receipts as paid.
+ */
+export function prefixCandidates(payerNorm: string, parentNorms: string[]): string[] {
+  if (payerNorm.length < MIN_PREFIX_LEN) return [];
+
+  const tokens = payerNorm.split(' ').filter(Boolean);
+  if (tokens.length < 2) return [];
+  const head = tokens.slice(0, -1);
+  const tail = tokens[tokens.length - 1];
+
+  return parentNorms.filter(parent => {
+    if (parent.startsWith(payerNorm)) return true;
+
+    const rest = parent.split(' ').filter(Boolean);
+    for (const t of head) {
+      const i = rest.indexOf(t);
+      if (i === -1) return false;
+      rest.splice(i, 1);
+    }
+    return rest.some(t => t.startsWith(tail));
+  });
+}
+
+/** Pending shop orders, shaped as debts. Their payer is the customer name. */
+function orderToDebt(o: {
+  id: string;
+  customer_name: string | null;
+  total_amount: number | string;
+  created_at: string | null;
+}): PendingPayment {
+  const created = o.created_at ? new Date(o.created_at) : new Date();
+  const name = (o.customer_name || '').trim();
+  return {
+    id: o.id,
+    kind: 'shop_order',
+    student_name: name || '—',
+    student_surname: '',
+    course: '',
+    concept: 'botiga',
+    amount: Number(o.total_amount),
+    due_date: created.toISOString().slice(0, 10),
+    parent_name: name || null,
+    payment_month: created.getMonth() + 1,
+    payment_year: created.getFullYear(),
+  };
+}
+
 export const BankReconciliationService = {
   /** Whether this exact file was reconciled before. Returns the prior import or null. */
   async findImport(fileHash: string) {
@@ -73,24 +144,34 @@ export const BankReconciliationService = {
   },
 
   async loadContext(): Promise<{ payments: PendingPayment[]; aliases: PayerAlias[] }> {
-    const [{ data: payments, error: pErr }, { data: aliases, error: aErr }] = await Promise.all([
-      supabase
-        .from('payments')
-        .select('id, student_name, student_surname, course, concept, amount, due_date, parent_name, payment_month, payment_year')
-        .neq('status', 'paid'),
-      supabase.from('payer_aliases').select('alias_normalized, parent_name'),
-    ]);
+    const [{ data: payments, error: pErr }, { data: orders, error: oErr }, { data: aliases, error: aErr }] =
+      await Promise.all([
+        supabase
+          .from('payments')
+          .select('id, student_name, student_surname, course, concept, amount, due_date, parent_name, payment_month, payment_year')
+          .neq('status', 'paid'),
+        supabase
+          .from('shop_orders')
+          .select('id, customer_name, total_amount, created_at')
+          .neq('payment_status', 'paid'),
+        supabase.from('payer_aliases').select('alias_normalized, parent_name'),
+      ]);
     if (pErr) throw pErr;
+    if (oErr) throw oErr;
     if (aErr) throw aErr;
-    return { payments: (payments || []) as PendingPayment[], aliases: (aliases || []) as PayerAlias[] };
+
+    const receipts = ((payments || []) as PendingPayment[]).map(p => ({ ...p, kind: 'payment' as const }));
+    const shop = (orders || []).map(orderToDebt);
+
+    return { payments: [...receipts, ...shop], aliases: (aliases || []) as PayerAlias[] };
   },
 
   /**
-   * Match incoming N43 movements against pending payments.
+   * Match incoming movements against everything still unpaid.
    * High-confidence rows are pre-checked; everything else needs a human.
    */
-  reconcile(movements: N43Movement[], payments: PendingPayment[], aliases: PayerAlias[]): ReconRow[] {
-    // Index pending payments by their canonical parent name.
+  reconcile(movements: BankMovement[], payments: PendingPayment[], aliases: PayerAlias[]): ReconRow[] {
+    // Index pending debts by their canonical parent name.
     const byParentNorm = new Map<string, PendingPayment[]>();
     const byParentTok = new Map<string, PendingPayment[]>();
     for (const p of payments) {
@@ -100,6 +181,8 @@ export const BankReconciliationService = {
       const tok = tokenKey(norm);
       (byParentTok.get(tok) ?? byParentTok.set(tok, []).get(tok)!).push(p);
     }
+    const parentNorms = [...byParentNorm.keys()];
+
     // Learned aliases (bank name -> canonical parent name).
     const aliasByNorm = new Map<string, string>();
     const aliasByTok = new Map<string, string>();
@@ -119,6 +202,7 @@ export const BankReconciliationService = {
       // 1) Resolve the parent this payer maps to, and its pending pool.
       let parentName: string | null = null;
       let pool: PendingPayment[] = [];
+      let byCutName = false;
 
       const aliasHit = aliasByNorm.get(movement.payerNorm) ?? aliasByTok.get(movement.payerTokenKey);
       if (aliasHit) {
@@ -130,12 +214,23 @@ export const BankReconciliationService = {
       } else if (byParentTok.has(movement.payerTokenKey)) {
         pool = byParentTok.get(movement.payerTokenKey)!;
         parentName = pool[0]?.parent_name ?? null;
+      } else {
+        // Last resort: the export may have cut the name mid-surname.
+        const cands = [...new Set(prefixCandidates(movement.payerNorm, parentNorms))];
+        if (cands.length === 1) {
+          pool = byParentNorm.get(cands[0])!;
+          parentName = pool[0]?.parent_name ?? null;
+          byCutName = true;
+        }
       }
 
       const available = pool.filter(p => !consumed.has(p.id));
 
       if (!parentName) {
-        rows.push({ movement, confidence: 'unmatched', parentName: null, suggestedPaymentIds: [], candidatePayments: [], note: 'Ordenant no identificat' });
+        const note = movement.truncated
+          ? 'Nom retallat per l’extracte i no identificat'
+          : 'Ordenant no identificat';
+        rows.push({ movement, confidence: 'unmatched', parentName: null, suggestedPaymentIds: [], candidatePayments: [], note });
         continue;
       }
       if (available.length === 0) {
@@ -143,11 +238,17 @@ export const BankReconciliationService = {
         continue;
       }
 
-      // 2) Match by amount within the parent's pending receipts.
+      // 2) Match by amount within the parent's pending debts.
       const exact = available.filter(p => Math.abs(Number(p.amount) - movement.amount) < EPS);
       if (exact.length === 1) {
-        consumed.add(exact[0].id);
-        rows.push({ movement, confidence: 'high', parentName, suggestedPaymentIds: [exact[0].id], candidatePayments: available, note: 'Import i família coincideixen' });
+        // A name the bank cut short is a guess until a human confirms it: it
+        // gets the suggestion but never the "no need to look" badge.
+        if (byCutName) {
+          rows.push({ movement, confidence: 'medium', parentName, suggestedPaymentIds: [exact[0].id], candidatePayments: available, note: 'Nom retallat per l’extracte: confirma la família' });
+        } else {
+          consumed.add(exact[0].id);
+          rows.push({ movement, confidence: 'high', parentName, suggestedPaymentIds: [exact[0].id], candidatePayments: available, note: 'Import i família coincideixen' });
+        }
       } else if (exact.length > 1) {
         rows.push({ movement, confidence: 'medium', parentName, suggestedPaymentIds: [], candidatePayments: available, note: 'Diversos rebuts del mateix import' });
       } else {
@@ -155,7 +256,7 @@ export const BankReconciliationService = {
         if (subset) {
           rows.push({ movement, confidence: 'medium', parentName, suggestedPaymentIds: subset.map(p => p.id), candidatePayments: available, note: 'Possible pagament combinat' });
         } else {
-          rows.push({ movement, confidence: 'medium', parentName, suggestedPaymentIds: [], candidatePayments: available, note: "L'import no quadra amb cap rebut" });
+          rows.push({ movement, confidence: 'medium', parentName, suggestedPaymentIds: [], candidatePayments: available, note: 'L’import no quadra amb cap rebut' });
         }
       }
     }
@@ -164,26 +265,42 @@ export const BankReconciliationService = {
   },
 
   /**
-   * Mark the selected payments paid, learn the payer alias and record the import.
+   * Mark the selected debts paid, learn the payer alias and record the import.
    * `selections` carries the admin's final choice per movement.
    */
   async apply(
-    selections: Array<{ movement: N43Movement; paymentIds: string[]; parentName: string | null }>,
+    selections: Array<{ movement: BankMovement; debts: PendingPayment[]; parentName: string | null }>,
     summary: { fileHash: string; filename: string; movementsTotal: number; movementsIncome: number; matchedCount: number },
   ): Promise<number> {
     let applied = 0;
 
     for (const sel of selections) {
-      if (sel.paymentIds.length === 0) continue;
-      const ref = `N43 ${sel.movement.date} ${sel.movement.amount.toFixed(2)}€ · ${sel.movement.payerName}`.slice(0, 160);
-      const { error } = await supabase
-        .from('payments')
-        .update({ status: 'paid', payment_date: sel.movement.date, bank_reference: ref })
-        .in('id', sel.paymentIds);
-      if (error) throw error;
-      applied += sel.paymentIds.length;
+      if (sel.debts.length === 0) continue;
+      const ref = `Extracte ${sel.movement.date} ${sel.movement.amount.toFixed(2)}€ · ${sel.movement.payerName}`.slice(0, 160);
 
-      // Learn the alias so this payer auto-resolves next time.
+      const receiptIds = sel.debts.filter(d => debtKind(d) === 'payment').map(d => d.id);
+      const orderIds = sel.debts.filter(d => debtKind(d) === 'shop_order').map(d => d.id);
+
+      if (receiptIds.length > 0) {
+        const { error } = await supabase
+          .from('payments')
+          .update({ status: 'paid', payment_date: sel.movement.date, bank_reference: ref })
+          .in('id', receiptIds);
+        if (error) throw error;
+      }
+
+      if (orderIds.length > 0) {
+        const { error } = await supabase
+          .from('shop_orders')
+          .update({ payment_status: 'paid' })
+          .in('id', orderIds);
+        if (error) throw error;
+      }
+
+      applied += sel.debts.length;
+
+      // Learn the alias so this payer auto-resolves next time. A name the bank
+      // cut short is learned too: next month it resolves straight away.
       if (sel.parentName && sel.movement.payerNorm) {
         await supabase
           .from('payer_aliases')

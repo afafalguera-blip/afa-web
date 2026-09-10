@@ -5,6 +5,9 @@
 // Sabadell does NOT export the payer IBAN nor any pupil/free-text concept for
 // incoming transfers, so the payer name is the only stable key available.
 //
+// Name handling and the movement shape are shared with the "Consulta de
+// movimientos" listing parser — see ./bankStatement.ts.
+//
 // Record layout (1-based columns -> 0-based slice):
 //   Type 22 (movement):
 //     11-16 fecha operación (YYMMDD) | 17-22 fecha valor (YYMMDD)
@@ -12,65 +15,12 @@
 //   Type 23 (complementary concept, up to 5 per movement):
 //     05-80 free text (two 38-char fields; payer name lives here)
 
-export interface N43Movement {
-  /** Operation date, ISO YYYY-MM-DD. */
-  date: string;
-  /** Value date, ISO YYYY-MM-DD. */
-  valueDate: string;
-  /** Signed euro amount (positive = credit/abono, negative = debit/cargo). */
-  amount: number;
-  /** True for incoming money (haber / abono) — the family payments we match. */
-  isIncome: boolean;
-  /** Full complementary concept, whitespace-collapsed. */
-  rawConcept: string;
-  /** Payer name with the bank's generic prefix stripped. */
-  payerName: string;
-  /** Normalized payer name (uppercase, no accents/punctuation) — the match key. */
-  payerNorm: string;
-  /** Tokens of payerNorm sorted — order-insensitive key (name/surname swaps). */
-  payerTokenKey: string;
-}
+import { movementNames, type BankMovement } from './bankStatement';
 
-/** Uppercase, strip accents and punctuation, collapse whitespace. */
-export function normalizeName(s: string): string {
-  return s
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toUpperCase()
-    .replace(/[^A-Z0-9 ]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+export { normalizeName, tokenKey } from './bankStatement';
 
-/** Order-insensitive key so "RODRIGUEZ YANEZ MARIA BELEN" == "Maria Belen Rodriguez Yanez". */
-export function tokenKey(normalized: string): string {
-  return normalized.split(' ').filter(Boolean).sort().join(' ');
-}
-
-// Generic literals Sabadell puts before the actual payer name. Longest first so
-// "ABONO TRF DE" is stripped before "ABONO". Compared against normalized text.
-const PREFIXES = [
-  'ABONO TRANSFERENCIA DE',
-  'ABONO TRF DE',
-  'ABONO TRF',
-  'ABONO',
-  'TRANSFERENCIA DE',
-  'TRANSFERENC DE',
-  'TRANSFERENCIA',
-  'TRANSFERENC',
-  'BIZUM DE',
-  'BIZUM',
-  'TRASPASO DE',
-  'TRASPASO',
-];
-
-function stripPrefix(normalized: string): string {
-  for (const p of PREFIXES) {
-    if (normalized === p) return '';
-    if (normalized.startsWith(p + ' ')) return normalized.slice(p.length + 1).trim();
-  }
-  return normalized;
-}
+/** @deprecated Use `BankMovement`: movements now come from two formats. */
+export type N43Movement = BankMovement;
 
 function parseDate(yymmdd: string): string {
   const yy = yymmdd.slice(0, 2);
@@ -92,24 +42,16 @@ function toRecords(raw: string): string[] {
   return out;
 }
 
-export function parseN43(raw: string): N43Movement[] {
+export function parseN43(raw: string): BankMovement[] {
   const records = toRecords(raw);
-  const movements: N43Movement[] = [];
+  const movements: BankMovement[] = [];
   let current: { date: string; valueDate: string; amount: number; isIncome: boolean } | null = null;
   let concepts: string[] = [];
 
   const flush = () => {
     if (!current) return;
     const rawConcept = concepts.join(' ').replace(/\s+/g, ' ').trim();
-    const payerName = stripPrefix(normalizeName(rawConcept));
-    const payerNorm = normalizeName(payerName);
-    movements.push({
-      ...current,
-      rawConcept,
-      payerName,
-      payerNorm,
-      payerTokenKey: tokenKey(payerNorm),
-    });
+    movements.push({ ...current, rawConcept, truncated: false, ...movementNames(rawConcept) });
     current = null;
     concepts = [];
   };
