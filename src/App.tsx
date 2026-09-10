@@ -48,6 +48,7 @@ const InscriptionsPage = lazy(() => import('./pages/admin/inscriptions/Inscripti
 const InscriptionConfigPage = lazy(() => import('./pages/admin/inscription-config/InscriptionConfigPage'));
 const PaymentsPage = lazy(() => import('./pages/admin/payments/PaymentsPage').then(m => ({ default: m.PaymentsPage })));
 const FinanceDashboard = lazy(() => import('./pages/admin/finances/FinanceDashboard').then(m => ({ default: m.FinanceDashboard })));
+const AccountsPage = lazy(() => import('./pages/admin/accounts/AccountsPage').then(m => ({ default: m.AccountsPage })));
 const ActivitiesManager = lazy(() => import('./pages/admin/ActivitiesManager'));
 const FaqManager = lazy(() => import('./pages/admin/FaqManager'));
 const NewsManager = lazy(() => import('./pages/admin/NewsManager'));
@@ -118,6 +119,7 @@ function App() {
                     <Route path="inscriptions" element={<InscriptionsPage />} />
                     <Route path="inscription-config" element={<InscriptionConfigPage />} />
                     <Route path="payments" element={<PaymentsPage />} />
+                    <Route path="estat-comptes" element={<AccountsPage />} />
                     <Route path="finances" element={<FinanceDashboard />} />
                     <Route path="shop/inventory" element={<InventoryPage />} />
                     <Route path="shop/orders" element={<OrdersPage />} />

@@ -11,7 +11,25 @@ import type { Inscription } from '../types/inscription';
 const courseLabel = (code?: string): string =>
   code && isCourseCode(code) ? COURSE_BY_CODE[code].label : code || '';
 import type { ShopProduct, ShopVariant } from '../features/shop/types/shop';
-import type { Payment } from '../types/payment';
+import { PAYMENT_CONCEPTS, type Payment } from '../types/payment';
+import type { FamilyAccount } from './admin/AdminAccountsService';
+
+/** Excel-friendly CSV: a BOM so accents survive, and every cell quoted. */
+function downloadCSV(rows: (string | number)[][], filename: string) {
+  const csv = '\uFEFF' + rows
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 
 interface jsPDFExtended extends jsPDF {
   lastAutoTable: {
@@ -490,14 +508,56 @@ export const ExportService = {
           ])
       ];
 
-      const csvContent = "\uFEFF" + rows.map(e => e.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", `${filename}_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      downloadCSV(rows, filename);
+  },
+
+  /**
+   * One row per pupil (plus one for the family's shop orders), so the sheet can
+   * be sorted by what is owed and used as the list to chase.
+   */
+  exportAccountsCSV(families: FamilyAccount[], filename: string = 'estat_comptes') {
+    const header = [
+      'Familia', 'Socio', 'Email', 'Tel\u00E9fono', 'Alumno', 'Curso', 'Actividades',
+      ...PAYMENT_CONCEPTS.map(c => `${c.label} pendiente`),
+      'Pendiente alumno', 'Vencido', 'Pendiente familia',
+    ];
+
+    const rows: (string | number)[][] = [header];
+
+    for (const family of families) {
+      const common = [
+        family.parentName,
+        family.member ? 'S\u00ED' : 'No',
+        family.email || '',
+        family.phone || '',
+      ];
+
+      for (const child of family.children) {
+        rows.push([
+          ...common,
+          `${child.name} ${child.surname}`.trim(),
+          courseLabel(child.course),
+          child.activities.join('; '),
+          ...PAYMENT_CONCEPTS.map(c => child.concepts[c.value]?.pending ?? 0),
+          child.pending,
+          Object.values(child.concepts).some(s => s.overdue) ? 'S\u00ED' : 'No',
+          family.pending,
+        ]);
+      }
+
+      if (family.shop.pending > 0) {
+        rows.push([
+          ...common,
+          `Tienda (${family.shop.pendingCount} pedido/s)`,
+          '', '',
+          ...PAYMENT_CONCEPTS.map(() => 0),
+          family.shop.pending,
+          family.shop.overdue ? 'S\u00ED' : 'No',
+          family.pending,
+        ]);
+      }
+    }
+
+    downloadCSV(rows, filename);
   }
 };
